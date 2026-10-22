@@ -94,12 +94,14 @@ Alpine.data('clockApp', () => ({
         clearTimeout(this.resizeTimer);
         this.resizeTimer = setTimeout(() => {
             const width = Math.max(150, Math.ceil(this.$refs.clockDigits.getBoundingClientRect().width) + 24);
+            const height = Math.max(110, Math.ceil(this.$refs.clockContainer.getBoundingClientRect().height) + 12);
             resizeQueue = resizeQueue.then(async () => {
                 const oldSize = await appWindow.outerSize();
                 const scale = await appWindow.scaleFactor();
-                if (Math.abs(oldSize.width - width * scale) < 2) return;
+                if (Math.abs(oldSize.width - width * scale) < 2
+                    && Math.abs(oldSize.height - height * scale) < 2) return;
                 const oldPosition = await appWindow.outerPosition();
-                await appWindow.setSize(new LogicalSize(width, 110));
+                await appWindow.setSize(new LogicalSize(width, height));
                 const newSize = await appWindow.outerSize();
                 await appWindow.setPosition(new PhysicalPosition(oldPosition.x + oldSize.width - newSize.width, oldPosition.y));
             }).catch(console.error);

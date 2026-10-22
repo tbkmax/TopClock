@@ -59,7 +59,7 @@ Alpine.data('settingsApp', () => ({
     previewStyle() {
         return {
             color: this.settings.font_color,
-            fontSize: `${this.settings.font_size}px`,
+            fontSize: `${Math.min(this.settings.font_size, 64)}px`,
             fontFamily: clockFontStack(this.settings.font_family),
             WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
             textShadow: '0 2px 6px rgba(0, 0, 0, .65)',

@@ -139,8 +139,6 @@ html, body {
 
 .clock-segment {
     display: inline-block;
-    min-width: 1.2em;
-    text-align: center;
 }
 
 /* Number changes are independent from the continuous colon effect. */
@@ -191,7 +189,7 @@ html, body {
 
 /* AM / PM indicator */
 .clock-ampm {
-    font-size: 13px;
+    font-size: .31em;
     font-weight: 700;
     margin-left: 6px;
     color: var(--clock-font-color);

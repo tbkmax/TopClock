@@ -51,7 +51,7 @@
                                 <span :class="{ 'preview-colon': part.kind === 'separator', 'preview-number': ['h', 'm', 's'].includes(part.kind), 'preview-ampm': part.kind === 'ampm', 'number-changing': part.changing }" x-text="part.text"></span>
                             </template>
                         </div>
-                        <div class="preview-caption">Your desktop clock updates instantly</div>
+                        <div class="preview-caption" x-text="settings.font_size > 64 ? 'Large sizes are scaled down in this preview' : 'Your desktop clock updates instantly'"></div>
                     </div>
 
                     <div class="control-grid">
@@ -68,8 +68,8 @@
                     </div>
 
                     <div class="setting-row size-row">
-                        <div><div class="control-title">Clock size</div><div class="control-description">Set the type size from 24 to 60 pixels</div></div>
-                        <div class="slider-area"><input class="size-range" type="range" min="24" max="60" :value="settings.font_size" :style="rangeStyle(settings.font_size, 24, 60)" @input="settings.font_size = Number($event.target.value); save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
+                        <div><div class="control-title">Clock size</div><div class="control-description">Set the type size from 24 to 200 pixels</div></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="24" max="200" :value="settings.font_size" :style="rangeStyle(settings.font_size, 24, 200)" @input="settings.font_size = Number($event.target.value); save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
                     </div>
                     <div class="setting-row">
                         <div><div class="control-title">Outline thickness</div><div class="control-description">From no outline to a bold 4 pixel edge</div></div>

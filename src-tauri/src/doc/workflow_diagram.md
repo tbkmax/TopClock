@@ -43,7 +43,7 @@ sequenceDiagram
     participant File as settings.json
     participant Clock as Clock UI
     UI->>Rust: update_settings(settings)
-    Rust->>Rust: Validate appearance, layout and both animation choices
+    Rust->>Rust: Validate appearance, 24–200 px size, layout and animations
     alt Invalid
         Rust-->>UI: Error
     else Valid

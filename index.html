@@ -16,7 +16,7 @@
     >
         <!-- The Clock itself (fades out when mouse approaches without Ctrl) -->
         <div 
-            class="clock-container" 
+            class="clock-container" x-ref="clockContainer"
             :class="{ 'faded': isNear && !isCtrlHeld && !menuOpen }"
             @click="toggleFormat" 
             title="Hold Ctrl to Move or Right-Click"

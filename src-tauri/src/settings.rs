@@ -53,7 +53,7 @@ fn valid_color(value: &str) -> bool {
 pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
     valid_color(&settings.font_color)
         && valid_color(&settings.outline_color)
-        && (24..=60).contains(&settings.font_size)
+        && (24..=200).contains(&settings.font_size)
         && settings.outline_width.is_finite()
         && (0.0..=4.0).contains(&settings.outline_width)
         && !settings.font_family.is_empty()
@@ -106,6 +106,11 @@ mod tests {
     #[test]
     fn rejects_invalid_new_settings() {
         let mut settings = ClockSettings::default();
+        settings.font_size = 200;
+        assert!(valid_settings(&settings));
+        settings.font_size = 201;
+        assert!(!valid_settings(&settings));
+        settings.font_size = 42;
         settings.outline_width = f32::NAN;
         assert!(!valid_settings(&settings));
         settings.outline_width = 1.5;

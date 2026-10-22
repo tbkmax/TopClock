@@ -2,6 +2,11 @@
 
 ## Added
 
+### 2026-10-22 - Larger clock sizes
+
+- Raised the Clock size slider maximum from 60 to 200 pixels, sized the desktop window vertically with the rendered clock, and made the AM/PM label scale with the clock.
+- Scaled large text down in the Settings preview and labeled the scaled view. No operator action is required.
+
 ### 2026-10-22 - Independent clock animations
 
 - Added separate colon and number change selectors with independent None choices for the desktop clock and live preview.
@@ -14,6 +19,10 @@
 - Existing settings files without the new fields reset to defaults on launch; users can reapply their preferences. No other operator action is required.
 
 ## Fixed
+
+### 2026-10-22 - Hour display padding and spacing
+
+- Show hours without a leading zero in the desktop clock and Settings preview while keeping minutes and seconds at two digits. The desktop clock now keeps single-digit hours beside the colon. No operator action is required.
 
 ### 2026-10-22 - Installed font selection
 

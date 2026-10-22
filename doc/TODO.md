@@ -13,9 +13,10 @@
 - [x] setting page should be follow DESIGN.md and use Alpine.js code reference include the animations
 - [x] the minimize, and close button and window itself should also be part of design not using Windows own one
 - [x] no full screen button, the size should not be able to change
-- [x] the setting page should have different tab, which will include: Clock, Add-on, preference
+- [ ] the setting page should have different tab, which will include: Clock, Add-on, Shortcut, General
 - [x] Clock tab is for setting like blink or not, font color, outline color, size..... should be reflect to the real one while changing (Not implment all of this right now, do few simple one create place holder fo rest)
 - [x] Add-on tab is for like below clock can let user add timer or other region's clock (Not implment right now)
+- [ ] Shortcut tab, list all the shortcut
 - [x] General tab is for setting like turn on open this when PC open or that kind of settings
 - [ ] add when user hold ctrl right click also will show setting
 
@@ -29,5 +30,7 @@
 ### TODO 4: General tab in setting
 - [ ] place a button to open where all setting file were locate in this PC
 
-### TODO 5:
+### TODO 5: Add-on tab
 - [ ]
+
+### TODO 6: Rename project, fix Readme

@@ -11,7 +11,7 @@ export function timeParts(date, settings) {
     const layout = settings.time_layout || 'hms';
     const hour = date.getHours();
     const values = {
-        h: String(settings.twenty_four_hour ? hour : hour % 12 || 12).padStart(2, '0'),
+        h: String(settings.twenty_four_hour ? hour : hour % 12 || 12),
         m: String(date.getMinutes()).padStart(2, '0'),
         s: String(date.getSeconds()).padStart(2, '0'),
     };
