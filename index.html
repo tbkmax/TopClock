@@ -21,9 +21,9 @@
             @click="toggleFormat" 
             title="Hold Ctrl to Move or Right-Click"
         >
-            <div class="clock-digits" x-ref="clockDigits" :class="[`animation-${settings?.animation || 'classic'}`, { 'clock-static': settings && !settings.blink }]">
+            <div class="clock-digits" x-ref="clockDigits" :class="[`colon-${settings?.colon_animation || 'pulse'}`, `number-${settings?.number_animation || 'tick'}`]">
                 <template x-for="(part, index) in parts" :key="index">
-                    <span :class="{ 'clock-segment': part.kind !== 'separator' && part.kind !== 'ampm', 'clock-colon': part.kind === 'separator', 'clock-seconds': part.kind === 's', 'clock-ampm': part.kind === 'ampm', 'ticking': part.kind === 's' && isTicking }" x-text="part.text"></span>
+                    <span :class="{ 'clock-segment': ['h', 'm', 's'].includes(part.kind), 'clock-colon': part.kind === 'separator', 'clock-ampm': part.kind === 'ampm', 'number-changing': part.changing }" x-text="part.text"></span>
                 </template>
             </div>
         </div>

@@ -2,6 +2,11 @@
 
 ## Added
 
+### 2026-10-22 - Independent clock animations
+
+- Added separate colon and number change selectors with independent None choices for the desktop clock and live preview.
+- Tracked changes to every displayed numeric part so hour and minute changes animate even when seconds are hidden. No operator action is required.
+
 ### 2026-10-22 - Clock tab customization
 
 - Added selectable time layouts, optional AM/PM, outline thickness, installed font names and four animation modes to the Clock tab and desktop clock.

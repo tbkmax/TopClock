@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-22 - Independent animation settings
+
+- Persisted and validated separate colon and number change animation choices. Either can be set to None without disabling the other. Older settings files missing these fields reset to defaults. No operator action is required.
+
 ### 2026-10-22 - Installed font enumeration
 
 - Added a command that lists font families installed in Windows for the Clock tab. No operator action is required.

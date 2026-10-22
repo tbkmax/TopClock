@@ -2,7 +2,8 @@ import Alpine from 'alpinejs';
 import { invoke } from '@tauri-apps/api/core';
 import { emitTo, listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { clockAnimations, clockFontStack, timeLayouts, timeParts } from './time-format.js';
+import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
+import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import './settings.css';
 
 const settingsWindow = getCurrentWindow();
@@ -11,13 +12,14 @@ window.Alpine = Alpine;
 
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
-    settings: { blink: true, font_color: '#ffffff', outline_color: '#000000', outline_width: 1.5, font_size: 42, font_family: 'Segoe UI', twenty_four_hour: true, show_ampm: true, time_layout: 'hms', animation: 'classic' },
+    settings: { colon_animation: 'pulse', number_animation: 'tick', font_color: '#ffffff', outline_color: '#000000', outline_width: 1.5, font_size: 42, font_family: 'Segoe UI', twenty_four_hour: true, show_ampm: true, time_layout: 'hms' },
     startupEnabled: false,
     previewParts: [],
-    previewTick: false,
-    previewSecond: null,
+    previousPreviewNumbers: {},
+    previewNumberActiveUntil: {},
     layouts: timeLayouts,
-    animations: clockAnimations,
+    colonAnimations,
+    numberAnimations,
     fontFamilies: [],
     fontsLoading: true,
     fontListError: false,
@@ -31,7 +33,7 @@ Alpine.data('settingsApp', () => ({
         await this.loadFontFamilies();
         this.startupEnabled = await invoke('get_startup_enabled');
         this.updatePreview();
-        setInterval(() => this.updatePreview(), 1000);
+        setInterval(() => this.updatePreview(), 200);
         await listen('clock-settings-changed', (event) => {
             if (!this.saveTimer && !this.isSaving) this.settings = event.payload;
         });
@@ -43,12 +45,15 @@ Alpine.data('settingsApp', () => ({
 
     updatePreview() {
         const now = new Date();
-        if (this.previewSecond !== now.getSeconds()) {
-            this.previewSecond = now.getSeconds();
-            this.previewTick = true;
-            setTimeout(() => { this.previewTick = false; }, 300);
-        }
-        this.previewParts = timeParts(now, this.settings);
+        const result = markChangedNumbers(
+            timeParts(now, this.settings),
+            this.previousPreviewNumbers,
+            this.previewNumberActiveUntil,
+            now.getTime(),
+        );
+        this.previewParts = result.parts;
+        this.previousPreviewNumbers = result.numbers;
+        this.previewNumberActiveUntil = result.activeUntil;
     },
 
     previewStyle() {

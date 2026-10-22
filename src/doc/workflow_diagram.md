@@ -30,7 +30,7 @@ classDiagram
     settingsApp --> TauriCommands : invoke
 ```
 
-These names map to [main.js](../main.js), [settings.js](../settings.js), and the command registrations in [main.rs](../../src-tauri/src/main.rs). Both UI components call the shared `timeParts` function in [time-format.js](../time-format.js). `TauriCommands` represents the command interface, not a source class.
+These names map to [main.js](../main.js), [settings.js](../settings.js), and the command registrations in [main.rs](../../src-tauri/src/main.rs). Both UI components call the shared `timeParts` function in [time-format.js](../time-format.js), then `markChangedNumbers` in [clock-animations.js](../clock-animations.js). The tracker compares each displayed hour, minute and second with its previous value. CSS applies the chosen number effect to changed parts and the chosen colon effect to separators independently. `TauriCommands` represents the command interface, not a source class.
 
 ```mermaid
 sequenceDiagram
@@ -38,7 +38,7 @@ sequenceDiagram
     participant Settings as settingsApp
     participant Clock as clockApp
     participant Rust
-    User->>Settings: Change clock control
+    User->>Settings: Choose colon or number animation
     Settings->>Clock: clock-settings-preview
     Settings->>Settings: Debounce and queue save
     Settings->>Rust: update_settings

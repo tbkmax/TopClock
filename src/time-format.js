@@ -7,13 +7,6 @@ export const timeLayouts = [
     { value: 's', label: 'S' },
 ];
 
-export const clockAnimations = [
-    { value: 'classic', label: 'Classic pulse' },
-    { value: 'fade', label: 'Soft fade' },
-    { value: 'slide', label: 'Gentle slide' },
-    { value: 'none', label: 'None' },
-];
-
 export function timeParts(date, settings) {
     const layout = settings.time_layout || 'hms';
     const hour = date.getHours();

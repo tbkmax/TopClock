@@ -4,6 +4,7 @@ import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
+import { markChangedNumbers } from './clock-animations.js';
 import './style.css';
 
 const appWindow = getCurrentWindow();
@@ -12,9 +13,9 @@ window.Alpine = Alpine;
 
 Alpine.data('clockApp', () => ({
     parts: [],
-    lastSecond: null,
+    previousNumbers: {},
+    numberActiveUntil: {},
     settings: null,
-    isTicking: false,
     isCtrlHeld: false,
     isNear: false,
     menuOpen: false,
@@ -107,12 +108,15 @@ Alpine.data('clockApp', () => ({
 
     updateClock() {
         const now = new Date();
-        if (this.lastSecond !== now.getSeconds()) {
-            this.lastSecond = now.getSeconds();
-            this.isTicking = true;
-            setTimeout(() => { this.isTicking = false; }, 300);
-        }
-        this.parts = timeParts(now, this.settings || { time_layout: 'hms', twenty_four_hour: true });
+        const result = markChangedNumbers(
+            timeParts(now, this.settings || { time_layout: 'hms', twenty_four_hour: true }),
+            this.previousNumbers,
+            this.numberActiveUntil,
+            now.getTime(),
+        );
+        this.parts = result.parts;
+        this.previousNumbers = result.numbers;
+        this.numberActiveUntil = result.activeUntil;
     },
 
     toggleFormat() {

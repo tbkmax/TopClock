@@ -46,9 +46,9 @@
 
                     <div class="preview-card">
                         <div class="preview-heading"><span>LIVE PREVIEW</span><span class="preview-live"><i></i> LIVE</span></div>
-                        <div class="preview-time" :class="[`animation-${settings.animation}`, { 'clock-static': !settings.blink }]" :style="previewStyle()">
+                        <div class="preview-time" :class="[`colon-${settings.colon_animation}`, `number-${settings.number_animation}`]" :style="previewStyle()">
                             <template x-for="(part, index) in previewParts" :key="index">
-                                <span :class="{ 'preview-colon': part.kind === 'separator', 'preview-seconds': part.kind === 's', 'preview-ampm': part.kind === 'ampm', 'ticking': part.kind === 's' && previewTick }" x-text="part.text"></span>
+                                <span :class="{ 'preview-colon': part.kind === 'separator', 'preview-number': ['h', 'm', 's'].includes(part.kind), 'preview-ampm': part.kind === 'ampm', 'number-changing': part.changing }" x-text="part.text"></span>
                             </template>
                         </div>
                         <div class="preview-caption">Your desktop clock updates instantly</div>
@@ -93,13 +93,13 @@
                         <div><div class="control-title">Show AM / PM</div><div class="control-description">Label morning and evening in 12-hour time</div></div>
                         <button type="button" class="switch" role="switch" :aria-checked="settings.show_ampm" :class="{ on: settings.show_ampm }" aria-label="Show AM or PM" @click="settings.show_ampm = !settings.show_ampm; save()"><span></span></button>
                     </div>
-                    <div class="setting-row" x-show="settings.animation !== 'none'">
-                        <div><div class="control-title">Animated separators</div><div class="control-description">Animate colons in the selected style</div></div>
-                        <button type="button" class="switch" role="switch" :aria-checked="settings.blink" :class="{ on: settings.blink }" aria-label="Animated separators" @click="settings.blink = !settings.blink; save()"><span></span></button>
+                    <div class="setting-row">
+                        <div><div class="control-title">Colon animation</div><div class="control-description">Motion for the separators</div></div>
+                        <select class="select-control" x-model="settings.colon_animation" @change="save()" aria-label="Colon animation"><template x-for="animation in colonAnimations" :key="animation.value"><option :value="animation.value" x-text="animation.label"></option></template></select>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Animation</div><div class="control-description">Motion uses the clock's yellow accent</div></div>
-                        <select class="select-control" x-model="settings.animation" @change="save()" aria-label="Clock animation"><template x-for="animation in animations" :key="animation.value"><option :value="animation.value" x-text="animation.label"></option></template></select>
+                        <div><div class="control-title">Number change animation</div><div class="control-description">Motion when a displayed number changes</div></div>
+                        <select class="select-control" x-model="settings.number_animation" @change="save()" aria-label="Number change animation"><template x-for="animation in numberAnimations" :key="animation.value"><option :value="animation.value" x-text="animation.label"></option></template></select>
                     </div>
                 </section>
                 </template>

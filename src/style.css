@@ -143,15 +143,15 @@ html, body {
     text-align: center;
 }
 
-/* Second tick micro-animation with electric yellow flash */
-.animation-classic .clock-seconds.ticking {
-    animation: secondTick 0.3s ease-out;
+/* Number changes are independent from the continuous colon effect. */
+.number-tick .clock-segment.number-changing {
+    animation: numberTick 0.3s ease-out;
 }
 
-@keyframes secondTick {
+@keyframes numberTick {
     0% {
         transform: translateY(-2px);
-        color: var(--color-primary); /* Electric yellow pulse on tick */
+        color: var(--color-primary);
     }
     100% {
         transform: translateY(0);
@@ -167,16 +167,16 @@ html, body {
     transform-origin: center;
 }
 
-.animation-classic:not(.clock-static) .clock-colon { animation: colonPulse 1s infinite ease-in-out; }
-.animation-fade:not(.clock-static) .clock-colon { animation: colonFade 1s infinite ease-in-out; }
-.animation-slide:not(.clock-static) .clock-colon { animation: colonSlide 1s infinite ease-in-out; }
-.animation-fade .clock-seconds.ticking { animation: secondFade .3s ease-out; }
-.animation-slide .clock-seconds.ticking { animation: secondSlide .3s ease-out; }
+.colon-pulse .clock-colon { animation: colonPulse 1s infinite ease-in-out; }
+.colon-fade .clock-colon { animation: colonFade 1s infinite ease-in-out; }
+.colon-slide .clock-colon { animation: colonSlide 1s infinite ease-in-out; }
+.number-fade .clock-segment.number-changing { animation: numberFade .3s ease-out; }
+.number-slide .clock-segment.number-changing { animation: numberSlide .3s ease-out; }
 
 @keyframes colonFade { 50% { opacity: .25; } }
 @keyframes colonSlide { 50% { transform: translateY(-3px); color: var(--color-primary); } }
-@keyframes secondFade { 0% { opacity: .3; color: var(--color-primary); } }
-@keyframes secondSlide { 0% { transform: translateY(-4px); color: var(--color-primary); } }
+@keyframes numberFade { 0% { opacity: .3; color: var(--color-primary); } }
+@keyframes numberSlide { 0% { transform: translateY(-4px); color: var(--color-primary); } }
 
 @keyframes colonPulse {
     0%, 100% {
@@ -299,5 +299,5 @@ html, body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .clock-colon, .clock-seconds.ticking { animation: none !important; }
+    .clock-colon, .clock-segment.number-changing { animation: none !important; }
 }

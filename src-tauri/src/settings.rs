@@ -15,7 +15,8 @@ pub(crate) struct PersistedConfig {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct ClockSettings {
-    pub(crate) blink: bool,
+    pub(crate) colon_animation: String,
+    pub(crate) number_animation: String,
     pub(crate) font_color: String,
     pub(crate) outline_color: String,
     pub(crate) outline_width: f32,
@@ -24,13 +25,13 @@ pub(crate) struct ClockSettings {
     pub(crate) twenty_four_hour: bool,
     pub(crate) show_ampm: bool,
     pub(crate) time_layout: String,
-    pub(crate) animation: String,
 }
 
 impl Default for ClockSettings {
     fn default() -> Self {
         Self {
-            blink: true,
+            colon_animation: "pulse".into(),
+            number_animation: "tick".into(),
             font_color: "#ffffff".into(),
             outline_color: "#000000".into(),
             outline_width: 1.5,
@@ -39,7 +40,6 @@ impl Default for ClockSettings {
             twenty_four_hour: true,
             show_ampm: true,
             time_layout: "hms".into(),
-            animation: "classic".into(),
         }
     }
 }
@@ -64,8 +64,12 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
             "hms" | "hm" | "ms" | "h" | "m" | "s"
         )
         && matches!(
-            settings.animation.as_str(),
-            "classic" | "fade" | "slide" | "none"
+            settings.colon_animation.as_str(),
+            "pulse" | "fade" | "slide" | "none"
+        )
+        && matches!(
+            settings.number_animation.as_str(),
+            "tick" | "fade" | "slide" | "none"
         )
 }
 
@@ -81,7 +85,8 @@ mod tests {
         settings.twenty_four_hour = false;
         settings.show_ampm = false;
         settings.time_layout = "ms".into();
-        settings.animation = "slide".into();
+        settings.colon_animation = "none".into();
+        settings.number_animation = "slide".into();
         let config = PersistedConfig {
             settings,
             position: Some(ClockPosition { x: -120, y: 240 }),
@@ -93,7 +98,8 @@ mod tests {
         assert_eq!(loaded.settings.outline_width, 3.5);
         assert_eq!(loaded.settings.font_family, "Times New Roman");
         assert_eq!(loaded.settings.time_layout, "ms");
-        assert_eq!(loaded.settings.animation, "slide");
+        assert_eq!(loaded.settings.colon_animation, "none");
+        assert_eq!(loaded.settings.number_animation, "slide");
         assert!(valid_settings(&loaded.settings));
     }
 
@@ -107,6 +113,12 @@ mod tests {
         assert!(!valid_settings(&settings));
         settings.font_family = "Segoe UI".into();
         settings.time_layout = "invalid".into();
+        assert!(!valid_settings(&settings));
+        settings.time_layout = "hms".into();
+        settings.colon_animation = "invalid".into();
+        assert!(!valid_settings(&settings));
+        settings.colon_animation = "pulse".into();
+        settings.number_animation = "invalid".into();
         assert!(!valid_settings(&settings));
     }
 }

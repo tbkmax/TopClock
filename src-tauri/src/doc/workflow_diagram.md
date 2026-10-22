@@ -14,7 +14,8 @@ classDiagram
       position: Option~ClockPosition~
     }
     class ClockSettings {
-      blink: bool
+      colon_animation: String
+      number_animation: String
       font_color: String
       outline_color: String
       outline_width: f32
@@ -23,7 +24,6 @@ classDiagram
       twenty_four_hour: bool
       show_ampm: bool
       time_layout: String
-      animation: String
     }
     class ClockPosition {
       x: i32
@@ -43,7 +43,7 @@ sequenceDiagram
     participant File as settings.json
     participant Clock as Clock UI
     UI->>Rust: update_settings(settings)
-    Rust->>Rust: Validate appearance and layout fields
+    Rust->>Rust: Validate appearance, layout and both animation choices
     alt Invalid
         Rust-->>UI: Error
     else Valid
