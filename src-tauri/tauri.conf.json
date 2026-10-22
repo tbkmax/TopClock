@@ -14,7 +14,7 @@
       {
         "label": "main",
         "title": "On-Top Clock",
-        "width": 280,
+        "width": 380,
         "height": 110,
         "resizable": false,
         "decorations": false,
@@ -23,6 +23,20 @@
         "skipTaskbar": true,
         "visible": false,
         "shadow": false
+      },
+      {
+        "label": "settings",
+        "title": "On-Top Clock Settings",
+        "url": "settings.html",
+        "width": 760,
+        "height": 650,
+        "minWidth": 760,
+        "minHeight": 650,
+        "resizable": false,
+        "maximizable": false,
+        "decorations": false,
+        "center": true,
+        "visible": false
       }
     ],
     "security": {

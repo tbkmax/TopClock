@@ -13,6 +13,7 @@ Alpine.data('clockApp', () => ({
     seconds: '00',
     ampm: '',
     is24Hour: true,
+    settings: null,
     isTicking: false,
     isCtrlHeld: false,
     isNear: false,
@@ -23,6 +24,12 @@ Alpine.data('clockApp', () => ({
     dragStarted: false,
 
     async init() {
+        try {
+            this.applySettings(await invoke('get_settings'));
+        } catch (error) {
+            console.error('Could not load clock settings:', error);
+            this.applySettings({ blink: true, font_color: '#ffffff', outline_color: '#000000', font_size: 42, twenty_four_hour: true });
+        }
         this.updateClock();
         setInterval(() => this.updateClock(), 200);
 
@@ -32,6 +39,10 @@ Alpine.data('clockApp', () => ({
             }),
             listen('proximity', (event) => {
                 this.isNear = event.payload;
+            }),
+            listen('clock-settings-changed', (event) => {
+                this.applySettings(event.payload);
+                this.updateClock();
             }),
         ]);
 
@@ -45,7 +56,14 @@ Alpine.data('clockApp', () => ({
         });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
 
-        await invoke('frontend_ready');
+    },
+
+    applySettings(settings) {
+        this.settings = settings;
+        this.is24Hour = settings.twenty_four_hour;
+        document.documentElement.style.setProperty('--clock-font-color', settings.font_color);
+        document.documentElement.style.setProperty('--clock-outline-color', settings.outline_color);
+        document.documentElement.style.setProperty('--clock-font-size', `${settings.font_size}px`);
     },
 
     updateClock() {
@@ -79,6 +97,8 @@ Alpine.data('clockApp', () => ({
         }
         if (this.isCtrlHeld) {
             this.is24Hour = !this.is24Hour;
+            this.settings.twenty_four_hour = this.is24Hour;
+            invoke('update_settings', { settings: this.settings }).catch(console.error);
             this.updateClock();
         }
     },

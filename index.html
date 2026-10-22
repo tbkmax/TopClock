@@ -25,7 +25,7 @@
             @click="toggleFormat" 
             title="Hold Ctrl to Move or Right-Click"
         >
-            <div class="clock-digits">
+            <div class="clock-digits" :class="{ 'clock-static': settings && !settings.blink }">
                 <span class="clock-segment" x-text="hours">00</span>
                 <span class="clock-colon">:</span>
                 <span class="clock-segment" x-text="minutes">00</span>

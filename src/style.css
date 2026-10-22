@@ -23,6 +23,7 @@
     --clock-font-color: #ffffff;
     --clock-outline-color: #000000;
     --clock-outline-width: 1.5px;
+    --clock-font-size: 42px;
 
     /* Radii */
     --radius-xs: 4px;
@@ -126,7 +127,7 @@ html, body {
 /* High contrast white font with black outline */
 .clock-digits {
     font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, ui-monospace, monospace;
-    font-size: 42px;
+    font-size: var(--clock-font-size);
     font-weight: 700;
     line-height: 1;
     letter-spacing: -0.5px;
@@ -175,6 +176,10 @@ html, body {
     color: var(--clock-font-color);
     animation: colonPulse 1s infinite ease-in-out;
     transform-origin: center;
+}
+
+.clock-static .clock-colon {
+    animation: none;
 }
 
 @keyframes colonPulse {

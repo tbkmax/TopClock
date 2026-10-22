@@ -9,6 +9,8 @@ Without Ctrl, clicks pass through the clock to the window underneath. Move the p
 - Ctrl + right click: open the Quit menu.
 - Ctrl + Q while the clock has focus: quit.
 
+The Windows notification area icon opens Settings on left click and shows Quit on right click. Settings has Clock, Add-ons, and General tabs. Clock colors, size, blinking separators, and time format update the desktop clock live and are saved across launches. General also has a Windows sign-in launch switch. The Add-ons tab previews planned timer and world clock features.
+
 ## Build on Windows
 
 Install Node.js, Rust with the MSVC toolchain, and Visual Studio C++ Build Tools with a Windows SDK. If the local toolchain in `.tools/` is present, the npm scripts use it automatically. From the repository root, run:

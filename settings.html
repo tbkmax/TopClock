@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Top Clock Settings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="settings-app" x-data="settingsApp" x-cloak>
+        <header class="titlebar" @mousedown="startDrag($event)">
+            <div class="brand-mark" aria-hidden="true">:</div>
+            <div class="titlebar-name">ON-TOP CLOCK <span> / SETTINGS</span></div>
+            <div class="window-actions">
+                <button class="window-action" type="button" title="Minimize" aria-label="Minimize" @mousedown.stop @click="minimize()">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/></svg>
+                </button>
+                <button class="window-action close-action" type="button" title="Close settings" aria-label="Close settings" @mousedown.stop @click="close()">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
+                </button>
+            </div>
+        </header>
+
+        <div class="settings-layout">
+            <aside class="sidebar" aria-label="Settings sections">
+                <div class="sidebar-kicker">WORKSPACE</div>
+                <nav class="tab-list" aria-label="Settings tabs">
+                    <button type="button" class="tab-button" :class="{ active: tab === 'clock' }" :aria-selected="tab === 'clock'" @click="tab = 'clock'">
+                        <span class="tab-glyph">◷</span> Clock <span class="tab-arrow">›</span>
+                    </button>
+                    <button type="button" class="tab-button" :class="{ active: tab === 'addons' }" :aria-selected="tab === 'addons'" @click="tab = 'addons'">
+                        <span class="tab-glyph">＋</span> Add-ons <span class="tab-arrow">›</span>
+                    </button>
+                    <button type="button" class="tab-button" :class="{ active: tab === 'general' }" :aria-selected="tab === 'general'" @click="tab = 'general'">
+                        <span class="tab-glyph">⚙</span> General <span class="tab-arrow">›</span>
+                    </button>
+                </nav>
+                <div class="sidebar-bottom"><span class="status-dot"></span> CLOCK RUNNING <span class="version">v0.1</span></div>
+            </aside>
+
+            <main class="settings-content">
+                <div x-show="tab === 'clock'" x-transition.opacity.duration.180ms>
+                    <div class="section-kicker">DISPLAY / 01</div>
+                    <h1>Make time yours<span class="yellow-period">.</span></h1>
+                    <p class="section-description">Changes appear on your desktop clock as you make them.</p>
+
+                    <div class="preview-card">
+                        <div class="preview-heading"><span>LIVE PREVIEW</span><span class="preview-live"><i></i> LIVE</span></div>
+                        <div class="preview-time" :style="previewStyle()"><span x-text="previewTime">00:00:00</span></div>
+                        <div class="preview-caption">Your desktop clock updates instantly</div>
+                    </div>
+
+                    <div class="control-grid">
+                        <label class="control-card color-card">
+                            <span class="control-title">Font color</span>
+                            <span class="control-description">The face of your clock</span>
+                            <span class="color-control"><input type="color" x-model="settings.font_color" @input="save()" aria-label="Font color"><span x-text="settings.font_color.toUpperCase()"></span></span>
+                        </label>
+                        <label class="control-card color-card">
+                            <span class="control-title">Outline color</span>
+                            <span class="control-description">Contrast against your desktop</span>
+                            <span class="color-control"><input type="color" x-model="settings.outline_color" @input="save()" aria-label="Outline color"><span x-text="settings.outline_color.toUpperCase()"></span></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-row size-row">
+                        <div><div class="control-title">Clock size</div><div class="control-description">Set the type size from 24 to 60 pixels</div></div>
+                        <div class="slider-area"><input type="range" min="24" max="60" x-model.number="settings.font_size" @input="save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
+                    </div>
+                    <div class="setting-row">
+                        <div><div class="control-title">Blinking separators</div><div class="control-description">A subtle pulse between the numbers</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.blink" :class="{ on: settings.blink }" aria-label="Blinking separators" @click="settings.blink = !settings.blink; save()"><span></span></button>
+                    </div>
+                    <div class="tip-card"><span>UP NEXT</span> Font family and outline thickness controls are coming later.</div>
+                </div>
+
+                <div x-show="tab === 'addons'" x-transition.opacity.duration.180ms x-cloak>
+                    <div class="section-kicker">EXTENSIONS / 02</div>
+                    <h1>More than time<span class="yellow-period">.</span></h1>
+                    <p class="section-description">Extra displays are planned for a future release.</p>
+                    <div class="addon-card"><div class="addon-icon">⏱</div><div><div class="addon-title">Timer</div><p>Keep a countdown below your clock.</p></div><span class="coming-soon">COMING SOON</span></div>
+                    <div class="addon-card"><div class="addon-icon">◎</div><div><div class="addon-title">World clocks</div><p>Follow the time in another region.</p></div><span class="coming-soon">COMING SOON</span></div>
+                </div>
+
+                <div x-show="tab === 'general'" x-transition.opacity.duration.180ms x-cloak>
+                    <div class="section-kicker">PREFERENCES / 03</div>
+                    <h1>Your clock, your way<span class="yellow-period">.</span></h1>
+                    <p class="section-description">Choose how On-Top Clock behaves on your PC.</p>
+                    <div class="general-panel">
+                        <div class="setting-row">
+                            <div><div class="control-title">24-hour time</div><div class="control-description">Show 18:30 instead of 06:30 PM</div></div>
+                            <button type="button" class="switch" role="switch" :aria-checked="settings.twenty_four_hour" :class="{ on: settings.twenty_four_hour }" aria-label="24-hour time" @click="settings.twenty_four_hour = !settings.twenty_four_hour; save()"><span></span></button>
+                        </div>
+                        <div class="setting-row">
+                            <div><div class="control-title">Launch when I sign in</div><div class="control-description">Start the clock with Windows</div></div>
+                            <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()"><span></span></button>
+                        </div>
+                    </div>
+                    <div class="tip-card"><span>TIP</span> Hold Ctrl and drag the desktop clock to move it. Ctrl + click switches time format.</div>
+                </div>
+                <div class="error-toast" x-show="error" x-transition.opacity x-text="error" x-cloak role="alert"></div>
+            </main>
+        </div>
+    </div>
+    <script type="module" src="/src/settings.js"></script>
+</body>
+</html>
