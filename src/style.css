@@ -1,0 +1,298 @@
+/* Design tokens from doc/DESIGN.md (ClickHouse-inspired) */
+:root {
+    /* Brand & Accent */
+    --color-primary: #faff69;          /* Electric yellow signature */
+    --color-primary-active: #e6eb52;   /* Active / press yellow */
+    --color-on-primary: #0a0a0a;
+
+    /* Canvas & Surfaces */
+    --color-surface-card: #1a1a1a;    /* Dropdown menu background */
+    --color-surface-elevated: #242424;/* Dropdown hover background */
+
+    /* Borders */
+    --color-hairline: #2a2a2a;        /* 1px hairline border */
+    --color-hairline-strong: #3a3a3a;
+
+    /* Typography colors */
+    --color-ink: #ffffff;
+    --color-body: #cccccc;
+    --color-muted: #888888;
+    --color-rose: #ef4444;            /* Quit icon accent */
+
+    /* Default white font color with black outline (configurable via CSS vars) */
+    --clock-font-color: #ffffff;
+    --clock-outline-color: #000000;
+    --clock-outline-width: 1.5px;
+
+    /* Radii */
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-pill: 9999px;
+}
+
+[x-cloak] {
+    display: none !important;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+/* 100% Transparent window background */
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background-color: transparent !important;
+    background: transparent !important;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    pointer-events: none; /* Mouse events pass through by default */
+}
+
+/* App container - only shows the clock itself */
+#app {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 6px;
+    background: transparent !important;
+    cursor: default;
+    pointer-events: none; /* Clicks pass through to windows beneath */
+}
+
+/* When Ctrl is held or Menu is open: enable pointer events */
+#app.ctrl-active,
+#app.menu-active {
+    pointer-events: auto;
+}
+
+/* Ctrl drag state - cursor changes and clock digits emit electric yellow glow */
+#app.ctrl-active {
+    cursor: grab;
+}
+
+#app.ctrl-active:active {
+    cursor: grabbing;
+}
+
+#app.ctrl-active .clock-digits {
+    text-shadow:
+        -1.5px -1.5px 0 var(--clock-outline-color),
+         1.5px -1.5px 0 var(--clock-outline-color),
+        -1.5px  1.5px 0 var(--clock-outline-color),
+         1.5px  1.5px 0 var(--clock-outline-color),
+         0 0 10px rgba(250, 255, 105, 0.9),
+         0 0 20px rgba(250, 255, 105, 0.5);
+    transition: text-shadow 0.2s ease;
+}
+
+/* Clock Container */
+.clock-container {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 8px;
+    background: transparent;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.1s ease;
+    opacity: 1;
+    pointer-events: none; /* Passthrough by default */
+}
+
+#app.ctrl-active .clock-container,
+#app.menu-active .clock-container {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* When mouse gets close to the clock without Ctrl held, fade out so user sees what is underneath */
+.clock-container.faded {
+    opacity: 0.08;
+}
+
+.clock-container:active {
+    transform: scale(0.98);
+}
+
+/* High contrast white font with black outline */
+.clock-digits {
+    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, ui-monospace, monospace;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    display: inline-flex;
+    align-items: baseline;
+
+    color: var(--clock-font-color);
+    -webkit-text-stroke: var(--clock-outline-width) var(--clock-outline-color);
+    paint-order: stroke fill;
+    text-shadow:
+        -1.5px -1.5px 0 var(--clock-outline-color),
+         1.5px -1.5px 0 var(--clock-outline-color),
+        -1.5px  1.5px 0 var(--clock-outline-color),
+         1.5px  1.5px 0 var(--clock-outline-color),
+         0 2px 6px rgba(0, 0, 0, 0.95);
+    transition: text-shadow 0.2s ease;
+}
+
+.clock-segment {
+    display: inline-block;
+    min-width: 52px;
+    text-align: center;
+}
+
+/* Second tick micro-animation with electric yellow flash */
+.clock-seconds.ticking {
+    animation: secondTick 0.3s ease-out;
+}
+
+@keyframes secondTick {
+    0% {
+        transform: translateY(-2px);
+        color: var(--color-primary); /* Electric yellow pulse on tick */
+    }
+    100% {
+        transform: translateY(0);
+        color: var(--clock-font-color);
+    }
+}
+
+/* Colon rhythmic breathing animation */
+.clock-colon {
+    display: inline-block;
+    margin: 0 1px;
+    color: var(--clock-font-color);
+    animation: colonPulse 1s infinite ease-in-out;
+    transform-origin: center;
+}
+
+@keyframes colonPulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.3;
+        transform: scale(0.92);
+    }
+}
+
+/* AM / PM indicator */
+.clock-ampm {
+    font-size: 13px;
+    font-weight: 700;
+    margin-left: 6px;
+    color: var(--clock-font-color);
+    -webkit-text-stroke: 1px var(--clock-outline-color);
+    letter-spacing: 0.5px;
+}
+
+/* Dropdown Menu (Right click menu) */
+.dropdown-menu {
+    position: absolute;
+    width: 130px;
+    background-color: var(--color-surface-card);
+    border: 1px solid var(--color-hairline-strong);
+    border-radius: var(--radius-md);
+    padding: 4px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    overflow: hidden;
+    pointer-events: auto; /* Menu items must be clickable */
+}
+
+.menu-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+    text-align: left;
+    pointer-events: auto;
+}
+
+.menu-item-left {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.menu-icon {
+    width: 13px;
+    height: 13px;
+    color: var(--color-rose);
+    stroke: currentColor;
+    transition: transform 0.15s ease;
+}
+
+.menu-shortcut {
+    font-size: 9px;
+    color: var(--color-muted);
+    background: var(--color-surface-elevated);
+    padding: 1px 4px;
+    border-radius: var(--radius-xs);
+    border: 1px solid var(--color-hairline);
+    font-family: "JetBrains Mono", monospace;
+}
+
+.menu-item:hover {
+    background-color: var(--color-surface-elevated);
+    color: var(--color-primary);
+}
+
+.menu-item:hover .menu-icon {
+    transform: translateX(1px);
+}
+
+.menu-item:active {
+    background-color: var(--color-hairline);
+}
+
+/* Alpine.js dropdown transitions */
+.menu-enter {
+    transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), transform 150ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+.menu-enter-start {
+    opacity: 0;
+    transform: scale(0.92) translateY(-4px);
+}
+
+.menu-enter-end {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.menu-leave {
+    transition: opacity 100ms cubic-bezier(0.4, 0, 1, 1), transform 100ms cubic-bezier(0.4, 0, 1, 1);
+}
+
+.menu-leave-start {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+}
+
+.menu-leave-end {
+    opacity: 0;
+    transform: scale(0.92) translateY(-4px);
+}

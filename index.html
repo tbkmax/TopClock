@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On-Top Clock</title>
+    <!-- Modern typography following DESIGN.md -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div 
+        id="app" 
+        x-data="clockApp"
+        @mousedown="handleMouseDown($event)"
+        @mousemove="handleMouseMove($event)"
+        @contextmenu="handleContextMenu($event)"
+        :class="{ 'ctrl-active': isCtrlHeld, 'menu-active': menuOpen }"
+    >
+        <!-- The Clock itself (fades out when mouse approaches without Ctrl) -->
+        <div 
+            class="clock-container" 
+            :class="{ 'faded': isNear && !isCtrlHeld && !menuOpen }"
+            @click="toggleFormat" 
+            title="Hold Ctrl to Move or Right-Click"
+        >
+            <div class="clock-digits">
+                <span class="clock-segment" x-text="hours">00</span>
+                <span class="clock-colon">:</span>
+                <span class="clock-segment" x-text="minutes">00</span>
+                <span class="clock-colon">:</span>
+                <span class="clock-segment clock-seconds" :class="{ 'ticking': isTicking }" x-text="seconds">00</span>
+                <template x-if="ampm">
+                    <span class="clock-ampm" x-text="ampm"></span>
+                </template>
+            </div>
+        </div>
+
+        <!-- Dropdown Menu (Ctrl + Right-Click) -->
+        <div 
+            x-show="menuOpen"
+            @click.outside="closeMenu()"
+            @keydown.escape.window="closeMenu()"
+            x-transition:enter="menu-enter"
+            x-transition:enter-start="menu-enter-start"
+            x-transition:enter-end="menu-enter-end"
+            x-transition:leave="menu-leave"
+            x-transition:leave-start="menu-leave-start"
+            x-transition:leave-end="menu-leave-end"
+            class="dropdown-menu"
+            :style="`left: ${menuX}px; top: ${menuY}px;`"
+            x-cloak
+        >
+            <button class="menu-item" @click="quitApp" title="Quit Application">
+                <span class="menu-item-left">
+                    <svg class="menu-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Quit</span>
+                </span>
+                <span class="menu-shortcut">Ctrl+Q</span>
+            </button>
+        </div>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
