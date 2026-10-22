@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>On-Top Clock Settings</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=optional" rel="stylesheet">
 </head>
 <body>
     <div id="settings-app" x-data="settingsApp" x-cloak>
@@ -49,7 +46,11 @@
 
                     <div class="preview-card">
                         <div class="preview-heading"><span>LIVE PREVIEW</span><span class="preview-live"><i></i> LIVE</span></div>
-                        <div class="preview-time" :style="previewStyle()"><span x-text="previewTime">00:00:00</span></div>
+                        <div class="preview-time" :class="[`animation-${settings.animation}`, { 'clock-static': !settings.blink }]" :style="previewStyle()">
+                            <template x-for="(part, index) in previewParts" :key="index">
+                                <span :class="{ 'preview-colon': part.kind === 'separator', 'preview-seconds': part.kind === 's', 'preview-ampm': part.kind === 'ampm', 'ticking': part.kind === 's' && previewTick }" x-text="part.text"></span>
+                            </template>
+                        </div>
                         <div class="preview-caption">Your desktop clock updates instantly</div>
                     </div>
 
@@ -68,13 +69,38 @@
 
                     <div class="setting-row size-row">
                         <div><div class="control-title">Clock size</div><div class="control-description">Set the type size from 24 to 60 pixels</div></div>
-                        <div class="slider-area"><input class="size-range" type="range" min="24" max="60" :value="settings.font_size" :style="rangeStyle()" @input="settings.font_size = Number($event.target.value); save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="24" max="60" :value="settings.font_size" :style="rangeStyle(settings.font_size, 24, 60)" @input="settings.font_size = Number($event.target.value); save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Blinking separators</div><div class="control-description">A subtle pulse between the numbers</div></div>
-                        <button type="button" class="switch" role="switch" :aria-checked="settings.blink" :class="{ on: settings.blink }" aria-label="Blinking separators" @click="settings.blink = !settings.blink; save()"><span></span></button>
+                        <div><div class="control-title">Outline thickness</div><div class="control-description">From no outline to a bold 4 pixel edge</div></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="0" max="4" step="0.5" :value="settings.outline_width" :style="rangeStyle(settings.outline_width, 0, 4)" @input="settings.outline_width = Number($event.target.value); save()" aria-label="Outline thickness"><span class="size-value" x-text="`${settings.outline_width} px`"></span></div>
                     </div>
-                    <div class="tip-card"><span>UP NEXT</span> Font family and outline thickness controls are coming later.</div>
+                    <div class="setting-row">
+                        <div><div class="control-title">Font family</div><div class="control-description" x-text="fontListError ? 'Windows font list is unavailable' : fontsLoading ? 'Loading installed fonts…' : `${fontFamilies.length} installed fonts`"></div></div>
+                        <select class="select-control font-select" x-model="settings.font_family" @change="save()" :disabled="fontsLoading || fontListError" :title="settings.font_family" aria-label="Font family">
+                            <template x-for="family in fontFamilies" :key="family"><option :value="family" x-text="family"></option></template>
+                        </select>
+                    </div>
+                    <div class="setting-row">
+                        <div><div class="control-title">Time layout</div><div class="control-description">Choose which parts appear</div></div>
+                        <select class="select-control" x-model="settings.time_layout" @change="save()" aria-label="Time layout"><template x-for="layout in layouts" :key="layout.value"><option :value="layout.value" x-text="layout.label"></option></template></select>
+                    </div>
+                    <div class="setting-row">
+                        <div><div class="control-title">24-hour time</div><div class="control-description">Use 18 instead of 06 in the evening</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.twenty_four_hour" :class="{ on: settings.twenty_four_hour }" aria-label="24-hour time" @click="settings.twenty_four_hour = !settings.twenty_four_hour; save()"><span></span></button>
+                    </div>
+                    <div class="setting-row" x-show="!settings.twenty_four_hour && settings.time_layout.includes('h')">
+                        <div><div class="control-title">Show AM / PM</div><div class="control-description">Label morning and evening in 12-hour time</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.show_ampm" :class="{ on: settings.show_ampm }" aria-label="Show AM or PM" @click="settings.show_ampm = !settings.show_ampm; save()"><span></span></button>
+                    </div>
+                    <div class="setting-row" x-show="settings.animation !== 'none'">
+                        <div><div class="control-title">Animated separators</div><div class="control-description">Animate colons in the selected style</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.blink" :class="{ on: settings.blink }" aria-label="Animated separators" @click="settings.blink = !settings.blink; save()"><span></span></button>
+                    </div>
+                    <div class="setting-row">
+                        <div><div class="control-title">Animation</div><div class="control-description">Motion uses the clock's yellow accent</div></div>
+                        <select class="select-control" x-model="settings.animation" @change="save()" aria-label="Clock animation"><template x-for="animation in animations" :key="animation.value"><option :value="animation.value" x-text="animation.label"></option></template></select>
+                    </div>
                 </section>
                 </template>
 
@@ -94,10 +120,6 @@
                     <h1>Your clock, your way<span class="yellow-period">.</span></h1>
                     <p class="section-description">Choose how On-Top Clock behaves on your PC.</p>
                     <div class="general-panel">
-                        <div class="setting-row">
-                            <div><div class="control-title">24-hour time</div><div class="control-description">Show 18:30 instead of 06:30 PM</div></div>
-                            <button type="button" class="switch" role="switch" :aria-checked="settings.twenty_four_hour" :class="{ on: settings.twenty_four_hour }" aria-label="24-hour time" @click="settings.twenty_four_hour = !settings.twenty_four_hour; save()"><span></span></button>
-                        </div>
                         <div class="setting-row">
                             <div><div class="control-title">Launch when I sign in</div><div class="control-description">Start the clock with Windows</div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()"><span></span></button>

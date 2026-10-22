@@ -2,6 +2,15 @@
 
 ## Added
 
+### 2026-10-22 - Installed font enumeration
+
+- Added a command that lists font families installed in Windows for the Clock tab. No operator action is required.
+
+### 2026-10-22 - Clock settings schema
+
+- Added saved outline thickness, installed font name, time layout, AM/PM visibility and animation choice. Invalid values are rejected.
+- Moved settings types and validation into `settings.rs` to keep native window behavior separate. Older files without the new fields reset to defaults; users can reapply preferences. No other operator action is required.
+
 ### 2026-10-22 - Folder documentation
 
 - Added this folder's architecture, workflow, changelog and backlog documents for native behavior.

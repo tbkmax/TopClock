@@ -2,6 +2,7 @@ import Alpine from 'alpinejs';
 import { invoke } from '@tauri-apps/api/core';
 import { emitTo, listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { clockAnimations, clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import './settings.css';
 
 const settingsWindow = getCurrentWindow();
@@ -10,9 +11,16 @@ window.Alpine = Alpine;
 
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
-    settings: { blink: true, font_color: '#ffffff', outline_color: '#000000', font_size: 42, twenty_four_hour: true },
+    settings: { blink: true, font_color: '#ffffff', outline_color: '#000000', outline_width: 1.5, font_size: 42, font_family: 'Segoe UI', twenty_four_hour: true, show_ampm: true, time_layout: 'hms', animation: 'classic' },
     startupEnabled: false,
-    previewTime: '00:00:00',
+    previewParts: [],
+    previewTick: false,
+    previewSecond: null,
+    layouts: timeLayouts,
+    animations: clockAnimations,
+    fontFamilies: [],
+    fontsLoading: true,
+    fontListError: false,
     error: '',
     saveTimer: null,
     pendingSaves: 0,
@@ -20,6 +28,7 @@ Alpine.data('settingsApp', () => ({
 
     async init() {
         this.settings = await invoke('get_settings');
+        await this.loadFontFamilies();
         this.startupEnabled = await invoke('get_startup_enabled');
         this.updatePreview();
         setInterval(() => this.updatePreview(), 1000);
@@ -34,21 +43,42 @@ Alpine.data('settingsApp', () => ({
 
     updatePreview() {
         const now = new Date();
-        const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: !this.settings.twenty_four_hour };
-        this.previewTime = new Intl.DateTimeFormat(undefined, options).format(now);
+        if (this.previewSecond !== now.getSeconds()) {
+            this.previewSecond = now.getSeconds();
+            this.previewTick = true;
+            setTimeout(() => { this.previewTick = false; }, 300);
+        }
+        this.previewParts = timeParts(now, this.settings);
     },
 
     previewStyle() {
         return {
             color: this.settings.font_color,
             fontSize: `${this.settings.font_size}px`,
-            WebkitTextStroke: `1.5px ${this.settings.outline_color}`,
-            textShadow: `1px 1px 0 ${this.settings.outline_color}, -1px -1px 0 ${this.settings.outline_color}`,
+            fontFamily: clockFontStack(this.settings.font_family),
+            WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
+            textShadow: '0 2px 6px rgba(0, 0, 0, .65)',
         };
     },
 
-    rangeStyle() {
-        return { '--range-progress': `${((this.settings.font_size - 24) / 36) * 100}%` };
+    rangeStyle(value, min, max) {
+        return { '--range-progress': `${((value - min) / (max - min)) * 100}%` };
+    },
+
+    async loadFontFamilies() {
+        try {
+            this.fontFamilies = await invoke('get_font_families');
+            if (!this.fontFamilies.includes(this.settings.font_family)) {
+                this.settings.font_family = this.fontFamilies.includes('Segoe UI')
+                    ? 'Segoe UI' : this.fontFamilies[0];
+                this.save();
+            }
+        } catch (error) {
+            this.fontListError = true;
+            this.error = `Could not list installed fonts: ${error}`;
+        } finally {
+            this.fontsLoading = false;
+        }
     },
 
     save() {

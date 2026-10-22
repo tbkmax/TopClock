@@ -24,6 +24,7 @@
     --clock-outline-color: #000000;
     --clock-outline-width: 1.5px;
     --clock-font-size: 42px;
+    --clock-font-family: "Segoe UI", Arial, sans-serif;
 
     /* Radii */
     --radius-xs: 4px;
@@ -87,13 +88,7 @@ html, body {
 }
 
 #app.ctrl-active .clock-digits {
-    text-shadow:
-        -1.5px -1.5px 0 var(--clock-outline-color),
-         1.5px -1.5px 0 var(--clock-outline-color),
-        -1.5px  1.5px 0 var(--clock-outline-color),
-         1.5px  1.5px 0 var(--clock-outline-color),
-         0 0 10px rgba(250, 255, 105, 0.9),
-         0 0 20px rgba(250, 255, 105, 0.5);
+    text-shadow: 0 0 10px rgba(250, 255, 105, 0.9), 0 0 20px rgba(250, 255, 105, 0.5);
     transition: text-shadow 0.2s ease;
 }
 
@@ -126,7 +121,7 @@ html, body {
 
 /* High contrast white font with black outline */
 .clock-digits {
-    font-family: "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, ui-monospace, monospace;
+    font-family: var(--clock-font-family);
     font-size: var(--clock-font-size);
     font-weight: 700;
     line-height: 1;
@@ -138,23 +133,18 @@ html, body {
     color: var(--clock-font-color);
     -webkit-text-stroke: var(--clock-outline-width) var(--clock-outline-color);
     paint-order: stroke fill;
-    text-shadow:
-        -1.5px -1.5px 0 var(--clock-outline-color),
-         1.5px -1.5px 0 var(--clock-outline-color),
-        -1.5px  1.5px 0 var(--clock-outline-color),
-         1.5px  1.5px 0 var(--clock-outline-color),
-         0 2px 6px rgba(0, 0, 0, 0.95);
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.65);
     transition: text-shadow 0.2s ease;
 }
 
 .clock-segment {
     display: inline-block;
-    min-width: 52px;
+    min-width: 1.2em;
     text-align: center;
 }
 
 /* Second tick micro-animation with electric yellow flash */
-.clock-seconds.ticking {
+.animation-classic .clock-seconds.ticking {
     animation: secondTick 0.3s ease-out;
 }
 
@@ -174,13 +164,19 @@ html, body {
     display: inline-block;
     margin: 0 1px;
     color: var(--clock-font-color);
-    animation: colonPulse 1s infinite ease-in-out;
     transform-origin: center;
 }
 
-.clock-static .clock-colon {
-    animation: none;
-}
+.animation-classic:not(.clock-static) .clock-colon { animation: colonPulse 1s infinite ease-in-out; }
+.animation-fade:not(.clock-static) .clock-colon { animation: colonFade 1s infinite ease-in-out; }
+.animation-slide:not(.clock-static) .clock-colon { animation: colonSlide 1s infinite ease-in-out; }
+.animation-fade .clock-seconds.ticking { animation: secondFade .3s ease-out; }
+.animation-slide .clock-seconds.ticking { animation: secondSlide .3s ease-out; }
+
+@keyframes colonFade { 50% { opacity: .25; } }
+@keyframes colonSlide { 50% { transform: translateY(-3px); color: var(--color-primary); } }
+@keyframes secondFade { 0% { opacity: .3; color: var(--color-primary); } }
+@keyframes secondSlide { 0% { transform: translateY(-4px); color: var(--color-primary); } }
 
 @keyframes colonPulse {
     0%, 100% {
@@ -199,7 +195,7 @@ html, body {
     font-weight: 700;
     margin-left: 6px;
     color: var(--clock-font-color);
-    -webkit-text-stroke: 1px var(--clock-outline-color);
+    -webkit-text-stroke: var(--clock-outline-width) var(--clock-outline-color);
     letter-spacing: 0.5px;
 }
 
@@ -300,4 +296,8 @@ html, body {
 .menu-leave-end {
     opacity: 0;
     transform: scale(0.92) translateY(-4px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .clock-colon, .clock-seconds.ticking { animation: none !important; }
 }

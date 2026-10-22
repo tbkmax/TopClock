@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>On-Top Clock</title>
-    <!-- Modern typography following DESIGN.md -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div 
@@ -25,14 +21,9 @@
             @click="toggleFormat" 
             title="Hold Ctrl to Move or Right-Click"
         >
-            <div class="clock-digits" :class="{ 'clock-static': settings && !settings.blink }">
-                <span class="clock-segment" x-text="hours">00</span>
-                <span class="clock-colon">:</span>
-                <span class="clock-segment" x-text="minutes">00</span>
-                <span class="clock-colon">:</span>
-                <span class="clock-segment clock-seconds" :class="{ 'ticking': isTicking }" x-text="seconds">00</span>
-                <template x-if="ampm">
-                    <span class="clock-ampm" x-text="ampm"></span>
+            <div class="clock-digits" x-ref="clockDigits" :class="[`animation-${settings?.animation || 'classic'}`, { 'clock-static': settings && !settings.blink }]">
+                <template x-for="(part, index) in parts" :key="index">
+                    <span :class="{ 'clock-segment': part.kind !== 'separator' && part.kind !== 'ampm', 'clock-colon': part.kind === 'separator', 'clock-seconds': part.kind === 's', 'clock-ampm': part.kind === 'ampm', 'ticking': part.kind === 's' && isTicking }" x-text="part.text"></span>
                 </template>
             </div>
         </div>

@@ -45,80 +45,34 @@ This backlog tracks upcoming features, configurability milestones, and planned i
 
 ---
 
-## 3. Clock Appearance & Typography Customization
-
-- **Title:** User-customizable fonts, colors, and outline styles
-- **Problem or opportunity:** The font color defaults to white (`#ffffff`) with a 1.5px black outline (`#000000`). While CSS variables `--clock-font-color`, `--clock-outline-color`, and `--clock-outline-width` are structured for customization, there is currently no runtime UI or config mechanism to change them.
-- **Desired outcome:**
-  - Custom font color picker (supporting `#ffffff`, electric yellow `#faff69`, neon cyan, etc.).
-  - Custom outline thickness (0px to 4px) and outline color.
-  - Font family selection (JetBrains Mono, Inter, Consolas, Segoe UI).
-  - Font size scaling slider (e.g. 24px to 72px).
-- **Scope:**
-  - `src/style.css`: `:root` CSS variables update dynamically.
-  - `src/main.js`: Color and font state management.
-  - `src-tauri/src/main.rs`: Dynamic window resize if font size scale changes.
-- **Acceptance criteria:**
-  - Applying custom outline thickness and color updates text stroke and shadow instantly.
-  - Preserves legibility over both bright and dark backgrounds.
-- **Dependencies and risks:** High stroke thickness (>4px) can distort smaller fonts if `paint-order: stroke fill` is not respected.
-- **Verification:** Test custom color combinations against various wallpaper backgrounds.
-- **Priority:** Medium — Visual personalization.
-
----
-
 ## 4. Time Formatting & Display Options
 
-- **Title:** Extended clock display formats (Seconds toggle, Timezone, Date)
-- **Problem or opportunity:** Clock currently displays `HH:MM:SS` (24h/12h). Users may want to hide seconds for minimal distraction, show the date, or select an alternate timezone.
+- **Title:** Add optional date and timezone display
+- **Problem or opportunity:** The Clock tab now supports H:M:S, H:M, M:S, H, M and S layouts, but the clock only reads local system time and shows no date.
 - **Desired outcome:**
-  - Toggle seconds display on/off (`HH:MM` vs `HH:MM:SS`).
   - Optional date subtitle badge (e.g. `Mon, Oct 21`).
   - Custom timezone offset or UTC display.
-  - Colon animation toggle (pulsing vs static).
 - **Scope:**
-  - `src/main.js`: Time format string builder.
-  - `index.html`: Conditional rendering of seconds and date pill.
+  - `src/time-format.js`: Timezone-aware time parts and date formatting.
+  - `index.html`: Conditional rendering of the date.
 - **Acceptance criteria:**
-  - Hiding seconds stops the second-tick animation and reduces window width appropriately.
+  - Selected date and timezone persist and render correctly after restart.
 - **Dependencies and risks:** Minimal.
-- **Verification:** Toggle seconds, check layout centering and synchronization with system clock.
+- **Verification:** Change timezone and date display, then restart and compare the clock against known times.
 - **Priority:** Medium — Functional utility.
 
 ---
 
-## 5. Persistent Local Configuration File (JSON)
+## 6. Open Settings from the Clock Menu
 
-- **Title:** Local JSON settings persistence and auto-load
-- **Problem or opportunity:** Any customized settings are lost upon closing the app.
-- **Desired outcome:**
-  - Settings automatically persist to `%APPDATA%/On_top_clock/config.json`.
-  - Loaded automatically during app startup in `src-tauri/src/main.rs`.
+- **Title:** Add Settings to the Ctrl + right-click menu
+- **Problem or opportunity:** The existing separate Settings window opens from the tray, while the clock's Ctrl + right-click menu only shows Quit.
+- **Desired outcome:** A Settings item opens the existing Settings window.
 - **Scope:**
-  - `src-tauri/src/main.rs`: Config read/write commands.
-  - `src/main.js`: Tauri command calls for configuration loading.
+  - `index.html`: Add the menu item.
+  - `src/main.js`: Invoke the existing `open_settings` command.
 - **Acceptance criteria:**
-  - If config file does not exist, default values are generated safely.
-  - Modifying settings immediately saves without file corruption.
-- **Dependencies and risks:** File permission handling on Windows.
-- **Verification:** Modify settings, restart application, verify all settings persist.
-- **Priority:** High — Prerequisite for all custom settings to be meaningful across sessions.
-
----
-
-## 6. ClickHouse-Styled Settings Modal UI
-
-- **Title:** In-app settings panel conforming to DESIGN.md
-- **Problem or opportunity:** Need an intuitive UI to adjust all the above settings rather than manually editing config files.
-- **Desired outcome:**
-  - A modal panel opened from the Ctrl+Right-Click dropdown menu ("Settings...").
-  - Designed strictly following `doc/DESIGN.md` (canvas `#0a0a0a`, cards `#1a1a1a`, yellow `#faff69` primary controls, Inter typography).
-- **Scope:**
-  - `index.html`: Settings modal component with tabs.
-  - `src/style.css`: Settings form controls and slider styles.
-- **Acceptance criteria:**
-  - Modal animations follow Alpine.js transition styling.
-  - Modal can be closed with `Esc` or clicking the close button.
-- **Dependencies and risks:** Requires expanding window size or opening a secondary settings window.
-- **Verification:** Open settings, change settings, verify instant feedback.
+  - Ctrl + right-click then Settings opens and focuses the existing window without changing click-through behavior.
+- **Dependencies and risks:** Keep the current menu and tray behavior.
+- **Verification:** Open Settings from the clock and tray; verify clock interaction returns after closing the menu.
 - **Priority:** Medium — Polish and user experience.

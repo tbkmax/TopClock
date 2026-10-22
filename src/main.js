@@ -2,17 +2,17 @@ import Alpine from 'alpinejs';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
+import { clockFontStack, timeParts } from './time-format.js';
 import './style.css';
 
 const appWindow = getCurrentWindow();
+let resizeQueue = Promise.resolve();
 window.Alpine = Alpine;
 
 Alpine.data('clockApp', () => ({
-    hours: '00',
-    minutes: '00',
-    seconds: '00',
-    ampm: '',
-    is24Hour: true,
+    parts: [],
+    lastSecond: null,
     settings: null,
     isTicking: false,
     isCtrlHeld: false,
@@ -22,11 +22,16 @@ Alpine.data('clockApp', () => ({
     menuY: 0,
     dragStart: null,
     dragStarted: false,
+    resizeTimer: null,
 
     async init() {
         this.updateClock();
         setInterval(() => this.updateClock(), 200);
         this.loadSettings();
+        this.$nextTick(() => {
+            new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockDigits);
+            this.scheduleResize();
+        });
 
         await Promise.all([
             listen('ctrl-state', (event) => {
@@ -76,34 +81,38 @@ Alpine.data('clockApp', () => ({
 
     applySettings(settings) {
         this.settings = settings;
-        this.is24Hour = settings.twenty_four_hour;
         document.documentElement.style.setProperty('--clock-font-color', settings.font_color);
         document.documentElement.style.setProperty('--clock-outline-color', settings.outline_color);
+        document.documentElement.style.setProperty('--clock-outline-width', `${settings.outline_width}px`);
         document.documentElement.style.setProperty('--clock-font-size', `${settings.font_size}px`);
+        document.documentElement.style.setProperty('--clock-font-family', clockFontStack(settings.font_family));
+        this.$nextTick(() => this.scheduleResize());
+    },
+
+    scheduleResize() {
+        clearTimeout(this.resizeTimer);
+        this.resizeTimer = setTimeout(() => {
+            const width = Math.max(150, Math.ceil(this.$refs.clockDigits.getBoundingClientRect().width) + 24);
+            resizeQueue = resizeQueue.then(async () => {
+                const oldSize = await appWindow.outerSize();
+                const scale = await appWindow.scaleFactor();
+                if (Math.abs(oldSize.width - width * scale) < 2) return;
+                const oldPosition = await appWindow.outerPosition();
+                await appWindow.setSize(new LogicalSize(width, 110));
+                const newSize = await appWindow.outerSize();
+                await appWindow.setPosition(new PhysicalPosition(oldPosition.x + oldSize.width - newSize.width, oldPosition.y));
+            }).catch(console.error);
+        }, 40);
     },
 
     updateClock() {
         const now = new Date();
-        let hours = now.getHours();
-        const minutes = now.getMinutes();
-        const seconds = now.getSeconds();
-
-        if (this.is24Hour) {
-            this.ampm = '';
-        } else {
-            this.ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12 || 12;
-        }
-
-        const nextSeconds = String(seconds).padStart(2, '0');
-        if (this.seconds !== nextSeconds) {
-            this.seconds = nextSeconds;
+        if (this.lastSecond !== now.getSeconds()) {
+            this.lastSecond = now.getSeconds();
             this.isTicking = true;
             setTimeout(() => { this.isTicking = false; }, 300);
         }
-
-        this.hours = String(hours).padStart(2, '0');
-        this.minutes = String(minutes).padStart(2, '0');
+        this.parts = timeParts(now, this.settings || { time_layout: 'hms', twenty_four_hour: true });
     },
 
     toggleFormat() {
@@ -112,8 +121,7 @@ Alpine.data('clockApp', () => ({
             return;
         }
         if (this.isCtrlHeld && this.settings) {
-            this.is24Hour = !this.is24Hour;
-            this.settings.twenty_four_hour = this.is24Hour;
+            this.settings.twenty_four_hour = !this.settings.twenty_four_hour;
             invoke('update_settings', { settings: this.settings }).catch(console.error);
             this.updateClock();
         }

@@ -9,7 +9,7 @@ Without Ctrl, clicks pass through the clock to the window underneath. Move the p
 - Ctrl + right click: open the Quit menu.
 - Ctrl + Q while the clock has focus: quit.
 
-The Windows notification area icon opens Settings on left click and shows Quit on right click. Settings has Clock, Add-ons, and General tabs. Clock colors, size, blinking separators, time format, and the clock's desktop position are saved across launches. General also has a Windows sign-in launch switch. The Add-ons tab previews planned timer and world clock features.
+The Windows notification area icon opens Settings on left click and shows Quit on right click. Settings has Clock, Add-ons, and General tabs. The Clock tab offers six time layouts, 12/24-hour display, optional AM/PM, colors, font and outline controls, size, and animation choices. The font dropdown lists the families installed on the PC; Segoe UI is the fallback if a saved font becomes unavailable. The app needs no network connection. Clock preferences and desktop position are saved across launches. General has a Windows sign-in launch switch. The Add-ons tab previews planned timer and world clock features.
 
 Settings are stored in `%APPDATA%\com.maxtc.ontopclock\settings.json`, not beside the executable. The file is created on first launch. The Windows sign-in launch switch is stored in the current user's Windows Run registry key.
 

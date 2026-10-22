@@ -16,4 +16,4 @@ sequenceDiagram
     end
 ```
 
-The allowlist is in [default.json](../default.json). The diagram describes the configuration's role; Tauri implements the permission check outside this repository's source.
+The allowlist is in [default.json](../default.json). Window size and position operations by [main.js](../../../src/main.js) pass through the same check. The diagram describes the configuration's role; Tauri implements the permission check outside this repository's source.
