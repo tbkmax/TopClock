@@ -13,6 +13,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "On-Top Clock",
         "width": 380,
         "height": 110,
@@ -26,6 +27,7 @@
       },
       {
         "label": "settings",
+        "create": false,
         "title": "On-Top Clock Settings",
         "url": "settings.html",
         "width": 760,

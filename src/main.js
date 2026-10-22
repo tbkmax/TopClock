@@ -24,14 +24,9 @@ Alpine.data('clockApp', () => ({
     dragStarted: false,
 
     async init() {
-        try {
-            this.applySettings(await invoke('get_settings'));
-        } catch (error) {
-            console.error('Could not load clock settings:', error);
-            this.applySettings({ blink: true, font_color: '#ffffff', outline_color: '#000000', font_size: 42, twenty_four_hour: true });
-        }
         this.updateClock();
         setInterval(() => this.updateClock(), 200);
+        this.loadSettings();
 
         await Promise.all([
             listen('ctrl-state', (event) => {
@@ -41,6 +36,10 @@ Alpine.data('clockApp', () => ({
                 this.isNear = event.payload;
             }),
             listen('clock-settings-changed', (event) => {
+                this.applySettings(event.payload);
+                this.updateClock();
+            }),
+            listen('clock-settings-preview', (event) => {
                 this.applySettings(event.payload);
                 this.updateClock();
             }),
@@ -56,6 +55,23 @@ Alpine.data('clockApp', () => ({
         });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
 
+    },
+
+    async loadSettings() {
+        let reportedError = false;
+        while (!this.settings) {
+            try {
+                this.applySettings(await invoke('get_settings'));
+                this.updateClock();
+                return;
+            } catch (error) {
+                if (!reportedError) {
+                    console.error('Could not load clock settings:', error);
+                    reportedError = true;
+                }
+                await new Promise((resolve) => setTimeout(resolve, 250));
+            }
+        }
     },
 
     applySettings(settings) {
@@ -95,7 +111,7 @@ Alpine.data('clockApp', () => ({
             this.dragStarted = false;
             return;
         }
-        if (this.isCtrlHeld) {
+        if (this.isCtrlHeld && this.settings) {
             this.is24Hour = !this.is24Hour;
             this.settings.twenty_four_hour = this.is24Hour;
             invoke('update_settings', { settings: this.settings }).catch(console.error);

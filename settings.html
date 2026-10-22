@@ -57,18 +57,18 @@
                         <label class="control-card color-card">
                             <span class="control-title">Font color</span>
                             <span class="control-description">The face of your clock</span>
-                            <span class="color-control"><input type="color" x-model="settings.font_color" @input="save()" aria-label="Font color"><span x-text="settings.font_color.toUpperCase()"></span></span>
+                            <span class="color-control"><input type="color" :value="settings.font_color" @input="settings.font_color = $event.target.value; save()" aria-label="Font color"><span x-text="settings.font_color.toUpperCase()"></span></span>
                         </label>
                         <label class="control-card color-card">
                             <span class="control-title">Outline color</span>
                             <span class="control-description">Contrast against your desktop</span>
-                            <span class="color-control"><input type="color" x-model="settings.outline_color" @input="save()" aria-label="Outline color"><span x-text="settings.outline_color.toUpperCase()"></span></span>
+                            <span class="color-control"><input type="color" :value="settings.outline_color" @input="settings.outline_color = $event.target.value; save()" aria-label="Outline color"><span x-text="settings.outline_color.toUpperCase()"></span></span>
                         </label>
                     </div>
 
                     <div class="setting-row size-row">
                         <div><div class="control-title">Clock size</div><div class="control-description">Set the type size from 24 to 60 pixels</div></div>
-                        <div class="slider-area"><input class="size-range" type="range" min="24" max="60" x-model.number="settings.font_size" :style="rangeStyle()" @input="save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="24" max="60" :value="settings.font_size" :style="rangeStyle()" @input="settings.font_size = Number($event.target.value); save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
                     </div>
                     <div class="setting-row">
                         <div><div class="control-title">Blinking separators</div><div class="control-description">A subtle pulse between the numbers</div></div>

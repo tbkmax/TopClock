@@ -9,7 +9,7 @@ use std::{
         Arc, Mutex,
     },
     thread,
-    time::Duration,
+    time::{Duration, Instant},
 };
 use tauri::{
     menu::{Menu, MenuItem},
@@ -30,8 +30,22 @@ use winreg::{
 
 struct ClockState {
     menu_open: AtomicBool,
-    settings: Mutex<ClockSettings>,
+    config: Mutex<PersistedConfig>,
     settings_path: PathBuf,
+}
+
+#[derive(Clone, Copy, Serialize, Deserialize)]
+struct ClockPosition {
+    x: i32,
+    y: i32,
+}
+
+#[derive(Default, Serialize, Deserialize)]
+#[serde(default)]
+struct PersistedConfig {
+    #[serde(flatten)]
+    settings: ClockSettings,
+    position: Option<ClockPosition>,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -60,6 +74,20 @@ fn valid_color(value: &str) -> bool {
     value.len() == 7
         && value.starts_with('#')
         && value[1..].bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+
+fn valid_settings(settings: &ClockSettings) -> bool {
+    valid_color(&settings.font_color)
+        && valid_color(&settings.outline_color)
+        && (24..=60).contains(&settings.font_size)
+}
+
+fn save_config(state: &ClockState, config: &PersistedConfig) -> Result<(), String> {
+    let data = serde_json::to_vec_pretty(config).map_err(|error| error.to_string())?;
+    if let Some(parent) = state.settings_path.parent() {
+        fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    }
+    fs::write(&state.settings_path, data).map_err(|error| error.to_string())
 }
 
 fn show_settings(app: &tauri::AppHandle) {
@@ -93,7 +121,7 @@ fn minimize_settings(app: tauri::AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 fn get_settings(state: tauri::State<'_, Arc<ClockState>>) -> ClockSettings {
-    state.settings.lock().unwrap().clone()
+    state.config.lock().unwrap().settings.clone()
 }
 
 #[tauri::command]
@@ -102,18 +130,17 @@ fn update_settings(
     state: tauri::State<'_, Arc<ClockState>>,
     settings: ClockSettings,
 ) -> Result<ClockSettings, String> {
-    if !valid_color(&settings.font_color)
-        || !valid_color(&settings.outline_color)
-        || !(24..=60).contains(&settings.font_size)
-    {
+    if !valid_settings(&settings) {
         return Err("Invalid clock appearance settings".into());
     }
-    let data = serde_json::to_vec_pretty(&settings).map_err(|error| error.to_string())?;
-    if let Some(parent) = state.settings_path.parent() {
-        fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    {
+        let mut config = state.config.lock().unwrap();
+        let previous = std::mem::replace(&mut config.settings, settings.clone());
+        if let Err(error) = save_config(&state, &config) {
+            config.settings = previous;
+            return Err(error);
+        }
     }
-    fs::write(&state.settings_path, data).map_err(|error| error.to_string())?;
-    *state.settings.lock().unwrap() = settings.clone();
     app.emit("clock-settings-changed", &settings)
         .map_err(|error| error.to_string())?;
     Ok(settings)
@@ -153,8 +180,22 @@ fn set_menu_open(open: bool, state: tauri::State<'_, Arc<ClockState>>) {
     state.menu_open.store(open, Ordering::Relaxed);
 }
 
+fn save_current_position(app: &tauri::AppHandle) {
+    if let Some(window) = app.get_webview_window("main") {
+        if let Ok(position) = window.outer_position() {
+            let state = app.state::<Arc<ClockState>>();
+            let mut config = state.config.lock().unwrap();
+            config.position = Some(ClockPosition { x: position.x, y: position.y });
+            if let Err(error) = save_config(&state, &config) {
+                eprintln!("Unable to save clock position: {error}");
+            }
+        }
+    }
+}
+
 #[tauri::command]
 fn quit(app: tauri::AppHandle) {
+    save_current_position(&app);
     app.exit(0);
 }
 
@@ -163,6 +204,8 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
         let mut last_ctrl = None;
         let mut last_near = None;
         let mut last_ignore = Some(true);
+        let mut last_position = window.outer_position().ok();
+        let mut position_changed_at = None;
 
         loop {
             let ctrl = unsafe { GetAsyncKeyState(VK_CONTROL as i32) as u16 & 0x8000 != 0 };
@@ -185,6 +228,10 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
             let mut cursor = POINT { x: 0, y: 0 };
             if unsafe { GetCursorPos(&mut cursor) } != 0 {
                 if let (Ok(position), Ok(size)) = (window.outer_position(), window.outer_size()) {
+                    if last_position != Some(position) {
+                        last_position = Some(position);
+                        position_changed_at = Some(Instant::now());
+                    }
                     let right = position.x + size.width as i32;
                     let bottom = position.y + size.height as i32;
                     let dx = if cursor.x < position.x {
@@ -209,6 +256,17 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
                 }
             }
 
+            if position_changed_at.is_some_and(|changed_at| changed_at.elapsed() >= Duration::from_millis(400)) {
+                if let Some(position) = last_position {
+                    let mut config = state.config.lock().unwrap();
+                    config.position = Some(ClockPosition { x: position.x, y: position.y });
+                    if let Err(error) = save_config(&state, &config) {
+                        eprintln!("Unable to save clock position: {error}");
+                    }
+                }
+                position_changed_at = None;
+            }
+
             thread::sleep(Duration::from_millis(30));
         }
     });
@@ -229,15 +287,26 @@ fn main() {
         ])
         .setup(|app| {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
-            let settings = fs::read(&settings_path)
+            let mut config = fs::read(&settings_path)
                 .ok()
-                .and_then(|data| serde_json::from_slice::<ClockSettings>(&data).ok())
+                .and_then(|data| serde_json::from_slice::<PersistedConfig>(&data).ok())
                 .unwrap_or_default();
-            app.manage(Arc::new(ClockState {
+            if !valid_settings(&config.settings) {
+                config.settings = ClockSettings::default();
+            }
+            let state = Arc::new(ClockState {
                 menu_open: AtomicBool::new(false),
-                settings: Mutex::new(settings),
+                config: Mutex::new(config),
                 settings_path,
-            }));
+            });
+            save_config(&state, &state.config.lock().unwrap())
+                .map_err(std::io::Error::other)?;
+            app.manage(state);
+
+            // Create webviews only after their commands can read the managed settings.
+            for window_config in &app.config().app.windows {
+                tauri::WebviewWindowBuilder::from_config(app.handle(), window_config)?.build()?;
+            }
 
             let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&quit])?;
@@ -248,6 +317,7 @@ fn main() {
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| {
                     if event.id().as_ref() == "quit" {
+                        save_current_position(app);
                         app.exit(0);
                     }
                 })
@@ -266,11 +336,24 @@ fn main() {
             let window = app.get_webview_window("main").expect("clock window");
             window.set_ignore_cursor_events(true)?;
 
-            if let Some(monitor) = window.primary_monitor()? {
+            let saved_position = app.state::<Arc<ClockState>>().config.lock().unwrap().position;
+            let window_size = window.outer_size()?;
+            let position_is_visible = |position: ClockPosition| {
+                window.available_monitors().map(|monitors| monitors.iter().any(|monitor| {
+                    let origin = monitor.position();
+                    let bounds = monitor.size();
+                    position.x < origin.x + bounds.width as i32
+                        && position.x + window_size.width as i32 > origin.x
+                        && position.y < origin.y + bounds.height as i32
+                        && position.y + window_size.height as i32 > origin.y
+                })).unwrap_or(false)
+            };
+            if let Some(position) = saved_position.filter(|position| position_is_visible(*position)) {
+                window.set_position(tauri::PhysicalPosition::new(position.x, position.y))?;
+            } else if let Some(monitor) = window.primary_monitor()? {
                 let bounds = monitor.size();
                 let origin = monitor.position();
-                let size = window.outer_size()?;
-                let x = origin.x + bounds.width as i32 - size.width as i32 - 24;
+                let x = origin.x + bounds.width as i32 - window_size.width as i32 - 24;
                 let y = origin.y + 24;
                 window.set_position(tauri::PhysicalPosition::new(x, y))?;
             }
@@ -281,4 +364,47 @@ fn main() {
         })
         .run(tauri::generate_context!())
         .expect("clock failed to start");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn existing_settings_file_loads_without_position() {
+        let legacy = r##"{
+            "blink": false,
+            "font_color": "#123456",
+            "outline_color": "#abcdef",
+            "font_size": 53,
+            "twenty_four_hour": false
+        }"##;
+        let config: PersistedConfig = serde_json::from_str(legacy).unwrap();
+        assert!(!config.settings.blink);
+        assert_eq!(config.settings.font_color, "#123456");
+        assert_eq!(config.settings.font_size, 53);
+        assert!(!config.settings.twenty_four_hour);
+        assert!(config.position.is_none());
+    }
+
+    #[test]
+    fn settings_and_position_round_trip_together() {
+        let mut settings = ClockSettings::default();
+        settings.blink = false;
+        settings.font_color = "#c88484".into();
+        settings.font_size = 60;
+        settings.twenty_four_hour = false;
+        let config = PersistedConfig {
+            settings,
+            position: Some(ClockPosition { x: -120, y: 240 }),
+        };
+        let json = serde_json::to_string(&config).unwrap();
+        let loaded: PersistedConfig = serde_json::from_str(&json).unwrap();
+        let position = loaded.position.unwrap();
+        assert_eq!((position.x, position.y), (-120, 240));
+        assert!(!loaded.settings.blink);
+        assert_eq!(loaded.settings.font_color, "#c88484");
+        assert_eq!(loaded.settings.font_size, 60);
+        assert!(!loaded.settings.twenty_four_hour);
+    }
 }
