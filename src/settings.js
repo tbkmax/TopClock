@@ -42,6 +42,10 @@ Alpine.data('settingsApp', () => ({
         };
     },
 
+    rangeStyle() {
+        return { '--range-progress': `${((this.settings.font_size - 24) / 36) * 100}%` };
+    },
+
     save() {
         this.updatePreview();
         clearTimeout(this.saveTimer);

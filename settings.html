@@ -6,7 +6,7 @@
     <title>On-Top Clock Settings</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@700&display=optional" rel="stylesheet">
 </head>
 <body>
     <div id="settings-app" x-data="settingsApp" x-cloak>
@@ -41,7 +41,8 @@
             </aside>
 
             <main class="settings-content">
-                <div x-show="tab === 'clock'" x-transition.opacity.duration.180ms>
+                <template x-if="tab === 'clock'">
+                <section class="tab-panel">
                     <div class="section-kicker">DISPLAY / 01</div>
                     <h1>Make time yours<span class="yellow-period">.</span></h1>
                     <p class="section-description">Changes appear on your desktop clock as you make them.</p>
@@ -67,24 +68,28 @@
 
                     <div class="setting-row size-row">
                         <div><div class="control-title">Clock size</div><div class="control-description">Set the type size from 24 to 60 pixels</div></div>
-                        <div class="slider-area"><input type="range" min="24" max="60" x-model.number="settings.font_size" @input="save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="24" max="60" x-model.number="settings.font_size" :style="rangeStyle()" @input="save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
                     </div>
                     <div class="setting-row">
                         <div><div class="control-title">Blinking separators</div><div class="control-description">A subtle pulse between the numbers</div></div>
                         <button type="button" class="switch" role="switch" :aria-checked="settings.blink" :class="{ on: settings.blink }" aria-label="Blinking separators" @click="settings.blink = !settings.blink; save()"><span></span></button>
                     </div>
                     <div class="tip-card"><span>UP NEXT</span> Font family and outline thickness controls are coming later.</div>
-                </div>
+                </section>
+                </template>
 
-                <div x-show="tab === 'addons'" x-transition.opacity.duration.180ms x-cloak>
+                <template x-if="tab === 'addons'">
+                <section class="tab-panel">
                     <div class="section-kicker">EXTENSIONS / 02</div>
                     <h1>More than time<span class="yellow-period">.</span></h1>
                     <p class="section-description">Extra displays are planned for a future release.</p>
                     <div class="addon-card"><div class="addon-icon">⏱</div><div><div class="addon-title">Timer</div><p>Keep a countdown below your clock.</p></div><span class="coming-soon">COMING SOON</span></div>
                     <div class="addon-card"><div class="addon-icon">◎</div><div><div class="addon-title">World clocks</div><p>Follow the time in another region.</p></div><span class="coming-soon">COMING SOON</span></div>
-                </div>
+                </section>
+                </template>
 
-                <div x-show="tab === 'general'" x-transition.opacity.duration.180ms x-cloak>
+                <template x-if="tab === 'general'">
+                <section class="tab-panel">
                     <div class="section-kicker">PREFERENCES / 03</div>
                     <h1>Your clock, your way<span class="yellow-period">.</span></h1>
                     <p class="section-description">Choose how On-Top Clock behaves on your PC.</p>
@@ -99,7 +104,8 @@
                         </div>
                     </div>
                     <div class="tip-card"><span>TIP</span> Hold Ctrl and drag the desktop clock to move it. Ctrl + click switches time format.</div>
-                </div>
+                </section>
+                </template>
                 <div class="error-toast" x-show="error" x-transition.opacity x-text="error" x-cloak role="alert"></div>
             </main>
         </div>
