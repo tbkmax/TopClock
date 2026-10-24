@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-24 - Simplified app identifier to topclock
+
+- Updated [tauri.conf.json](../tauri.conf.json) app identifier from `com.maxtc.topclock` to `topclock`, storing settings under `%APPDATA%\topclock\settings.json`.
+
 ### 2026-10-24 - Project rename to TopClock
 
 - Updated [Cargo.toml](../Cargo.toml) package name to `top_clock`.

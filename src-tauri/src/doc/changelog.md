@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-24 - Legacy settings migration
+
+- Added automatic migration from legacy `%APPDATA%\com.maxtc.topclock\settings.json` to `%APPDATA%\topclock\settings.json` during setup if the new settings file does not yet exist.
+
 ### 2026-10-24 - Startup key name and tray tooltip update
 
 - Updated [main.rs](../main.rs) registry Run key identifier from `OnTopClock` to `TopClock`.

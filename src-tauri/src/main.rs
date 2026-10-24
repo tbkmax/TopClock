@@ -251,6 +251,17 @@ fn main() {
         ])
         .setup(|app| {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
+            if !settings_path.exists() {
+                if let Some(app_data) = settings_path.parent().and_then(|p| p.parent()) {
+                    let legacy_path = app_data.join("com.maxtc.topclock").join("settings.json");
+                    if legacy_path.exists() {
+                        if let Some(parent) = settings_path.parent() {
+                            let _ = fs::create_dir_all(parent);
+                        }
+                        let _ = fs::copy(&legacy_path, &settings_path);
+                    }
+                }
+            }
             let mut config = fs::read(&settings_path)
                 .ok()
                 .and_then(|data| serde_json::from_slice::<PersistedConfig>(&data).ok())

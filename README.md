@@ -56,7 +56,7 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
 
 TopClock stores your configuration locally in your Windows user profile:
 
-- **Settings File**: `%APPDATA%\com.maxtc.topclock\settings.json`
+- **Settings File**: `%APPDATA%\topclock\settings.json`
 - **Auto-Start**: Controlled via the current user's Windows Run registry key (`HKCU\Software\Microsoft\Windows\CurrentVersion\Run\TopClock`).
 
 Settings and desktop positions automatically persist across reboots and app launches.
