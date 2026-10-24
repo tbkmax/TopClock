@@ -29,8 +29,14 @@
 
 ### TODO 4: General tab in setting
 - [ ] place a button to open where all setting file were locate in this PC
+- [ ] currently the clock will only display in main display, which when user have multiple screen it won't show it other, make it by default will show on all display (even user plug in new screen after app open show detect and shows) (also position of each screen can be customizable and should be remember). For this on in general tab, add a setting that will have check box for user to select which screen to show the clock (which default will check all the box)
 
 ### TODO 5: Add-on tab
 - [ ]
 
-### TODO 6: Rename project, fix Readme
+### TODO 6: Rename project, fix Readme, add icon
+- [ ] read though the project and suggest the better names that is not used (should list more than 5)
+- [ ] after select by user fix name use in this project include readme
+- [ ] generate icon based on project and name select by user using svg and replace the ico files 
+- [ ] fix Readme to modern simple README, include a banner  
+
