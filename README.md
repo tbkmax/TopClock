@@ -1,26 +1,89 @@
-# On-Top Clock
+# TopClock
 
-A small Windows clock built with Tauri 2, Rust, Alpine.js, and Vite. The Alpine frontend draws the clock and menu; Rust handles the transparent, always-on-top window, pointer pass-through, Ctrl key state, and mouse proximity.
+![TopClock Banner](src/assets/images/banner.png)
 
-Without Ctrl, clicks pass through the clock to the window underneath. Move the pointer near the clock to fade it. Hold Ctrl to interact:
+<p align="center">
+  <strong>Always On Top. Zero Interruption.</strong><br>
+  A transparent, click-through desktop clock for Windows built with Tauri 2, Rust, and Alpine.js.
+</p>
 
-- Ctrl + drag: move the clock.
-- Ctrl + left click: switch between 12-hour and 24-hour time.
-- Ctrl + right click: open the Quit menu.
-- Ctrl + Q while the clock has focus: quit.
+<p align="center">
+  <img src="https://img.shields.io/badge/Platform-Windows-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Platform" />
+  <img src="https://img.shields.io/badge/Tauri-v2-24C8DB?style=flat-square&logo=tauri&logoColor=white" alt="Tauri" />
+  <img src="https://img.shields.io/badge/Rust-2021-DEA584?style=flat-square&logo=rust&logoColor=white" alt="Rust" />
+  <img src="https://img.shields.io/badge/Alpine.js-v3-8BC0D0?style=flat-square&logo=alpinedotjs&logoColor=white" alt="Alpine.js" />
+  <img src="https://img.shields.io/badge/Network-100%25_Offline-success?style=flat-square" alt="Offline" />
+</p>
 
-The Windows notification area icon opens Settings on left click and shows Quit on right click. Settings has Clock, Add-ons, and General tabs. The Clock tab offers six time layouts, 12/24-hour display, optional AM/PM, colors, font and outline controls, a 24–200 pixel clock size, and separate colon and number change animation choices. Each animation can be set to None independently. The font dropdown lists the families installed on the PC; Segoe UI is the fallback if a saved font becomes unavailable. The app needs no network connection. Clock preferences and desktop position are saved across launches. General has a Windows sign-in launch switch. The Add-ons tab previews planned timer and world clock features.
+---
 
-Settings are stored in `%APPDATA%\com.maxtc.ontopclock\settings.json`, not beside the executable. The file is created on first launch. The Windows sign-in launch switch is stored in the current user's Windows Run registry key.
+## Overview
 
-## Build on Windows
+**TopClock** is a sleek, ultra-lightweight desktop clock that stays pinned above your windows, full-screen games, videos, and IDEs without ever getting in your way. 
 
-Install Node.js, Rust with the MSVC toolchain, and Visual Studio C++ Build Tools with a Windows SDK. If the local toolchain in `.tools/` is present, the npm scripts use it automatically. From the repository root, run:
+By default, the clock is non-intrusive and transparent to input: mouse clicks pass directly through to whatever window is underneath, and approaching the clock with your cursor smoothly fades it out. When you want to adjust or position it, simply hold <kbd>Ctrl</kbd> to unlock full HUD control.
+
+## Key Features
+
+- 👻 **Ghost Click-Through** — Clicks pass straight through the clock window. Play games, click browser tabs, or code without ever misclicking the widget.
+- 💨 **Proximity Fade** — As your cursor approaches the clock, it automatically fades to prevent obscuring important UI or text underneath.
+- ⌨️ **Ctrl-Driven Interaction** — Hold <kbd>Ctrl</kbd> to drag, reposition, toggle time formats, or open the context menu.
+- 🎨 **Deep Customization** — Tailor the clock to your aesthetic:
+  - **Layouts**: 6 layout presets (`H:M:S`, `H:M`, `M:S`, `H M S`, `H M`, `M S`).
+  - **12 / 24-Hour Modes**: Instant toggle with optional `AM`/`PM` badge.
+  - **System Font Picker**: Enumerates fonts installed directly on your Windows PC—works 100% offline.
+  - **Styling**: Independent text color, outline color, outline size slider, and font size from 24px to 200px.
+  - **Animations**: Independent colon animations and numeric transition effects (fade, slide, flip, pulse, or none).
+- ⚡ **Native Windows Performance** — Written in Rust with direct Win32 API integration, ensuring virtually zero CPU overhead and minimal memory usage.
+- 🔒 **Private & Offline** — No network telemetry, no external font CDNs, no web requests. Settings stay on your machine.
+
+---
+
+## Controls & Shortcuts
+
+| Action | Control | Description |
+| :--- | :--- | :--- |
+| **Move / Reposition** | <kbd>Ctrl</kbd> + **Left Drag** | Drag the clock anywhere on your desktop (position is saved automatically). |
+| **Toggle 12 / 24-Hour** | <kbd>Ctrl</kbd> + **Left Click** | Quick-toggle between 12-hour and 24-hour time formats. |
+| **Context Menu** | <kbd>Ctrl</kbd> + **Right Click** | Open the clock menu (access Settings or Quit). |
+| **Quit Application** | <kbd>Ctrl</kbd> + <kbd>Q</kbd> | Instantly exit TopClock when focused. |
+| **Open Settings** | **Left Click Tray Icon** | Open the modern ClickHouse-inspired Settings panel. |
+| **Tray Context Menu** | **Right Click Tray Icon** | Access tray options and application exit. |
+
+---
+
+## Configuration & Storage
+
+TopClock stores your configuration locally in your Windows user profile:
+
+- **Settings File**: `%APPDATA%\com.maxtc.topclock\settings.json`
+- **Auto-Start**: Controlled via the current user's Windows Run registry key (`HKCU\Software\Microsoft\Windows\CurrentVersion\Run\TopClock`).
+
+Settings and desktop positions automatically persist across reboots and app launches.
+
+---
+
+## Building from Source
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18+)
+- [Rust](https://rustup.rs/) (MSVC toolchain)
+- Visual Studio C++ Build Tools with Windows SDK
+
+If the repository's `.tools/` folder is present, the included scripts configure the toolchain paths automatically.
+
+### Development
 
 ```powershell
+# Install frontend dependencies
 npm install
+
+# Run the app in live development mode
 npm run tauri:dev
 ```
+
+### Production Build
 
 To build a standalone executable:
 
@@ -28,4 +91,13 @@ To build a standalone executable:
 npm run tauri:build -- --no-bundle
 ```
 
-The executable is `src-tauri/target/release/on_top_clock.exe`. Run `npm run tauri:build` to also create an NSIS installer.
+The compiled binary will be placed at:
+```
+src-tauri/target/release/top_clock.exe
+```
+
+To build a full Windows installer (NSIS setup):
+
+```powershell
+npm run tauri:build
+```

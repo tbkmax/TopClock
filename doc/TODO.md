@@ -35,8 +35,8 @@
 - [ ]
 
 ### TODO 6: Rename project, fix Readme, add icon
-- [ ] read though the project and suggest the better names that is not used (should list more than 5)
-- [ ] after select by user fix name use in this project include readme
-- [ ] generate icon based on project and name select by user using svg and replace the ico files 
-- [ ] fix Readme to modern simple README, include a banner  
+- [x] read though the project and suggest the better names that is not used (should list more than 5)
+- [x] after select by user fix name use in this project include readme
+- [x] generate icon based on project and name select by user using svg and replace the ico files 
+- [x] fix Readme to modern simple README, include a banner  
 

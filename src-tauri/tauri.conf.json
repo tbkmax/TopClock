@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "On-Top Clock",
+  "productName": "TopClock",
   "version": "0.1.0",
-  "identifier": "com.maxtc.ontopclock",
+  "identifier": "com.maxtc.topclock",
   "build": {
     "beforeDevCommand": "npm run dev -- --host 127.0.0.1 --port 1420 --strictPort",
     "devUrl": "http://127.0.0.1:1420",
@@ -14,7 +14,7 @@
       {
         "label": "main",
         "create": false,
-        "title": "On-Top Clock",
+        "title": "TopClock",
         "width": 380,
         "height": 110,
         "resizable": false,
@@ -28,7 +28,7 @@
       {
         "label": "settings",
         "create": false,
-        "title": "On-Top Clock Settings",
+        "title": "TopClock Settings",
         "url": "settings.html",
         "width": 760,
         "height": 650,

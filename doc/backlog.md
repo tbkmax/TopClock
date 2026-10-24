@@ -1,6 +1,6 @@
 # Project Backlog & Customization Roadmap
 
-This backlog tracks upcoming features, configurability milestones, and planned improvements for the Always-On-Top Clock widget.
+This backlog tracks upcoming features, configurability milestones, and planned improvements for TopClock.
 
 ---
 

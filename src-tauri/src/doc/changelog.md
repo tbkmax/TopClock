@@ -2,6 +2,11 @@
 
 ## Added
 
+### 2026-10-24 - Startup key name and tray tooltip update
+
+- Updated [main.rs](../main.rs) registry Run key identifier from `OnTopClock` to `TopClock`.
+- Updated system tray tooltip to `TopClock · Click for settings`.
+
 ### 2026-10-22 - Larger clock size range
 
 - Accepted saved clock sizes up to 200 pixels and rejected larger values. No operator action is required.

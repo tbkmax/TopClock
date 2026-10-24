@@ -2,6 +2,11 @@
 
 ## Added
 
+### 2026-10-24 - Project rename to TopClock in UI
+
+- Updated page titles in [index.html](../../index.html) and [settings.html](../../settings.html) to `TopClock` and `TopClock Settings`.
+- Updated settings titlebar brand text to `TOPCLOCK / SETTINGS` and description text.
+
 ### 2026-10-22 - Larger clock sizes
 
 - Raised the Clock size slider maximum from 60 to 200 pixels, sized the desktop window vertically with the rendered clock, and made the AM/PM label scale with the clock.

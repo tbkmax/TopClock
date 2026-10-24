@@ -102,7 +102,7 @@ fn update_settings(
 }
 
 const STARTUP_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
-const STARTUP_NAME: &str = "OnTopClock";
+const STARTUP_NAME: &str = "TopClock";
 
 #[tauri::command]
 fn get_startup_enabled() -> bool {
@@ -275,7 +275,7 @@ fn main() {
             let menu = Menu::with_items(app, &[&quit])?;
             TrayIconBuilder::new()
                 .icon(app.default_window_icon().expect("application icon").clone())
-                .tooltip("On-Top Clock · Click for settings")
+                .tooltip("TopClock · Click for settings")
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| {
