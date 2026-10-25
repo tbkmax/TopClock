@@ -18,6 +18,7 @@
         "width": 380,
         "height": 110,
         "resizable": false,
+        "maximizable": false,
         "decorations": false,
         "transparent": true,
         "alwaysOnTop": true,

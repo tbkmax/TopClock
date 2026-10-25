@@ -1,5 +1,11 @@
 # Tauri package changelog
 
+## Fixed
+
+### 2026-10-25 - Prevent Aero Snap bounce-back on clock window
+
+- Configured `"maximizable": false` for the `main` window in [tauri.conf.json](../tauri.conf.json) to prevent Windows DWM from triggering Aero Snap and bouncing the borderless window back when dragged near the top or sides of the screen.
+
 ## Added
 
 ### 2026-10-24 - Simplified app identifier to topclock

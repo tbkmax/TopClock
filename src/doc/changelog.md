@@ -25,6 +25,13 @@
 
 ## Fixed
 
+### 2026-10-25 - Custom pointer dragging and tight window fit
+
+- Replaced native OS titlebar drag (`startDragging`) with direct pointer coordinate dragging via `requestAnimationFrame` in [main.js](../main.js) and [index.html](../../index.html), bypassing Windows caption clamping and Aero Snap so the window can be placed flush at screen edges without bouncing back.
+- Removed top padding from `#app` and `.clock-container` in [style.css](../style.css) so clock numerals can be placed flush against the top edge of the display without an artificial gap.
+- Tightened window sizing in [main.js](../main.js) to wrap directly around the clock container instead of forcing an oversized transparent box, dynamically expanding height only when the dropdown menu is opened.
+- Preserved initial window position on first resize so the clock does not drift to the right on application launch. No operator action is required.
+
 ### 2026-10-22 - Hour display padding and spacing
 
 - Show hours without a leading zero in the desktop clock and Settings preview while keeping minutes and seconds at two digits. The desktop clock now keeps single-digit hours beside the colon. No operator action is required.

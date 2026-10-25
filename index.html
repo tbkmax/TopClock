@@ -11,6 +11,7 @@
         x-data="clockApp"
         @mousedown="handleMouseDown($event)"
         @mousemove="handleMouseMove($event)"
+        @mouseup="handleMouseUp()"
         @contextmenu="handleContextMenu($event)"
         :class="{ 'ctrl-active': isCtrlHeld, 'menu-active': menuOpen }"
     >

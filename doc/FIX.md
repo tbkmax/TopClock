@@ -6,3 +6,6 @@
 - [ ] the position of clock will always a little bit right than where I stop 
 
 ### FIX 3: have a little space on top which prevent clock to place closer to the topside of screen
+- [x] removed top padding from `#app` and `.clock-container` so the clock can be positioned flush with the top edge of the screen
+- [x] tightened native window bounds to hug the clock container (removing ~85px invisible vertical buffer)
+- [x] replaced OS titlebar drag (`startDragging`) with direct pointer coordinate drag, eliminating Windows caption boundary clamping and bounce-back entirely

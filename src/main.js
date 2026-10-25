@@ -9,6 +9,7 @@ import './style.css';
 
 const appWindow = getCurrentWindow();
 let resizeQueue = Promise.resolve();
+let isFirstResize = true;
 window.Alpine = Alpine;
 
 Alpine.data('clockApp', () => ({
@@ -23,6 +24,10 @@ Alpine.data('clockApp', () => ({
     menuY: 0,
     dragStart: null,
     dragStarted: false,
+    isDragging: false,
+    dragRaf: null,
+    lastTargetX: 0,
+    lastTargetY: 0,
     resizeTimer: null,
 
     async init() {
@@ -60,6 +65,8 @@ Alpine.data('clockApp', () => ({
             if (event.key === 'Escape' && this.menuOpen) this.closeMenu();
         });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
+        window.addEventListener('mousemove', (event) => this.handleMouseMove(event));
+        window.addEventListener('mouseup', () => this.handleMouseUp());
 
     },
 
@@ -93,8 +100,12 @@ Alpine.data('clockApp', () => ({
     scheduleResize() {
         clearTimeout(this.resizeTimer);
         this.resizeTimer = setTimeout(() => {
-            const width = Math.max(150, Math.ceil(this.$refs.clockDigits.getBoundingClientRect().width) + 24);
-            const height = Math.max(110, Math.ceil(this.$refs.clockContainer.getBoundingClientRect().height) + 12);
+            if (!this.$refs.clockContainer) return;
+            const containerRect = this.$refs.clockContainer.getBoundingClientRect();
+            const minWidth = this.menuOpen ? 138 : 60;
+            const width = Math.max(minWidth, Math.ceil(containerRect.width) + 4);
+            const baseHeight = Math.ceil(containerRect.height) + 2;
+            const height = this.menuOpen ? baseHeight + 46 : baseHeight;
             resizeQueue = resizeQueue.then(async () => {
                 const oldSize = await appWindow.outerSize();
                 const scale = await appWindow.scaleFactor();
@@ -103,7 +114,11 @@ Alpine.data('clockApp', () => ({
                 const oldPosition = await appWindow.outerPosition();
                 await appWindow.setSize(new LogicalSize(width, height));
                 const newSize = await appWindow.outerSize();
-                await appWindow.setPosition(new PhysicalPosition(oldPosition.x + oldSize.width - newSize.width, oldPosition.y));
+                const newX = isFirstResize
+                    ? oldPosition.x
+                    : oldPosition.x + oldSize.width - newSize.width;
+                isFirstResize = false;
+                await appWindow.setPosition(new PhysicalPosition(newX, oldPosition.y));
             }).catch(console.error);
         }, 40);
     },
@@ -133,40 +148,84 @@ Alpine.data('clockApp', () => ({
         }
     },
 
-    handleMouseDown(event) {
+    async handleMouseDown(event) {
         this.dragStarted = false;
-        this.dragStart = event.button === 0 && this.isCtrlHeld
-            ? { x: event.screenX, y: event.screenY }
-            : null;
+        if (event.button === 0 && this.isCtrlHeld) {
+            const pos = await appWindow.outerPosition();
+            const scale = await appWindow.scaleFactor();
+            this.dragStart = {
+                mouseX: event.screenX,
+                mouseY: event.screenY,
+                winX: pos.x,
+                winY: pos.y,
+                scale: scale,
+            };
+            this.isDragging = false;
+        } else {
+            this.dragStart = null;
+        }
     },
 
     handleMouseMove(event) {
-        if (!this.dragStart || this.dragStarted || !(event.buttons & 1)) return;
-        const dx = event.screenX - this.dragStart.x;
-        const dy = event.screenY - this.dragStart.y;
-        if (Math.hypot(dx, dy) > 3) {
-            this.dragStarted = true;
+        if (!this.dragStart || !(event.buttons & 1)) {
+            if (this.isDragging) {
+                this.handleMouseUp();
+            }
+            return;
+        }
+        const dx = event.screenX - this.dragStart.mouseX;
+        const dy = event.screenY - this.dragStart.mouseY;
+        if (!this.isDragging) {
+            if (Math.hypot(dx, dy) > 3) {
+                this.isDragging = true;
+                this.dragStarted = true;
+            } else {
+                return;
+            }
+        }
+        const targetX = Math.round(this.dragStart.winX + dx * this.dragStart.scale);
+        const targetY = Math.round(this.dragStart.winY + dy * this.dragStart.scale);
+        this.lastTargetX = targetX;
+        this.lastTargetY = targetY;
+        if (!this.dragRaf) {
+            this.dragRaf = requestAnimationFrame(() => {
+                this.dragRaf = null;
+                appWindow.setPosition(new PhysicalPosition(this.lastTargetX, this.lastTargetY)).catch(console.error);
+            });
+        }
+    },
+
+    handleMouseUp() {
+        if (this.isDragging) {
+            if (this.dragRaf) {
+                cancelAnimationFrame(this.dragRaf);
+                this.dragRaf = null;
+                appWindow.setPosition(new PhysicalPosition(this.lastTargetX, this.lastTargetY)).catch(console.error);
+            }
+            this.isDragging = false;
             this.dragStart = null;
-            appWindow.startDragging().catch(console.error);
         }
     },
 
     handleContextMenu(event) {
         event.preventDefault();
         if (!this.isCtrlHeld) return;
+        const containerHeight = this.$refs.clockContainer ? Math.ceil(this.$refs.clockContainer.getBoundingClientRect().height) : 48;
         this.menuX = Math.max(4, Math.min(event.clientX, window.innerWidth - 134));
-        this.menuY = Math.max(4, Math.min(event.clientY, window.innerHeight - 48));
+        this.menuY = containerHeight;
         this.openMenu();
     },
 
     openMenu() {
         this.menuOpen = true;
         invoke('set_menu_open', { open: true }).catch(console.error);
+        this.scheduleResize();
     },
 
     closeMenu() {
         this.menuOpen = false;
         invoke('set_menu_open', { open: false }).catch(console.error);
+        this.scheduleResize();
     },
 
     quitApp() {
