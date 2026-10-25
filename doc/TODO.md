@@ -1,12 +1,6 @@
+(finished TODO will be in Completed.md, only search if necessary)
 
-### TODO 1: basic feature implementations, On top clock
-- [x] create a always on top clock, with transparent window (only show the clock itself)
-- [x] the default is white font color, with black outline (both of this should be setting in future, now don't need)
-- [x] follow DESIGN.md
-- [x] when user hold ctrl can drag and move the clock
-- [x] when user ctrl + right click will show the drop down menu, now only show the quit
-- [x] add animation for drop down menu (reference alpine.js style animation for that)
-- [x] clock should also have animation
+### TODO 1: basic feature implementations, On top clock (Completed)
 
 ### TODO 2: setting window
 - [x] when open it will create a icon in indicator bar, which click there will open setting page, right click will show the menu, currently only have quit
@@ -20,23 +14,23 @@
 - [x] General tab is for setting like turn on open this when PC open or that kind of settings
 - [ ] add when user hold ctrl right click also will show setting
 
-### TODO 3: Clock tab in setting
-- [x] 24 or 12 hour time should be this page, and for 12 let user choose have AM PM or not
-- [x] let user can set hour minute second in what every they like (can be H:M:S H:M M:S H M S)
-- [x] also add outline size change slider
-- [x] let user can choose font, make sure this app can run fully offline, so use font from user's PC's font family as default (but also add other modern way but if can't reach just make sure it will not have issues)
-- [x] and make the current animation as default but search for Alpine.js and adding more animation choice (the color or other setting about animation should try to align with DESIGN.md)
+### TODO 3: Clock tab in setting (Completed)
 
 ### TODO 4: General tab in setting
 - [ ] place a button to open where all setting file were locate in this PC
 - [ ] currently the clock will only display in main display, which when user have multiple screen it won't show it other, make it by default will show on all display (even user plug in new screen after app open show detect and shows) (also position of each screen can be customizable and should be remember). For this on in general tab, add a setting that will have check box for user to select which screen to show the clock (which default will check all the box)
 
 ### TODO 5: Add-on tab
-- [ ]
+- [ ] Design add-on system which user can add or remove the add-on which in this TODO will be consider as default add-on
+- [ ] Add-on can be place up or down of clock usually will be smaller text or even button to change any feature
+- [ ] Add-on will share space in up and down of clock which always consider about how to place it to make sure there is no conflict
+- [ ] dashboard: has place for user to customize the order of add-on that is turn on and text size of add-on, which for example add-on date and add-on
+- [ ] Add-on 1: date: when turn on can choose y-m-d or m-d or even d
+- [ ] Add-on 2: region clock: when turn on can choose which other region's time, text size will control in dashboard, the clock animation or design will follow the clock setting in clock tab (when change in clock tab here should also reflect)
+- [ ] Add-on 3: timer: when turn on will have a timer, which can set the shortcut for start stop and reset, which when timer add-on exist no matter turn on or turn off the shortcut tab will have Add-on timer shortcut for changing
 
-### TODO 6: Rename project, fix Readme, add icon
-- [x] read though the project and suggest the better names that is not used (should list more than 5)
-- [x] after select by user fix name use in this project include readme
-- [x] generate icon based on project and name select by user using svg and replace the ico files 
-- [x] fix Readme to modern simple README, include a banner  
+### TODO 6: Rename project, fix Readme, add icon (Completed)
 
+### TODO 7: Shortcut Tab:
+- [ ] add a place for show all shortcut in here, which they can be change and will also show the conflict
+- [ ] Design should follow DESIGN.md
