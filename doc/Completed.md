@@ -22,15 +22,13 @@
 
 
 ### TODO 8: Update system
-- [x] In-app updater powered by Tauri 2 updater plugin (`tauri-plugin-updater`, `@tauri-apps/plugin-updater`) targeting GitHub Releases endpoint
-- [x] Free Minisign / Ed25519 cryptographic key pair for release signature verification without requiring costly Microsoft Authenticode / EV certificates
-- [x] Safe in-app restart plugin (`tauri-plugin-process`, `@tauri-apps/plugin-process`) for 1-click update & relaunch
+- [x] Lightweight GitHub Releases API update reminder (Option 1) without internal dropper/self-replacement code, keeping binary 100% free of Windows Defender heuristic flags
+- [x] Zero corporate key purchases or private signing key management needed
 - [x] General preferences UI additions:
-  - Dynamic version indicator (`v0.1.0`)
+  - Dynamic version indicator (`v0.0.0` default in dev)
   - Automatic update check toggle switch (`auto_check_updates` persisted in settings)
-  - Software Updates status display
+  - Software Updates status display with semver comparison against GitHub Releases
   - "Check for updates" manual check button
-  - "Update & Restart" action button with live percentage download progress
-- [x] GitHub Actions release workflow updated to sign updater bundles and publish `latest.json`, `.zip`, and `.sig` assets
-- [x] `.gitignore` updated to safeguard signing keys (`*.key`, `*.key.pub`, `/.tauri/`)
+  - "Download Update ↗" action button opening the release page directly in the default browser
+- [x] Fast GitHub Actions release workflow publishing NSIS setup installer, portable executable, and SHA-256 checksums
 - [x] Detailed documentation and step-by-step guide added to `doc/UPDATE_SYSTEM.md`

@@ -75,6 +75,19 @@ fn minimize_settings(app: tauri::AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
+fn open_release_page(url: Option<String>) {
+    let target = url.unwrap_or_else(|| "https://github.com/tbkmax/TopClock/releases/latest".into());
+    if target.starts_with("https://github.com/tbkmax/TopClock") {
+        #[cfg(windows)]
+        {
+            let _ = std::process::Command::new("cmd")
+                .args(["/c", "start", "", &target])
+                .spawn();
+        }
+    }
+}
+
+#[tauri::command]
 fn get_settings(state: tauri::State<'_, Arc<ClockState>>) -> ClockSettings {
     state.config.lock().unwrap().settings.clone()
 }
@@ -237,13 +250,12 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
 
 fn main() {
     tauri::Builder::default()
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             set_menu_open,
             open_settings,
             hide_settings,
             minimize_settings,
+            open_release_page,
             get_settings,
             fonts::get_font_families,
             update_settings,

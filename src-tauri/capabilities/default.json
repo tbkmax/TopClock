@@ -11,8 +11,6 @@
     "core:window:allow-outer-position",
     "core:window:allow-scale-factor",
     "core:window:allow-set-size",
-    "core:window:allow-set-position",
-    "updater:default",
-    "process:default"
+    "core:window:allow-set-position"
   ]
 }

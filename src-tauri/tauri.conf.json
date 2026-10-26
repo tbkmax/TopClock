@@ -48,20 +48,11 @@
   },
   "bundle": {
     "active": true,
-    "createUpdaterArtifacts": true,
     "targets": [
       "nsis"
     ],
     "icon": [
       "icons/icon.ico"
     ]
-  },
-  "plugins": {
-    "updater": {
-      "endpoints": [
-        "https://github.com/tbkmax/TopClock/releases/latest/download/latest.json"
-      ],
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg5MkI1QTI4NDVFN0MxMEMKUldRTXdlZEZLRm9yaWIvbmNyRkJXZXdVaHR5VFF2cGNJZ2U1UWxxK1dWYkg4V1BLLzBsY0lKZFoK"
-    }
   }
 }

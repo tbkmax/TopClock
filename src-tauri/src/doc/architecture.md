@@ -7,8 +7,7 @@
 | `ClockState` | In-process config mutex, menu flag and settings path |
 | `PersistedConfig` | Serialized clock appearance and optional window position, defined in `settings.rs` |
 | `get_font_families` | Read and deduplicate font families from the Windows GDI font table |
-| Tauri commands | Settings, startup registry switch, menu state, window controls and quit |
-| Native plugins | Process and updater plugins for safe restart and signed update downloads |
+| Tauri commands | Settings, startup registry switch, menu state, window controls, open release page, and quit |
 | `start_monitor` | Poll Ctrl, cursor proximity and window position; set click-through and emit events |
 | Tray setup | Open settings and quit actions |
 

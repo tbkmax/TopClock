@@ -135,8 +135,8 @@
                             </div>
                             <div class="update-actions">
                                 <template x-if="updateAvailable">
-                                    <button type="button" class="action-button primary-action" :disabled="isUpdating" @click="installUpdate()">
-                                        <span x-text="isUpdating ? `Updating (${updateProgress}%)…` : 'Update & Restart'"></span>
+                                    <button type="button" class="action-button primary-action" @click="openRelease()">
+                                        <span>Download Update ↗</span>
                                     </button>
                                 </template>
                                 <template x-if="!updateAvailable">

@@ -2,9 +2,9 @@
 
 ## Added
 
-### 2026-10-25 - Updater and process permissions
+### 2026-10-25 - Lightweight release reminder transition
 
-- Added `updater:default` and `process:default` permissions to [default.json](../default.json) to enable checking for updates, downloading signed release assets, and relaunching the application from the Settings UI. No operator action is required.
+- Removed `updater:default` and `process:default` permissions from [default.json](../default.json) in favor of lightweight in-browser GitHub Release reminders, avoiding antivirus heuristic dropper flags. No operator action is required.
 
 ### 2026-10-22 - Clock window fit
 

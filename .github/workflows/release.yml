@@ -81,9 +81,6 @@ jobs:
 
       - name: Build Tauri app and NSIS bundle
         run: npx tauri build
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Prepare release assets
         shell: pwsh
@@ -104,40 +101,7 @@ jobs:
             Copy-Item -Path $installer.FullName -Destination $assetsDir
           }
 
-          # 2. Updater bundle files (signed zip, signatures, latest.json)
-          $bundleFiles = Get-ChildItem -Path "src-tauri/target/release/bundle" -Recurse -Include "*.zip", "*.sig", "latest.json" -File
-          foreach ($file in $bundleFiles) {
-            Write-Host "Found updater bundle file: $($file.Name)"
-            Copy-Item -Path $file.FullName -Destination $assetsDir -Force
-          }
-
-          # 3. Generate latest.json manifest if not already generated
-          if (-not (Test-Path "$assetsDir/latest.json")) {
-            $sigFile = Get-ChildItem -Path $assetsDir -Filter "*.sig" -File | Select-Object -First 1
-            $zipFile = Get-ChildItem -Path $assetsDir -Filter "*.zip" -File | Select-Object -First 1
-            if ($sigFile -and $zipFile) {
-              $sigContent = (Get-Content -Raw $sigFile.FullName).Trim()
-              $tag = "${{ steps.release_info.outputs.tag }}"
-              $latestObj = [ordered]@{
-                version = $version
-                notes = "TopClock release $tag"
-                pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
-                platforms = [ordered]@{
-                  "windows-x86_64" = [ordered]@{
-                    signature = $sigContent
-                    url = "https://github.com/tbkmax/TopClock/releases/download/$tag/$($zipFile.Name)"
-                  }
-                }
-              }
-              $latestObj | ConvertTo-Json -Depth 5 | Set-Content -Path "$assetsDir/latest.json" -Encoding utf8
-              Write-Host "Generated latest.json successfully:"
-              Get-Content "$assetsDir/latest.json"
-            } else {
-              Write-Warning "No .sig or .zip bundle found to generate latest.json"
-            }
-          }
-
-          # 4. Standalone Portable Executables
+          # 2. Standalone Portable Executables
           $binary = "src-tauri/target/release/top_clock.exe"
           if (Test-Path $binary) {
             Copy-Item -Path $binary -Destination "$assetsDir/TopClock.exe"

@@ -3,8 +3,6 @@ import { invoke } from '@tauri-apps/api/core';
 import { emitTo, listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getVersion } from '@tauri-apps/api/app';
-import { check } from '@tauri-apps/plugin-updater';
-import { relaunch } from '@tauri-apps/plugin-process';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import './settings.css';
@@ -12,6 +10,18 @@ import './settings.css';
 const settingsWindow = getCurrentWindow();
 let settingsSaveQueue = Promise.resolve(true);
 window.Alpine = Alpine;
+
+function isNewerVersion(latest, current) {
+    const cleanL = String(latest).replace(/^v/, '').split('.').map(Number);
+    const cleanC = String(current).replace(/^v/, '').split('.').map(Number);
+    for (let i = 0; i < Math.max(cleanL.length, cleanC.length); i++) {
+        const l = cleanL[i] || 0;
+        const c = cleanC[i] || 0;
+        if (l > c) return true;
+        if (l < c) return false;
+    }
+    return false;
+}
 
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
@@ -21,9 +31,8 @@ Alpine.data('settingsApp', () => ({
     updateStatusText: 'v0.0.0',
     isCheckingUpdate: false,
     updateAvailable: false,
-    pendingUpdate: null,
-    isUpdating: false,
-    updateProgress: 0,
+    latestReleaseUrl: 'https://github.com/tbkmax/TopClock/releases/latest',
+    latestReleaseTag: '',
     previewParts: [],
     previousPreviewNumbers: {},
     previewNumberActiveUntil: {},
@@ -143,60 +152,48 @@ Alpine.data('settingsApp', () => ({
     },
 
     async checkForUpdates(manual = false) {
-        if (this.isCheckingUpdate || this.isUpdating) return;
+        if (this.isCheckingUpdate) return;
         this.isCheckingUpdate = true;
         if (manual) {
-            this.updateStatusText = 'Checking for updates…';
+            this.updateStatusText = 'Checking GitHub Releases…';
         }
         try {
-            const update = await check();
-            if (update?.available) {
-                this.pendingUpdate = update;
+            const res = await fetch('https://api.github.com/repos/tbkmax/TopClock/releases/latest', {
+                headers: { 'Accept': 'application/vnd.github.v3+json' },
+            });
+            if (!res.ok) {
+                if (res.status === 404) {
+                    this.updateAvailable = false;
+                    this.updateStatusText = `TopClock v${this.appVersion} is up to date`;
+                    return;
+                }
+                throw new Error(`HTTP ${res.status}`);
+            }
+            const data = await res.json();
+            const latestTag = data.tag_name || '';
+            const cleanLatest = latestTag.replace(/^v/, '');
+            this.latestReleaseUrl = data.html_url || 'https://github.com/tbkmax/TopClock/releases/latest';
+            this.latestReleaseTag = latestTag;
+
+            if (isNewerVersion(cleanLatest, this.appVersion)) {
                 this.updateAvailable = true;
-                this.updateStatusText = `Version ${update.version} available (current: v${this.appVersion})`;
+                this.updateStatusText = `New version ${latestTag} is available!`;
             } else {
-                this.pendingUpdate = null;
                 this.updateAvailable = false;
                 this.updateStatusText = `TopClock v${this.appVersion} is up to date`;
             }
         } catch (error) {
             console.warn('Update check failed:', error);
             if (manual) {
-                this.updateStatusText = `Could not reach update server (v${this.appVersion})`;
+                this.updateStatusText = `Could not reach GitHub Releases (v${this.appVersion})`;
             }
         } finally {
             this.isCheckingUpdate = false;
         }
     },
 
-    async installUpdate() {
-        if (!this.pendingUpdate || this.isUpdating) return;
-        this.isUpdating = true;
-        this.updateStatusText = 'Downloading update…';
-        this.updateProgress = 0;
-        try {
-            let downloaded = 0;
-            let contentLength = 0;
-            await this.pendingUpdate.downloadAndInstall((event) => {
-                if (event.event === 'Started') {
-                    contentLength = event.data.contentLength || 0;
-                } else if (event.event === 'Progress') {
-                    downloaded += event.data.chunkLength;
-                    if (contentLength > 0) {
-                        this.updateProgress = Math.round((downloaded / contentLength) * 100);
-                        this.updateStatusText = `Downloading update: ${this.updateProgress}%`;
-                    }
-                } else if (event.event === 'Finished') {
-                    this.updateStatusText = 'Installing update and restarting…';
-                }
-            });
-            await relaunch();
-        } catch (error) {
-            this.error = `Update failed: ${error}`;
-            this.updateStatusText = `Update failed: ${error}`;
-        } finally {
-            this.isUpdating = false;
-        }
+    openRelease() {
+        invoke('open_release_page', { url: this.latestReleaseUrl }).catch(console.error);
     },
 
     startDrag(event) {
