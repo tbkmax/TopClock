@@ -61,7 +61,20 @@ jobs:
             $tag = "v$appVersion"
           }
 
-          Write-Host "App Version: $appVersion"
+          # Extract version from tag (e.g. v0.0.1 -> 0.0.1)
+          if ($tag -match '^v?([0-9]+\.[0-9]+\.[0-9]+.*)$') {
+            $appVersion = $Matches[1]
+          }
+
+          # Synchronize tauri.conf.json and Cargo.toml with the release version
+          $tauriConfig.version = $appVersion
+          $tauriConfig | ConvertTo-Json -Depth 10 | Set-Content "src-tauri/tauri.conf.json" -Encoding utf8
+
+          $cargoContent = Get-Content -Raw "src-tauri/Cargo.toml"
+          $cargoContent = $cargoContent -replace '(?m)^version\s*=\s*"[^"]+"', "version = `"$appVersion`""
+          $cargoContent | Set-Content "src-tauri/Cargo.toml" -Encoding utf8
+
+          Write-Host "Synchronized build version: $appVersion"
           Write-Host "Release Tag: $tag"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "version=$appVersion"
           Add-Content -Path $env:GITHUB_OUTPUT -Value "tag=$tag"
@@ -98,7 +111,33 @@ jobs:
             Copy-Item -Path $file.FullName -Destination $assetsDir -Force
           }
 
-          # 3. Standalone Portable Executables
+          # 3. Generate latest.json manifest if not already generated
+          if (-not (Test-Path "$assetsDir/latest.json")) {
+            $sigFile = Get-ChildItem -Path $assetsDir -Filter "*.sig" -File | Select-Object -First 1
+            $zipFile = Get-ChildItem -Path $assetsDir -Filter "*.zip" -File | Select-Object -First 1
+            if ($sigFile -and $zipFile) {
+              $sigContent = (Get-Content -Raw $sigFile.FullName).Trim()
+              $tag = "${{ steps.release_info.outputs.tag }}"
+              $latestObj = [ordered]@{
+                version = $version
+                notes = "TopClock release $tag"
+                pub_date = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+                platforms = [ordered]@{
+                  "windows-x86_64" = [ordered]@{
+                    signature = $sigContent
+                    url = "https://github.com/tbkmax/TopClock/releases/download/$tag/$($zipFile.Name)"
+                  }
+                }
+              }
+              $latestObj | ConvertTo-Json -Depth 5 | Set-Content -Path "$assetsDir/latest.json" -Encoding utf8
+              Write-Host "Generated latest.json successfully:"
+              Get-Content "$assetsDir/latest.json"
+            } else {
+              Write-Warning "No .sig or .zip bundle found to generate latest.json"
+            }
+          }
+
+          # 4. Standalone Portable Executables
           $binary = "src-tauri/target/release/top_clock.exe"
           if (Test-Path $binary) {
             Copy-Item -Path $binary -Destination "$assetsDir/TopClock.exe"

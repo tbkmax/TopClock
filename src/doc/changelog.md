@@ -8,6 +8,7 @@
 - Integrated `@tauri-apps/plugin-updater` and `@tauri-apps/plugin-process` in [settings.js](../settings.js).
 - Added an automatic update check toggle switch ("Automatically check for updates") in [settings.html](../../settings.html) that persists via `update_settings`.
 - Added manual "Check for updates" and "Update & Restart" action buttons with real-time download progress tracking in [settings.html](../../settings.html) and [settings.css](../settings.css).
+- Set default development fallback version to `0.0.0` in [settings.js](../settings.js) and [settings.html](../../settings.html).
 
 ### 2026-10-24 - Project rename to TopClock in UI
 

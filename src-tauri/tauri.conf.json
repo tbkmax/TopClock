@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "TopClock",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "identifier": "topclock",
   "build": {
     "beforeDevCommand": "npm run dev -- --host 127.0.0.1 --port 1420 --strictPort",
@@ -48,6 +48,7 @@
   },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": [
       "nsis"
     ],
@@ -58,7 +59,7 @@
   "plugins": {
     "updater": {
       "endpoints": [
-        "https://github.com/tbkmax/On_top_Clock/releases/latest/download/latest.json"
+        "https://github.com/tbkmax/TopClock/releases/latest/download/latest.json"
       ],
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg5MkI1QTI4NDVFN0MxMEMKUldRTXdlZEZLRm9yaWIvbmNyRkJXZXdVaHR5VFF2cGNJZ2U1UWxxK1dWYkg4V1BLLzBsY0lKZFoK"
     }

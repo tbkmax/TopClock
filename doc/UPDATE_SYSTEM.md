@@ -40,7 +40,7 @@ The public key is configured in [`src-tauri/tauri.conf.json`](file:///src-tauri/
 "plugins": {
   "updater": {
     "endpoints": [
-      "repo/releases/latest/download/latest.json"
+      "https://github.com/tbkmax/TopClock/releases/latest/download/latest.json"
     ],
     "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDg5MkI1QTI4NDVFN0MxMEMKUldRTXdlZEZLRm9yaWIvbmNyRkJXZXdVaHR5VFF2cGNJZ2U1UWxxK1dWYkg4V1BLLzBsY0lKZFoK"
   }
@@ -83,26 +83,21 @@ To enable automated release signing in GitHub Actions:
 
 Whenever you want to release an update (e.g. `v0.2.0`), follow these four steps:
 
-### Step 4.1: Bump the Version Number
-Update the version string in two files:
-1. In [`package.json`](file:///../../package.json):
-   ```json
-   "version": "0.2.0"
-   ```
-2. In [`src-tauri/tauri.conf.json`](file:///src-tauri/tauri.conf.json):
-   ```json
-   "version": "0.2.0"
-   ```
+### Step 4.1: Development & Release Versioning
+- **In development**, the repository defaults to version `0.0.0`. This ensures that any published release (`v0.0.1`, `v0.1.0`, `v0.2.0`, etc.) is always recognized as a newer update, making in-app update testing effortless.
+- **When releasing**, you can simply push a Git tag like `v0.0.1` or `v0.1.0`. The GitHub Actions workflow will automatically synchronize `tauri.conf.json` and `Cargo.toml` with the tag version before bundling.
 
 ### Step 4.2: Commit and Tag
 In your local terminal:
 ```powershell
 git add .
-git commit -m "Prepare release v0.2.0"
-git tag v0.2.0
+git commit -m "Prepare release v0.1.0"
+git tag v0.1.0
 git push origin main
-git push origin v0.2.0
+git push origin v0.1.0
 ```
+> [!NOTE]
+> The GitHub Actions workflow automatically extracts the version number from your git tag (e.g. `v0.2.0` -> `0.2.0`) and synchronizes `tauri.conf.json` and `Cargo.toml` during the build so all installer, portable, and updater asset filenames match the tag.
 
 ### Step 4.3: Automated Build & Sign
 The workflow in [`.github/workflows/release.yml`](file:///../../.github/workflows/release.yml) will trigger automatically:

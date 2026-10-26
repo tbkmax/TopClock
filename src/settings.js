@@ -17,8 +17,8 @@ Alpine.data('settingsApp', () => ({
     tab: 'clock',
     settings: { colon_animation: 'pulse', number_animation: 'tick', font_color: '#ffffff', outline_color: '#000000', outline_width: 1.5, font_size: 42, font_family: 'Segoe UI', twenty_four_hour: true, show_ampm: true, time_layout: 'hms', auto_check_updates: true },
     startupEnabled: false,
-    appVersion: '0.1.0',
-    updateStatusText: 'v0.1.0',
+    appVersion: '0.0.0',
+    updateStatusText: 'v0.0.0',
     isCheckingUpdate: false,
     updateAvailable: false,
     pendingUpdate: null,
@@ -40,7 +40,7 @@ Alpine.data('settingsApp', () => ({
 
     async init() {
         this.settings = await invoke('get_settings');
-        this.appVersion = await getVersion().catch(() => '0.1.0');
+        this.appVersion = await getVersion().catch(() => '0.0.0');
         this.updateStatusText = `Current version: v${this.appVersion}`;
         await this.loadFontFamilies();
         this.startupEnabled = await invoke('get_startup_enabled');
