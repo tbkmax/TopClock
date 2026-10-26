@@ -8,4 +8,4 @@
 /.tauri/
 *.key
 *.key.pub
-
+.vscode
