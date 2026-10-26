@@ -34,3 +34,5 @@
 ### TODO 7: Shortcut Tab:
 - [ ] add a place for show all shortcut in here, which they can be change and will also show the conflict
 - [ ] Design should follow DESIGN.md
+
+### TODO 8: Update system (Completed)

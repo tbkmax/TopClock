@@ -68,6 +68,9 @@ jobs:
 
       - name: Build Tauri app and NSIS bundle
         run: npx tauri build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Prepare release assets
         shell: pwsh
@@ -88,7 +91,14 @@ jobs:
             Copy-Item -Path $installer.FullName -Destination $assetsDir
           }
 
-          # 2. Standalone Portable Executables
+          # 2. Updater bundle files (signed zip, signatures, latest.json)
+          $bundleFiles = Get-ChildItem -Path "src-tauri/target/release/bundle" -Recurse -Include "*.zip", "*.sig", "latest.json" -File
+          foreach ($file in $bundleFiles) {
+            Write-Host "Found updater bundle file: $($file.Name)"
+            Copy-Item -Path $file.FullName -Destination $assetsDir -Force
+          }
+
+          # 3. Standalone Portable Executables
           $binary = "src-tauri/target/release/top_clock.exe"
           if (Test-Path $binary) {
             Copy-Item -Path $binary -Destination "$assetsDir/TopClock.exe"

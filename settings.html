@@ -34,7 +34,7 @@
                         <span class="tab-glyph">⚙</span> General <span class="tab-arrow">›</span>
                     </button>
                 </nav>
-                <div class="sidebar-bottom"><span class="status-dot"></span> CLOCK RUNNING <span class="version">v0.1</span></div>
+                <div class="sidebar-bottom"><span class="status-dot"></span> CLOCK RUNNING <span class="version" x-text="`v${appVersion}`">v0.1.0</span></div>
             </aside>
 
             <main class="settings-content">
@@ -123,6 +123,28 @@
                         <div class="setting-row">
                             <div><div class="control-title">Launch when I sign in</div><div class="control-description">Start the clock with Windows</div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()"><span></span></button>
+                        </div>
+                        <div class="setting-row">
+                            <div><div class="control-title">Automatically check for updates</div><div class="control-description">Check GitHub Releases when TopClock starts</div></div>
+                            <button type="button" class="switch" role="switch" :aria-checked="settings.auto_check_updates" :class="{ on: settings.auto_check_updates }" aria-label="Automatically check for updates" @click="settings.auto_check_updates = !settings.auto_check_updates; save()"><span></span></button>
+                        </div>
+                        <div class="setting-row update-row">
+                            <div>
+                                <div class="control-title">Software Updates</div>
+                                <div class="control-description" x-text="updateStatusText"></div>
+                            </div>
+                            <div class="update-actions">
+                                <template x-if="updateAvailable">
+                                    <button type="button" class="action-button primary-action" :disabled="isUpdating" @click="installUpdate()">
+                                        <span x-text="isUpdating ? `Updating (${updateProgress}%)…` : 'Update & Restart'"></span>
+                                    </button>
+                                </template>
+                                <template x-if="!updateAvailable">
+                                    <button type="button" class="action-button" :disabled="isCheckingUpdate" @click="checkForUpdates(true)">
+                                        <span x-text="isCheckingUpdate ? 'Checking…' : 'Check for updates'"></span>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
                     </div>
                     <div class="tip-card"><span>TIP</span> Hold Ctrl and drag the desktop clock to move it. Ctrl + click switches time format.</div>

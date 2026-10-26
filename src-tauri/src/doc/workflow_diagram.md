@@ -24,6 +24,7 @@ classDiagram
       twenty_four_hour: bool
       show_ampm: bool
       time_layout: String
+      auto_check_updates: bool
     }
     class ClockPosition {
       x: i32

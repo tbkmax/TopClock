@@ -8,6 +8,12 @@
 
 ## Added
 
+### 2026-10-25 - Updater and process plugin configuration
+
+- Integrated `tauri-plugin-updater` and `tauri-plugin-process` in [Cargo.toml](../Cargo.toml).
+- Configured GitHub Releases updater endpoint (`https://github.com/tbkmax/On_top_Clock/releases/latest/download/latest.json`) and free Minisign Ed25519 public key in [tauri.conf.json](../tauri.conf.json), avoiding expensive Microsoft Authenticode code signing keys.
+- Configured `.gitignore` to protect signing private keys (`*.key`, `*.key.pub`, `/.tauri/`).
+
 ### 2026-10-24 - Simplified app identifier to topclock
 
 - Updated [tauri.conf.json](../tauri.conf.json) app identifier from `com.maxtc.topclock` to `topclock`, storing settings under `%APPDATA%\topclock\settings.json`.

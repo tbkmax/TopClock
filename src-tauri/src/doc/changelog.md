@@ -2,6 +2,12 @@
 
 ## Added
 
+### 2026-10-25 - Updater, process plugins and auto-update setting
+
+- Registered `tauri_plugin_process` and `tauri_plugin_updater` plugins in [main.rs](../main.rs).
+- Added `auto_check_updates` boolean setting (defaulting to true) to `ClockSettings` in [settings.rs](../settings.rs) with serde default fallback for existing config files.
+- Added unit tests in `settings.rs` validating serialization and roundtrip of `auto_check_updates`.
+
 ### 2026-10-24 - Legacy settings migration
 
 - Added automatic migration from legacy `%APPDATA%\com.maxtc.topclock\settings.json` to `%APPDATA%\topclock\settings.json` during setup if the new settings file does not yet exist.

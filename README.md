@@ -101,3 +101,10 @@ To build a full Windows installer (NSIS setup):
 ```powershell
 npm run tauri:build
 ```
+
+---
+
+## Updates & Releases
+
+TopClock includes an automated in-app updater backed by GitHub Releases and cryptographic signatures (requiring zero paid Microsoft code signing certificates). See [doc/UPDATE_SYSTEM.md](doc/UPDATE_SYSTEM.md) for the full architecture, cryptographic key management, and step-by-step release publishing instructions.
+

@@ -5,3 +5,7 @@
 /src-tauri/gen/
 /src-tauri/*.exe
 /release-assets/
+/.tauri/
+*.key
+*.key.pub
+

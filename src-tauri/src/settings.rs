@@ -13,6 +13,10 @@ pub(crate) struct PersistedConfig {
     pub(crate) position: Option<ClockPosition>,
 }
 
+fn default_auto_check_updates() -> bool {
+    true
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct ClockSettings {
     pub(crate) colon_animation: String,
@@ -25,6 +29,8 @@ pub(crate) struct ClockSettings {
     pub(crate) twenty_four_hour: bool,
     pub(crate) show_ampm: bool,
     pub(crate) time_layout: String,
+    #[serde(default = "default_auto_check_updates")]
+    pub(crate) auto_check_updates: bool,
 }
 
 impl Default for ClockSettings {
@@ -40,6 +46,7 @@ impl Default for ClockSettings {
             twenty_four_hour: true,
             show_ampm: true,
             time_layout: "hms".into(),
+            auto_check_updates: true,
         }
     }
 }
@@ -100,6 +107,7 @@ mod tests {
         assert_eq!(loaded.settings.time_layout, "ms");
         assert_eq!(loaded.settings.colon_animation, "none");
         assert_eq!(loaded.settings.number_animation, "slide");
+        assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
     }
 

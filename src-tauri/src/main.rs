@@ -237,6 +237,8 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .invoke_handler(tauri::generate_handler![
             set_menu_open,
             open_settings,

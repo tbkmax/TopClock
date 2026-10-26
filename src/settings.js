@@ -2,6 +2,9 @@ import Alpine from 'alpinejs';
 import { invoke } from '@tauri-apps/api/core';
 import { emitTo, listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { getVersion } from '@tauri-apps/api/app';
+import { check } from '@tauri-apps/plugin-updater';
+import { relaunch } from '@tauri-apps/plugin-process';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import './settings.css';
@@ -12,8 +15,15 @@ window.Alpine = Alpine;
 
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
-    settings: { colon_animation: 'pulse', number_animation: 'tick', font_color: '#ffffff', outline_color: '#000000', outline_width: 1.5, font_size: 42, font_family: 'Segoe UI', twenty_four_hour: true, show_ampm: true, time_layout: 'hms' },
+    settings: { colon_animation: 'pulse', number_animation: 'tick', font_color: '#ffffff', outline_color: '#000000', outline_width: 1.5, font_size: 42, font_family: 'Segoe UI', twenty_four_hour: true, show_ampm: true, time_layout: 'hms', auto_check_updates: true },
     startupEnabled: false,
+    appVersion: '0.1.0',
+    updateStatusText: 'v0.1.0',
+    isCheckingUpdate: false,
+    updateAvailable: false,
+    pendingUpdate: null,
+    isUpdating: false,
+    updateProgress: 0,
     previewParts: [],
     previousPreviewNumbers: {},
     previewNumberActiveUntil: {},
@@ -30,6 +40,8 @@ Alpine.data('settingsApp', () => ({
 
     async init() {
         this.settings = await invoke('get_settings');
+        this.appVersion = await getVersion().catch(() => '0.1.0');
+        this.updateStatusText = `Current version: v${this.appVersion}`;
         await this.loadFontFamilies();
         this.startupEnabled = await invoke('get_startup_enabled');
         this.updatePreview();
@@ -41,6 +53,9 @@ Alpine.data('settingsApp', () => ({
             event.preventDefault();
             this.close();
         });
+        if (this.settings.auto_check_updates) {
+            this.checkForUpdates(false);
+        }
     },
 
     updatePreview() {
@@ -124,6 +139,63 @@ Alpine.data('settingsApp', () => ({
             this.error = '';
         } catch (error) {
             this.error = `Could not update startup: ${error}`;
+        }
+    },
+
+    async checkForUpdates(manual = false) {
+        if (this.isCheckingUpdate || this.isUpdating) return;
+        this.isCheckingUpdate = true;
+        if (manual) {
+            this.updateStatusText = 'Checking for updates…';
+        }
+        try {
+            const update = await check();
+            if (update?.available) {
+                this.pendingUpdate = update;
+                this.updateAvailable = true;
+                this.updateStatusText = `Version ${update.version} available (current: v${this.appVersion})`;
+            } else {
+                this.pendingUpdate = null;
+                this.updateAvailable = false;
+                this.updateStatusText = `TopClock v${this.appVersion} is up to date`;
+            }
+        } catch (error) {
+            console.warn('Update check failed:', error);
+            if (manual) {
+                this.updateStatusText = `Could not reach update server (v${this.appVersion})`;
+            }
+        } finally {
+            this.isCheckingUpdate = false;
+        }
+    },
+
+    async installUpdate() {
+        if (!this.pendingUpdate || this.isUpdating) return;
+        this.isUpdating = true;
+        this.updateStatusText = 'Downloading update…';
+        this.updateProgress = 0;
+        try {
+            let downloaded = 0;
+            let contentLength = 0;
+            await this.pendingUpdate.downloadAndInstall((event) => {
+                if (event.event === 'Started') {
+                    contentLength = event.data.contentLength || 0;
+                } else if (event.event === 'Progress') {
+                    downloaded += event.data.chunkLength;
+                    if (contentLength > 0) {
+                        this.updateProgress = Math.round((downloaded / contentLength) * 100);
+                        this.updateStatusText = `Downloading update: ${this.updateProgress}%`;
+                    }
+                } else if (event.event === 'Finished') {
+                    this.updateStatusText = 'Installing update and restarting…';
+                }
+            });
+            await relaunch();
+        } catch (error) {
+            this.error = `Update failed: ${error}`;
+            this.updateStatusText = `Update failed: ${error}`;
+        } finally {
+            this.isUpdating = false;
         }
     },
 

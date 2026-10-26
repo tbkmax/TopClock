@@ -4,8 +4,8 @@ This folder defines the native Windows application. Read the [README](../../READ
 
 | File or folder | Responsibility |
 | --- | --- |
-| [Cargo.toml](../Cargo.toml), [build.rs](../build.rs) | Rust package, Windows GDI binding and Tauri build setup |
-| [tauri.conf.json](../tauri.conf.json) | Two window definitions, frontend paths and NSIS bundle |
+| [Cargo.toml](../Cargo.toml), [build.rs](../build.rs) | Rust package, Windows GDI binding, updater & process plugins, and Tauri build setup |
+| [tauri.conf.json](../tauri.conf.json) | Two window definitions, frontend paths, NSIS bundle, and updater endpoints with public key |
 | [src/](../src/) | Native commands, tray, settings and pointer monitor |
 | [capabilities/](../capabilities/) | Frontend permissions for both windows |
 | [icons/](../icons/) | Windows application icon |
