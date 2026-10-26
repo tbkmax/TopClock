@@ -1,5 +1,12 @@
 # Rust application changelog
 
+## Fixed
+
+### 2026-10-25 - Direct Win32 click-through toggle preserving layered window style
+
+- Replaced Tao's `window.set_ignore_cursor_events` with direct Win32 `SetWindowLongPtrW` extended style modification (`set_click_through`), preserving `WS_EX_LAYERED` while toggling only `WS_EX_TRANSPARENT`. This prevents Windows DWM from falling back to an opaque white GDI redirection bitmap when Ctrl is pressed.
+- Set `WEBVIEW2_DEFAULT_BACKGROUND_COLOR` to `0` at application start to ensure WebView2 default backing surface is transparent.
+
 ## Added
 
 ### 2026-10-25 - Release reminder command and auto-update setting

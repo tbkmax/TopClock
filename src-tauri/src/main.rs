@@ -20,10 +20,13 @@ use tauri::{
     Emitter, Manager, WebviewWindow,
 };
 use windows_sys::Win32::{
-    Foundation::POINT,
+    Foundation::{HWND, POINT},
     UI::{
         Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL},
-        WindowsAndMessaging::GetCursorPos,
+        WindowsAndMessaging::{
+            GetCursorPos, GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_LAYERED,
+            WS_EX_TRANSPARENT,
+        },
     },
 };
 use winreg::{
@@ -170,8 +173,30 @@ fn quit(app: tauri::AppHandle) {
     app.exit(0);
 }
 
+fn set_click_through(hwnd: HWND, ignore: bool) {
+    unsafe {
+        let ex_style = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        let new_style = if ignore {
+            ex_style | (WS_EX_TRANSPARENT as isize) | (WS_EX_LAYERED as isize)
+        } else {
+            (ex_style & !(WS_EX_TRANSPARENT as isize)) | (WS_EX_LAYERED as isize)
+        };
+        if new_style != ex_style {
+            SetWindowLongPtrW(hwnd, GWL_EXSTYLE, new_style);
+        }
+    }
+}
+
 fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
+    let hwnd_raw = match window.hwnd() {
+        Ok(h) => h.0 as isize,
+        Err(error) => {
+            eprintln!("Unable to get window handle for monitor: {error}");
+            return;
+        }
+    };
     thread::spawn(move || {
+        let hwnd = hwnd_raw as HWND;
         let mut last_ctrl = None;
         let mut last_near = None;
         let mut last_ignore = Some(true);
@@ -184,11 +209,8 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
             let ignore = !ctrl && !menu_open;
 
             if last_ignore != Some(ignore) {
-                if let Err(error) = window.set_ignore_cursor_events(ignore) {
-                    eprintln!("Unable to change click-through mode: {error}");
-                } else {
-                    last_ignore = Some(ignore);
-                }
+                set_click_through(hwnd, ignore);
+                last_ignore = Some(ignore);
             }
 
             if last_ctrl != Some(ctrl) {
@@ -249,6 +271,7 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
 }
 
 fn main() {
+    std::env::set_var("WEBVIEW2_DEFAULT_BACKGROUND_COLOR", "0");
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             set_menu_open,
@@ -322,7 +345,9 @@ fn main() {
                 .build(app)?;
 
             let window = app.get_webview_window("main").expect("clock window");
-            window.set_ignore_cursor_events(true)?;
+            if let Ok(hwnd) = window.hwnd() {
+                set_click_through(hwnd.0 as HWND, true);
+            }
 
             let saved_position = app
                 .state::<Arc<ClockState>>()

@@ -9,6 +9,7 @@
 | `get_font_families` | Read and deduplicate font families from the Windows GDI font table |
 | Tauri commands | Settings, startup registry switch, menu state, window controls, open release page, and quit |
 | `start_monitor` | Poll Ctrl, cursor proximity and window position; set click-through and emit events |
+| `set_click_through` | Toggle Win32 `WS_EX_TRANSPARENT` while preserving `WS_EX_LAYERED` to avoid GDI redirection white flash |
 | Tray setup | Open settings and quit actions |
 
 At startup, Rust loads `settings.json` from Tauri's app config directory (`%APPDATA%\topclock\settings.json`), migrating from legacy `com.maxtc.topclock` if present, defaults missing or invalid settings, then writes the current config. The current schema includes outline width, font family, a 24–200 pixel clock size, time layout, AM/PM visibility, independent `colon_animation` and `number_animation` choices, and `auto_check_updates` preference. Older files missing fields default gracefully. Rust creates both webviews after the state is managed. The main window is positioned on a visible saved monitor location, or near the primary monitor's top-right corner. `update_settings` validates colors, size, font name and enumerated options, saves the new value, rolls back in-memory settings on write failure, then emits `clock-settings-changed`. The Windows Run registry key stores sign-in launch separately. The monitor emits `ctrl-state` and `proximity`, controls pointer pass-through, and saves position after movement settles.

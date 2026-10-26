@@ -2,6 +2,10 @@
 
 ## Fixed
 
+### 2026-10-25 - Prevent white background flash on click-through toggle
+
+- Managed native click-through extended styles directly via Win32 `SetWindowLongPtrW` to preserve `WS_EX_LAYERED` while toggling `WS_EX_TRANSPARENT`. This prevents Windows DWM from falling back to an opaque GDI redirection surface when Ctrl is pressed.
+
 ### 2026-10-25 - Prevent Aero Snap bounce-back on clock window
 
 - Configured `"maximizable": false` for the `main` window in [tauri.conf.json](../tauri.conf.json) to prevent Windows DWM from triggering Aero Snap and bouncing the borderless window back when dragged near the top or sides of the screen.
