@@ -9,6 +9,10 @@
 
 ## Added
 
+### 2026-10-27 - Optional Date and Region display settings
+
+- Added validation for Date weekday and Region label switches while keeping earlier add-on records valid. The minimum saved size is now 10%, and newly migrated legacy Timers start at 30%. Existing saved add-on sizes are not changed. No operator action is required.
+
 ### 2026-10-27 - Add-on persistence, Timer sessions and optional global shortcuts
 
 - Added a validated ordered add-on list for Date, multiple Region clocks and Timer in [addons.rs](../addons.rs) and [settings.rs](../settings.rs). Existing enabled Timer settings migrate to a Countdown instance; malformed add-on data can be discarded while preserving valid clock appearance.

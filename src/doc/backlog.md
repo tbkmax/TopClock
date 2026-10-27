@@ -12,5 +12,5 @@ TODO 2's Ctrl + right-click dropdown menu item for opening the Settings window a
 - **Scope:** [main.js](../main.js), [style.css](../style.css), and the Add-ons dashboard in [settings.html](../../settings.html).
 - **Acceptance criteria:** With 16 allowed instances and the largest clock size, the main clock remains reachable, rows do not overlap, and Settings explains any automatic size reduction or limit.
 - **Dependencies and risks:** Preserve the clock anchor and native click-through while fitting content; do not silently remove an add-on.
-- **Verification:** Test small and mixed-DPI monitors with above and below stacks, dragging, menu opening and position restore.
+- **Verification:** Test small and mixed-DPI monitors with above and below stacks, including the balanced gap around the main clock, dragging, menu opening and position restore.
 - **Priority:** Medium because dense custom layouts can clip on small displays even though normal rows never overlap.

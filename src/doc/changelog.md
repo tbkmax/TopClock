@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-27 - Date weekday and Region label controls
+
+- Added a Date switch to append a smaller English weekday, such as `10-27 (Tue)`, and a Region clock switch to hide or show its name. Existing add-ons keep their previous display until the user changes these options. No operator action is required.
+
 ### 2026-10-27 - Built-in add-ons and system-wide shortcut controls
 
 - Added Date, multiple Region clocks, and a Timer with Countdown and Stopwatch modes to the Add-ons dashboard. Users can place, size, enable, remove and reorder instances above or below the clock. The transparent window measures the combined layout and keeps the main clock anchored where monitor bounds allow.
@@ -53,7 +57,17 @@
 - The preview and desktop display share time formatting, and the clock window adjusts to rendered width. Removed network font requests so both pages work offline.
 - Existing settings files without the new fields reset to defaults on launch; users can reapply their preferences. No other operator action is required.
 
+## Changed
+
+### 2026-10-27 - Smaller add-on defaults and concise Timer display
+
+- New add-ons start at 30% of the main clock size, and the size control now reaches 10%. Timer rows show only the time value; the selected mode remains visible in Settings. Existing saved sizes remain unchanged. No operator action is required.
+
 ## Fixed
+
+### 2026-10-27 - Add-on slider visibility and clock spacing
+
+- Supplied the missing slider progress value so its track is visible, and shortened the gap above the main clock to balance the space below it. No operator action is required.
 
 ### 2026-10-25 - Custom pointer dragging and tight window fit
 

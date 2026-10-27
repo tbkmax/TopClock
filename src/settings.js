@@ -146,7 +146,7 @@ Alpine.data('settingsApp', () => ({
     addonPreviewStyle(addon) {
         return {
             color: this.settings.font_color,
-            fontSize: `${Math.max(10, Math.round(Math.min(this.settings.font_size, 64) * addon.size_percent / 100))}px`,
+            fontSize: `${Math.min(this.settings.font_size, 64) * addon.size_percent / 100}px`,
             fontFamily: clockFontStack(this.settings.font_family),
             WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
         };

@@ -70,6 +70,7 @@ classDiagram
 ```
 
 Names and fields match [settings.rs](../settings.rs), [addons.rs](../addons.rs), and [main.rs](../main.rs). The config is written to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
+The `options` value contains `format` and optionally `show_weekday` for Date, or `time_zone` and optionally `show_label` for Region clock. [addons.rs](../addons.rs) accepts missing optional switches for older files, requires booleans when present, and validates sizes from 10% to 100% before the save flow below proceeds.
 
 ```mermaid
 sequenceDiagram

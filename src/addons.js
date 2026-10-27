@@ -1,8 +1,8 @@
 import { timeParts } from './time-format.js';
 
 export const addonCatalog = [
-    { kind: 'date', label: 'Date', description: 'Show the local calendar date.', options: { format: 'ymd' } },
-    { kind: 'region_clock', label: 'Region clock', description: 'Show time in another region.', options: { time_zone: 'Etc/UTC' } },
+    { kind: 'date', label: 'Date', description: 'Show the local calendar date.', options: { format: 'ymd', show_weekday: false } },
+    { kind: 'region_clock', label: 'Region clock', description: 'Show time in another region.', options: { time_zone: 'Etc/UTC', show_label: true } },
     { kind: 'timer', label: 'Timer', description: 'Count down or use a stopwatch.', options: { mode: 'countdown', duration_seconds: 300 } },
 ];
 
@@ -14,7 +14,7 @@ export function createAddon(kind) {
         kind,
         enabled: true,
         placement: 'below',
-        size_percent: 55,
+        size_percent: 30,
         options: { ...entry.options },
     };
 }
@@ -51,17 +51,20 @@ export function timerText(addon, session, nowMs) {
     const seconds = totalSeconds % 60;
     const display = hours ? `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
         : `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    return `${addon.options.mode === 'countdown' ? 'Countdown' : 'Stopwatch'} ${display}`;
+    return display;
 }
 
 export function displayAddon(addon, now, settings, session) {
-    const base = { ...addon, label: addonName(addon), text: '', parts: null, finished: false };
+    const base = { ...addon, label: addonName(addon), text: '', weekday: '', parts: null, finished: false };
     if (addon.kind === 'date') {
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
         const day = String(now.getDate()).padStart(2, '0');
         base.text = addon.options.format === 'd' ? day
             : addon.options.format === 'md' ? `${month}-${day}` : `${year}-${month}-${day}`;
+        if (addon.options.show_weekday === true) {
+            base.weekday = `(${new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(now)})`;
+        }
     } else if (addon.kind === 'region_clock') {
         try {
             base.parts = timeParts(now, settings, addon.options.time_zone);

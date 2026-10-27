@@ -18,7 +18,7 @@ pub(crate) fn legacy_timer() -> AddonInstance {
         kind: "timer".into(),
         enabled: true,
         placement: "below".into(),
-        size_percent: 55,
+        size_percent: 30,
         options: serde_json::json!({"mode":"countdown","duration_seconds":300}),
     }
 }
@@ -51,7 +51,7 @@ pub(crate) fn valid_addons(addons: &[AddonInstance]) -> bool {
                 .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
             || !ids.insert(addon.id.as_str())
             || !matches!(addon.placement.as_str(), "above" | "below")
-            || !(30..=100).contains(&addon.size_percent)
+            || !(10..=100).contains(&addon.size_percent)
         {
             return false;
         }
@@ -61,7 +61,12 @@ pub(crate) fn valid_addons(addons: &[AddonInstance]) -> bool {
         match addon.kind.as_str() {
             "date" => {
                 singleton_kinds.insert("date")
-                    && options.len() == 1
+                    && (options.len() == 1 || options.len() == 2)
+                    && (options.len() == 1
+                        || options
+                            .get("show_weekday")
+                            .and_then(Value::as_bool)
+                            .is_some())
                     && matches!(
                         options.get("format").and_then(Value::as_str),
                         Some("ymd" | "md" | "d")
@@ -70,7 +75,9 @@ pub(crate) fn valid_addons(addons: &[AddonInstance]) -> bool {
             "region_clock" => {
                 regions += 1;
                 regions <= 12
-                    && options.len() == 1
+                    && (options.len() == 1 || options.len() == 2)
+                    && (options.len() == 1
+                        || options.get("show_label").and_then(Value::as_bool).is_some())
                     && options
                         .get("time_zone")
                         .and_then(Value::as_str)
@@ -152,11 +159,39 @@ mod tests {
     fn validates_addon_instances() {
         let mut addons = vec![legacy_timer()];
         assert!(valid_addons(&addons));
+        addons[0].size_percent = 10;
+        assert!(valid_addons(&addons));
+        addons[0].size_percent = 9;
+        assert!(!valid_addons(&addons));
+        addons[0].size_percent = 30;
         addons.push(addons[0].clone());
         assert!(!valid_addons(&addons));
         addons.pop();
         addons[0].options = serde_json::json!({"mode":"countdown","duration_seconds":0});
         assert!(!valid_addons(&addons));
+    }
+
+    #[test]
+    fn optional_display_options_accept_legacy_and_boolean_values() {
+        for (kind, key, options) in [
+            ("date", "show_weekday", serde_json::json!({"format":"md"})),
+            (
+                "region_clock",
+                "show_label",
+                serde_json::json!({"time_zone":"Etc/UTC"}),
+            ),
+        ] {
+            let mut addon = legacy_timer();
+            addon.kind = kind.into();
+            addon.options = options;
+            assert!(valid_addons(&[addon.clone()]));
+            addon.options[key] = serde_json::json!(false);
+            assert!(valid_addons(&[addon.clone()]));
+            addon.options[key] = serde_json::json!(true);
+            assert!(valid_addons(&[addon.clone()]));
+            addon.options[key] = serde_json::json!("yes");
+            assert!(!valid_addons(&[addon]));
+        }
     }
 
     #[test]

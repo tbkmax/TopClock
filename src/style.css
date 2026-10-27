@@ -114,6 +114,7 @@ html, body {
     max-width: 100%;
     margin: 2px 0;
 }
+.addon-stack-above { margin-bottom: -2px; }
 .addon-line {
     display: flex;
     align-items: baseline;
@@ -133,6 +134,7 @@ html, body {
 }
 .addon-line.addon-finished { color: var(--color-primary); }
 .addon-label { font-size: .65em; opacity: .85; }
+.addon-weekday { font-size: .8em; margin-left: -.2em; }
 .addon-time { display: inline-flex; align-items: baseline; }
 #app.ctrl-active .addon-interactive { pointer-events: auto; cursor: pointer; }
 
