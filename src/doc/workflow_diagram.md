@@ -7,10 +7,13 @@ classDiagram
     class clockApp {
       settings
       parts
+      renderedAddons
+      timerSession
       isCtrlHeld
       isNear
       updateClock()
       toggleFormat()
+      timerAction()
       scheduleResize()
       openSettings()
       quitApp()
@@ -18,7 +21,11 @@ classDiagram
     class settingsApp {
       settings
       previewParts
+      previewAddons
       pendingSaves
+      addAddon()
+      moveAddon()
+      timerChange()
       save()
       queueSave()
       startRecording()
@@ -29,14 +36,27 @@ classDiagram
     }
     class TauriCommands {
       get_settings()
+      get_timer_state()
       get_font_families()
       update_settings()
+      timer_action()
+      get_monitor_bounds()
       set_startup_enabled()
       open_settings()
       quit()
     }
     clockApp --> TauriCommands : invoke
     settingsApp --> TauriCommands : invoke
+    class AddonInstance {
+      id
+      kind
+      enabled
+      placement
+      size_percent
+      options
+    }
+    clockApp --> AddonInstance : renders ordered instances
+    settingsApp --> AddonInstance : edits instances
 ```
 
 These names map to [main.js](../main.js), [settings.js](../settings.js), and the command registrations in [main.rs](../../src-tauri/src/main.rs). Both UI components call the shared `timeParts` function in [time-format.js](../time-format.js), which leaves hours unpadded and keeps minutes and seconds at two digits, then `markChangedNumbers` in [clock-animations.js](../clock-animations.js). The tracker compares each displayed hour, minute and second with its previous value. [style.css](../style.css) sizes clock segments to their text, keeping a one-digit hour beside the colon. CSS applies the chosen number effect to changed parts and the chosen colon effect to separators independently. `TauriCommands` represents the command interface, not a source class.
@@ -58,4 +78,27 @@ sequenceDiagram
     end
 ```
 
-On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings.js](../settings.js) after a control changes. `clockApp` applies both preview and saved settings in [main.js](../main.js), then measures the rendered text and container height and resizes the clock window in both dimensions when needed. It adjusts the window's left edge to keep the right edge in place. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings.js](../settings.js) after a control changes. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the whole clock group and menu, and resizes the native window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates where monitor bounds permit. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Settings as settingsApp
+    participant Rust as Rust commands
+    participant Clock as clockApp
+    User->>Settings: Add or reorder an add-on
+    Settings->>Clock: clock-settings-preview
+    Settings->>Rust: update_settings
+    alt Valid and saved
+        Rust->>Clock: clock-settings-changed
+        Clock->>Clock: Rebuild stacks and preserve main clock anchor
+    else Invalid or write failure
+        Rust-->>Settings: Error
+    end
+    User->>Clock: Modifier-click Timer
+    Clock->>Rust: timer_action(toggle)
+    Rust->>Clock: timer-state-changed
+```
+
+The [Add-ons tab](../../settings.html) controls placement, order, size and options. The [clock](../../index.html) reserves distinct rows above and below the main display. Timer actions and running progress are native state; frontend display values are computed on each tick. The menu Reset action calls the same timer command.

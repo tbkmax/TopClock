@@ -5,6 +5,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
+import { addonCatalog, addonName, availableTimeZones, createAddon, displayAddon, timerElapsed } from './addons.js';
 import './settings.css';
 
 const settingsWindow = getCurrentWindow();
@@ -26,10 +27,22 @@ function isNewerVersion(latest, current) {
 const DEFAULT_SHORTCUTS = {
     interaction_modifier: 'Ctrl',
     open_settings: 'Ctrl+,',
-    quit: 'Ctrl+Q',
+    open_settings_enabled: false,
+    quit: 'Ctrl+Alt+Q',
+    quit_enabled: false,
     timer_toggle: 'Ctrl+Shift+S',
+    timer_toggle_enabled: false,
     timer_reset: 'Ctrl+Shift+R',
+    timer_reset_enabled: false,
 };
+
+function supportedGlobalKey(key) {
+    return /^[A-Z0-9]$/.test(key)
+        || /^F(?:[1-9]|1\d|2[0-4])$/.test(key)
+        || [',', '.', '/', ';', "'", '[', ']', '\\', '-', '=', '`', 'Space', 'Enter', 'Tab',
+            'Escape', 'Backspace', 'Delete', 'Insert', 'Home', 'End', 'PageUp', 'PageDown',
+            'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key);
+}
 
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
@@ -46,7 +59,8 @@ Alpine.data('settingsApp', () => ({
         time_layout: 'hms',
         auto_check_updates: true,
         shortcuts: { ...DEFAULT_SHORTCUTS },
-        timer_addon_enabled: false,
+        addons: [],
+        timer_reset_warning_dismissed: false,
     },
     recordingAction: null,
     recordListener: null,
@@ -58,6 +72,12 @@ Alpine.data('settingsApp', () => ({
     latestReleaseUrl: 'https://github.com/tbkmax/TopClock/releases/latest',
     latestReleaseTag: '',
     previewParts: [],
+    previewAddons: [],
+    timerSession: null,
+    pendingTimerChange: null,
+    suppressResetPrompt: false,
+    addonCatalog,
+    timeZones: availableTimeZones(),
     previousPreviewNumbers: {},
     previewNumberActiveUntil: {},
     layouts: timeLayouts,
@@ -73,6 +93,8 @@ Alpine.data('settingsApp', () => ({
 
     async init() {
         this.settings = await invoke('get_settings');
+        this.timerSession = await invoke('get_timer_state');
+        this.hotkeyErrors = await invoke('get_hotkey_errors');
         this.appVersion = await getVersion().catch(() => '0.0.0');
         this.updateStatusText = `Current version: v${this.appVersion}`;
         await this.loadFontFamilies();
@@ -82,6 +104,11 @@ Alpine.data('settingsApp', () => ({
         await listen('clock-settings-changed', (event) => {
             if (!this.saveTimer && !this.isSaving) this.settings = event.payload;
         });
+        await listen('timer-state-changed', (event) => {
+            this.timerSession = event.payload;
+            this.updatePreview();
+        });
+        await listen('hotkey-errors-changed', (event) => { this.hotkeyErrors = event.payload; });
         await settingsWindow.onCloseRequested((event) => {
             event.preventDefault();
             this.close();
@@ -102,6 +129,8 @@ Alpine.data('settingsApp', () => ({
         this.previewParts = result.parts;
         this.previousPreviewNumbers = result.numbers;
         this.previewNumberActiveUntil = result.activeUntil;
+        this.previewAddons = (this.settings.addons || []).filter((addon) => addon.enabled)
+            .map((addon) => displayAddon(addon, now, this.settings, this.timerSession));
     },
 
     previewStyle() {
@@ -111,6 +140,15 @@ Alpine.data('settingsApp', () => ({
             fontFamily: clockFontStack(this.settings.font_family),
             WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
             textShadow: '0 2px 6px rgba(0, 0, 0, .65)',
+        };
+    },
+
+    addonPreviewStyle(addon) {
+        return {
+            color: this.settings.font_color,
+            fontSize: `${Math.max(10, Math.round(Math.min(this.settings.font_size, 64) * addon.size_percent / 100))}px`,
+            fontFamily: clockFontStack(this.settings.font_family),
+            WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
         };
     },
 
@@ -137,7 +175,7 @@ Alpine.data('settingsApp', () => ({
     save() {
         this.updatePreview();
         clearTimeout(this.saveTimer);
-        const settings = { ...this.settings };
+        const settings = JSON.parse(JSON.stringify(this.settings));
         emitTo('main', 'clock-settings-preview', settings).catch(console.error);
         this.saveTimer = setTimeout(() => {
             this.saveTimer = null;
@@ -162,6 +200,89 @@ Alpine.data('settingsApp', () => ({
             this.isSaving = this.pendingSaves > 0;
         });
         return settingsSaveQueue;
+    },
+
+    hotkeyErrors: [],
+
+    get timerAddonEnabled() {
+        return (this.settings.addons || []).some((addon) => addon.kind === 'timer' && addon.enabled);
+    },
+
+    hasAddon(kind) { return (this.settings.addons || []).some((addon) => addon.kind === kind); },
+    addonName,
+
+    addAddon(kind) {
+        if (kind !== 'region_clock' && this.hasAddon(kind)) return;
+        if (this.settings.addons.length >= 16) return;
+        this.settings.addons.push(createAddon(kind));
+        this.save();
+    },
+
+    removeAddon(id) {
+        this.settings.addons = this.settings.addons.filter((addon) => addon.id !== id);
+        this.save();
+    },
+
+    moveAddon(id, direction) {
+        const index = this.settings.addons.findIndex((addon) => addon.id === id);
+        if (index < 0) return;
+        const placement = this.settings.addons[index].placement;
+        let other = index + direction;
+        while (other >= 0 && other < this.settings.addons.length && this.settings.addons[other].placement !== placement) other += direction;
+        if (other < 0 || other >= this.settings.addons.length) return;
+        [this.settings.addons[index], this.settings.addons[other]] = [this.settings.addons[other], this.settings.addons[index]];
+        this.save();
+    },
+
+    timerChange(field, value) {
+        const timer = this.settings.addons.find((addon) => addon.kind === 'timer');
+        if (!timer || this.timerSession?.running || timer.options[field] === value) return;
+        const elapsed = timerElapsed(this.timerSession, Date.now());
+        if (elapsed > 0 && !this.settings.timer_reset_warning_dismissed) {
+            this.pendingTimerChange = { field, value };
+            this.suppressResetPrompt = false;
+            return;
+        }
+        this.applyTimerChange(field, value);
+    },
+
+    applyTimerChange(field, value) {
+        const timer = this.settings.addons.find((addon) => addon.kind === 'timer');
+        if (!timer) return;
+        timer.options[field] = value;
+        this.timerSession = { running: false, elapsed_ms: 0, started_at_ms: null, finished: false };
+        this.save();
+    },
+
+    confirmTimerChange() {
+        if (!this.pendingTimerChange) return;
+        if (this.timerSession?.running) {
+            this.error = 'Pause the timer before changing its mode or duration.';
+            this.pendingTimerChange = null;
+            return;
+        }
+        if (this.suppressResetPrompt) this.settings.timer_reset_warning_dismissed = true;
+        this.applyTimerChange(this.pendingTimerChange.field, this.pendingTimerChange.value);
+        this.pendingTimerChange = null;
+    },
+
+    cancelTimerChange() { this.pendingTimerChange = null; },
+
+    async runTimerAction(action) {
+        let saved;
+        if (this.saveTimer) {
+            clearTimeout(this.saveTimer);
+            this.saveTimer = null;
+            saved = await this.queueSave(JSON.parse(JSON.stringify(this.settings)));
+        } else {
+            saved = await settingsSaveQueue;
+        }
+        if (!saved) return;
+        invoke('timer_action', { action }).then((session) => {
+            this.timerSession = session;
+            this.error = '';
+            this.updatePreview();
+        }).catch((error) => { this.error = `Could not control timer: ${error}`; });
     },
 
     async toggleStartup() {
@@ -221,6 +342,10 @@ Alpine.data('settingsApp', () => ({
     },
 
     startRecording(actionKey) {
+        if (this.settings.shortcuts[`${actionKey}_enabled`]) {
+            this.error = 'Turn off this shortcut before changing its keys.';
+            return;
+        }
         if (this.recordingAction) {
             this.stopRecording();
         }
@@ -249,11 +374,17 @@ Alpine.data('settingsApp', () => ({
             if (key === ' ') key = 'Space';
             else if (key.length === 1) key = key.toUpperCase();
 
+            if (!(event.ctrlKey || event.altKey || event.shiftKey) || !supportedGlobalKey(key)) {
+                this.error = 'Choose Ctrl, Alt, or Shift plus a supported key for a system-wide shortcut.';
+                return;
+            }
+
             const combo = [...mods, key].join('+');
             if (!this.settings.shortcuts) {
                 this.settings.shortcuts = { ...DEFAULT_SHORTCUTS };
             }
             this.settings.shortcuts[actionKey] = combo;
+            this.error = '';
             this.save();
             this.stopRecording();
         };
@@ -273,6 +404,14 @@ Alpine.data('settingsApp', () => ({
             this.settings.shortcuts = { ...DEFAULT_SHORTCUTS };
         }
         this.settings.shortcuts[actionKey] = '';
+        this.settings.shortcuts[`${actionKey}_enabled`] = false;
+        this.save();
+    },
+
+    toggleShortcut(actionKey) {
+        if (!this.settings.shortcuts[actionKey]) return;
+        const key = `${actionKey}_enabled`;
+        this.settings.shortcuts[key] = !this.settings.shortcuts[key];
         this.save();
     },
 
@@ -283,18 +422,20 @@ Alpine.data('settingsApp', () => ({
 
     getConflict(actionKey) {
         if (!this.settings?.shortcuts) return null;
+        if (!this.timerAddonEnabled && actionKey.startsWith('timer_')) return null;
+        if (!this.settings.shortcuts[`${actionKey}_enabled`]) return null;
         const current = (this.settings.shortcuts[actionKey] || '').trim().toLowerCase();
         if (!current) return null;
 
         const labels = {
             open_settings: 'Open Settings',
             quit: 'Quit TopClock',
-            timer_toggle: 'Timer Start / Stop',
-            timer_reset: 'Timer Reset',
+            ...(this.timerAddonEnabled ? { timer_toggle: 'Timer Start / Stop', timer_reset: 'Timer Reset' } : {}),
         };
 
         for (const [key, label] of Object.entries(labels)) {
             if (key === actionKey) continue;
+            if (!this.settings.shortcuts[`${key}_enabled`]) continue;
             const other = (this.settings.shortcuts[key] || '').trim().toLowerCase();
             if (other && other === current) {
                 return label;

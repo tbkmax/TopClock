@@ -5,32 +5,23 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
+import { displayAddon } from './addons.js';
 import './style.css';
 
 const appWindow = getCurrentWindow();
 let resizeQueue = Promise.resolve();
 let isFirstResize = true;
-function matchShortcut(event, shortcutString) {
-    if (!shortcutString || typeof shortcutString !== 'string') return false;
-    const parts = shortcutString.split('+').map((p) => p.trim());
-    const mods = parts.filter((p) => ['Ctrl', 'Alt', 'Shift'].includes(p));
-    const mainKey = parts.find((p) => !['Ctrl', 'Alt', 'Shift'].includes(p));
-
-    const ctrlMatch = event.ctrlKey === mods.includes('Ctrl');
-    const altMatch = event.altKey === mods.includes('Alt');
-    const shiftMatch = event.shiftKey === mods.includes('Shift');
-
-    if (!ctrlMatch || !altMatch || !shiftMatch) return false;
-    if (!mainKey) return true;
-
-    if (mainKey === 'Space') return event.key === ' ' || event.code === 'Space';
-    return event.key.toLowerCase() === mainKey.toLowerCase();
-}
+let lastMainRightOffset = 0;
+let lastMainTopOffset = 0;
 
 window.Alpine = Alpine;
 
 Alpine.data('clockApp', () => ({
     parts: [],
+    renderedAddons: [],
+    addonPreviousNumbers: {},
+    addonNumberActiveUntil: {},
+    timerSession: null,
     previousNumbers: {},
     numberActiveUntil: {},
     settings: null,
@@ -51,8 +42,9 @@ Alpine.data('clockApp', () => ({
         this.updateClock();
         setInterval(() => this.updateClock(), 200);
         this.loadSettings();
+        invoke('get_timer_state').then((session) => { this.timerSession = session; this.updateClock(); }).catch(console.error);
         this.$nextTick(() => {
-            new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockDigits);
+            new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockContainer);
             this.scheduleResize();
         });
 
@@ -71,24 +63,16 @@ Alpine.data('clockApp', () => ({
                 this.applySettings(event.payload);
                 this.updateClock();
             }),
+            listen('timer-state-changed', (event) => {
+                this.timerSession = event.payload;
+                this.updateClock();
+            }),
         ]);
 
         window.addEventListener('keydown', (event) => {
             const modifierKey = this.settings?.shortcuts?.interaction_modifier || 'Ctrl';
             const expectedKey = modifierKey === 'Ctrl' ? 'Control' : modifierKey;
             if (event.key === expectedKey) this.isCtrlHeld = true;
-
-            const quitShortcut = this.settings?.shortcuts?.quit ?? 'Ctrl+Q';
-            if (matchShortcut(event, quitShortcut)) {
-                event.preventDefault();
-                this.quitApp();
-            }
-
-            const settingsShortcut = this.settings?.shortcuts?.open_settings ?? 'Ctrl+,';
-            if (matchShortcut(event, settingsShortcut)) {
-                event.preventDefault();
-                this.openSettings();
-            }
 
             if (event.key === 'Escape' && this.menuOpen) this.closeMenu();
         });
@@ -123,6 +107,7 @@ Alpine.data('clockApp', () => ({
 
     applySettings(settings) {
         this.settings = settings;
+        this.updateClock();
         document.documentElement.style.setProperty('--clock-font-color', settings.font_color);
         document.documentElement.style.setProperty('--clock-outline-color', settings.outline_color);
         document.documentElement.style.setProperty('--clock-outline-width', `${settings.outline_width}px`);
@@ -132,6 +117,7 @@ Alpine.data('clockApp', () => ({
     },
 
     scheduleResize() {
+        if (!this.settings) return;
         clearTimeout(this.resizeTimer);
         this.resizeTimer = setTimeout(() => {
             if (!this.$refs.clockContainer) return;
@@ -148,16 +134,28 @@ Alpine.data('clockApp', () => ({
             resizeQueue = resizeQueue.then(async () => {
                 const oldSize = await appWindow.outerSize();
                 const scale = await appWindow.scaleFactor();
-                if (Math.abs(oldSize.width - width * scale) < 2
-                    && Math.abs(oldSize.height - height * scale) < 2) return;
                 const oldPosition = await appWindow.outerPosition();
-                await appWindow.setSize(new LogicalSize(width, height));
+                const targetMainRight = oldPosition.x + lastMainRightOffset * scale;
+                const targetMainTop = oldPosition.y + lastMainTopOffset * scale;
+                if (Math.abs(oldSize.width - width * scale) >= 2
+                    || Math.abs(oldSize.height - height * scale) >= 2) {
+                    await appWindow.setSize(new LogicalSize(width, height));
+                }
                 const newSize = await appWindow.outerSize();
+                const mainRect = this.$refs.clockDigits.getBoundingClientRect();
                 const newX = isFirstResize
                     ? oldPosition.x
-                    : oldPosition.x + oldSize.width - newSize.width;
+                    : Math.round(targetMainRight - mainRect.right * scale);
+                const newY = isFirstResize
+                    ? oldPosition.y
+                    : Math.round(targetMainTop - mainRect.top * scale);
                 isFirstResize = false;
-                await appWindow.setPosition(new PhysicalPosition(newX, oldPosition.y));
+                lastMainRightOffset = mainRect.right;
+                lastMainTopOffset = mainRect.top;
+                const bounds = await invoke('get_monitor_bounds').catch(() => null);
+                const x = bounds ? Math.max(bounds.x, Math.min(newX, bounds.x + bounds.width - newSize.width)) : newX;
+                const y = bounds ? Math.max(bounds.y, Math.min(newY, bounds.y + bounds.height - newSize.height)) : newY;
+                await appWindow.setPosition(new PhysicalPosition(x, y));
             }).catch(console.error);
         }, 40);
     },
@@ -173,6 +171,31 @@ Alpine.data('clockApp', () => ({
         this.parts = result.parts;
         this.previousNumbers = result.numbers;
         this.numberActiveUntil = result.activeUntil;
+        this.renderedAddons = (this.settings?.addons || []).filter((addon) => addon.enabled).map((addon) => {
+            const display = displayAddon(addon, now, this.settings, this.timerSession);
+            if (display.parts) {
+                const animation = markChangedNumbers(display.parts, this.addonPreviousNumbers[addon.id], this.addonNumberActiveUntil[addon.id], now.getTime());
+                display.parts = animation.parts;
+                this.addonPreviousNumbers[addon.id] = animation.numbers;
+                this.addonNumberActiveUntil[addon.id] = animation.activeUntil;
+            }
+            return display;
+        });
+    },
+
+    get timerEnabled() { return (this.settings?.addons || []).some((addon) => addon.kind === 'timer' && addon.enabled); },
+
+    timerClick() {
+        if (this.dragStarted) { this.dragStarted = false; return; }
+        if (this.isCtrlHeld && this.timerEnabled) this.timerAction('toggle');
+    },
+
+    timerAction(action) {
+        invoke('timer_action', { action }).then((session) => {
+            this.timerSession = session;
+            this.updateClock();
+            if (action === 'reset') this.closeMenu();
+        }).catch(console.error);
     },
 
     toggleFormat() {

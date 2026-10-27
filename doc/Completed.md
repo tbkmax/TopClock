@@ -7,6 +7,18 @@
 - [x] add animation for drop down menu (reference alpine.js style animation for that)
 - [x] clock should also have animation
 
+### TODO 2: setting window (Completed)
+- [x] when open it will create a icon in indicator bar, which click there will open setting page, right click will show the menu, currently only have quit
+- [x] setting page should be follow DESIGN.md and use Alpine.js code reference include the animations
+- [x] the minimize, and close button and window itself should also be part of design not using Windows own one
+- [x] no full screen button, the size should not be able to change
+- [x] the setting page should have different tab, which will include: Clock, Add-on, Shortcut, General
+- [x] Clock tab is for setting like blink or not, font color, outline color, size..... should be reflect to the real one while changing (Not implment all of this right now, do few simple one create place holder fo rest)
+- [x] Add-on tab is for like below clock can let user add timer or other region's clock (Not implement right now)
+- [x] Shortcut tab, list all the shortcut
+- [x] General tab is for setting like turn on open this when PC open or that kind of settings
+- [x] add when user hold ctrl right click also will show setting
+
 ### TODO 3: Clock tab in setting
 - [x] 24 or 12 hour time should be this page, and for 12 let user choose have AM PM or not
 - [x] let user can set hour minute second in what every they like (can be H:M:S H:M M:S H M S)

@@ -12,6 +12,10 @@
 
 ## Added
 
+### 2026-10-27 - Built-in add-on and shortcut runtime
+
+- The native package now persists validated add-on instances and Timer progress, restoring a running session after restart. Enabled action shortcuts use Windows-wide registration while the modifier continues to govern click-through. The package configuration and capability permissions did not need new entries. No operator action is required.
+
 ### 2026-10-25 - Lightweight release reminder transition
 
 - Replaced internal updater & process plugins with lightweight GitHub Release reminders, avoiding Defender heuristic dropper alerts.

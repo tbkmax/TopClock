@@ -7,13 +7,35 @@ export const timeLayouts = [
     { value: 's', label: 'S' },
 ];
 
-export function timeParts(date, settings) {
+const zoneFormatters = new Map();
+
+function formatterForZone(timeZone) {
+    let formatter = zoneFormatters.get(timeZone);
+    if (!formatter) {
+        formatter = new Intl.DateTimeFormat('en-US', {
+            timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+        });
+        zoneFormatters.set(timeZone, formatter);
+    }
+    return formatter;
+}
+
+export function timeParts(date, settings, timeZone = null) {
     const layout = settings.time_layout || 'hms';
-    const hour = date.getHours();
+    let hour = date.getHours();
+    let minute = date.getMinutes();
+    let second = date.getSeconds();
+    if (timeZone) {
+        const fields = Object.fromEntries(formatterForZone(timeZone)
+            .formatToParts(date).map(({ type, value }) => [type, value]));
+        hour = Number(fields.hour) % 24;
+        minute = Number(fields.minute);
+        second = Number(fields.second);
+    }
     const values = {
         h: String(settings.twenty_four_hour ? hour : hour % 12 || 12),
-        m: String(date.getMinutes()).padStart(2, '0'),
-        s: String(date.getSeconds()).padStart(2, '0'),
+        m: String(minute).padStart(2, '0'),
+        s: String(second).padStart(2, '0'),
     };
     const parts = [];
     for (const unit of layout) {

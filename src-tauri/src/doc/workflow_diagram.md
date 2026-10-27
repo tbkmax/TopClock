@@ -8,10 +8,12 @@ classDiagram
       menu_open: AtomicBool
       config: Mutex~PersistedConfig~
       settings_path: PathBuf
+      hotkey_errors: Mutex~Vec_String~
     }
     class PersistedConfig {
       settings: ClockSettings
       position: Option~ClockPosition~
+      timer_session: TimerSession
     }
     class ClockSettings {
       colon_animation: String
@@ -27,13 +29,33 @@ classDiagram
       auto_check_updates: bool
       shortcuts: ShortcutSettings
       timer_addon_enabled: bool
+      addons: Vec~AddonInstance~
+      timer_reset_warning_dismissed: bool
     }
     class ShortcutSettings {
       interaction_modifier: String
       open_settings: String
+      open_settings_enabled: bool
       quit: String
+      quit_enabled: bool
       timer_toggle: String
+      timer_toggle_enabled: bool
       timer_reset: String
+      timer_reset_enabled: bool
+    }
+    class AddonInstance {
+      id: String
+      kind: String
+      enabled: bool
+      placement: String
+      size_percent: u8
+      options: Value
+    }
+    class TimerSession {
+      running: bool
+      elapsed_ms: u64
+      started_at_ms: Option~u64~
+      finished: bool
     }
     class ClockPosition {
       x: i32
@@ -42,10 +64,12 @@ classDiagram
     ClockState --> PersistedConfig : owns
     PersistedConfig --> ClockSettings : includes
     ClockSettings --> ShortcutSettings : includes
+    ClockSettings --> AddonInstance : ordered instances
+    PersistedConfig --> TimerSession : includes
     PersistedConfig --> ClockPosition : optional
 ```
 
-Names and fields match [settings.rs](../settings.rs) and [main.rs](../main.rs). The config is written to `settings.json`; `menu_open` is in-memory only.
+Names and fields match [settings.rs](../settings.rs), [addons.rs](../addons.rs), and [main.rs](../main.rs). The config is written to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
 
 ```mermaid
 sequenceDiagram
@@ -54,7 +78,7 @@ sequenceDiagram
     participant File as settings.json
     participant Clock as Clock UI
     UI->>Rust: update_settings(settings)
-    Rust->>Rust: Validate appearance, 24–200 px size, layout and animations
+    Rust->>Rust: Validate appearance, add-on instances, timer changes and shortcuts
     alt Invalid
         Rust-->>UI: Error
     else Valid
@@ -70,3 +94,24 @@ sequenceDiagram
 ```
 
 Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. The persistence path and error handling are in [main.rs](../main.rs). Window-position saves use the same file. The background monitor polls Windows input and window geometry every 30 ms, changing click-through and emitting events when observed values change.
+
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Win as Windows hotkey service
+    participant Rust as hotkeys.rs and main.rs
+    participant File as settings.json
+    participant Clock as Clock UI
+    User->>Win: Press enabled Timer binding
+    Win->>Rust: WM_HOTKEY
+    Rust->>Rust: Toggle or reset TimerSession
+    Rust->>File: Save session
+    Rust->>Clock: timer-state-changed
+    alt Countdown reaches zero
+        Rust->>File: Save finished session
+        Rust->>Clock: timer-state-changed
+    end
+```
+
+The hotkey service sends only successfully registered bindings. Timer session state survives restart by storing accumulated milliseconds and the last start epoch; the UI formats the current value from that state. The configured interaction modifier is polled separately and never has an off switch.

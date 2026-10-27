@@ -1,3 +1,4 @@
+use crate::addons::{valid_addons, AddonInstance, TimerSession};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
@@ -11,6 +12,8 @@ pub(crate) struct PersistedConfig {
     #[serde(flatten)]
     pub(crate) settings: ClockSettings,
     pub(crate) position: Option<ClockPosition>,
+    #[serde(default)]
+    pub(crate) timer_session: TimerSession,
 }
 
 fn default_auto_check_updates() -> bool {
@@ -26,7 +29,7 @@ fn default_open_settings() -> String {
 }
 
 fn default_quit() -> String {
-    "Ctrl+Q".into()
+    "Ctrl+Alt+Q".into()
 }
 
 fn default_timer_toggle() -> String {
@@ -43,12 +46,20 @@ pub(crate) struct ShortcutSettings {
     pub(crate) interaction_modifier: String,
     #[serde(default = "default_open_settings")]
     pub(crate) open_settings: String,
+    #[serde(default)]
+    pub(crate) open_settings_enabled: bool,
     #[serde(default = "default_quit")]
     pub(crate) quit: String,
+    #[serde(default)]
+    pub(crate) quit_enabled: bool,
     #[serde(default = "default_timer_toggle")]
     pub(crate) timer_toggle: String,
+    #[serde(default)]
+    pub(crate) timer_toggle_enabled: bool,
     #[serde(default = "default_timer_reset")]
     pub(crate) timer_reset: String,
+    #[serde(default)]
+    pub(crate) timer_reset_enabled: bool,
 }
 
 impl Default for ShortcutSettings {
@@ -56,9 +67,13 @@ impl Default for ShortcutSettings {
         Self {
             interaction_modifier: default_modifier(),
             open_settings: default_open_settings(),
+            open_settings_enabled: false,
             quit: default_quit(),
+            quit_enabled: false,
             timer_toggle: default_timer_toggle(),
+            timer_toggle_enabled: false,
             timer_reset: default_timer_reset(),
+            timer_reset_enabled: false,
         }
     }
 }
@@ -79,8 +94,12 @@ pub(crate) struct ClockSettings {
     pub(crate) auto_check_updates: bool,
     #[serde(default)]
     pub(crate) shortcuts: ShortcutSettings,
-    #[serde(default)]
+    #[serde(default, skip_serializing)]
     pub(crate) timer_addon_enabled: bool,
+    #[serde(default)]
+    pub(crate) addons: Vec<AddonInstance>,
+    #[serde(default)]
+    pub(crate) timer_reset_warning_dismissed: bool,
 }
 
 impl Default for ClockSettings {
@@ -99,6 +118,8 @@ impl Default for ClockSettings {
             auto_check_updates: true,
             shortcuts: ShortcutSettings::default(),
             timer_addon_enabled: false,
+            addons: Vec::new(),
+            timer_reset_warning_dismissed: false,
         }
     }
 }
@@ -142,6 +163,7 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
         && valid_shortcut_string(&settings.shortcuts.quit)
         && valid_shortcut_string(&settings.shortcuts.timer_toggle)
         && valid_shortcut_string(&settings.shortcuts.timer_reset)
+        && valid_addons(&settings.addons)
 }
 
 #[cfg(test)]
@@ -161,6 +183,7 @@ mod tests {
         let config = PersistedConfig {
             settings,
             position: Some(ClockPosition { x: -120, y: 240 }),
+            timer_session: TimerSession::default(),
         };
         let loaded: PersistedConfig =
             serde_json::from_str(&serde_json::to_string(&config).unwrap()).unwrap();
@@ -172,7 +195,8 @@ mod tests {
         assert_eq!(loaded.settings.colon_animation, "none");
         assert_eq!(loaded.settings.number_animation, "slide");
         assert_eq!(loaded.settings.shortcuts.interaction_modifier, "Ctrl");
-        assert_eq!(loaded.settings.shortcuts.quit, "Ctrl+Q");
+        assert_eq!(loaded.settings.shortcuts.quit, "Ctrl+Alt+Q");
+        assert!(!loaded.settings.shortcuts.quit_enabled);
         assert_eq!(loaded.settings.shortcuts.open_settings, "Ctrl+,");
         assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
@@ -191,8 +215,21 @@ mod tests {
         settings.shortcuts.interaction_modifier = "Shift".into();
         assert!(valid_settings(&settings));
 
-        settings.shortcuts.quit = "VeryLongShortcutKeyStringThatExceedsTheMaximumAllowedCharactersLimit".into();
+        settings.shortcuts.quit =
+            "VeryLongShortcutKeyStringThatExceedsTheMaximumAllowedCharactersLimit".into();
         assert!(!valid_settings(&settings));
+    }
+
+    #[test]
+    fn legacy_timer_flag_is_read_but_not_written() {
+        let mut raw = serde_json::to_value(ClockSettings::default()).unwrap();
+        raw["timer_addon_enabled"] = serde_json::Value::Bool(true);
+        let restored: ClockSettings = serde_json::from_value(raw).unwrap();
+        assert!(restored.timer_addon_enabled);
+        assert!(serde_json::to_value(restored)
+            .unwrap()
+            .get("timer_addon_enabled")
+            .is_none());
     }
 
     #[test]

@@ -111,16 +111,61 @@
                 <section class="tab-panel">
                     <div class="section-kicker">EXTENSIONS / 02</div>
                     <h1>More than time<span class="yellow-period">.</span></h1>
-                    <p class="section-description">Extra displays and widgets to enhance your desktop clock.</p>
-                    <div class="addon-card">
-                        <div class="addon-icon">⏱</div>
-                        <div style="flex: 1;">
-                            <div class="addon-title">Timer</div>
-                            <p>Keep a countdown below your clock.</p>
+                    <p class="section-description">Place useful details around your clock. Add-ons share one layout so they never overlap.</p>
+                    <div class="addon-preview">
+                        <div class="preview-heading"><span>DESKTOP LAYOUT</span><span class="preview-live"><i></i> LIVE</span></div>
+                        <div class="addon-preview-stack">
+                            <template x-for="item in previewAddons.filter((addon) => addon.placement === 'above')" :key="item.id"><div class="addon-preview-line" :style="addonPreviewStyle(item)" x-text="`${item.kind === 'region_clock' ? item.label + ' ' : ''}${item.text || (item.parts || []).map((part) => part.text).join('')}`"></div></template>
+                            <div class="addon-preview-clock" :style="previewStyle()" x-text="previewParts.map((part) => part.text).join('')"></div>
+                            <template x-for="item in previewAddons.filter((addon) => addon.placement === 'below')" :key="item.id"><div class="addon-preview-line" :style="addonPreviewStyle(item)" x-text="`${item.kind === 'region_clock' ? item.label + ' ' : ''}${item.text || (item.parts || []).map((part) => part.text).join('')}`"></div></template>
                         </div>
-                        <button type="button" class="switch" role="switch" :aria-checked="settings.timer_addon_enabled" :class="{ on: settings.timer_addon_enabled }" aria-label="Toggle Timer Add-on" @click="settings.timer_addon_enabled = !settings.timer_addon_enabled; save()"><span></span></button>
                     </div>
-                    <div class="addon-card"><div class="addon-icon">◎</div><div><div class="addon-title">World clocks</div><p>Follow the time in another region.</p></div><span class="coming-soon">COMING SOON</span></div>
+                    <div class="addon-section-title">ADD ADD-ONS</div>
+                    <div class="addon-catalog">
+                        <template x-for="item in addonCatalog" :key="item.kind">
+                            <div class="addon-catalog-card">
+                                <div><strong x-text="item.label"></strong><p x-text="item.description"></p></div>
+                                <button type="button" class="action-button" :disabled="item.kind !== 'region_clock' && hasAddon(item.kind) || settings.addons.length >= 16" @click="addAddon(item.kind)" x-text="item.kind !== 'region_clock' && hasAddon(item.kind) ? 'Added' : 'Add'"></button>
+                            </div>
+                        </template>
+                    </div>
+                    <div class="addon-section-title">YOUR ADD-ONS <span x-text="settings.addons.length"></span></div>
+                    <p class="addon-empty" x-show="settings.addons.length === 0">Add a date, region clock, or timer to get started.</p>
+                    <template x-for="addon in settings.addons" :key="addon.id">
+                        <div class="addon-instance">
+                            <div class="addon-instance-head">
+                                <div><strong x-text="addonName(addon)"></strong><small x-text="addon.kind === 'timer' ? 'Countdown or stopwatch' : addon.kind === 'date' ? 'Local date' : addon.options.time_zone"></small></div>
+                                <button type="button" class="switch" role="switch" :aria-checked="addon.enabled" :class="{ on: addon.enabled }" :aria-label="`Enable ${addonName(addon)}`" @click="addon.enabled = !addon.enabled; save()"><span></span></button>
+                            </div>
+                            <div class="addon-instance-controls">
+                                <label>Position<select class="select-control" x-model="addon.placement" @change="save()" :aria-label="`Position for ${addonName(addon)}`"><option value="above">Above clock</option><option value="below">Below clock</option></select></label>
+                                <label>Text size <span x-text="`${addon.size_percent}%`"></span><input class="size-range" type="range" min="30" max="100" step="5" x-model.number="addon.size_percent" @input="save()" :aria-label="`Text size for ${addonName(addon)}`"></label>
+                            </div>
+                            <div class="addon-instance-controls" x-show="addon.kind === 'date'"><label>Date format<select class="select-control" x-model="addon.options.format" @change="save()" aria-label="Date format"><option value="ymd">Year-Month-Day</option><option value="md">Month-Day</option><option value="d">Day only</option></select></label></div>
+                            <div class="addon-instance-controls" x-show="addon.kind === 'region_clock'"><label>Region<select class="select-control" x-model="addon.options.time_zone" @change="save()" aria-label="Region time zone"><template x-for="zone in timeZones" :key="zone"><option :value="zone" x-text="zone.replaceAll('_', ' ')"></option></template></select></label></div>
+                            <div class="addon-instance-controls" x-show="addon.kind === 'timer'">
+                                <label>Mode<select class="select-control" :value="addon.options.mode" @change="timerChange('mode', $event.target.value); $event.target.value = addon.options.mode" :disabled="timerSession?.running" aria-label="Timer mode"><option value="countdown">Countdown</option><option value="stopwatch">Stopwatch</option></select></label>
+                                <label x-show="addon.options.mode === 'countdown'">Minutes<input class="addon-number" type="number" min="1" max="5999" :value="Math.round(addon.options.duration_seconds / 60)" @change="timerChange('duration_seconds', Math.max(60, Math.min(359940, Math.round(Number($event.target.value) || 1) * 60))); $event.target.value = Math.round(addon.options.duration_seconds / 60)" :disabled="timerSession?.running" aria-label="Countdown minutes"></label>
+                                <small x-show="timerSession?.running">Pause the timer before changing its mode or duration.</small>
+                            </div>
+                            <div class="addon-instance-actions">
+                                <template x-if="addon.kind === 'timer'"><span class="addon-timer-actions"><button type="button" class="action-button primary-action" :disabled="!addon.enabled" @click="runTimerAction('toggle')" x-text="timerSession?.running ? 'Pause' : 'Start'"></button><button type="button" class="action-button" :disabled="!addon.enabled" @click="runTimerAction('reset')">Reset</button></span></template>
+                                <button type="button" class="action-button" @click="moveAddon(addon.id, -1)" :aria-label="`Move ${addonName(addon)} up`">↑ Up</button>
+                                <button type="button" class="action-button" @click="moveAddon(addon.id, 1)" :aria-label="`Move ${addonName(addon)} down`">↓ Down</button>
+                                <button type="button" class="action-button addon-remove" @click="removeAddon(addon.id)" :aria-label="`Remove ${addonName(addon)}`">Remove</button>
+                            </div>
+                        </div>
+                    </template>
+                    <template x-if="pendingTimerChange">
+                        <div class="addon-modal-backdrop" role="presentation" @keydown.escape.window="cancelTimerChange()">
+                            <div class="addon-modal" role="dialog" aria-modal="true" aria-labelledby="timer-reset-title" x-init="$nextTick(() => $refs.timerResetCancel.focus())">
+                                <h2 id="timer-reset-title">Reset timer to switch?</h2>
+                                <p>Changing the timer mode or duration will clear the current session.</p>
+                                <label><input type="checkbox" x-model="suppressResetPrompt"> Don't show this again</label>
+                                <div><button type="button" class="action-button" x-ref="timerResetCancel" @click="cancelTimerChange()">Cancel</button><button type="button" class="action-button primary-action" @click="confirmTimerChange()">Reset and change</button></div>
+                            </div>
+                        </div>
+                    </template>
                 </section>
                 </template>
 
@@ -128,7 +173,8 @@
                 <section class="tab-panel">
                     <div class="section-kicker">SHORTCUTS / 03</div>
                     <h1>Control at your fingertips<span class="yellow-period">.</span></h1>
-                    <p class="section-description">Customize key combinations. Internal conflicts between actions are highlighted automatically.</p>
+                    <p class="section-description">Action shortcuts work system-wide when switched on. They start off; the interaction modifier stays active. Unavailable combinations are shown below.</p>
+                    <template x-if="hotkeyErrors.length"><div class="conflict-alert" role="alert"><div><div class="conflict-title">System-wide shortcut unavailable</div><template x-for="message in hotkeyErrors" :key="message"><div class="conflict-text" x-text="message"></div></template></div></div></template>
 
                     <!-- Conflict alert banner -->
                     <template x-if="hasAnyConflict">
@@ -164,7 +210,7 @@
                         </div>
 
                         <!-- Open Settings Row -->
-                        <div class="shortcut-row" :class="{ 'has-conflict': getConflict('open_settings') }">
+                        <div class="shortcut-row" :class="{ 'disabled-row': !settings.shortcuts.open_settings_enabled, 'has-conflict': getConflict('open_settings') }">
                             <div class="shortcut-info">
                                 <div class="shortcut-name">Open Settings</div>
                                 <div class="shortcut-desc">Show settings window while clock is active</div>
@@ -173,6 +219,7 @@
                                 </template>
                             </div>
                             <div class="shortcut-action">
+                                <button type="button" class="switch shortcut-switch" role="switch" :aria-checked="settings.shortcuts.open_settings_enabled" :class="{ on: settings.shortcuts.open_settings_enabled }" :disabled="!settings.shortcuts.open_settings" aria-label="Enable Open Settings shortcut" @click="toggleShortcut('open_settings')"><span></span></button>
                                 <div class="keys-container" :class="{ 'recording': recordingAction === 'open_settings' }">
                                     <template x-if="recordingAction === 'open_settings'">
                                         <span class="recording-badge">Press keys (Esc to cancel)...</span>
@@ -186,10 +233,10 @@
                                     </template>
                                 </div>
                                 <div class="shortcut-buttons">
-                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'open_settings' }" @click="recordingAction === 'open_settings' ? stopRecording() : startRecording('open_settings')">
+                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'open_settings' }" :disabled="settings.shortcuts.open_settings_enabled" title="Turn off this shortcut before changing it" @click="recordingAction === 'open_settings' ? stopRecording() : startRecording('open_settings')">
                                         <span x-text="recordingAction === 'open_settings' ? 'Cancel' : 'Change'"></span>
                                     </button>
-                                    <button type="button" class="action-button clear-btn" title="Set to None (no shortcut)" :disabled="!settings.shortcuts?.open_settings" @click="clearShortcut('open_settings')">
+                                    <button type="button" class="action-button clear-btn" title="Turn off before clearing" :disabled="settings.shortcuts.open_settings_enabled || !settings.shortcuts?.open_settings" @click="clearShortcut('open_settings')">
                                         Clear
                                     </button>
                                 </div>
@@ -197,7 +244,7 @@
                         </div>
 
                         <!-- Quit TopClock Row -->
-                        <div class="shortcut-row" :class="{ 'has-conflict': getConflict('quit') }">
+                        <div class="shortcut-row" :class="{ 'disabled-row': !settings.shortcuts.quit_enabled, 'has-conflict': getConflict('quit') }">
                             <div class="shortcut-info">
                                 <div class="shortcut-name">Quit TopClock</div>
                                 <div class="shortcut-desc">Exit application completely</div>
@@ -206,6 +253,7 @@
                                 </template>
                             </div>
                             <div class="shortcut-action">
+                                <button type="button" class="switch shortcut-switch" role="switch" :aria-checked="settings.shortcuts.quit_enabled" :class="{ on: settings.shortcuts.quit_enabled }" :disabled="!settings.shortcuts.quit" aria-label="Enable Quit shortcut" @click="toggleShortcut('quit')"><span></span></button>
                                 <div class="keys-container" :class="{ 'recording': recordingAction === 'quit' }">
                                     <template x-if="recordingAction === 'quit'">
                                         <span class="recording-badge">Press keys (Esc to cancel)...</span>
@@ -219,10 +267,10 @@
                                     </template>
                                 </div>
                                 <div class="shortcut-buttons">
-                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'quit' }" @click="recordingAction === 'quit' ? stopRecording() : startRecording('quit')">
+                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'quit' }" :disabled="settings.shortcuts.quit_enabled" title="Turn off this shortcut before changing it" @click="recordingAction === 'quit' ? stopRecording() : startRecording('quit')">
                                         <span x-text="recordingAction === 'quit' ? 'Cancel' : 'Change'"></span>
                                     </button>
-                                    <button type="button" class="action-button clear-btn" title="Set to None (no shortcut)" :disabled="!settings.shortcuts?.quit" @click="clearShortcut('quit')">
+                                    <button type="button" class="action-button clear-btn" title="Turn off before clearing" :disabled="settings.shortcuts.quit_enabled || !settings.shortcuts?.quit" @click="clearShortcut('quit')">
                                         Clear
                                     </button>
                                 </div>
@@ -235,22 +283,23 @@
                         <div class="shortcut-box-header">
                             <div class="shortcut-box-header-row">
                                 <div class="shortcut-box-title">ADD-ON SHORTCUTS</div>
-                                <span class="addon-status-pill" :class="settings.timer_addon_enabled ? 'status-enabled' : 'status-disabled'" x-text="settings.timer_addon_enabled ? 'TIMER: ENABLED' : 'TIMER: DISABLED'"></span>
+                                <span class="addon-status-pill" :class="timerAddonEnabled ? 'status-enabled' : 'status-disabled'" x-text="timerAddonEnabled ? 'TIMER: ENABLED' : 'TIMER: DISABLED'"></span>
                             </div>
                             <div class="shortcut-box-desc">Dedicated shortcuts for add-ons. Only changeable when the respective add-on is enabled.</div>
                         </div>
 
                         <!-- Timer Start / Stop -->
-                        <div class="shortcut-row" :class="{ 'disabled-row': !settings.timer_addon_enabled, 'has-conflict': getConflict('timer_toggle') }">
+                        <div class="shortcut-row" :class="{ 'disabled-row': !timerAddonEnabled || !settings.shortcuts.timer_toggle_enabled, 'has-conflict': getConflict('timer_toggle') }">
                             <div class="shortcut-info">
                                 <div class="shortcut-name">Timer Start / Stop</div>
-                                <div class="shortcut-desc" x-text="settings.timer_addon_enabled ? 'Start or pause the timer' : 'Enable the Timer add-on in the Add-ons tab to configure this shortcut'"></div>
+                                <div class="shortcut-desc" x-text="timerAddonEnabled ? 'Start or pause the timer' : 'Enable the Timer add-on in the Add-ons tab to configure this shortcut'"></div>
                                 <template x-if="getConflict('timer_toggle')">
                                     <div class="conflict-badge" x-text="`⚠️ Conflict: Also assigned to ${getConflict('timer_toggle')}`"></div>
                                 </template>
                             </div>
                             <div class="shortcut-action">
-                                <div class="keys-container" :class="{ 'recording': recordingAction === 'timer_toggle', 'disabled': !settings.timer_addon_enabled }">
+                                <button type="button" class="switch shortcut-switch" role="switch" :aria-checked="settings.shortcuts.timer_toggle_enabled" :class="{ on: settings.shortcuts.timer_toggle_enabled }" :disabled="!timerAddonEnabled || !settings.shortcuts.timer_toggle" aria-label="Enable Timer Start or Pause shortcut" @click="toggleShortcut('timer_toggle')"><span></span></button>
+                                <div class="keys-container" :class="{ 'recording': recordingAction === 'timer_toggle', 'disabled': !timerAddonEnabled }">
                                     <template x-if="recordingAction === 'timer_toggle'">
                                         <span class="recording-badge">Press keys (Esc to cancel)...</span>
                                     </template>
@@ -263,10 +312,10 @@
                                     </template>
                                 </div>
                                 <div class="shortcut-buttons">
-                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'timer_toggle' }" :disabled="!settings.timer_addon_enabled" @click="recordingAction === 'timer_toggle' ? stopRecording() : startRecording('timer_toggle')">
+                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'timer_toggle' }" :disabled="!timerAddonEnabled || settings.shortcuts.timer_toggle_enabled" title="Turn off this shortcut before changing it" @click="recordingAction === 'timer_toggle' ? stopRecording() : startRecording('timer_toggle')">
                                         <span x-text="recordingAction === 'timer_toggle' ? 'Cancel' : 'Change'"></span>
                                     </button>
-                                    <button type="button" class="action-button clear-btn" title="Set to None (no shortcut)" :disabled="!settings.timer_addon_enabled || !settings.shortcuts?.timer_toggle" @click="clearShortcut('timer_toggle')">
+                                    <button type="button" class="action-button clear-btn" title="Turn off before clearing" :disabled="!timerAddonEnabled || settings.shortcuts.timer_toggle_enabled || !settings.shortcuts?.timer_toggle" @click="clearShortcut('timer_toggle')">
                                         Clear
                                     </button>
                                 </div>
@@ -274,16 +323,17 @@
                         </div>
 
                         <!-- Timer Reset -->
-                        <div class="shortcut-row" :class="{ 'disabled-row': !settings.timer_addon_enabled, 'has-conflict': getConflict('timer_reset') }">
+                        <div class="shortcut-row" :class="{ 'disabled-row': !timerAddonEnabled || !settings.shortcuts.timer_reset_enabled, 'has-conflict': getConflict('timer_reset') }">
                             <div class="shortcut-info">
                                 <div class="shortcut-name">Timer Reset</div>
-                                <div class="shortcut-desc" x-text="settings.timer_addon_enabled ? 'Reset the timer back to zero' : 'Enable the Timer add-on in the Add-ons tab to configure this shortcut'"></div>
+                                <div class="shortcut-desc" x-text="timerAddonEnabled ? 'Reset the timer back to zero' : 'Enable the Timer add-on in the Add-ons tab to configure this shortcut'"></div>
                                 <template x-if="getConflict('timer_reset')">
                                     <div class="conflict-badge" x-text="`⚠️ Conflict: Also assigned to ${getConflict('timer_reset')}`"></div>
                                 </template>
                             </div>
                             <div class="shortcut-action">
-                                <div class="keys-container" :class="{ 'recording': recordingAction === 'timer_reset', 'disabled': !settings.timer_addon_enabled }">
+                                <button type="button" class="switch shortcut-switch" role="switch" :aria-checked="settings.shortcuts.timer_reset_enabled" :class="{ on: settings.shortcuts.timer_reset_enabled }" :disabled="!timerAddonEnabled || !settings.shortcuts.timer_reset" aria-label="Enable Timer Reset shortcut" @click="toggleShortcut('timer_reset')"><span></span></button>
+                                <div class="keys-container" :class="{ 'recording': recordingAction === 'timer_reset', 'disabled': !timerAddonEnabled }">
                                     <template x-if="recordingAction === 'timer_reset'">
                                         <span class="recording-badge">Press keys (Esc to cancel)...</span>
                                     </template>
@@ -296,10 +346,10 @@
                                     </template>
                                 </div>
                                 <div class="shortcut-buttons">
-                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'timer_reset' }" :disabled="!settings.timer_addon_enabled" @click="recordingAction === 'timer_reset' ? stopRecording() : startRecording('timer_reset')">
+                                    <button type="button" class="action-button record-btn" :class="{ active: recordingAction === 'timer_reset' }" :disabled="!timerAddonEnabled || settings.shortcuts.timer_reset_enabled" title="Turn off this shortcut before changing it" @click="recordingAction === 'timer_reset' ? stopRecording() : startRecording('timer_reset')">
                                         <span x-text="recordingAction === 'timer_reset' ? 'Cancel' : 'Change'"></span>
                                     </button>
-                                    <button type="button" class="action-button clear-btn" title="Set to None (no shortcut)" :disabled="!settings.timer_addon_enabled || !settings.shortcuts?.timer_reset" @click="clearShortcut('timer_reset')">
+                                    <button type="button" class="action-button clear-btn" title="Turn off before clearing" :disabled="!timerAddonEnabled || settings.shortcuts.timer_reset_enabled || !settings.shortcuts?.timer_reset" @click="clearShortcut('timer_reset')">
                                         Clear
                                     </button>
                                 </div>
@@ -349,7 +399,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tip-card"><span>TIP</span> Hold Ctrl and drag the desktop clock to move it. Ctrl + click switches time format.</div>
+                    <div class="tip-card"><span>TIP</span> <span class="tip-copy" x-text="`Hold ${settings.shortcuts.interaction_modifier} and drag the desktop clock to move it. ${settings.shortcuts.interaction_modifier} + click switches time format.`"></span></div>
                 </section>
                 </template>
                 <div class="error-toast" x-show="error" x-transition.opacity x-text="error" x-cloak role="alert"></div>

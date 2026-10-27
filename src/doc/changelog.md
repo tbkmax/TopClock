@@ -2,6 +2,12 @@
 
 ## Added
 
+### 2026-10-27 - Built-in add-ons and system-wide shortcut controls
+
+- Added Date, multiple Region clocks, and a Timer with Countdown and Stopwatch modes to the Add-ons dashboard. Users can place, size, enable, remove and reorder instances above or below the clock. The transparent window measures the combined layout and keeps the main clock anchored where monitor bounds allow.
+- Added native Timer Start/Pause and Reset actions from the clock, Settings, conditional clock menu and optional shortcuts. Timer progress resumes after restart; a countdown stops at zero with a visible finished state. Mode or duration changes require a paused timer and warn before clearing recorded time, with an optional saved dismissal.
+- Added off-by-default switches for each action shortcut and a warning when Windows cannot register an enabled binding. The interaction modifier remains active. Fresh default Quit binding is `Ctrl+Alt+Q`; an older `Ctrl+Q` binding is migrated. Other stored bindings remain saved. No operator action is required.
+
 ### 2026-10-26 - Dedicated Shortcuts tab with conflict detection and modifier selection
 
 - Added a dedicated "Shortcuts" tab to the Settings sidebar and panel in [settings.html](../../settings.html) following DESIGN.md dark theme tokens.

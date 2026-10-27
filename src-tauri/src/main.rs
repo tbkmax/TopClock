@@ -1,8 +1,12 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod addons;
 mod fonts;
+mod hotkeys;
 mod settings;
 
+use addons::{timer_options, TimerSession};
+use serde::Serialize;
 use settings::{valid_settings, ClockPosition, ClockSettings, PersistedConfig};
 use std::{
     fs,
@@ -12,7 +16,7 @@ use std::{
         Arc, Mutex,
     },
     thread,
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 use tauri::{
     menu::{Menu, MenuItem},
@@ -38,6 +42,36 @@ struct ClockState {
     menu_open: AtomicBool,
     config: Mutex<PersistedConfig>,
     settings_path: PathBuf,
+    hotkey_errors: Mutex<Vec<String>>,
+}
+
+#[derive(Serialize)]
+struct MonitorBounds {
+    x: i32,
+    y: i32,
+    width: u32,
+    height: u32,
+}
+
+#[tauri::command]
+fn get_monitor_bounds(window: WebviewWindow) -> Option<MonitorBounds> {
+    window
+        .current_monitor()
+        .ok()
+        .flatten()
+        .map(|monitor| MonitorBounds {
+            x: monitor.position().x,
+            y: monitor.position().y,
+            width: monitor.size().width,
+            height: monitor.size().height,
+        })
+}
+
+fn epoch_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64
 }
 
 fn save_config(state: &ClockState, config: &PersistedConfig) -> Result<(), String> {
@@ -102,19 +136,71 @@ fn update_settings(
     settings: ClockSettings,
 ) -> Result<ClockSettings, String> {
     if !valid_settings(&settings) {
-        return Err("Invalid clock appearance settings".into());
+        return Err("Invalid settings or add-on configuration".into());
     }
+    let mut timer_state_changed = false;
     {
         let mut config = state.config.lock().unwrap();
+        let previous_session = config.timer_session.clone();
+        let old_timer = timer_options(&config.settings.addons);
+        let new_timer = timer_options(&settings.addons);
+        if old_timer != new_timer {
+            if config.timer_session.running && new_timer.is_some() {
+                return Err("Pause the timer before changing its mode or duration".into());
+            }
+            config.timer_session = TimerSession::default();
+            timer_state_changed = true;
+        }
         let previous = std::mem::replace(&mut config.settings, settings.clone());
         if let Err(error) = save_config(&state, &config) {
             config.settings = previous;
+            config.timer_session = previous_session;
             return Err(error);
         }
     }
     app.emit("clock-settings-changed", &settings)
         .map_err(|error| error.to_string())?;
+    if timer_state_changed {
+        let _ = app.emit("timer-state-changed", TimerSession::default());
+    }
     Ok(settings)
+}
+
+#[tauri::command]
+fn get_timer_state(state: tauri::State<'_, Arc<ClockState>>) -> TimerSession {
+    state.config.lock().unwrap().timer_session.clone()
+}
+
+fn apply_timer_action(app: &tauri::AppHandle, action: &str) -> Result<TimerSession, String> {
+    let state = app.state::<Arc<ClockState>>();
+    let mut config = state.config.lock().unwrap();
+    let (mode, duration) =
+        timer_options(&config.settings.addons).ok_or("Timer add-on is not enabled")?;
+    let mode = mode.to_owned();
+    let before = config.timer_session.clone();
+    match action {
+        "toggle" => config.timer_session.toggle(epoch_ms(), &mode, duration),
+        "reset" => config.timer_session = TimerSession::default(),
+        _ => return Err("Unknown timer action".into()),
+    }
+    if let Err(error) = save_config(&state, &config) {
+        config.timer_session = before;
+        return Err(error);
+    }
+    let snapshot = config.timer_session.clone();
+    drop(config);
+    let _ = app.emit("timer-state-changed", &snapshot);
+    Ok(snapshot)
+}
+
+#[tauri::command]
+fn timer_action(app: tauri::AppHandle, action: String) -> Result<TimerSession, String> {
+    apply_timer_action(&app, &action)
+}
+
+#[tauri::command]
+fn get_hotkey_errors(state: tauri::State<'_, Arc<ClockState>>) -> Vec<String> {
+    state.hotkey_errors.lock().unwrap().clone()
 }
 
 const STARTUP_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
@@ -212,6 +298,18 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
                     _ => VK_CONTROL as i32,
                 }
             };
+            {
+                let mut config = state.config.lock().unwrap();
+                if let Some((mode, duration)) = timer_options(&config.settings.addons) {
+                    let mode = mode.to_owned();
+                    if config.timer_session.normalize(epoch_ms(), &mode, duration) {
+                        if let Err(error) = save_config(&state, &config) {
+                            eprintln!("Unable to save completed timer: {error}");
+                        }
+                        let _ = window.emit("timer-state-changed", &config.timer_session);
+                    }
+                }
+            }
             let ctrl = unsafe { GetAsyncKeyState(modifier_vk) as u16 & 0x8000 != 0 };
             let menu_open = state.menu_open.load(Ordering::Relaxed);
             let ignore = !ctrl && !menu_open;
@@ -290,6 +388,10 @@ fn main() {
             get_settings,
             fonts::get_font_families,
             update_settings,
+            get_timer_state,
+            timer_action,
+            get_hotkey_errors,
+            get_monitor_bounds,
             get_startup_enabled,
             set_startup_enabled,
             quit
@@ -309,15 +411,55 @@ fn main() {
             }
             let mut config = fs::read(&settings_path)
                 .ok()
-                .and_then(|data| serde_json::from_slice::<PersistedConfig>(&data).ok())
+                .and_then(|data| serde_json::from_slice::<serde_json::Value>(&data).ok())
+                .and_then(|raw| {
+                    serde_json::from_value::<PersistedConfig>(raw.clone())
+                        .ok()
+                        .or_else(|| {
+                            let mut recovered = raw;
+                            let object = recovered.as_object_mut()?;
+                            object.remove("addons");
+                            object.remove("timer_session");
+                            serde_json::from_value::<PersistedConfig>(recovered).ok()
+                        })
+                })
                 .unwrap_or_default();
+            if !addons::valid_addons(&config.settings.addons) {
+                config.settings.addons.clear();
+                config.timer_session = TimerSession::default();
+            }
             if !valid_settings(&config.settings) {
                 config.settings = ClockSettings::default();
+            }
+            if config.settings.shortcuts.quit == "Ctrl+Q" {
+                config.settings.shortcuts.quit = "Ctrl+Alt+Q".into();
+            }
+            if config.settings.timer_addon_enabled
+                && !config
+                    .settings
+                    .addons
+                    .iter()
+                    .any(|addon| addon.kind == "timer")
+            {
+                config.settings.addons.push(addons::legacy_timer());
+            }
+            config.settings.timer_addon_enabled = false;
+            if config.timer_session.running != config.timer_session.started_at_ms.is_some()
+                || (config.timer_session.running && config.timer_session.finished)
+            {
+                config.timer_session = TimerSession::default();
+            }
+            if let Some((mode, duration)) = timer_options(&config.settings.addons) {
+                let mode = mode.to_owned();
+                config.timer_session.normalize(epoch_ms(), &mode, duration);
+            } else {
+                config.timer_session = TimerSession::default();
             }
             let state = Arc::new(ClockState {
                 menu_open: AtomicBool::new(false),
                 config: Mutex::new(config),
                 settings_path,
+                hotkey_errors: Mutex::new(Vec::new()),
             });
             save_config(&state, &state.config.lock().unwrap()).map_err(std::io::Error::other)?;
             app.manage(state);
@@ -392,6 +534,10 @@ fn main() {
 
             window.show()?;
             start_monitor(window, app.state::<Arc<ClockState>>().inner().clone());
+            hotkeys::start_hotkeys(
+                app.handle().clone(),
+                app.state::<Arc<ClockState>>().inner().clone(),
+            );
             Ok(())
         })
         .run(tauri::generate_context!())

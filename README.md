@@ -34,6 +34,8 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
   - **System Font Picker**: Enumerates fonts installed directly on your Windows PC—works 100% offline.
   - **Styling**: Independent text color, outline color, outline size slider, and font size from 24px to 200px.
   - **Animations**: Independent colon animations and numeric transition effects (fade, slide, flip, pulse, or none).
+- 🧩 **Built-in Add-ons** — Add a local date, multiple region clocks, or a Countdown/Stopwatch Timer above or below the clock. Set their order and relative text size in Settings.
+- ⌨️ **Optional System-wide Shortcuts** — Enable individual Open Settings, Quit, Timer Start/Pause, and Timer Reset bindings in the Shortcuts tab. They are off by default; the interaction modifier remains active.
 - ⚡ **Native Windows Performance** — Written in Rust with direct Win32 API integration, ensuring virtually zero CPU overhead and minimal memory usage.
 - 🔒 **Private & Offline** — No network telemetry, no external font CDNs, no web requests. Settings stay on your machine.
 
@@ -46,7 +48,7 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
 | **Move / Reposition** | <kbd>Ctrl</kbd> + **Left Drag** | Drag the clock anywhere on your desktop (position is saved automatically). |
 | **Toggle 12 / 24-Hour** | <kbd>Ctrl</kbd> + **Left Click** | Quick-toggle between 12-hour and 24-hour time formats. |
 | **Context Menu** | <kbd>Ctrl</kbd> + **Right Click** | Open the clock menu (access Settings or Quit). |
-| **Quit Application** | <kbd>Ctrl</kbd> + <kbd>Q</kbd> | Instantly exit TopClock when focused. |
+| **Quit Application** | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Q</kbd> | Optional system-wide shortcut, off by default. Enable it in Shortcuts. |
 | **Open Settings** | **Left Click Tray Icon** | Open the modern ClickHouse-inspired Settings panel. |
 | **Tray Context Menu** | **Right Click Tray Icon** | Access tray options and application exit. |
 

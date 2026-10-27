@@ -9,6 +9,12 @@
 
 ## Added
 
+### 2026-10-27 - Add-on persistence, Timer sessions and optional global shortcuts
+
+- Added a validated ordered add-on list for Date, multiple Region clocks and Timer in [addons.rs](../addons.rs) and [settings.rs](../settings.rs). Existing enabled Timer settings migrate to a Countdown instance; malformed add-on data can be discarded while preserving valid clock appearance.
+- Added durable Timer Start/Pause, Reset, resume-after-restart and countdown completion state. Timer state is separate from add-on appearance and broadcasts `timer-state-changed`.
+- Added per-action enable switches, off by default, and system-wide Windows hotkey registration in [hotkeys.rs](../hotkeys.rs). Registration failures are shown in Settings. The configured interaction modifier remains active. The default Quit binding changes to `Ctrl+Alt+Q`; older `Ctrl+Q` defaults migrate. No operator action is required.
+
 ### 2026-10-26 - Shortcut settings and configurable interaction modifier
 
 - Added `ShortcutSettings` to `ClockSettings` in [settings.rs](../settings.rs) with serde default fallbacks for `interaction_modifier` ("Ctrl"), `open_settings` ("Ctrl+,"), `quit` ("Ctrl+Q"), `timer_toggle` ("Ctrl+Shift+S"), and `timer_reset` ("Ctrl+Shift+R").

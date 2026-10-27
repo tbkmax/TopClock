@@ -95,6 +95,7 @@ html, body {
 /* Clock Container */
 .clock-container {
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 0 8px 4px;
@@ -103,6 +104,37 @@ html, body {
     opacity: 1;
     pointer-events: none; /* Passthrough by default */
 }
+
+.addon-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    width: max-content;
+    max-width: 100%;
+    margin: 2px 0;
+}
+.addon-line {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: .45em;
+    width: max-content;
+    max-width: 100%;
+    font-family: var(--clock-font-family);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--clock-font-color);
+    -webkit-text-stroke: var(--clock-outline-width) var(--clock-outline-color);
+    paint-order: stroke fill;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, .65);
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.addon-line.addon-finished { color: var(--color-primary); }
+.addon-label { font-size: .65em; opacity: .85; }
+.addon-time { display: inline-flex; align-items: baseline; }
+#app.ctrl-active .addon-interactive { pointer-events: auto; cursor: pointer; }
 
 #app.ctrl-active .clock-container,
 #app.menu-active .clock-container {
