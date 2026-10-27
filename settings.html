@@ -33,8 +33,8 @@
                     <button type="button" class="tab-button" :class="{ active: tab === 'shortcuts' }" :aria-selected="tab === 'shortcuts'" @click="stopRecording(); tab = 'shortcuts'">
                         <span class="tab-glyph">⌨</span> Shortcuts <span class="tab-arrow">›</span>
                     </button>
-                    <button type="button" class="tab-button" :class="{ active: tab === 'general' }" :aria-selected="tab === 'general'" @click="stopRecording(); tab = 'general'">
-                        <span class="tab-glyph">⚙</span> General <span class="tab-arrow">›</span>
+                    <button type="button" class="tab-button" :class="{ active: tab === 'general' }" :aria-selected="tab === 'general'" :aria-label="updateAvailable ? 'General, update available' : 'General'" @click="stopRecording(); tab = 'general'">
+                        <span class="tab-glyph">⚙</span> General <span class="tab-update-badge" x-show="updateAvailable" title="Update available" aria-hidden="true">!</span><span class="tab-arrow">›</span>
                     </button>
                 </nav>
                 <div class="sidebar-bottom"><span class="status-dot"></span> CLOCK RUNNING <span class="version" x-text="`v${appVersion}`">v0.0.0</span></div>
@@ -383,7 +383,7 @@
                         <div class="setting-row update-row">
                             <div>
                                 <div class="control-title">Software Updates</div>
-                                <div class="control-description" x-text="updateStatusText"></div>
+                                <div class="control-description" role="status" aria-live="polite" x-text="updateStatusText"></div>
                             </div>
                             <div class="update-actions">
                                 <template x-if="updateAvailable">

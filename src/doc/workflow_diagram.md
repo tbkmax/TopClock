@@ -102,3 +102,5 @@ sequenceDiagram
 ```
 
 The [Add-ons tab](../../settings.html) controls placement, order, a visible 10%–100% size slider, and options. It previews the Date weekday and Region label switches using the shared formatter in [addons.js](../addons.js). The [clock](../../index.html) reserves distinct rows above and below the main display; the optional weekday uses 80% of its Date row's font size. Timer actions and running progress are native state; frontend display values are computed on each tick without a mode label. The menu Reset action calls the same timer command.
+
+In the [General tab](../../settings.html), the startup or manual release check in [settings.js](../settings.js) sets `updateAvailable` after comparing the latest tag with the installed version. The General sidebar badge and its accessible label follow that state, while the update row shows the status text and download action. A successful current-version result hides the badge; a failed network check does not claim that an available update disappeared.

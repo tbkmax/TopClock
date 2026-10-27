@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-27 - Update indicator on General tab
+
+- The General sidebar tab now shows a yellow alert badge when an update is available. The badge clears when a successful check finds the installed version current, and the update status is announced to assistive technology. No operator action is required.
+
 ### 2026-10-27 - Date weekday and Region label controls
 
 - Added a Date switch to append a smaller English weekday, such as `10-27 (Tue)`, and a Region clock switch to hide or show its name. Existing add-ons keep their previous display until the user changes these options. No operator action is required.
