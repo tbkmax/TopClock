@@ -2,6 +2,17 @@
 
 This backlog tracks upcoming features, configurability milestones, and planned improvements for TopClock.
 
+## Uninstall coexistence and legacy data
+
+- **Title:** Preserve portable startup and remove legacy data during installed uninstall.
+- **Problem or opportunity:** Tauri's NSIS uninstaller removes the shared `TopClock` Run value by name, even if it points to a separate portable copy. Its optional data deletion does not cover the legacy `%APPDATA%\com.maxtc.topclock` migration folder.
+- **Desired outcome:** Uninstalling the installed copy leaves a portable copy's sign-in setting intact, while still removing an entry that points to the installed executable. The explicit data-deletion choice also removes legacy TopClock data.
+- **Scope:** NSIS uninstall behavior and release documentation.
+- **Acceptance criteria:** With both copies present, uninstalling the installed copy preserves a Run value for the portable path; uninstalling when the Run value points to the installed path removes it. Selecting application-data deletion removes the legacy folder, while leaving it untouched when the user does not select deletion.
+- **Dependencies and risks:** Any customization must preserve Tauri's update and uninstall behavior. App data is also shared, so users still need an explicit choice before deleting it.
+- **Verification:** Test both Run-value cases with an actual NSIS install and uninstall on Windows.
+- **Priority:** Medium — affects only users who keep both distribution types, but can silently disable launch at sign-in.
+
 ---
 
 ## 1. Configurable Proximity Fade Settings

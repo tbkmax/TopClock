@@ -108,5 +108,12 @@ npm run tauri:build
 
 ## Updates & Releases
 
-TopClock includes an automated in-app updater backed by GitHub Releases and cryptographic signatures (requiring zero paid Microsoft code signing certificates). See [doc/UPDATE_SYSTEM.md](doc/UPDATE_SYSTEM.md) for the full architecture, cryptographic key management, and step-by-step release publishing instructions.
+TopClock checks GitHub Releases for newer versions and opens the release page for manual download. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for the build and publishing steps.
+
+## Uninstalling
+
+- **Installer:** Quit TopClock, then use Windows **Settings > Apps > Installed apps > TopClock > Uninstall**. The NSIS uninstaller removes the installed application and its sign-in entry. Select **Delete the application data** in the uninstaller if you also want to erase TopClock settings and cache for this Windows user.
+- **Portable ZIP:** Quit TopClock, then run `Uninstall-TopClock.cmd` from the same extracted folder as `TopClock.exe`. It removes that executable and its matching sign-in entry, then asks separately whether to erase shared settings and cache. Delete the remaining cleanup scripts and extracted folder afterward if they contain nothing else you need.
+
+Installer and portable copies share the same TopClock user-data directories and sign-in entry. Deleting data affects both copies. The portable script does not remove other copies in different folders. If both types are present, uninstalling the installed copy also clears their shared sign-in entry; re-enable launch at sign-in from the remaining portable copy if needed. The NSIS data checkbox removes the current TopClock data directories; an older `%APPDATA%\com.maxtc.topclock` migration folder may remain.
 

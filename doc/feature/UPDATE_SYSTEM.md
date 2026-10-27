@@ -12,7 +12,7 @@ TopClock uses a **zero-overhead, heuristic-safe update reminder**:
 flowchart TD
     A["Developer pushes Git Tag (e.g. v0.1.0)"] --> B["GitHub Actions CI/CD (.github/workflows/release.yml)"]
     B --> C["Compiles Frontend & Rust Windows Binary"]
-    C --> D["Uploads to GitHub Release:\n• TopClock_x.x.x_x64-setup.exe (NSIS Installer)\n• TopClock.exe (Portable)\n• checksums-sha256.txt"]
+    C --> D["Uploads to GitHub Release:\n• TopClock_x.x.x_x64-setup.exe (NSIS Installer)\n• TopClock_x.x.x_portable.zip (app and cleanup scripts)\n• checksums-sha256.txt"]
     D --> E["User's TopClock Application"]
     E -->|Queries GitHub Releases API| D
     E -->|Notifies user when new version exists| E
@@ -21,7 +21,7 @@ flowchart TD
 
 ### Why This Approach Was Chosen
 - 🛡️ **Zero Windows Defender False Positives**: Does not bundle background file-replacement or dropper code, avoiding automated `!ml` (machine-learning) antivirus heuristic flags.
-- ⚡ **Lightweight & Fast**: No external updater runtime plugins or extra binary dependencies (`zip`, `minisign`, etc.).
+- ⚡ **Lightweight & Fast**: No external updater runtime plugins or extra runtime binary dependencies.
 - 🆓 **100% Free**: No corporate Microsoft Authenticode / EV signing certificates required.
 - 🔒 **Zero Private Key Management**: No need to manage or configure signing private keys locally or in CI secrets.
 
@@ -59,9 +59,12 @@ The workflow in [`.github/workflows/release.yml`](file:///../../.github/workflow
 2. It builds the Windows installer and standalone executable.
 3. It generates SHA-256 checksums and creates a GitHub Release draft with:
    - `TopClock_0.1.0_x64-setup.exe`
-   - `TopClock.exe`
-   - `TopClock_0.1.0_portable.exe`
+   - `TopClock_0.1.0_portable.zip` (contains `TopClock.exe`, `Uninstall-TopClock.cmd`, and `Uninstall-TopClock.ps1`)
    - `checksums-sha256.txt`
+
+The portable ZIP contains the standalone `TopClock.exe`; it does not require the NSIS installer. It still stores settings in the user's app config directory. To update a portable copy, quit TopClock and extract the new `TopClock.exe` over the old one in the same folder. Launch at sign-in uses the executable's full path, so keeping both the folder and filename unchanged preserves that setting. Deleting the executable without disabling launch at sign-in leaves a stale Windows Run entry; restore the file at that path or remove the startup entry.
+
+To remove a portable copy, quit TopClock and run `Uninstall-TopClock.cmd` beside that copy's `TopClock.exe`. It removes only the adjacent executable and a sign-in entry that points to it. It asks separately before deleting TopClock data shared by all copies for the current Windows user. Delete the remaining cleanup scripts and extracted folder manually afterward. For an installed copy, use Windows Installed apps; the NSIS uninstaller offers an optional application-data checkbox. See [Uninstalling](../../README.md#uninstalling).
 
 ### Step 3.3: Publish the Draft
 1. Visit **`https://github.com/tbkmax/TopClock/releases`**.

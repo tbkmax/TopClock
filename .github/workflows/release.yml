@@ -101,12 +101,20 @@ jobs:
             Copy-Item -Path $installer.FullName -Destination $assetsDir
           }
 
-          # 2. Standalone Portable Executables
+          # 2. Versioned portable ZIP containing a stable executable name and cleanup scripts
           $binary = "src-tauri/target/release/top_clock.exe"
           if (Test-Path $binary) {
-            Copy-Item -Path $binary -Destination "$assetsDir/TopClock.exe"
-            Copy-Item -Path $binary -Destination "$assetsDir/TopClock_${version}_portable.exe"
-            Write-Host "Prepared standalone executables: TopClock.exe and TopClock_${version}_portable.exe"
+            $portableExe = Join-Path $assetsDir "TopClock.exe"
+            $uninstallCmd = Join-Path $assetsDir "Uninstall-TopClock.cmd"
+            $uninstallPs1 = Join-Path $assetsDir "Uninstall-TopClock.ps1"
+            $portableZip = Join-Path $assetsDir "TopClock_${version}_portable.zip"
+            Copy-Item -LiteralPath $binary -Destination $portableExe -ErrorAction Stop
+            Copy-Item -LiteralPath "scripts/Uninstall-TopClock.cmd" -Destination $uninstallCmd -ErrorAction Stop
+            Copy-Item -LiteralPath "scripts/Uninstall-TopClock.ps1" -Destination $uninstallPs1 -ErrorAction Stop
+            Compress-Archive -LiteralPath $portableExe, $uninstallCmd, $uninstallPs1 -DestinationPath $portableZip -CompressionLevel Optimal -ErrorAction Stop
+            Remove-Item -LiteralPath $portableExe -ErrorAction Stop
+            Remove-Item -LiteralPath $uninstallCmd, $uninstallPs1 -ErrorAction Stop
+            Write-Host "Prepared portable ZIP: $portableZip (contains TopClock.exe and cleanup scripts)"
           } else {
             Write-Error "Binary $binary not found"
             exit 1
@@ -114,7 +122,7 @@ jobs:
 
           # 3. Generate SHA-256 checksums
           Push-Location $assetsDir
-          $checksums = Get-ChildItem -Filter "*.exe" | ForEach-Object {
+          $checksums = Get-ChildItem -File | Where-Object { $_.Extension -in @(".exe", ".zip") } | ForEach-Object {
             $hash = (Get-FileHash -Algorithm SHA256 $_.Name).Hash.ToLower()
             "$hash  $($_.Name)"
           }
