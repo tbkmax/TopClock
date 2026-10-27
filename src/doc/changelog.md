@@ -2,6 +2,12 @@
 
 ## Added
 
+### 2026-10-26 - Settings option in Ctrl + right-click dropdown menu
+
+- Added a "Settings" action to the clock's Ctrl + right-click dropdown menu in [index.html](../../index.html), invoking `open_settings` to display and focus the Settings window.
+- Added a subtle hairline divider between Settings and Quit actions in [index.html](../../index.html) and styled `.menu-icon.settings-icon`, `.menu-icon.quit-icon`, and `.menu-divider` in [style.css](../style.css).
+- Updated `scheduleResize()` in [main.js](../main.js) to dynamically calculate dropdown menu height using `$refs.dropdownMenu`, ensuring complete visibility of menu items without window clipping.
+
 ### 2026-10-25 - Lightweight GitHub Release update reminder
 
 - Added dynamic version indicator to the Settings sidebar and General preferences tab using `getVersion()` from `@tauri-apps/api/app`.

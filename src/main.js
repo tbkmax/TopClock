@@ -105,7 +105,12 @@ Alpine.data('clockApp', () => ({
             const minWidth = this.menuOpen ? 138 : 60;
             const width = Math.max(minWidth, Math.ceil(containerRect.width) + 4);
             const baseHeight = Math.ceil(containerRect.height) + 2;
-            const height = this.menuOpen ? baseHeight + 46 : baseHeight;
+            let menuExtraHeight = 0;
+            if (this.menuOpen) {
+                const measuredHeight = this.$refs.dropdownMenu ? Math.ceil(this.$refs.dropdownMenu.getBoundingClientRect().height) : 0;
+                menuExtraHeight = measuredHeight > 0 ? measuredHeight + 4 : 78;
+            }
+            const height = baseHeight + menuExtraHeight;
             resizeQueue = resizeQueue.then(async () => {
                 const oldSize = await appWindow.outerSize();
                 const scale = await appWindow.scaleFactor();
@@ -226,6 +231,11 @@ Alpine.data('clockApp', () => ({
         this.menuOpen = false;
         invoke('set_menu_open', { open: false }).catch(console.error);
         this.scheduleResize();
+    },
+
+    openSettings() {
+        this.closeMenu();
+        invoke('open_settings').catch(console.error);
     },
 
     quitApp() {

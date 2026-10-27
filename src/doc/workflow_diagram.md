@@ -12,6 +12,8 @@ classDiagram
       updateClock()
       toggleFormat()
       scheduleResize()
+      openSettings()
+      quitApp()
     }
     class settingsApp {
       settings
@@ -25,6 +27,8 @@ classDiagram
       get_font_families()
       update_settings()
       set_startup_enabled()
+      open_settings()
+      quit()
     }
     clockApp --> TauriCommands : invoke
     settingsApp --> TauriCommands : invoke

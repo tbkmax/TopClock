@@ -1,5 +1,5 @@
 (finished TODO will be in Completed.md, only search if necessary)
-
+(UI design generally should follow DESIGN.md)
 ### TODO 1: basic feature implementations, On top clock (Completed)
 
 ### TODO 2: setting window
@@ -9,10 +9,10 @@
 - [x] no full screen button, the size should not be able to change
 - [ ] the setting page should have different tab, which will include: Clock, Add-on, Shortcut, General
 - [x] Clock tab is for setting like blink or not, font color, outline color, size..... should be reflect to the real one while changing (Not implment all of this right now, do few simple one create place holder fo rest)
-- [x] Add-on tab is for like below clock can let user add timer or other region's clock (Not implment right now)
-- [ ] Shortcut tab, list all the shortcut
+- [x] Add-on tab is for like below clock can let user add timer or other region's clock (Not implement right now)
+- [ ] Shortcut tab, list all the shortcut (Not implement right now)
 - [x] General tab is for setting like turn on open this when PC open or that kind of settings
-- [ ] add when user hold ctrl right click also will show setting
+- [x] add when user hold ctrl right click also will show setting
 
 ### TODO 3: Clock tab in setting (Completed)
 
@@ -33,6 +33,5 @@
 
 ### TODO 7: Shortcut Tab:
 - [ ] add a place for show all shortcut in here, which they can be change and will also show the conflict
-- [ ] Design should follow DESIGN.md
 
 ### TODO 8: Update system (Completed)

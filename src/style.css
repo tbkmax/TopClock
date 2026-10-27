@@ -239,9 +239,22 @@ html, body {
 .menu-icon {
     width: 13px;
     height: 13px;
-    color: var(--color-rose);
     stroke: currentColor;
     transition: transform 0.15s ease;
+}
+
+.menu-icon.quit-icon {
+    color: var(--color-rose);
+}
+
+.menu-icon.settings-icon {
+    color: var(--color-body);
+}
+
+.menu-divider {
+    height: 1px;
+    background-color: var(--color-hairline);
+    margin: 3px 0;
 }
 
 .menu-shortcut {

@@ -63,7 +63,7 @@ This backlog tracks upcoming features, configurability milestones, and planned i
 
 ---
 
-## 6. Open Settings from the Clock Menu
+## 6. Open Settings from the Clock Menu (Completed)
 
 - **Title:** Add Settings to the Ctrl + right-click menu
 - **Problem or opportunity:** The existing separate Settings window opens from the tray, while the clock's Ctrl + right-click menu only shows Quit.
@@ -75,4 +75,5 @@ This backlog tracks upcoming features, configurability milestones, and planned i
   - Ctrl + right-click then Settings opens and focuses the existing window without changing click-through behavior.
 - **Dependencies and risks:** Keep the current menu and tray behavior.
 - **Verification:** Open Settings from the clock and tray; verify clock interaction returns after closing the menu.
+- **Status:** Completed (2026-10-26).
 - **Priority:** Medium — Polish and user experience.
