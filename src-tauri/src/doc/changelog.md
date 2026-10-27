@@ -9,6 +9,13 @@
 
 ## Added
 
+### 2026-10-26 - Shortcut settings and configurable interaction modifier
+
+- Added `ShortcutSettings` to `ClockSettings` in [settings.rs](../settings.rs) with serde default fallbacks for `interaction_modifier` ("Ctrl"), `open_settings` ("Ctrl+,"), `quit` ("Ctrl+Q"), `timer_toggle` ("Ctrl+Shift+S"), and `timer_reset` ("Ctrl+Shift+R").
+- Added validation for `interaction_modifier` (accepting "Ctrl", "Alt", or "Shift") and shortcut string length/control character limits.
+- Updated `start_monitor` in [main.rs](../main.rs) to poll the dynamically configured modifier virtual key code (`VK_CONTROL`, `VK_MENU`, or `VK_SHIFT`) via `GetAsyncKeyState`.
+- Added unit tests in `settings.rs` validating shortcut serialization round-trip, empty string acceptance (no shortcut), and invalid modifier rejection.
+
 ### 2026-10-25 - Release reminder command and auto-update setting
 
 - Added `open_release_page` Tauri command in [main.rs](../main.rs) that opens the GitHub releases download page in the default web browser, eliminating internal dropper/updater code.

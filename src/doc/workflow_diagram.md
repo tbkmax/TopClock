@@ -21,6 +21,11 @@ classDiagram
       pendingSaves
       save()
       queueSave()
+      startRecording()
+      stopRecording()
+      clearShortcut()
+      resetAllShortcuts()
+      getConflict()
     }
     class TauriCommands {
       get_settings()

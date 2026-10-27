@@ -53,6 +53,9 @@
                     </svg>
                     <span>Settings</span>
                 </span>
+                <template x-if="settings?.shortcuts?.open_settings">
+                    <span class="menu-shortcut" x-text="settings.shortcuts.open_settings"></span>
+                </template>
             </button>
             <div class="menu-divider"></div>
             <button class="menu-item" @click="quitApp" title="Quit Application">
@@ -64,7 +67,9 @@
                     </svg>
                     <span>Quit</span>
                 </span>
-                <span class="menu-shortcut">Ctrl+Q</span>
+                <template x-if="settings?.shortcuts?.quit">
+                    <span class="menu-shortcut" x-text="settings.shortcuts.quit"></span>
+                </template>
             </button>
         </div>
     </div>

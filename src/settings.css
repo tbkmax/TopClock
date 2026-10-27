@@ -18,4 +18,215 @@
 .addon-card{min-height:100px;border:1px solid #303030;border-radius:12px;background:#1a1a1a;margin:14px 0;display:flex;align-items:center;padding:19px;gap:17px}.addon-icon{width:44px;height:44px;flex:none;border-radius:8px;background:#282816;color:#faff69;display:grid;place-items:center;font-size:22px}.addon-title{font-size:15px;font-weight:700}.addon-card p{font-size:12px;color:#999;margin:5px 0 0}.coming-soon{margin-left:auto;white-space:nowrap;border-radius:999px;border:1px solid #4a4a31;color:#faff69;padding:5px 8px;font-size:9px;font-weight:700;letter-spacing:.7px}
 .general-panel{margin-top:26px}.general-panel .setting-row{min-height:80px}.update-actions{display:flex;align-items:center;gap:8px;flex:none}.action-button{background:#242424;color:#fff;border:1px solid #3a3a3a;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;transition:background .15s,border-color .15s,color .15s}.action-button:hover:not(:disabled){background:#303030;color:#faff69;border-color:#555}.action-button:disabled{opacity:.5;cursor:not-allowed}.action-button.primary-action{background:#faff69;color:#0a0a0a;border-color:#faff69;font-weight:700}.action-button.primary-action:hover:not(:disabled){background:#f4f952}.tip-card{background:#242419;border:1px solid #414125;border-radius:10px;padding:12px;color:#bbb;font-size:11px;line-height:1.6;margin-top:12px}.tip-card span{display:inline-block;color:#faff69;font-size:10px;letter-spacing:1px;font-weight:700;margin-right:10px}.error-toast{position:absolute;bottom:12px;left:30px;right:30px;padding:10px 12px;border:1px solid #ef4444;background:#2d1515;color:#fff;border-radius:8px;font-size:11px}
 button:focus-visible,input:focus-visible{outline:2px solid #faff69;outline-offset:2px}
+/* Shortcuts tab styling */
+.conflict-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 8px;
+    color: #ff8888;
+}
+.conflict-icon {
+    font-size: 16px;
+    line-height: 1;
+}
+.conflict-title {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 2px;
+    color: #ef4444;
+}
+.conflict-text {
+    font-size: 11px;
+    color: #ddaaaa;
+    line-height: 1.4;
+}
+.conflict-badge {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    border-radius: 4px;
+}
+.shortcut-box {
+    background: #141414;
+    border: 1px solid #282828;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+.shortcut-box-header {
+    margin-bottom: 14px;
+    border-bottom: 1px solid #222222;
+    padding-bottom: 10px;
+}
+.shortcut-box-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.shortcut-box-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    color: #faff69;
+}
+.shortcut-box-desc {
+    font-size: 11px;
+    color: #888888;
+    margin-top: 2px;
+}
+.addon-status-pill {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+.status-enabled {
+    background: rgba(250, 255, 105, 0.15);
+    color: #faff69;
+    border: 1px solid rgba(250, 255, 105, 0.4);
+}
+.status-disabled {
+    background: #202020;
+    color: #666666;
+    border: 1px solid #303030;
+}
+.shortcut-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border: 1px solid #222222;
+    border-radius: 6px;
+    background: #1a1a1a;
+    margin-bottom: 8px;
+    gap: 16px;
+    transition: border-color .15s ease;
+}
+.shortcut-row:last-child {
+    margin-bottom: 0;
+}
+.shortcut-row.disabled-row {
+    opacity: 0.5;
+}
+.shortcut-row.has-conflict {
+    border-color: rgba(239, 68, 68, 0.5);
+}
+.shortcut-info {
+    flex: 1;
+    min-width: 0;
+}
+.shortcut-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+}
+.shortcut-desc {
+    font-size: 11px;
+    color: #888888;
+    margin-top: 2px;
+}
+.shortcut-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+.keys-container {
+    min-width: 110px;
+    display: flex;
+    justify-content: flex-end;
+}
+.keys-list {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.key-pill {
+    display: inline-block;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    font-family: "JetBrains Mono", monospace;
+    color: #ffffff;
+    background: #242424;
+    border: 1px solid #383838;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+.key-pill.none-pill {
+    color: #777777;
+    font-style: italic;
+    background: transparent;
+    border-style: dashed;
+}
+.keys-container.recording {
+    border: 1px dashed #faff69;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background: rgba(250, 255, 105, 0.08);
+    animation: recordPulse 1.2s infinite ease-in-out;
+}
+@keyframes recordPulse {
+    0%, 100% { border-color: #faff69; }
+    50% { border-color: rgba(250, 255, 105, 0.3); }
+}
+.recording-badge {
+    font-size: 11px;
+    color: #faff69;
+    font-weight: 600;
+}
+.shortcut-buttons {
+    display: flex;
+    gap: 6px;
+}
+.record-btn {
+    font-size: 11px;
+    padding: 4px 10px;
+}
+.record-btn.active {
+    background: #faff69;
+    color: #0a0a0a;
+    border-color: #faff69;
+}
+.clear-btn {
+    font-size: 11px;
+    padding: 4px 8px;
+    color: #888888;
+}
+.clear-btn:hover:not(:disabled) {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+.modifier-select {
+    min-width: 90px;
+    padding: 6px 10px;
+    font-size: 12px;
+}
+.shortcut-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    padding-bottom: 10px;
+}
+.reset-shortcuts-btn {
+    font-size: 12px;
+    padding: 6px 14px;
+    color: #888888;
+}
+.reset-shortcuts-btn:hover {
+    color: #ffffff;
+    border-color: #555555;
+}
+
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}

@@ -17,6 +17,52 @@ fn default_auto_check_updates() -> bool {
     true
 }
 
+fn default_modifier() -> String {
+    "Ctrl".into()
+}
+
+fn default_open_settings() -> String {
+    "Ctrl+,".into()
+}
+
+fn default_quit() -> String {
+    "Ctrl+Q".into()
+}
+
+fn default_timer_toggle() -> String {
+    "Ctrl+Shift+S".into()
+}
+
+fn default_timer_reset() -> String {
+    "Ctrl+Shift+R".into()
+}
+
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+pub(crate) struct ShortcutSettings {
+    #[serde(default = "default_modifier")]
+    pub(crate) interaction_modifier: String,
+    #[serde(default = "default_open_settings")]
+    pub(crate) open_settings: String,
+    #[serde(default = "default_quit")]
+    pub(crate) quit: String,
+    #[serde(default = "default_timer_toggle")]
+    pub(crate) timer_toggle: String,
+    #[serde(default = "default_timer_reset")]
+    pub(crate) timer_reset: String,
+}
+
+impl Default for ShortcutSettings {
+    fn default() -> Self {
+        Self {
+            interaction_modifier: default_modifier(),
+            open_settings: default_open_settings(),
+            quit: default_quit(),
+            timer_toggle: default_timer_toggle(),
+            timer_reset: default_timer_reset(),
+        }
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct ClockSettings {
     pub(crate) colon_animation: String,
@@ -31,6 +77,10 @@ pub(crate) struct ClockSettings {
     pub(crate) time_layout: String,
     #[serde(default = "default_auto_check_updates")]
     pub(crate) auto_check_updates: bool,
+    #[serde(default)]
+    pub(crate) shortcuts: ShortcutSettings,
+    #[serde(default)]
+    pub(crate) timer_addon_enabled: bool,
 }
 
 impl Default for ClockSettings {
@@ -47,6 +97,8 @@ impl Default for ClockSettings {
             show_ampm: true,
             time_layout: "hms".into(),
             auto_check_updates: true,
+            shortcuts: ShortcutSettings::default(),
+            timer_addon_enabled: false,
         }
     }
 }
@@ -55,6 +107,10 @@ fn valid_color(value: &str) -> bool {
     value.len() == 7
         && value.starts_with('#')
         && value[1..].bytes().all(|byte| byte.is_ascii_hexdigit())
+}
+
+fn valid_shortcut_string(value: &str) -> bool {
+    value.chars().count() <= 40 && value.chars().all(|ch| !ch.is_control())
 }
 
 pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
@@ -78,6 +134,14 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
             settings.number_animation.as_str(),
             "tick" | "fade" | "slide" | "none"
         )
+        && matches!(
+            settings.shortcuts.interaction_modifier.as_str(),
+            "Ctrl" | "Alt" | "Shift"
+        )
+        && valid_shortcut_string(&settings.shortcuts.open_settings)
+        && valid_shortcut_string(&settings.shortcuts.quit)
+        && valid_shortcut_string(&settings.shortcuts.timer_toggle)
+        && valid_shortcut_string(&settings.shortcuts.timer_reset)
 }
 
 #[cfg(test)]
@@ -107,8 +171,28 @@ mod tests {
         assert_eq!(loaded.settings.time_layout, "ms");
         assert_eq!(loaded.settings.colon_animation, "none");
         assert_eq!(loaded.settings.number_animation, "slide");
+        assert_eq!(loaded.settings.shortcuts.interaction_modifier, "Ctrl");
+        assert_eq!(loaded.settings.shortcuts.quit, "Ctrl+Q");
+        assert_eq!(loaded.settings.shortcuts.open_settings, "Ctrl+,");
         assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
+    }
+
+    #[test]
+    fn shortcut_settings_round_trip_and_validation() {
+        let mut settings = ClockSettings::default();
+        settings.shortcuts.interaction_modifier = "Alt".into();
+        settings.shortcuts.quit = "".into(); // Allowed (no shortcut)
+        settings.shortcuts.open_settings = "Ctrl+Shift+P".into();
+        assert!(valid_settings(&settings));
+
+        settings.shortcuts.interaction_modifier = "InvalidKey".into();
+        assert!(!valid_settings(&settings));
+        settings.shortcuts.interaction_modifier = "Shift".into();
+        assert!(valid_settings(&settings));
+
+        settings.shortcuts.quit = "VeryLongShortcutKeyStringThatExceedsTheMaximumAllowedCharactersLimit".into();
+        assert!(!valid_settings(&settings));
     }
 
     #[test]

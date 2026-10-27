@@ -22,7 +22,7 @@ use tauri::{
 use windows_sys::Win32::{
     Foundation::{HWND, POINT},
     UI::{
-        Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL},
+        Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL, VK_MENU, VK_SHIFT},
         WindowsAndMessaging::{
             GetCursorPos, GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_LAYERED,
             WS_EX_TRANSPARENT,
@@ -204,7 +204,15 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
         let mut position_changed_at = None;
 
         loop {
-            let ctrl = unsafe { GetAsyncKeyState(VK_CONTROL as i32) as u16 & 0x8000 != 0 };
+            let modifier_vk = {
+                let config = state.config.lock().unwrap();
+                match config.settings.shortcuts.interaction_modifier.as_str() {
+                    "Alt" => VK_MENU as i32,
+                    "Shift" => VK_SHIFT as i32,
+                    _ => VK_CONTROL as i32,
+                }
+            };
+            let ctrl = unsafe { GetAsyncKeyState(modifier_vk) as u16 & 0x8000 != 0 };
             let menu_open = state.menu_open.load(Ordering::Relaxed);
             let ignore = !ctrl && !menu_open;
 

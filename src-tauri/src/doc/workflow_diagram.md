@@ -25,6 +25,15 @@ classDiagram
       show_ampm: bool
       time_layout: String
       auto_check_updates: bool
+      shortcuts: ShortcutSettings
+      timer_addon_enabled: bool
+    }
+    class ShortcutSettings {
+      interaction_modifier: String
+      open_settings: String
+      quit: String
+      timer_toggle: String
+      timer_reset: String
     }
     class ClockPosition {
       x: i32
@@ -32,6 +41,7 @@ classDiagram
     }
     ClockState --> PersistedConfig : owns
     PersistedConfig --> ClockSettings : includes
+    ClockSettings --> ShortcutSettings : includes
     PersistedConfig --> ClockPosition : optional
 ```
 

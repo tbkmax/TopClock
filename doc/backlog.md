@@ -29,7 +29,8 @@ This backlog tracks upcoming features, configurability milestones, and planned i
 ## 2. Configurable Modifier Key & Click-Through Behavior
 
 - **Title:** Custom modifier key selection and click-through toggle
-- **Problem or opportunity:** Currently `Ctrl` is hardcoded as the interaction modifier key. Some users may prefer `Alt`, `Shift`, or `Windows` key, or want a permanent "click-through lock" toggle.
+- **Status:** Modifier key selection (`Ctrl`, `Alt`, `Shift`) completed in TODO 7. Permanent click-through lock toggle remains on backlog.
+- **Problem or opportunity:** Currently `Ctrl` was hardcoded as the interaction modifier key. Some users may prefer `Alt`, `Shift`, or `Windows` key, or want a permanent "click-through lock" toggle.
 - **Desired outcome:**
   - Support choosing modifier key: `Ctrl`, `Alt`, `Shift`, or `Win`.
   - Option to toggle click-through mode on/off permanently (e.g. for users who want the widget permanently clickable or locked).

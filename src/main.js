@@ -10,6 +10,23 @@ import './style.css';
 const appWindow = getCurrentWindow();
 let resizeQueue = Promise.resolve();
 let isFirstResize = true;
+function matchShortcut(event, shortcutString) {
+    if (!shortcutString || typeof shortcutString !== 'string') return false;
+    const parts = shortcutString.split('+').map((p) => p.trim());
+    const mods = parts.filter((p) => ['Ctrl', 'Alt', 'Shift'].includes(p));
+    const mainKey = parts.find((p) => !['Ctrl', 'Alt', 'Shift'].includes(p));
+
+    const ctrlMatch = event.ctrlKey === mods.includes('Ctrl');
+    const altMatch = event.altKey === mods.includes('Alt');
+    const shiftMatch = event.shiftKey === mods.includes('Shift');
+
+    if (!ctrlMatch || !altMatch || !shiftMatch) return false;
+    if (!mainKey) return true;
+
+    if (mainKey === 'Space') return event.key === ' ' || event.code === 'Space';
+    return event.key.toLowerCase() === mainKey.toLowerCase();
+}
+
 window.Alpine = Alpine;
 
 Alpine.data('clockApp', () => ({
@@ -57,12 +74,29 @@ Alpine.data('clockApp', () => ({
         ]);
 
         window.addEventListener('keydown', (event) => {
-            if (event.key === 'Control') this.isCtrlHeld = true;
-            if (event.ctrlKey && event.key.toLowerCase() === 'q') {
+            const modifierKey = this.settings?.shortcuts?.interaction_modifier || 'Ctrl';
+            const expectedKey = modifierKey === 'Ctrl' ? 'Control' : modifierKey;
+            if (event.key === expectedKey) this.isCtrlHeld = true;
+
+            const quitShortcut = this.settings?.shortcuts?.quit ?? 'Ctrl+Q';
+            if (matchShortcut(event, quitShortcut)) {
                 event.preventDefault();
                 this.quitApp();
             }
+
+            const settingsShortcut = this.settings?.shortcuts?.open_settings ?? 'Ctrl+,';
+            if (matchShortcut(event, settingsShortcut)) {
+                event.preventDefault();
+                this.openSettings();
+            }
+
             if (event.key === 'Escape' && this.menuOpen) this.closeMenu();
+        });
+
+        window.addEventListener('keyup', (event) => {
+            const modifierKey = this.settings?.shortcuts?.interaction_modifier || 'Ctrl';
+            const expectedKey = modifierKey === 'Ctrl' ? 'Control' : modifierKey;
+            if (event.key === expectedKey) this.isCtrlHeld = false;
         });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
         window.addEventListener('mousemove', (event) => this.handleMouseMove(event));

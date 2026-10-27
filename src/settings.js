@@ -23,9 +23,33 @@ function isNewerVersion(latest, current) {
     return false;
 }
 
+const DEFAULT_SHORTCUTS = {
+    interaction_modifier: 'Ctrl',
+    open_settings: 'Ctrl+,',
+    quit: 'Ctrl+Q',
+    timer_toggle: 'Ctrl+Shift+S',
+    timer_reset: 'Ctrl+Shift+R',
+};
+
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
-    settings: { colon_animation: 'pulse', number_animation: 'tick', font_color: '#ffffff', outline_color: '#000000', outline_width: 1.5, font_size: 42, font_family: 'Segoe UI', twenty_four_hour: true, show_ampm: true, time_layout: 'hms', auto_check_updates: true },
+    settings: {
+        colon_animation: 'pulse',
+        number_animation: 'tick',
+        font_color: '#ffffff',
+        outline_color: '#000000',
+        outline_width: 1.5,
+        font_size: 42,
+        font_family: 'Segoe UI',
+        twenty_four_hour: true,
+        show_ampm: true,
+        time_layout: 'hms',
+        auto_check_updates: true,
+        shortcuts: { ...DEFAULT_SHORTCUTS },
+        timer_addon_enabled: false,
+    },
+    recordingAction: null,
+    recordListener: null,
     startupEnabled: false,
     appVersion: '0.0.0',
     updateStatusText: 'v0.0.0',
@@ -196,6 +220,103 @@ Alpine.data('settingsApp', () => ({
         invoke('open_release_page', { url: this.latestReleaseUrl }).catch(console.error);
     },
 
+    startRecording(actionKey) {
+        if (this.recordingAction) {
+            this.stopRecording();
+        }
+        this.recordingAction = actionKey;
+        this.recordListener = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.key === 'Escape') {
+                this.stopRecording();
+                return;
+            }
+            if (event.key === 'Backspace' || event.key === 'Delete') {
+                this.clearShortcut(actionKey);
+                this.stopRecording();
+                return;
+            }
+            if (['Control', 'Alt', 'Shift', 'Meta'].includes(event.key)) {
+                return;
+            }
+            const mods = [];
+            if (event.ctrlKey) mods.push('Ctrl');
+            if (event.altKey) mods.push('Alt');
+            if (event.shiftKey) mods.push('Shift');
+
+            let key = event.key;
+            if (key === ' ') key = 'Space';
+            else if (key.length === 1) key = key.toUpperCase();
+
+            const combo = [...mods, key].join('+');
+            if (!this.settings.shortcuts) {
+                this.settings.shortcuts = { ...DEFAULT_SHORTCUTS };
+            }
+            this.settings.shortcuts[actionKey] = combo;
+            this.save();
+            this.stopRecording();
+        };
+        window.addEventListener('keydown', this.recordListener, { capture: true });
+    },
+
+    stopRecording() {
+        if (this.recordListener) {
+            window.removeEventListener('keydown', this.recordListener, { capture: true });
+            this.recordListener = null;
+        }
+        this.recordingAction = null;
+    },
+
+    clearShortcut(actionKey) {
+        if (!this.settings.shortcuts) {
+            this.settings.shortcuts = { ...DEFAULT_SHORTCUTS };
+        }
+        this.settings.shortcuts[actionKey] = '';
+        this.save();
+    },
+
+    resetAllShortcuts() {
+        this.settings.shortcuts = { ...DEFAULT_SHORTCUTS };
+        this.save();
+    },
+
+    getConflict(actionKey) {
+        if (!this.settings?.shortcuts) return null;
+        const current = (this.settings.shortcuts[actionKey] || '').trim().toLowerCase();
+        if (!current) return null;
+
+        const labels = {
+            open_settings: 'Open Settings',
+            quit: 'Quit TopClock',
+            timer_toggle: 'Timer Start / Stop',
+            timer_reset: 'Timer Reset',
+        };
+
+        for (const [key, label] of Object.entries(labels)) {
+            if (key === actionKey) continue;
+            const other = (this.settings.shortcuts[key] || '').trim().toLowerCase();
+            if (other && other === current) {
+                return label;
+            }
+        }
+        return null;
+    },
+
+    get hasAnyConflict() {
+        return Boolean(
+            this.getConflict('open_settings') ||
+            this.getConflict('quit') ||
+            this.getConflict('timer_toggle') ||
+            this.getConflict('timer_reset')
+        );
+    },
+
+    formatShortcutKeys(binding) {
+        if (!binding || !binding.trim()) return ['None'];
+        return binding.split('+').map((k) => k.trim());
+    },
+
     startDrag(event) {
         if (event.button === 0 && !event.target.closest('button')) {
             settingsWindow.startDragging().catch(console.error);
@@ -203,6 +324,7 @@ Alpine.data('settingsApp', () => ({
     },
 
     async close() {
+        this.stopRecording();
         let saved;
         if (this.saveTimer) {
             clearTimeout(this.saveTimer);

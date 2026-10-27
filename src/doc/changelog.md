@@ -2,6 +2,16 @@
 
 ## Added
 
+### 2026-10-26 - Dedicated Shortcuts tab with conflict detection and modifier selection
+
+- Added a dedicated "Shortcuts" tab to the Settings sidebar and panel in [settings.html](../../settings.html) following DESIGN.md dark theme tokens.
+- Provided configurable interaction modifier key (`Ctrl`, `Alt`, `Shift`) and hotkeys for core actions (`open_settings`, `quit`).
+- Implemented interactive key capture recording, "Clear" unbind functionality ("None"), and "Reset All Shortcuts to Default".
+- Added real-time internal shortcut conflict detection flagging duplicate key combinations with warning banners and badges.
+- Visually separated TopClock default shortcuts from Add-on shortcuts, enforcing that add-on shortcuts can only be edited when the add-on is active.
+- Added toggle switch for Timer add-on in [settings.html](../../settings.html) to control add-on activation state.
+- Bound desktop clock keyboard listeners in [main.js](../main.js) and menu badges in [index.html](../../index.html) to dynamically reflect configured shortcuts.
+
 ### 2026-10-26 - Settings option in Ctrl + right-click dropdown menu
 
 - Added a "Settings" action to the clock's Ctrl + right-click dropdown menu in [index.html](../../index.html), invoking `open_settings` to display and focus the Settings window.

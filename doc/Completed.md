@@ -21,6 +21,17 @@
 - [x] fix Readme to modern simple README, include a banner  
 
 
+### TODO 7: Shortcut Tab
+- [x] Dedicated Shortcuts tab added to Settings with full ClickHouse / DESIGN.md styling
+- [x] All shortcuts (including add-on shortcuts) are configured exclusively in the Shortcut tab
+- [x] Clear visual separation between TopClock default shortcuts box and Add-on shortcuts box
+- [x] Configurable interaction modifier key (`Ctrl`, `Alt`, `Shift`) polled natively in Win32 pointer monitor
+- [x] Interactive key recording and "Clear" (unbind to None / no shortcut) functionality
+- [x] Automated internal conflict detection flagging duplicate key combinations across actions
+- [x] Add-on shortcuts locked/disabled when add-on is turned off, and editable when turned on
+- [x] "Reset All Shortcuts to Default" action button
+- [x] Dropdown menu dynamically displays configured hotkeys
+
 ### TODO 8: Update system
 - [x] Lightweight GitHub Releases API update reminder (Option 1) without internal dropper/self-replacement code, keeping binary 100% free of Windows Defender heuristic flags
 - [x] Zero corporate key purchases or private signing key management needed
