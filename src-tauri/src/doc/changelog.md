@@ -2,6 +2,10 @@
 
 ## Fixed
 
+### 2026-10-27 - Apply click-through on first visible monitor pass
+
+- The clock now reconciles its native click-through style immediately after showing the window, so a newly launched build does not require a Ctrl interaction before clicks pass through. Style changes also refresh the Windows frame while retaining `WS_EX_LAYERED`, preserving the earlier first-Ctrl white-background fix. No operator action is required.
+
 ### 2026-10-25 - Direct Win32 click-through toggle preserving layered window style
 
 - Replaced Tao's `window.set_ignore_cursor_events` with direct Win32 `SetWindowLongPtrW` extended style modification (`set_click_through`), preserving `WS_EX_LAYERED` while toggling only `WS_EX_TRANSPARENT`. This prevents Windows DWM from falling back to an opaque white GDI redirection bitmap when Ctrl is pressed.

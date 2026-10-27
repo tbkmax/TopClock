@@ -28,7 +28,8 @@ use windows_sys::Win32::{
     UI::{
         Input::KeyboardAndMouse::{GetAsyncKeyState, VK_CONTROL, VK_MENU, VK_SHIFT},
         WindowsAndMessaging::{
-            GetCursorPos, GetWindowLongPtrW, SetWindowLongPtrW, GWL_EXSTYLE, WS_EX_LAYERED,
+            GetCursorPos, GetWindowLongPtrW, SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE,
+            SWP_FRAMECHANGED, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, SWP_NOZORDER, WS_EX_LAYERED,
             WS_EX_TRANSPARENT,
         },
     },
@@ -269,6 +270,15 @@ fn set_click_through(hwnd: HWND, ignore: bool) {
         };
         if new_style != ex_style {
             SetWindowLongPtrW(hwnd, GWL_EXSTYLE, new_style);
+            SetWindowPos(
+                hwnd,
+                std::ptr::null_mut(),
+                0,
+                0,
+                0,
+                0,
+                SWP_FRAMECHANGED | SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER,
+            );
         }
     }
 }
@@ -285,7 +295,9 @@ fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
         let hwnd = hwnd_raw as HWND;
         let mut last_ctrl = None;
         let mut last_near = None;
-        let mut last_ignore = Some(true);
+        // The pre-show style may be changed while Windows shows the webview.
+        // Reconcile the actual window after it becomes visible on the first poll.
+        let mut last_ignore = None;
         let mut last_position = window.outer_position().ok();
         let mut position_changed_at = None;
 

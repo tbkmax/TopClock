@@ -2,6 +2,10 @@
 
 ## Fixed
 
+### 2026-10-27 - Restore startup click-through in release builds
+
+- The main window's native input style is checked again after it is shown, so click-through is available without a first Ctrl interaction. The Win32 style update keeps the layered transparent surface used by the earlier white-background fix. No operator action is required.
+
 ### 2026-10-25 - Prevent white background flash on click-through toggle
 
 - Managed native click-through extended styles directly via Win32 `SetWindowLongPtrW` to preserve `WS_EX_LAYERED` while toggling `WS_EX_TRANSPARENT`. This prevents Windows DWM from falling back to an opaque GDI redirection surface when Ctrl is pressed.

@@ -94,7 +94,7 @@ sequenceDiagram
     end
 ```
 
-Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. The persistence path and error handling are in [main.rs](../main.rs). Window-position saves use the same file. The background monitor polls Windows input and window geometry every 30 ms, changing click-through and emitting events when observed values change.
+Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. The persistence path and error handling are in [main.rs](../main.rs). Window-position saves use the same file. The background monitor polls Windows input and window geometry every 30 ms. Its first poll after the main window is shown reconciles click-through with the current modifier and menu state. On later state changes, `set_click_through` changes `WS_EX_TRANSPARENT` while retaining `WS_EX_LAYERED` and refreshes the native frame; the monitor also emits state and proximity events.
 
 
 ```mermaid

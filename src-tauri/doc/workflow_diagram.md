@@ -35,8 +35,9 @@ sequenceDiagram
     Rust->>Disk: Read or create settings.json
     Rust->>Rust: Manage ClockState
     Rust->>UI: Build main and settings windows
-    Rust->>UI: Show main clock window
+    Rust->>UI: Set click-through and show main clock window
     Rust->>Rust: Start modifier monitor and optional hotkey registrations
+    Rust->>UI: Reconcile click-through on first monitor pass
 ```
 
-The startup order comes from [main.rs](../src/main.rs); the window definitions come from [tauri.conf.json](../tauri.conf.json). After startup, [main.js](../../src/main.js) can resize and reposition the main window under [default.json](../capabilities/default.json). The Settings window can request the installed font list from [fonts.rs](../src/fonts.rs). Native Timer actions update `settings.json` and emit live state to the clock. `settings.json` is durable state; the menu flag and hotkey errors in `ClockState` are in-process state.
+The startup order comes from [main.rs](../src/main.rs); the window definitions come from [tauri.conf.json](../tauri.conf.json). The first monitor pass checks the visible window's desired click-through state even when the pre-show style was applied. After startup, [main.js](../../src/main.js) can resize and reposition the main window under [default.json](../capabilities/default.json). The Settings window can request the installed font list from [fonts.rs](../src/fonts.rs). Native Timer actions update `settings.json` and emit live state to the clock. `settings.json` is durable state; the menu flag and hotkey errors in `ClockState` are in-process state.
