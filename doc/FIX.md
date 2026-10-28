@@ -12,3 +12,12 @@
 
 ### FIX 4: when open program first time press ctrl, all clock invisible background will became white color (only first ctrl for every launch), when release ctrl will back to normal, but if holding ctrl will keep that white background
 - [x] fix
+
+### FIX 5: delete live layout in both Add-ons tab and Clock tab since the on-top preview is possible
+-[ ] fix
+
+### FIX6: in Shortcut tab, hide the shortcut of disabled add-on, only show when the related add-on is turn on
+-[ ] fix
+
+### FIX7: in setting page left top, replace to icon of this app
+-[ ] fix
