@@ -2,17 +2,29 @@
 
 ## Changed
 
+### 2026-10-29 - Simplify Settings and keyboard navigation
+
+- Settings now groups add-on, shortcut, update, and save behavior into focused JavaScript modules. Shortcut actions share one row template, and arrow keys plus Home and End navigate the four accessible Settings tabs. No operator action is required.
+
 ### 2026-10-29 - Group display controls in General
 
 - General now puts display switches in their own section, separate from app behavior controls. Display labels omit the Windows `\\.\` prefix and space the display number for readability; display identities and saved choices are unchanged. No operator action is required.
 
 ## Fixed
 
+### 2026-10-29 - Restore clock preview after a failed Settings save
+
+- If the latest Settings command fails, Settings checks the native saved state. A completed write remains accepted even if its event failed; otherwise Settings and every clock return to saved appearance and add-ons, and Settings reloads the native Timer session. No operator action is required.
+
 ### 2026-10-29 - Restore unrestricted clock placement
 
 - Removed the display-edge limits added to Ctrl-drag and resize anchoring during multi-display support. Clocks can again be placed flush with or beyond an edge without being pushed back. No operator action is required.
 
 ## Added
+
+### 2026-10-29 - Focused frontend tests
+
+- Added `npm run test:frontend` for save ordering and rollback, shortcut conflicts, tab navigation, and time, Timer and number display helpers. No operator action is required.
 
 ### 2026-10-29 - Clock on selected displays
 

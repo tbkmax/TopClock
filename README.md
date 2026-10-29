@@ -84,6 +84,10 @@ npm install
 
 # Run the app in live development mode
 npm run tauri:dev
+
+# Check the frontend logic and build
+npm run test:frontend
+npm run build
 ```
 
 ### Production Build

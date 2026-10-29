@@ -26,12 +26,13 @@ classDiagram
       settings
       previewParts
       previewAddons
-      pendingSaves
+      saveController
       addAddon()
       moveAddon()
       timerChange()
       save()
-      queueSave()
+      selectTab()
+      onTabKeydown()
       startRecording()
       stopRecording()
       clearShortcut()
@@ -40,6 +41,11 @@ classDiagram
       toggleDisplay()
       displayLabel()
       getConflict()
+    }
+    class SettingsPersistence {
+      schedule()
+      flush()
+      setCommitted()
     }
     class TauriCommands {
       get_settings()
@@ -56,6 +62,7 @@ classDiagram
     }
     clockApp --> TauriCommands : invoke
     settingsApp --> TauriCommands : invoke
+    settingsApp --> SettingsPersistence : owns save controller
     class AddonInstance {
       id
       kind
@@ -68,7 +75,7 @@ classDiagram
     settingsApp --> AddonInstance : edits instances
 ```
 
-These names map to [main.js](../main.js), [settings.js](../settings.js), and the command registrations in [main.rs](../../src-tauri/src/main.rs). Both UI components call the shared `timeParts` function in [time-format.js](../time-format.js), which leaves hours unpadded and keeps minutes and seconds at two digits, then `markChangedNumbers` in [clock-animations.js](../clock-animations.js). The tracker compares each displayed hour, minute and second with its previous value. [style.css](../style.css) sizes clock segments to their text, keeping a one-digit hour beside the colon. CSS applies the chosen number effect to changed parts and the chosen colon effect to separators independently. `TauriCommands` represents the command interface, not a source class.
+These names map to [main.js](../main.js), [settings.js](../settings.js), and the command registrations in [lib.rs](../../src-tauri/src/lib.rs). Settings delegates add-on actions to [settings-addons.js](../settings-addons.js), shortcut actions to [settings-shortcuts.js](../settings-shortcuts.js), update checks to [settings-updates.js](../settings-updates.js), and save ordering to [settings-persistence.js](../settings-persistence.js). Both UI components call the shared `timeParts` function in [time-format.js](../time-format.js), which leaves hours unpadded and keeps minutes and seconds at two digits, then `markChangedNumbers` in [clock-animations.js](../clock-animations.js). The tracker compares each displayed hour, minute and second with its previous value. [style.css](../style.css) sizes clock segments to their text, keeping a one-digit hour beside the colon. CSS applies the chosen number effect to changed parts and the chosen colon effect to separators independently. `TauriCommands` represents the command interface; `SettingsPersistence` represents the object returned by `createSettingsPersistence`, rather than a source class.
 
 ```mermaid
 sequenceDiagram
@@ -82,12 +89,22 @@ sequenceDiagram
     Settings->>Rust: update_settings
     alt Saved
         Rust->>Clocks: clock-settings-changed
-    else Failed
-        Rust-->>Settings: Error to display
+    else Command error
+        Rust-->>Settings: Error
+        Settings->>Rust: Read persisted settings
+        alt Persisted settings match draft
+            Settings->>Settings: Treat draft as saved
+        else Persisted settings differ
+            Settings->>Rust: Read Timer session
+            Settings->>Settings: Restore native state or last committed fallback
+            Settings->>Clocks: clock-settings-preview with restored settings
+        end
     end
 ```
 
-On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings.js](../settings.js) after a control changes. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the whole clock group and menu, and resizes the native window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings-persistence.js](../settings-persistence.js) after a control changes. The save controller snapshots each draft, debounces it, and serializes writes. It rolls back only when the latest draft fails, so an earlier failed write cannot erase a newer draft. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the whole clock group and menu, and resizes the native window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+
+The Settings navigation in [settings.html](../../settings.html) exposes four tab buttons and four mounted panels. [settings-tabs.js](../settings-tabs.js) maps Arrow, Home, and End keys to the next selected tab; the selected tab receives focus and its panel remains available to keyboard users. The Shortcuts tab draws the core and Timer actions from one metadata list in [settings-shortcuts.js](../settings-shortcuts.js).
 
 
 ```mermaid

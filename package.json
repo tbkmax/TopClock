@@ -1,10 +1,12 @@
 {
   "name": "top-clock",
   "private": true,
+  "type": "module",
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "test:frontend": "node src/frontend.test.js",
     "preview": "vite preview",
     "tauri:dev": "scripts\\tauri-windows.cmd dev",
     "tauri:build": "scripts\\tauri-windows.cmd build"
