@@ -1,5 +1,7 @@
 # Rust workflows
 
+The General tab calls `open_settings_folder` in [main.rs](../main.rs). The command derives the folder from `ClockState.settings_path`, creates it if necessary, and asks Explorer to open it. Directory or process launch errors return to Settings; this flow does not write `settings.json`.
+
 The core Rust types in [settings.rs](../settings.rs) and [main.rs](../main.rs) own durable configuration and live window state.
 
 ```mermaid

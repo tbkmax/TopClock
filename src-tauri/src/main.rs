@@ -97,6 +97,20 @@ fn open_settings(app: tauri::AppHandle) {
 }
 
 #[tauri::command]
+fn open_settings_folder(state: tauri::State<'_, Arc<ClockState>>) -> Result<(), String> {
+    let folder = state
+        .settings_path
+        .parent()
+        .ok_or("Settings folder is unavailable")?;
+    fs::create_dir_all(folder).map_err(|error| error.to_string())?;
+    std::process::Command::new("explorer.exe")
+        .arg(folder)
+        .spawn()
+        .map(|_| ())
+        .map_err(|error| error.to_string())
+}
+
+#[tauri::command]
 fn hide_settings(app: tauri::AppHandle) -> Result<(), String> {
     app.get_webview_window("settings")
         .ok_or("Settings window is unavailable")?
@@ -394,6 +408,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             set_menu_open,
             open_settings,
+            open_settings_folder,
             hide_settings,
             minimize_settings,
             open_release_page,

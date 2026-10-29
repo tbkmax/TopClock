@@ -1,5 +1,7 @@
 # Rust application architecture
 
+The `open_settings_folder` command uses the managed settings path, ensures its parent exists, and launches that directory in Windows Explorer. It does not accept a caller-supplied path.
+
 [main.rs](../main.rs) owns the native runtime. [settings.rs](../settings.rs) owns the durable settings schema, defaults and validation. [addons.rs](../addons.rs) validates built-in add-on instances and owns Timer session calculations. [hotkeys.rs](../hotkeys.rs) registers enabled action shortcuts with Windows. [fonts.rs](../fonts.rs) enumerates Windows-installed fonts. The parent [Tauri architecture](../../doc/architecture.md) describes package configuration.
 
 | Unit | Responsibility |
@@ -9,7 +11,7 @@
 | `AddonInstance` | ID, type, enable state, above/below placement, size percentage and validated type options |
 | `TimerSession` | Durable running flag, accumulated elapsed time, start epoch and finished state |
 | `get_font_families` | Read and deduplicate font families from the Windows GDI font table |
-| Tauri commands | Settings, Timer actions, hotkey errors, monitor bounds, startup registry switch, menu state, window controls, release page and quit |
+| Tauri commands | Settings, Timer actions, hotkey errors, monitor bounds, startup registry switch, menu state, window controls, settings-folder and release page opening, and quit |
 | `start_monitor` | Poll configured modifier key (Ctrl, Alt, or Shift), cursor proximity and window position; set click-through and emit events |
 | `start_hotkeys` | Register enabled system-wide action shortcuts, dispatch their native actions, and report unavailable combinations |
 | `set_click_through` | Toggle Win32 `WS_EX_TRANSPARENT` while preserving `WS_EX_LAYERED`, then refresh the window frame so the input style takes effect without the earlier GDI white flash |

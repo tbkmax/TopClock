@@ -13,6 +13,10 @@
 
 ## Added
 
+### 2026-10-29 - Open settings folder
+
+- Added a native command that opens the directory containing TopClock's settings file in Explorer for the General tab. It creates the directory if needed and reports launch errors. No operator action is required.
+
 ### 2026-10-27 - Optional Date and Region display settings
 
 - Added validation for Date weekday and Region label switches while keeping earlier add-on records valid. The minimum saved size is now 10%, and newly migrated legacy Timers start at 30%. Existing saved add-on sizes are not changed. No operator action is required.

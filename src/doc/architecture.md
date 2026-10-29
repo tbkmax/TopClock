@@ -1,5 +1,7 @@
 # Frontend architecture
 
+The General tab's Settings files button invokes `open_settings_folder`; Rust opens the app config directory containing `settings.json` in Windows Explorer. The frontend does not construct a filesystem path.
+
 This folder owns the two Alpine.js interfaces. Read the [README](../../README.md) and [Tauri architecture](../../src-tauri/doc/architecture.md) for the native boundary.
 
 | File | Responsibility |
@@ -9,7 +11,7 @@ This folder owns the two Alpine.js interfaces. Read the [README](../../README.md
 | [time-format.js](../time-format.js) | Shared time layout presets, unpadded hours, two-digit minutes and seconds, and local font fallback |
 | [clock-animations.js](../clock-animations.js) | Independent colon and number animation options, plus per-number change tracking shared by both windows |
 | [style.css](../style.css) | Transparent clock appearance, natural-width time segments, animation variants and proximity fade |
-| [settings.js](../settings.js) | Clock and add-on previews, add-on dashboard, save queue, timer mode confirmation, shortcut switches and conflict detection, startup and update controls |
+| [settings.js](../settings.js) | Clock and add-on previews, add-on dashboard, save queue, timer mode confirmation, shortcut switches and conflict detection, startup, settings-folder and update controls |
 | [settings.css](../settings.css) | Settings page layout, controls, shortcut key pill styles, conflict alerts, and update action buttons |
 
 [index.html](../../index.html) and [settings.html](../../settings.html) supply markup; [vite.config.js](../../vite.config.js) declares both entries. Rust validates and persists settings. Frontend code does not write the settings file or registry. The clock receives `ctrl-state`, `proximity`, `clock-settings-preview`, `clock-settings-changed`, and `timer-state-changed`. Settings receives `hotkey-errors-changed`. A preview event can show a change before Rust saves it. Both pages use `timeParts` and `markChangedNumbers`; a region clock passes a named time zone to `timeParts` and inherits the main clock's appearance and animation choices. The Settings page asks Rust for installed fonts and uses Segoe UI or another installed font if the saved family is unavailable. No network font is requested.

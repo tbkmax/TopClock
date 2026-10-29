@@ -380,6 +380,10 @@
                             <div><div class="control-title">Automatically check for updates</div><div class="control-description">Check GitHub Releases when TopClock starts</div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="settings.auto_check_updates" :class="{ on: settings.auto_check_updates }" aria-label="Automatically check for updates" @click="settings.auto_check_updates = !settings.auto_check_updates; save()"><span></span></button>
                         </div>
+                        <div class="setting-row">
+                            <div><div class="control-title">Settings files</div><div class="control-description">Open the folder containing settings.json</div></div>
+                            <button type="button" class="action-button" @click="openSettingsFolder()">Open folder</button>
+                        </div>
                         <div class="setting-row update-row">
                             <div>
                                 <div class="control-title">Software Updates</div>

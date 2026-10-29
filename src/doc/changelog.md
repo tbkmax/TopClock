@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-29 - Open settings files from General
+
+- Added an Open folder button in General that opens the directory containing `settings.json` and reports an error if Explorer cannot start. No operator action is required.
+
 ### 2026-10-27 - Update indicator on General tab
 
 - The General sidebar tab now shows a yellow alert badge when an update is available. The badge clears when a successful check finds the installed version current, and the update status is announced to assistive technology. No operator action is required.

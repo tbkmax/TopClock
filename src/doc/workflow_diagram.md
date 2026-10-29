@@ -1,5 +1,7 @@
 # Frontend workflows
 
+The General tab's Settings files button calls `open_settings_folder`; Rust opens the app config directory in Explorer. Failures appear in the Settings error toast, and this action does not change saved settings.
+
 Both UI components are Alpine component objects. This diagram shows their relationship to the native command boundary.
 
 ```mermaid
@@ -32,6 +34,7 @@ classDiagram
       stopRecording()
       clearShortcut()
       resetAllShortcuts()
+      openSettingsFolder()
       getConflict()
     }
     class TauriCommands {
@@ -42,6 +45,7 @@ classDiagram
       timer_action()
       get_monitor_bounds()
       set_startup_enabled()
+      open_settings_folder()
       open_settings()
       quit()
     }

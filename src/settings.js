@@ -296,6 +296,15 @@ Alpine.data('settingsApp', () => ({
         }
     },
 
+    async openSettingsFolder() {
+        try {
+            await invoke('open_settings_folder');
+            this.error = '';
+        } catch (error) {
+            this.error = `Could not open settings folder: ${error}`;
+        }
+    },
+
     async checkForUpdates(manual = false) {
         if (this.isCheckingUpdate) return;
         this.isCheckingUpdate = true;
