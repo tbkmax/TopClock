@@ -4,8 +4,8 @@
 
 ### TODO 2: setting window (Completed)
 
-### TODO 3: Clock tab in setting (Partially archive in Completed)
-- [x] at the bottom add a reset position button, which put clock to the center to prevent user place clock to some where unreachable (Consider about Multiple Displays support (which reset position will reflect on all display))
+### TODO 3: Clock tab in setting (Completed)
+
 
 ### TODO 4: General tab in setting (Completed)
 
