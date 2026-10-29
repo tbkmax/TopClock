@@ -105,6 +105,68 @@ pub(crate) fn get_displays(
     enumerate_displays(&app, &state)
 }
 
+fn centered_position(
+    bounds: MonitorBounds,
+    size: tauri::PhysicalSize<u32>,
+) -> tauri::PhysicalPosition<i32> {
+    tauri::PhysicalPosition::new(
+        bounds.x + (bounds.width as i32 - size.width as i32) / 2,
+        bounds.y + (bounds.height as i32 - size.height as i32) / 2,
+    )
+}
+
+#[tauri::command]
+pub(crate) fn reset_clock_positions(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, Arc<ClockState>>,
+) -> Result<(), String> {
+    let active = state.active_displays.lock().unwrap().clone();
+    let mut moves = Vec::new();
+    for (id, display) in active {
+        let Some(window) = app.get_webview_window(&display.label) else {
+            continue;
+        };
+        if !window.is_visible().map_err(|error| error.to_string())? {
+            continue;
+        }
+        let previous = window.outer_position().map_err(|error| error.to_string())?;
+        let size = window.outer_size().map_err(|error| error.to_string())?;
+        let target = centered_position(display.bounds, size);
+        moves.push((id, display.bounds, window, previous, target));
+    }
+    if moves.is_empty() {
+        return Err("No visible clocks to reset".into());
+    }
+
+    let mut moved = 0;
+    for (_, _, window, _, target) in &moves {
+        if let Err(error) = window.set_position(*target) {
+            for (_, _, previous_window, previous, _) in moves.iter().take(moved) {
+                let _ = previous_window.set_position(*previous);
+            }
+            return Err(error.to_string());
+        }
+        moved += 1;
+    }
+
+    let mut config = state.config.lock().unwrap();
+    let previous_displays = config.displays.clone();
+    for (id, bounds, _, _, target) in &moves {
+        config.displays.entry(id.clone()).or_default().position = Some(ClockPosition {
+            x: target.x - bounds.x,
+            y: target.y - bounds.y,
+        });
+    }
+    if let Err(error) = save_config(&state, &config) {
+        config.displays = previous_displays;
+        for (_, _, window, previous, _) in &moves {
+            let _ = window.set_position(*previous);
+        }
+        return Err(error);
+    }
+    Ok(())
+}
+
 #[tauri::command]
 pub(crate) fn set_display_enabled(
     app: tauri::AppHandle,
@@ -347,6 +409,31 @@ pub(crate) fn start_display_manager(app: tauri::AppHandle, state: Arc<ClockState
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn center_uses_each_displays_physical_bounds_and_window_size() {
+        let size = tauri::PhysicalSize::new(300, 100);
+        let primary = MonitorBounds {
+            x: 0,
+            y: 0,
+            width: 1920,
+            height: 1080,
+        };
+        let left = MonitorBounds {
+            x: -1280,
+            y: -200,
+            width: 1280,
+            height: 1024,
+        };
+        assert_eq!(
+            centered_position(primary, size),
+            tauri::PhysicalPosition::new(810, 490)
+        );
+        assert_eq!(
+            centered_position(left, size),
+            tauri::PhysicalPosition::new(-790, 262)
+        );
+    }
 
     #[test]
     fn display_positions_restore_relative_to_each_display() {

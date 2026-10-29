@@ -7,7 +7,7 @@
 - [x] add animation for drop down menu (reference alpine.js style animation for that)
 - [x] clock should also have animation
 
-### TODO 2: setting window (Completed)
+### TODO 2: setting window
 - [x] when open it will create a icon in indicator bar, which click there will open setting page, right click will show the menu, currently only have quit
 - [x] setting page should be follow DESIGN.md and use Alpine.js code reference include the animations
 - [x] the minimize, and close button and window itself should also be part of design not using Windows own one
@@ -26,7 +26,11 @@
 - [x] let user can choose font, make sure this app can run fully offline, so use font from user's PC's font family as default (but also add other modern way but if can't reach just make sure it will not have issues)
 - [x] and make the current animation as default but search for Alpine.js and adding more animation choice (the color or other setting about animation should try to align with DESIGN.md)
 
-### TODO 5: Add-on tab (Partially archive in Completed)
+### TODO 4: General tab in setting
+- [x] place a button to open where all setting file were locate in this PC
+- [x] currently the clock will only display in main display, which when user have multiple screen it won't show it other, make it by default will show on all display (even user plug in new screen after app open show detect and shows) (also position of each screen can be customizable and should be remember). For this on in general tab, add a setting that will have check box for user to select which screen to show the clock (which default will check all the box)
+
+### TODO 5: Add-on tab
 - [x] Design add-on system which user can add or remove the add-on which in this TODO will be consider as default add-on
 - [x] Add-on can be place up or down of clock usually will be smaller text or even button to change any feature
 - [x] Add-on will share space in up and down of clock which always consider about how to place it to make sure there is no conflict

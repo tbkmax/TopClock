@@ -103,6 +103,10 @@
                         <div><div class="control-title">Number change animation</div><div class="control-description">Motion when a displayed number changes</div></div>
                         <select class="select-control" x-model="settings.number_animation" @change="save()" aria-label="Number change animation"><template x-for="animation in numberAnimations" :key="animation.value"><option :value="animation.value" x-text="animation.label"></option></template></select>
                     </div>
+                    <div class="setting-row">
+                        <div><div class="control-title">Clock position</div><div class="control-description">Center clocks currently shown on displays</div></div>
+                        <button type="button" class="action-button" :disabled="resettingPositions" @click="resetClockPositions()" x-text="resettingPositions ? 'Resetting…' : 'Reset positions'"></button>
+                    </div>
                 </section>
 
                 <section id="panel-addons" class="tab-panel" role="tabpanel" aria-labelledby="tab-addons" tabindex="0" x-show="tab === 'addons'" x-cloak>

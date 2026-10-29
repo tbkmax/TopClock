@@ -2,6 +2,8 @@
 
 TODO 4's settings-folder command and per-display windows, visibility and positions are implemented. Manual verification with multiple physical displays remains in the [frontend backlog](../../../src/doc/backlog.md).
 
+The Clock tab's reset command now centers visible windows and stores their per-display positions. Its mixed-DPI, disabled-display, click-through, and restart behavior still needs the live Windows check in the [frontend backlog](../../../src/doc/backlog.md).
+
 Use this file for verified unfinished native work. Each item should include problem, desired outcome, scope, acceptance criteria, risks, verification and priority, following [the template](../../../templates/doc/backlog.md).
 
 The runtime module extraction is complete; [main.rs](../main.rs) remains a small entry point and [lib.rs](../lib.rs) owns startup wiring. TODO 7's shortcut persistence, modifier key validation, and dynamic Win32 modifier polling are complete. TODO 3's persistence, validation of independent animation choices and the 24–200 pixel size range, and Windows font enumeration are complete. Existing proposals in the [repository backlog](../../../doc/backlog.md) may be outdated; check [settings.rs](../settings.rs), [interaction.rs](../interaction.rs), and [fonts.rs](../fonts.rs) before adding them here.

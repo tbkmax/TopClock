@@ -22,6 +22,10 @@
 
 ## Added
 
+### 2026-10-29 - Reset visible clock positions
+
+- Added a Reset positions button at the bottom of the Clock tab. It centers clocks currently shown on connected displays and reports failures in Settings. Displays switched off in General keep their saved positions. No operator action is required.
+
 ### 2026-10-29 - Focused frontend tests
 
 - Added `npm run test:frontend` for save ordering and rollback, shortcut conflicts, tab navigation, and time, Timer and number display helpers. No operator action is required.

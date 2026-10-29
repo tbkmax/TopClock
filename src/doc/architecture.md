@@ -4,6 +4,8 @@ The General tab's Settings files button invokes `open_settings_folder`; Rust ope
 
 The General tab groups connected desktop displays separately from app behavior settings. It lists displays from `get_displays` and persists each switch through `set_display_enabled`. [settings.js](../settings.js) removes the Windows `\\.\` device prefix and formats `DISPLAY1` as `Display 1` for visible labels and switch accessibility names; the original display ID remains the command and persistence key. Missing display preferences mean visible, including newly connected displays. All clock windows load the same `ClockSettings` and Timer session; Settings broadcasts `clock-settings-preview` to every clock, and Rust broadcasts saved settings and Timer events. Only visibility and a display-relative position vary by display. Each clock instance receives its own proximity and modifier events. Direct pointer dragging and resize anchoring do not clamp the window to a display, preserving edge placement. Rust owns display identity, hot-plug reconciliation, and durable positions; see the [native architecture](../../src-tauri/src/doc/architecture.md).
 
+At the bottom of the Clock tab, Reset positions calls `reset_clock_positions` to center the clocks currently visible on connected displays. The command saves each centered position; a display switched off in General keeps its previous position. The button disables while the command runs and reports failures through the Settings error toast.
+
 This folder owns the two Alpine.js page types: one Settings page and a clock page instantiated once per enabled display. Read the [README](../../README.md) and [Tauri architecture](../../src-tauri/doc/architecture.md) for the native boundary.
 
 | File | Responsibility |

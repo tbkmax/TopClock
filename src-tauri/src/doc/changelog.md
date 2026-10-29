@@ -23,6 +23,10 @@
 
 ## Added
 
+### 2026-10-29 - Center visible clock windows
+
+- Added a Clock-tab command that centers each visible clock on its own display and saves the new positions. Disabled displays keep their prior positions and visibility. A failed move or save is reported to Settings. No operator action is required.
+
 ### 2026-10-29 - Per-display clock windows and positions
 
 - TopClock now creates a clock on every connected desktop display by default, detects connected and removed displays, and persists visibility and position for each display independently. Windows display target paths are used as identities with a display-slot fallback. Existing single-clock positions migrate to the matching display. Appearance, add-ons, Timer and shortcuts remain shared. No operator action is required.

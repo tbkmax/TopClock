@@ -148,6 +148,9 @@ sequenceDiagram
     Rust->>File: Save selected display visibility
     Manager->>Clock: Reconcile changed visibility on next poll
     Clock->>File: Save only its display-relative position after drag
+    Settings->>Rust: reset_clock_positions()
+    Rust->>Clock: Center each currently visible clock from its physical size
+    Rust->>File: Save centered display-relative positions
 ```
 
-The manager polls every two seconds and creates a secondary clock only for an enabled connected display. Windows without a target path use a GDI slot identity. The `main` and Settings windows stay allocated even when hidden; disconnected secondary clocks are destroyed. `clock-settings-changed` and `timer-state-changed` remain application-wide, while proximity and modifier events target an individual clock.
+The manager polls every two seconds and creates a secondary clock only for an enabled connected display. Windows without a target path use a GDI slot identity. The `main` and Settings windows stay allocated even when hidden; disconnected secondary clocks are destroyed. Reset skips clocks that are not currently visible and leaves disabled display preferences unchanged. If moving a clock or saving the config fails, the command tries to put moved windows back and reports the error. `clock-settings-changed` and `timer-state-changed` remain application-wide, while proximity and modifier events target an individual clock.

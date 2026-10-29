@@ -34,6 +34,7 @@ pub fn run() {
             timer::timer_action,
             settings_commands::get_hotkey_errors,
             displays::get_displays,
+            displays::reset_clock_positions,
             displays::set_display_enabled,
             startup::get_startup_enabled,
             startup::set_startup_enabled,

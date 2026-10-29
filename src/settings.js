@@ -38,6 +38,7 @@ Alpine.data('settingsApp', () => ({
     recordListener: null,
     startupEnabled: false,
     displays: [],
+    resettingPositions: false,
     appVersion: '0.0.0',
     updateStatusText: 'v0.0.0',
     isCheckingUpdate: false,
@@ -236,6 +237,19 @@ Alpine.data('settingsApp', () => ({
             this.error = '';
         } catch (error) {
             this.error = `Could not open settings folder: ${error}`;
+        }
+    },
+
+    async resetClockPositions() {
+        if (this.resettingPositions) return;
+        this.resettingPositions = true;
+        try {
+            await invoke('reset_clock_positions');
+            this.error = '';
+        } catch (error) {
+            this.error = `Could not reset clock positions: ${error}`;
+        } finally {
+            this.resettingPositions = false;
         }
     },
 

@@ -9,7 +9,7 @@ TODO 4's Settings files button and multiple-display controls are implemented. Ma
 - **Desired outcome:** Each clock keeps its own unrestricted position; shared appearance, add-ons, Timer, and menu actions stay synchronized.
 - **Scope:** [main.js](../main.js), [settings.js](../settings.js), and the native display manager in [displays.rs](../../src-tauri/src/displays.rs).
 - **Acceptance criteria:** Move a secondary clock without moving the primary; change an add-on or style and see every clock update; unplug and reconnect a display and recover its position and visibility choice. General keeps each switch paired with the correct display label after reconnection and shows no Windows device prefix.
-- **Dependencies and risks:** Include different scale factors and display order changes; preserve click-through and tray access if all displays are unchecked. An off-screen clock may require editing its saved position until the planned reset-position control is added.
+- **Dependencies and risks:** Include different scale factors and display order changes; preserve click-through and tray access if all displays are unchecked. The Clock tab now resets visible clocks to their display centers; a display switched off in General keeps its saved position.
 - **Verification:** Run `npm run tauri:dev` with two physical monitors and exercise each case.
 - **Priority:** High for the new display feature.
 
