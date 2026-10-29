@@ -57,12 +57,13 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
 
 ## Configuration & Storage
 
-TopClock stores your configuration locally in your Windows user profile:
+Current direct-download builds store your configuration locally in your Windows user profile:
 
 - **Settings File**: `%APPDATA%\topclock\settings.json`
 - **Auto-Start**: Controlled via the current user's Windows Run registry key (`HKCU\Software\Microsoft\Windows\CurrentVersion\Run\TopClock`).
 
 Settings and desktop positions automatically persist across reboots and app launches.
+The MSIX development package may use Windows' per-package AppData redirection. Its installed location and upgrade persistence still need the [package acceptance checks](doc/plan/MSIX_STORE_PLAN.md).
 
 ---
 
@@ -108,6 +109,18 @@ To build a full Windows installer (NSIS setup):
 ```powershell
 npm run tauri:build
 ```
+
+### MSIX development package
+
+An unsigned MSIX can be built with the Windows SDK's MakeAppx:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Msix.ps1 -Version v1.0.0
+```
+
+The output is `release-assets/TopClock_1.0.0.0_x64.msix`. The script uses a development package identity by default; for a Store candidate, pass the exact Partner Center `-IdentityName`, `-Publisher`, and `-PublisherDisplayName`. The package must be signed with a matching development certificate for local installation. The [manual Windows CI workflow](.github/workflows/msix.yml) runs the same build. This path is still under [installed-package validation](doc/plan/MSIX_STORE_PLAN.md), so the NSIS installer and portable ZIP remain the current releases.
+
+The MSIX uses Evergreen WebView2. If the runtime is missing, TopClock shows a native message pointing to Microsoft's download page before exiting. The runtime is not bundled in the package.
 
 ---
 

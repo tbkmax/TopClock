@@ -2,6 +2,11 @@
 
 ## Changed
 
+### 2026-10-29 - Add an MSIX development package path
+
+- Added an unsigned MSIX build that stages the existing Tauri executable and Windows logo assets. The package declares a disabled sign-in task; packaged builds use Windows startup state, while direct builds keep their Run-key behavior. The NSIS release remains current until installed-package acceptance checks pass. No action is required for existing users.
+- The executable now explains how to install Evergreen WebView2 if it is missing, before it creates a clock window.
+
 ### 2026-10-29 - Keep the native entry point small
 
 - [main.rs](../src/main.rs) now starts the library runtime in [lib.rs](../src/lib.rs), where command registration and startup order remain visible. Native features are grouped into modules under `src/`; no package configuration, capability, or user-data migration is required. No operator action is required.

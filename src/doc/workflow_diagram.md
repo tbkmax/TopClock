@@ -2,6 +2,8 @@
 
 The General tab's Settings files button calls `open_settings_folder`; Rust opens the app config directory in Explorer. Failures appear in the Settings error toast, and this action does not change saved settings.
 
+General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings-updates.js) leaves GitHub checks and the release-page action inactive, and [settings.html](../../settings.html) shows Store delivery text. If false, the existing GitHub reminder flow remains. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
+
 Every clock window runs `clockApp` with the same persisted appearance and add-ons. `settingsApp` broadcasts a preview to all windows, while `get_displays` and `set_display_enabled` control which display windows are present. The General tab renders these switches in a separate display section, and `displayLabel()` strips the Windows device prefix for visible and accessible names without changing the display ID sent to Rust. Rust owns per-display position persistence; Ctrl-drag and resize anchoring can place a clock beyond display edges.
 
 Both UI components are Alpine component objects. This diagram shows their relationship to the native command boundary.

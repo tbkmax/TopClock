@@ -37,6 +37,7 @@ Alpine.data('settingsApp', () => ({
     recordingAction: null,
     recordListener: null,
     startupEnabled: false,
+    isPackaged: true,
     displays: [],
     resettingPositions: false,
     appVersion: '0.0.0',
@@ -97,9 +98,15 @@ Alpine.data('settingsApp', () => ({
         this.timerSession = await invoke('get_timer_state');
         this.hotkeyErrors = await invoke('get_hotkey_errors');
         this.appVersion = await getVersion().catch(() => '0.0.0');
-        this.updateStatusText = `Current version: v${this.appVersion}`;
+        this.isPackaged = await invoke('is_packaged').catch((error) => {
+            console.error('Could not determine package identity:', error);
+            return true;
+        });
+        this.updateStatusText = this.isPackaged
+            ? 'Updates are delivered through Microsoft Store'
+            : `Current version: v${this.appVersion}`;
         await this.loadFontFamilies();
-        this.startupEnabled = await invoke('get_startup_enabled');
+        await this.refreshStartupState();
         try {
             this.displays = await invoke('get_displays');
         } catch (error) {
@@ -124,7 +131,10 @@ Alpine.data('settingsApp', () => ({
             event.preventDefault();
             this.close();
         });
-        if (this.settings.auto_check_updates) {
+        await settingsWindow.onFocusChanged(({ payload: focused }) => {
+            if (focused) this.refreshStartupState();
+        });
+        if (!this.isPackaged && this.settings.auto_check_updates) {
             this.checkForUpdates(false);
         }
     },
@@ -220,13 +230,23 @@ Alpine.data('settingsApp', () => ({
         );
     },
 
-    async toggleStartup() {
-        const enabled = !this.startupEnabled;
+    async refreshStartupState() {
         try {
-            await invoke('set_startup_enabled', { enabled });
-            this.startupEnabled = enabled;
-            this.error = '';
+            this.startupEnabled = await invoke('get_startup_enabled');
         } catch (error) {
+            this.startupEnabled = false;
+            this.error = `Could not read startup state: ${error}`;
+        }
+    },
+
+    async toggleStartup() {
+        try {
+            const enabled = !(await invoke('get_startup_enabled'));
+            await invoke('set_startup_enabled', { enabled });
+            this.error = '';
+            await this.refreshStartupState();
+        } catch (error) {
+            this.startupEnabled = await invoke('get_startup_enabled').catch(() => false);
             this.error = `Could not update startup: ${error}`;
         }
     },

@@ -14,6 +14,7 @@ export function isNewerVersion(latest, current) {
 
 export const updateMethods = {
     async checkForUpdates(manual = false) {
+        if (this.isPackaged) return;
         if (this.isCheckingUpdate) return;
         this.isCheckingUpdate = true;
         if (manual) {
@@ -55,6 +56,7 @@ export const updateMethods = {
     },
 
     openRelease() {
+        if (this.isPackaged) return;
         invoke('open_release_page', { url: this.latestReleaseUrl }).catch(console.error);
     },
 

@@ -1,4 +1,4 @@
-use crate::{displays::save_current_position, state::ClockState};
+use crate::{displays::save_current_position, startup, state::ClockState};
 use std::{fs, sync::Arc};
 use tauri::{Manager, WebviewWindow};
 
@@ -47,6 +47,9 @@ pub(crate) fn minimize_settings(app: tauri::AppHandle) -> Result<(), String> {
 
 #[tauri::command]
 pub(crate) fn open_release_page(url: Option<String>) {
+    if startup::is_packaged() != Ok(false) {
+        return;
+    }
     let target = url.unwrap_or_else(|| "https://github.com/tbkmax/TopClock/releases/latest".into());
     if target.starts_with("https://github.com/tbkmax/TopClock") {
         #[cfg(windows)]

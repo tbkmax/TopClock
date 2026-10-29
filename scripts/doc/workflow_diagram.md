@@ -17,6 +17,24 @@ sequenceDiagram
 
 The steps are visible in [tauri-windows.cmd](../tauri-windows.cmd). `.tools/` is optional; the script still calls the CLI when it is absent.
 
+The MSIX build extends that workflow:
+
+```mermaid
+sequenceDiagram
+    participant Caller as Local shell or CI
+    participant Script as Build-Msix.ps1
+    participant Tauri as tauri-windows.cmd
+    participant SDK as MakeAppx
+    Caller->>Script: Version, identity, publisher
+    Script->>Tauri: build --no-bundle with version override
+    Tauri-->>Script: Versioned executable
+    Script->>Script: Stage executable, logos, manifest
+    Script->>SDK: pack staged directory
+    SDK-->>Caller: Unsigned MSIX or error
+```
+
+[Build-Msix.ps1](../Build-Msix.ps1) stops if the version, toolchain, Tauri build, or MakeAppx validation fails. Signing and installation are outside this flow.
+
 The portable cleanup flow is:
 
 ```mermaid

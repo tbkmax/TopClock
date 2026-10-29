@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-29 - MSIX package logos
+
+- Added 44, 50, and 150 pixel PNGs derived from the existing icon for the MSIX package manifest. The existing executable and tray icon remain the same. No operator action is required.
+
 ### 2026-10-24 - Brand icon refresh and vector master
 
 - Added [icon.svg](../icon.svg) vector master representing the TopClock brand identity (floating HUD elevation card, apex arrow, electric yellow accent).

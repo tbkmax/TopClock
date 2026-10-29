@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-29 - Reproducible MSIX development build
+
+- Added [Build-Msix.ps1](../Build-Msix.ps1) to build a versioned executable and package it with an explicit MSIX identity, publisher, manifest, and Store logo assets. It produces an unsigned development artifact; a matching signature is required for installation. No existing direct-download build is changed.
+
 ### 2026-10-27 - Portable cleanup scripts
 
 - Added [Uninstall-TopClock.cmd](../Uninstall-TopClock.cmd) and [Uninstall-TopClock.ps1](../Uninstall-TopClock.ps1) to the portable release ZIP. They remove the adjacent executable, remove its matching sign-in entry, and optionally remove shared TopClock user data after a separate confirmation. Users delete the cleanup scripts and folder themselves afterward.

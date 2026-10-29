@@ -22,6 +22,10 @@
 
 ## Added
 
+### 2026-10-29 - Package-aware update and sign-in Settings
+
+- General shows Microsoft Store update delivery for an MSIX process and hides GitHub installer checks and download actions. Direct builds retain their existing GitHub reminder. The sign-in switch reads Windows' current state after a change and reports a user-disabled task. No saved settings migration is required.
+
 ### 2026-10-29 - Reset visible clock positions
 
 - Added a Reset positions button at the bottom of the Clock tab. It centers clocks currently shown on connected displays and reports failures in Settings. Displays switched off in General keep their saved positions. No operator action is required.

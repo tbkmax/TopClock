@@ -2,6 +2,14 @@
 
 ## Changed
 
+### 2026-10-29 - Explain a missing WebView2 Runtime
+
+- TopClock checks for Evergreen WebView2 before creating windows. If missing, a native message directs the user to Microsoft's runtime download page and the app exits. This adds no bundled runtime. No action is required where WebView2 is installed; clean Windows 10 behavior still needs verification.
+
+### 2026-10-29 - Route sign-in and release actions by package identity
+
+- MSIX builds now use the declared Windows StartupTask for the sign-in switch, including Windows' user-disabled state. Direct builds keep the Run key. Packaged builds cannot open the GitHub installer release page. The saved settings schema and native clock behavior are unchanged. No action is required for direct-build users; installed MSIX behavior still needs validation.
+
 ### 2026-10-29 - Separate native runtime responsibilities
 
 - The binary entry point now delegates to a library runtime. Settings persistence, display windows, input monitoring, Timer actions, commands, startup registry handling, and tray setup have separate Rust modules. Command and event names, saved settings, and clock behavior are unchanged. No operator action is required.

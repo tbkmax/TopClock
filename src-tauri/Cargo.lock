@@ -3460,6 +3460,8 @@ dependencies = [
  "serde_json",
  "tauri",
  "tauri-build",
+ "webview2-com-sys",
+ "windows",
  "windows-sys 0.61.2",
  "winreg",
 ]

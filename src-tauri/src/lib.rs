@@ -11,6 +11,7 @@ mod startup;
 mod state;
 mod timer;
 mod tray;
+mod webview_runtime;
 mod window_commands;
 
 use state::ClockState;
@@ -18,6 +19,7 @@ use std::sync::Arc;
 use tauri::Manager;
 
 pub fn run() {
+    webview_runtime::ensure_available();
     std::env::set_var("WEBVIEW2_DEFAULT_BACKGROUND_COLOR", "0");
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
@@ -38,6 +40,7 @@ pub fn run() {
             displays::set_display_enabled,
             startup::get_startup_enabled,
             startup::set_startup_enabled,
+            startup::is_packaged,
             window_commands::quit
         ])
         .setup(|app| {

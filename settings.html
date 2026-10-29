@@ -268,7 +268,7 @@
                             <div><div class="control-title">Launch when I sign in</div><div class="control-description">Start the clock with Windows</div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()"><span></span></button>
                         </div>
-                        <div class="setting-row">
+                        <div class="setting-row" x-show="!isPackaged">
                             <div><div class="control-title">Automatically check for updates</div><div class="control-description">Check GitHub Releases when TopClock starts</div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="settings.auto_check_updates" :class="{ on: settings.auto_check_updates }" aria-label="Automatically check for updates" @click="settings.auto_check_updates = !settings.auto_check_updates; save()"><span></span></button>
                         </div>
@@ -281,7 +281,7 @@
                                 <div class="control-title">Software Updates</div>
                                 <div class="control-description" role="status" aria-live="polite" x-text="updateStatusText"></div>
                             </div>
-                            <div class="update-actions">
+                            <div class="update-actions" x-show="!isPackaged">
                                 <template x-if="updateAvailable">
                                     <button type="button" class="action-button primary-action" @click="openRelease()">
                                         <span>Download Update ↗</span>

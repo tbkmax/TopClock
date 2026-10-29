@@ -2,6 +2,8 @@
 
 This document describes how TopClock's update system operates using a lightweight **GitHub Releases reminder**.
 
+This is the current direct-download release channel. An [MSIX development package](../plan/MSIX_STORE_PLAN.md) can now be built separately. When TopClock runs with package identity, Settings shows Microsoft Store update delivery and suppresses GitHub installer checks and download actions. The MSIX is not yet the default release artifact; signing, installed-package checks, and Store submission remain.
+
 ---
 
 ## 1. Overview & Architecture

@@ -1,0 +1,56 @@
+name: MSIX development package
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Three-part release version, for example v1.0.0'
+        required: true
+        type: string
+      identity_name:
+        description: 'Package identity (use the exact Partner Center value for Store preparation)'
+        required: false
+        default: 'TopClock.Development'
+        type: string
+      publisher:
+        description: 'Publisher distinguished name (use the exact Partner Center value for Store preparation)'
+        required: false
+        default: 'CN=TopClock Development'
+        type: string
+      publisher_display_name:
+        description: 'Publisher display name for the package manifest'
+        required: false
+        default: 'TopClock Development'
+        type: string
+
+jobs:
+  msix:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+      - uses: ilammy/msvc-dev-cmd@v1
+      - run: npm ci
+      - name: Build unsigned MSIX
+        shell: pwsh
+        env:
+          MSIX_VERSION: ${{ inputs.version }}
+          MSIX_IDENTITY: ${{ inputs.identity_name }}
+          MSIX_PUBLISHER: ${{ inputs.publisher }}
+          MSIX_PUBLISHER_DISPLAY: ${{ inputs.publisher_display_name }}
+        run: |
+          ./scripts/Build-Msix.ps1 -Version $env:MSIX_VERSION -IdentityName $env:MSIX_IDENTITY -Publisher $env:MSIX_PUBLISHER -PublisherDisplayName $env:MSIX_PUBLISHER_DISPLAY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: topclock-unsigned-msix
+          path: release-assets/*.msix
+          if-no-files-found: error
