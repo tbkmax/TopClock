@@ -14,13 +14,20 @@ classDiagram
       settings_path
       menu_open
       hotkey_errors
+      active_displays
+      main_display_id
     }
     class DefaultCapability {
       windows
       permissions
     }
+    class RuntimeClock {
+      label: clock-*
+    }
     TauriConfig --> ClockState : windows created during setup
+    ClockState --> RuntimeClock : creates for enabled displays
     DefaultCapability --> TauriConfig : applies to main and settings
+    DefaultCapability --> RuntimeClock : applies to clock-*
 ```
 
 The definitions are in [tauri.conf.json](../tauri.conf.json), [main.rs](../src/main.rs), and [default.json](../capabilities/default.json). This diagram omits generated Tauri types. Add-on instances and Timer sessions live inside `ClockState.config`; see the [Rust workflow](../src/doc/workflow_diagram.md).
@@ -35,9 +42,9 @@ sequenceDiagram
     Rust->>Disk: Read or create settings.json
     Rust->>Rust: Manage ClockState
     Rust->>UI: Build main and settings windows
-    Rust->>UI: Set click-through and show main clock window
+    Rust->>UI: Reconcile enabled display clocks and set click-through
     Rust->>Rust: Start modifier monitor and optional hotkey registrations
     Rust->>UI: Reconcile click-through on first monitor pass
 ```
 
-The startup order comes from [main.rs](../src/main.rs); the window definitions come from [tauri.conf.json](../tauri.conf.json). The first monitor pass checks the visible window's desired click-through state even when the pre-show style was applied. After startup, [main.js](../../src/main.js) can resize and reposition the main window under [default.json](../capabilities/default.json). The Settings window can request the installed font list from [fonts.rs](../src/fonts.rs). Native Timer actions update `settings.json` and emit live state to the clock. `settings.json` is durable state; the menu flag and hotkey errors in `ClockState` are in-process state.
+The startup order comes from [main.rs](../src/main.rs); the two configured windows come from [tauri.conf.json](../tauri.conf.json), and secondary clocks are created at runtime. Each visible clock checks its click-through state on the first monitor pass. [main.js](../../src/main.js) can resize and reposition its own window without display-edge clamping under [default.json](../capabilities/default.json). The Settings window can request installed fonts from [fonts.rs](../src/fonts.rs). Native Timer actions update the shared session in `settings.json` and emit live state to all clocks. The file is durable state; per-window menu flags and active window records in `ClockState` are in-process state.

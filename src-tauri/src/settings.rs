@@ -1,5 +1,6 @@
 use crate::addons::{valid_addons, AddonInstance, TimerSession};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Clone, Copy, Serialize, Deserialize)]
 pub(crate) struct ClockPosition {
@@ -7,11 +8,34 @@ pub(crate) struct ClockPosition {
     pub(crate) y: i32,
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) struct DisplayPreference {
+    #[serde(default = "default_display_visible")]
+    pub(crate) visible: bool,
+    #[serde(default)]
+    pub(crate) position: Option<ClockPosition>,
+}
+
+impl Default for DisplayPreference {
+    fn default() -> Self {
+        Self {
+            visible: true,
+            position: None,
+        }
+    }
+}
+
+fn default_display_visible() -> bool {
+    true
+}
+
 #[derive(Default, Serialize, Deserialize)]
 pub(crate) struct PersistedConfig {
     #[serde(flatten)]
     pub(crate) settings: ClockSettings,
     pub(crate) position: Option<ClockPosition>,
+    #[serde(default)]
+    pub(crate) displays: HashMap<String, DisplayPreference>,
     #[serde(default)]
     pub(crate) timer_session: TimerSession,
 }
@@ -183,6 +207,7 @@ mod tests {
         let config = PersistedConfig {
             settings,
             position: Some(ClockPosition { x: -120, y: 240 }),
+            displays: HashMap::new(),
             timer_session: TimerSession::default(),
         };
         let loaded: PersistedConfig =
@@ -200,6 +225,32 @@ mod tests {
         assert_eq!(loaded.settings.shortcuts.open_settings, "Ctrl+,");
         assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
+    }
+
+    #[test]
+    fn display_positions_and_visibility_are_independent() {
+        let mut config = PersistedConfig::default();
+        config.displays.insert(
+            "monitor-a".into(),
+            DisplayPreference {
+                visible: true,
+                position: Some(ClockPosition { x: 20, y: 30 }),
+            },
+        );
+        config.displays.insert(
+            "monitor-b".into(),
+            DisplayPreference {
+                visible: false,
+                position: Some(ClockPosition { x: 80, y: 90 }),
+            },
+        );
+        let loaded: PersistedConfig =
+            serde_json::from_str(&serde_json::to_string(&config).unwrap()).unwrap();
+        assert_eq!(loaded.displays["monitor-a"].position.unwrap().x, 20);
+        assert_eq!(loaded.displays["monitor-b"].position.unwrap().y, 90);
+        assert!(loaded.displays["monitor-a"].visible);
+        assert!(!loaded.displays["monitor-b"].visible);
+        assert!(DisplayPreference::default().visible);
     }
 
     #[test]

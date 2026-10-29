@@ -1,6 +1,6 @@
 import Alpine from 'alpinejs';
 import { invoke } from '@tauri-apps/api/core';
-import { emitTo, listen } from '@tauri-apps/api/event';
+import { emit, listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
@@ -65,6 +65,7 @@ Alpine.data('settingsApp', () => ({
     recordingAction: null,
     recordListener: null,
     startupEnabled: false,
+    displays: [],
     appVersion: '0.0.0',
     updateStatusText: 'v0.0.0',
     isCheckingUpdate: false,
@@ -99,6 +100,11 @@ Alpine.data('settingsApp', () => ({
         this.updateStatusText = `Current version: v${this.appVersion}`;
         await this.loadFontFamilies();
         this.startupEnabled = await invoke('get_startup_enabled');
+        try {
+            this.displays = await invoke('get_displays');
+        } catch (error) {
+            this.error = `Could not list displays: ${error}`;
+        }
         this.updatePreview();
         setInterval(() => this.updatePreview(), 200);
         await listen('clock-settings-changed', (event) => {
@@ -109,6 +115,7 @@ Alpine.data('settingsApp', () => ({
             this.updatePreview();
         });
         await listen('hotkey-errors-changed', (event) => { this.hotkeyErrors = event.payload; });
+        await listen('displays-changed', (event) => { this.displays = event.payload; });
         await settingsWindow.onCloseRequested((event) => {
             event.preventDefault();
             this.close();
@@ -176,7 +183,7 @@ Alpine.data('settingsApp', () => ({
         this.updatePreview();
         clearTimeout(this.saveTimer);
         const settings = JSON.parse(JSON.stringify(this.settings));
-        emitTo('main', 'clock-settings-preview', settings).catch(console.error);
+        emit('clock-settings-preview', settings).catch(console.error);
         this.saveTimer = setTimeout(() => {
             this.saveTimer = null;
             this.queueSave(settings);
@@ -302,6 +309,23 @@ Alpine.data('settingsApp', () => ({
             this.error = '';
         } catch (error) {
             this.error = `Could not open settings folder: ${error}`;
+        }
+    },
+
+    displayLabel(display) {
+        const rawName = typeof display.name === 'string' ? display.name : '';
+        const devicePrefix = '\\\\.\\';
+        const name = (rawName.startsWith(devicePrefix) ? rawName.slice(devicePrefix.length) : rawName).trim();
+        return name.replace(/^DISPLAY(\d+)/i, 'Display $1') || 'Display';
+    },
+
+    async toggleDisplay(display) {
+        try {
+            await invoke('set_display_enabled', { id: display.id, enabled: !display.enabled });
+            this.displays = await invoke('get_displays');
+            this.error = '';
+        } catch (error) {
+            this.error = `Could not change display visibility: ${error}`;
         }
     },
 

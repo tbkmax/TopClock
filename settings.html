@@ -372,6 +372,22 @@
                     <h1>Your clock, your way<span class="yellow-period">.</span></h1>
                     <p class="section-description">Choose how TopClock behaves on your PC.</p>
                     <div class="general-panel">
+                        <section class="display-section" aria-labelledby="display-section-title">
+                            <div class="display-section-heading">
+                                <h2 id="display-section-title">Clocks on displays</h2>
+                                <p>Choose where TopClock appears. Each display remembers its clock position.</p>
+                            </div>
+                            <div class="display-list">
+                                <template x-for="display in displays" :key="display.id">
+                                    <div class="display-row">
+                                        <div class="display-row-text"><div class="control-title" x-text="displayLabel(display)"></div><div class="control-description" x-text="display.primary ? 'Main display' : 'Connected display'"></div></div>
+                                        <button type="button" class="switch" role="switch" :aria-checked="display.enabled" :aria-label="`Show clock on ${displayLabel(display)}`" :class="{ on: display.enabled }" @click="toggleDisplay(display)"><span></span></button>
+                                    </div>
+                                </template>
+                            </div>
+                            <p class="display-section-note">Appearance and add-ons are shared across displays.</p>
+                        </section>
+                        <h2 class="general-group-heading">App behavior</h2>
                         <div class="setting-row">
                             <div><div class="control-title">Launch when I sign in</div><div class="control-description">Start the clock with Windows</div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()"><span></span></button>

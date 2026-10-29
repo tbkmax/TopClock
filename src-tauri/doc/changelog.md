@@ -16,6 +16,10 @@
 
 ## Added
 
+### 2026-10-29 - Runtime clock windows for connected displays
+
+- Added Windows display target identity bindings and runtime clock windows for enabled displays. The configured main and Settings windows remain the startup anchors; secondary clock windows are created as displays connect. No operator action is required.
+
 ### 2026-10-27 - Built-in add-on and shortcut runtime
 
 - The native package now persists validated add-on instances and Timer progress, restoring a running session after restart. Enabled action shortcuts use Windows-wide registration while the modifier continues to govern click-through. The package configuration and capability permissions did not need new entries. No operator action is required.

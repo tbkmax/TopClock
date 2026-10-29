@@ -1,5 +1,7 @@
 # Tauri package backlog
 
+TODO 4's display windows and Windows identity binding are implemented. Physical multi-monitor verification remains in the [frontend backlog](../../src/doc/backlog.md).
+
 Use this file for unfinished package-wide work. Describe the problem, desired outcome, scope, acceptance criteria, dependencies, risks, verification and priority as requested by [the template](../../templates/doc/backlog.md).
 
 TODO 3's package permission and font enumeration updates are complete. No package-wide item has been verified for this folder. Review the existing [repository backlog](../../doc/backlog.md) against current source before adopting a proposal.

@@ -54,6 +54,10 @@
 .addon-timer-actions { display:inline-flex; gap:7px; margin-right:auto; }
 .tip-card .tip-copy{color:#bbb;font-size:11px;letter-spacing:normal;font-weight:400;margin:0}
 .general-panel{margin-top:26px}.general-panel .setting-row{min-height:80px}.update-actions{display:flex;align-items:center;gap:8px;flex:none}.action-button{background:#242424;color:#fff;border:1px solid #3a3a3a;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;transition:background .15s,border-color .15s,color .15s}.action-button:hover:not(:disabled){background:#303030;color:#faff69;border-color:#555}.action-button:disabled{opacity:.5;cursor:not-allowed}.action-button.primary-action{background:#faff69;color:#0a0a0a;border-color:#faff69;font-weight:700}.action-button.primary-action:hover:not(:disabled){background:#f4f952}.tip-card{background:#242419;border:1px solid #414125;border-radius:10px;padding:12px;color:#bbb;font-size:11px;line-height:1.6;margin-top:12px}.tip-card span{display:inline-block;color:#faff69;font-size:10px;letter-spacing:1px;font-weight:700;margin-right:10px}.error-toast{position:absolute;bottom:12px;left:30px;right:30px;padding:10px 12px;border:1px solid #ef4444;background:#2d1515;color:#fff;border-radius:8px;font-size:11px}
+.display-section{border:1px solid #343434;border-radius:12px;background:#151515;overflow:hidden}
+.display-section-heading{padding:15px 15px 12px}.display-section-heading h2,.general-group-heading{margin:0;color:#fff;font-size:13px;font-weight:700}.display-section-heading p,.display-section-note{margin:5px 0 0;color:#999;font-size:11px;line-height:1.45}
+.display-list{border-top:1px solid #2d2d2d}.display-row{min-height:65px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:10px 15px}.display-row+.display-row{border-top:1px solid #2d2d2d}.display-row-text{min-width:0}.display-row .control-title{overflow-wrap:anywhere}.display-section-note{border-top:1px solid #2d2d2d;margin:0;padding:10px 15px;color:#888}
+.general-group-heading{margin:24px 3px 10px}
 button:focus-visible,input:focus-visible{outline:2px solid #faff69;outline-offset:2px}
 /* Shortcuts tab styling */
 .conflict-alert {

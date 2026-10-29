@@ -26,6 +26,7 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
 ## Key Features
 
 - 👻 **Ghost Click-Through** — Clicks pass straight through the clock window. Play games, click browser tabs, or code without ever misclicking the widget.
+- 🖥️ **Multiple Displays** — Show the clock on every connected display by default, choose visible displays in General, and save a separate Ctrl-drag position for each. Clock styling and add-ons stay shared.
 - 💨 **Proximity Fade** — As your cursor approaches the clock, it automatically fades to prevent obscuring important UI or text underneath.
 - ⌨️ **Ctrl-Driven Interaction** — Hold <kbd>Ctrl</kbd> to drag, reposition, toggle time formats, or open the context menu.
 - 🎨 **Deep Customization** — Tailor the clock to your aesthetic:
@@ -45,7 +46,7 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
 
 | Action | Control | Description |
 | :--- | :--- | :--- |
-| **Move / Reposition** | <kbd>Ctrl</kbd> + **Left Drag** | Drag the clock anywhere on your desktop (position is saved automatically). |
+| **Move / Reposition** | <kbd>Ctrl</kbd> + **Left Drag** | Drag a clock freely; each display's clock position is saved independently. |
 | **Toggle 12 / 24-Hour** | <kbd>Ctrl</kbd> + **Left Click** | Quick-toggle between 12-hour and 24-hour time formats. |
 | **Context Menu** | <kbd>Ctrl</kbd> + **Right Click** | Open the clock menu (access Settings or Quit). |
 | **Quit Application** | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Q</kbd> | Optional system-wide shortcut, off by default. Enable it in Shortcuts. |

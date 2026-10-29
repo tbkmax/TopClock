@@ -141,7 +141,6 @@ Alpine.data('clockApp', () => ({
                     || Math.abs(oldSize.height - height * scale) >= 2) {
                     await appWindow.setSize(new LogicalSize(width, height));
                 }
-                const newSize = await appWindow.outerSize();
                 const mainRect = this.$refs.clockDigits.getBoundingClientRect();
                 const newX = isFirstResize
                     ? oldPosition.x
@@ -152,10 +151,7 @@ Alpine.data('clockApp', () => ({
                 isFirstResize = false;
                 lastMainRightOffset = mainRect.right;
                 lastMainTopOffset = mainRect.top;
-                const bounds = await invoke('get_monitor_bounds').catch(() => null);
-                const x = bounds ? Math.max(bounds.x, Math.min(newX, bounds.x + bounds.width - newSize.width)) : newX;
-                const y = bounds ? Math.max(bounds.y, Math.min(newY, bounds.y + bounds.height - newSize.height)) : newY;
-                await appWindow.setPosition(new PhysicalPosition(x, y));
+                await appWindow.setPosition(new PhysicalPosition(newX, newY));
             }).catch(console.error);
         }, 40);
     },

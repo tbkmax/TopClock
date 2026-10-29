@@ -2,6 +2,8 @@
 
 The General tab's Settings files button calls `open_settings_folder`; Rust opens the app config directory in Explorer. Failures appear in the Settings error toast, and this action does not change saved settings.
 
+Every clock window runs `clockApp` with the same persisted appearance and add-ons. `settingsApp` broadcasts a preview to all windows, while `get_displays` and `set_display_enabled` control which display windows are present. The General tab renders these switches in a separate display section, and `displayLabel()` strips the Windows device prefix for visible and accessible names without changing the display ID sent to Rust. Rust owns per-display position persistence; Ctrl-drag and resize anchoring can place a clock beyond display edges.
+
 Both UI components are Alpine component objects. This diagram shows their relationship to the native command boundary.
 
 ```mermaid
@@ -35,6 +37,8 @@ classDiagram
       clearShortcut()
       resetAllShortcuts()
       openSettingsFolder()
+      toggleDisplay()
+      displayLabel()
       getConflict()
     }
     class TauriCommands {
@@ -43,7 +47,8 @@ classDiagram
       get_font_families()
       update_settings()
       timer_action()
-      get_monitor_bounds()
+      get_displays()
+      set_display_enabled()
       set_startup_enabled()
       open_settings_folder()
       open_settings()
@@ -69,20 +74,20 @@ These names map to [main.js](../main.js), [settings.js](../settings.js), and the
 sequenceDiagram
     participant User
     participant Settings as settingsApp
-    participant Clock as clockApp
+    participant Clocks as all clockApp instances
     participant Rust
     User->>Settings: Choose colon or number animation
-    Settings->>Clock: clock-settings-preview
+    Settings->>Clocks: clock-settings-preview
     Settings->>Settings: Debounce and queue save
     Settings->>Rust: update_settings
     alt Saved
-        Rust->>Clock: clock-settings-changed
+        Rust->>Clocks: clock-settings-changed
     else Failed
         Rust-->>Settings: Error to display
     end
 ```
 
-On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings.js](../settings.js) after a control changes. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the whole clock group and menu, and resizes the native window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates where monitor bounds permit. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings.js](../settings.js) after a control changes. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the whole clock group and menu, and resizes the native window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
 
 ```mermaid

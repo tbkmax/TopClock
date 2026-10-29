@@ -2,6 +2,10 @@
 
 ## Fixed
 
+### 2026-10-29 - Preserve saved positions beyond display edges
+
+- Restoring a display clock no longer pushes a saved origin back inside monitor bounds. This keeps intentionally placed edge positions when reopening or reconnecting a display. No operator action is required.
+
 ### 2026-10-27 - Apply click-through on first visible monitor pass
 
 - The clock now reconciles its native click-through style immediately after showing the window, so a newly launched build does not require a Ctrl interaction before clicks pass through. Style changes also refresh the Windows frame while retaining `WS_EX_LAYERED`, preserving the earlier first-Ctrl white-background fix. No operator action is required.
@@ -12,6 +16,10 @@
 - Set `WEBVIEW2_DEFAULT_BACKGROUND_COLOR` to `0` at application start to ensure WebView2 default backing surface is transparent.
 
 ## Added
+
+### 2026-10-29 - Per-display clock windows and positions
+
+- TopClock now creates a clock on every connected desktop display by default, detects connected and removed displays, and persists visibility and position for each display independently. Windows display target paths are used as identities with a display-slot fallback. Existing single-clock positions migrate to the matching display. Appearance, add-ons, Timer and shortcuts remain shared. No operator action is required.
 
 ### 2026-10-29 - Open settings folder
 

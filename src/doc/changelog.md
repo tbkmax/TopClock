@@ -1,6 +1,22 @@
 # Frontend changelog
 
+## Changed
+
+### 2026-10-29 - Group display controls in General
+
+- General now puts display switches in their own section, separate from app behavior controls. Display labels omit the Windows `\\.\` prefix and space the display number for readability; display identities and saved choices are unchanged. No operator action is required.
+
+## Fixed
+
+### 2026-10-29 - Restore unrestricted clock placement
+
+- Removed the display-edge limits added to Ctrl-drag and resize anchoring during multi-display support. Clocks can again be placed flush with or beyond an edge without being pushed back. No operator action is required.
+
 ## Added
+
+### 2026-10-29 - Clock on selected displays
+
+- General now lists connected displays with all clocks enabled by default. A new display appears automatically, and each display can be switched off independently. Ctrl-drag moves only that display's clock; appearance, add-ons, and preview changes reach every clock. No operator action is required.
 
 ### 2026-10-29 - Open settings files from General
 

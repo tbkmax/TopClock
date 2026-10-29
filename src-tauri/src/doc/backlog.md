@@ -1,6 +1,6 @@
 # Rust application backlog
 
-TODO 4's settings-folder command is implemented. Multiple-display windows and saved per-display positions remain pending a display identity and persistence decision; see [TODO 4](../../../doc/TODO.md).
+TODO 4's settings-folder command and per-display windows, visibility and positions are implemented. Manual verification with multiple physical displays remains in the [frontend backlog](../../../src/doc/backlog.md).
 
 Use this file for verified unfinished native work. Each item should include problem, desired outcome, scope, acceptance criteria, risks, verification and priority, following [the template](../../../templates/doc/backlog.md).
 
