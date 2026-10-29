@@ -1,5 +1,11 @@
 # Tauri package changelog
 
+## Changed
+
+### 2026-10-29 - Keep the native entry point small
+
+- [main.rs](../src/main.rs) now starts the library runtime in [lib.rs](../src/lib.rs), where command registration and startup order remain visible. Native features are grouped into modules under `src/`; no package configuration, capability, or user-data migration is required. No operator action is required.
+
 ## Fixed
 
 ### 2026-10-27 - Restore startup click-through in release builds

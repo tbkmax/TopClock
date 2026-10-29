@@ -1,5 +1,11 @@
 # Rust application changelog
 
+## Changed
+
+### 2026-10-29 - Separate native runtime responsibilities
+
+- The binary entry point now delegates to a library runtime. Settings persistence, display windows, input monitoring, Timer actions, commands, startup registry handling, and tray setup have separate Rust modules. Command and event names, saved settings, and clock behavior are unchanged. No operator action is required.
+
 ## Fixed
 
 ### 2026-10-29 - Preserve saved positions beyond display edges

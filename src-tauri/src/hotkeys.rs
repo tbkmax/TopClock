@@ -1,5 +1,8 @@
-use super::{apply_timer_action, save_current_position, show_settings, ClockState};
 use crate::settings::ShortcutSettings;
+use crate::{
+    displays::save_current_position, state::ClockState, timer::apply_timer_action,
+    window_commands::show_settings,
+};
 use std::{ptr, sync::Arc, thread, time::Duration};
 use tauri::Emitter;
 use windows_sys::Win32::UI::{

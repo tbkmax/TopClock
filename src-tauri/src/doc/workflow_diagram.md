@@ -1,10 +1,10 @@
 # Rust workflows
 
-The General tab calls `open_settings_folder` in [main.rs](../main.rs). The command derives the folder from `ClockState.settings_path`, creates it if necessary, and asks Explorer to open it. Directory or process launch errors return to Settings; this flow does not write `settings.json`.
+The General tab calls `open_settings_folder` in [window_commands.rs](../window_commands.rs). The command derives the folder from `ClockState.settings_path`, creates it if necessary, and asks Explorer to open it. Directory or process launch errors return to Settings; this flow does not write `settings.json`.
 
-The display manager in [main.rs](../main.rs) polls connected desktop displays every two seconds. [display_identity.rs](../display_identity.rs) matches GDI names to active Windows target paths. Enabled displays receive separate clock windows, while one `ClockSettings` and `TimerSession` remain shared. A per-display preference stores visibility and a position relative to that display's origin; absent preferences mean visible.
+The display manager in [displays.rs](../displays.rs) polls connected desktop displays every two seconds. [display_identity.rs](../display_identity.rs) matches GDI names to active Windows target paths. Enabled displays receive separate clock windows, while one `ClockSettings` and `TimerSession` remain shared. A per-display preference stores visibility and a position relative to that display's origin; absent preferences mean visible.
 
-The core Rust types in [settings.rs](../settings.rs) and [main.rs](../main.rs) own durable configuration and live window state.
+The core Rust types in [settings.rs](../settings.rs) and [state.rs](../state.rs) own durable configuration and live window state.
 
 ```mermaid
 classDiagram
@@ -81,7 +81,7 @@ classDiagram
     PersistedConfig --> DisplayPreference : by display identity
 ```
 
-Names and fields match [settings.rs](../settings.rs), [addons.rs](../addons.rs), and [main.rs](../main.rs). The config is written to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
+Names and fields match [settings.rs](../settings.rs), [addons.rs](../addons.rs), and [state.rs](../state.rs). [config_store.rs](../config_store.rs) writes the config to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
 The `options` value contains `format` and optionally `show_weekday` for Date, or `time_zone` and optionally `show_label` for Region clock. [addons.rs](../addons.rs) accepts missing optional switches for older files, requires booleans when present, and validates sizes from 10% to 100% before the save flow below proceeds.
 
 ```mermaid
@@ -106,14 +106,14 @@ sequenceDiagram
     end
 ```
 
-Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. The persistence path and error handling are in [main.rs](../main.rs). Window-position saves use the same file. The background monitor polls Windows input and window geometry every 30 ms. Its first poll after the main window is shown reconciles click-through with the current modifier and menu state. On later state changes, `set_click_through` changes `WS_EX_TRANSPARENT` while retaining `WS_EX_LAYERED` and refreshes the native frame; the monitor also emits state and proximity events.
+Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. [settings_commands.rs](../settings_commands.rs) validates changes and calls [config_store.rs](../config_store.rs) to save. Window-position saves in [displays.rs](../displays.rs) use the same file. The background monitor in [interaction.rs](../interaction.rs) polls Windows input and window geometry every 30 ms. Its first poll after the main window is shown reconciles click-through with the current modifier and menu state. On later state changes, `set_click_through` changes `WS_EX_TRANSPARENT` while retaining `WS_EX_LAYERED` and refreshes the native frame; the monitor also emits state and proximity events. It calls [timer.rs](../timer.rs) to normalize a completed Timer on the main window.
 
 
 ```mermaid
 sequenceDiagram
     participant User
     participant Win as Windows hotkey service
-    participant Rust as hotkeys.rs and main.rs
+    participant Rust as hotkeys.rs and timer.rs
     participant File as settings.json
     participant Clock as Clock UI
     User->>Win: Press enabled Timer binding
