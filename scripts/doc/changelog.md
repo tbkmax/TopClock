@@ -18,3 +18,13 @@
 
 - Added this folder's architecture, workflow, changelog and backlog documents.
 - No operator action is required.
+
+## Changed
+
+### 2026-10-29 - Partner Center MSIX identity
+
+- The default [MSIX build](../Build-Msix.ps1) and, initially, the manual CI workflow used the reserved `tbkmax.TopClock` identity and publisher. Packages are named by identity, and the build refuses to replace a loose-registered staging folder. The earlier development registration stays available. Store upload still uses an unsigned package; no signing key is added.
+
+### 2026-10-29 - Keep MSIX packaging local
+
+- Removed the manual MSIX GitHub Actions workflow. The [local script](../Build-Msix.ps1) remains the Store package build path; tag-triggered GitHub releases publish only the portable ZIP.

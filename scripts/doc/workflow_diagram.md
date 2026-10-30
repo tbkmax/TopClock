@@ -21,19 +21,20 @@ The MSIX build extends that workflow:
 
 ```mermaid
 sequenceDiagram
-    participant Caller as Local shell or CI
+    participant Caller as Local shell
     participant Script as Build-Msix.ps1
     participant Tauri as tauri-windows.cmd
     participant SDK as MakeAppx
-    Caller->>Script: Version, identity, publisher
+    Caller->>Script: Version and optional identity overrides
     Script->>Tauri: build --no-bundle with version override
     Tauri-->>Script: Versioned executable
-    Script->>Script: Stage executable, logos, manifest
+    Script->>Script: Refuse to replace registered identity stage
+    Script->>Script: Stage executable, logos, identity manifest
     Script->>SDK: pack staged directory
     SDK-->>Caller: Unsigned MSIX or error
 ```
 
-[Build-Msix.ps1](../Build-Msix.ps1) stops if the version, toolchain, Tauri build, or MakeAppx validation fails. Signing and installation are outside this flow.
+[Build-Msix.ps1](../Build-Msix.ps1) defaults to the reserved Partner Center identity and stops if the version, toolchain, Tauri build, registered staging folder, or MakeAppx validation fails. Its identity-specific staging directory keeps a loose-registered development build intact when a different identity is built. Signing and installation are outside this flow.
 
 The portable cleanup flow is:
 

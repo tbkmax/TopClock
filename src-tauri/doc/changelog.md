@@ -2,6 +2,10 @@
 
 ## Changed
 
+### 2026-10-29 - GitHub release uses the portable executable
+
+- The tag-triggered [release workflow](../../.github/workflows/release.yml) now skips NSIS bundling and publishes a portable ZIP with its checksum. Local `npm run tauri:build` can still make an NSIS installer. Existing installed copies are unaffected; future GitHub releases require users to extract the portable ZIP.
+
 ### 2026-10-29 - Add an MSIX development package path
 
 - Added an unsigned MSIX build that stages the existing Tauri executable and Windows logo assets. The package declares a disabled sign-in task; packaged builds use Windows startup state, while direct builds keep their Run-key behavior. The NSIS release remains current until installed-package acceptance checks pass. No action is required for existing users.

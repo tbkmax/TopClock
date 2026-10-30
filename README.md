@@ -110,7 +110,7 @@ To build a full Windows installer (NSIS setup):
 npm run tauri:build
 ```
 
-### MSIX development package
+### MSIX Store candidate
 
 An unsigned MSIX can be built with the Windows SDK's MakeAppx:
 
@@ -118,7 +118,7 @@ An unsigned MSIX can be built with the Windows SDK's MakeAppx:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Msix.ps1 -Version v1.0.0
 ```
 
-The output is `release-assets/TopClock_1.0.0.0_x64.msix`. The script uses a development package identity by default; for a Store candidate, pass the exact Partner Center `-IdentityName`, `-Publisher`, and `-PublisherDisplayName`. The package must be signed with a matching development certificate for local installation. The [manual Windows CI workflow](.github/workflows/msix.yml) runs the same build. This path is still under [installed-package validation](doc/plan/MSIX_STORE_PLAN.md), so the NSIS installer and portable ZIP remain the current releases.
+The output is `release-assets/TopClock_tbkmax.TopClock_1.0.0.0_x64.msix`. The default manifest identity is the reserved Partner Center identity (`tbkmax.TopClock`, `CN=508EFCDF-2961-4370-827D-3736CE5AC66A`, publisher display name `tbkmax`). The package is unsigned for Partner Center submission; direct local installation requires a matching trusted signature. Override the three identity parameters only for a separate development identity. Build the Store package locally with this script; GitHub Actions does not build it. The tested development registration used a loose manifest, so the Store identity's installed behavior and upgrades still need the [package acceptance checks](doc/plan/MSIX_STORE_PLAN.md). GitHub tag releases provide only the portable ZIP; local NSIS builds remain available with `npm run tauri:build`.
 
 The MSIX uses Evergreen WebView2. If the runtime is missing, TopClock shows a native message pointing to Microsoft's download page before exiting. The runtime is not bundled in the package.
 
@@ -126,11 +126,11 @@ The MSIX uses Evergreen WebView2. If the runtime is missing, TopClock shows a na
 
 ## Updates & Releases
 
-TopClock checks GitHub Releases for newer versions and opens the release page for manual download. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for the build and publishing steps.
+Direct builds check GitHub Releases for newer versions and open the release page for the portable ZIP. Store builds use Store-managed updates. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for the build and publishing steps.
 
 ## Uninstalling
 
-- **Installer:** Quit TopClock, then use Windows **Settings > Apps > Installed apps > TopClock > Uninstall**. The NSIS uninstaller removes the installed application and its sign-in entry. Select **Delete the application data** in the uninstaller if you also want to erase TopClock settings and cache for this Windows user.
+- **NSIS installer (local or older GitHub build):** Quit TopClock, then use Windows **Settings > Apps > Installed apps > TopClock > Uninstall**. The NSIS uninstaller removes the installed application and its sign-in entry. Select **Delete the application data** in the uninstaller if you also want to erase TopClock settings and cache for this Windows user.
 - **Portable ZIP:** Quit TopClock, then run `Uninstall-TopClock.cmd` from the same extracted folder as `TopClock.exe`. It removes that executable and its matching sign-in entry, then asks separately whether to erase shared settings and cache. Delete the remaining cleanup scripts and extracted folder afterward if they contain nothing else you need.
 
 Installer and portable copies share the same TopClock user-data directories and sign-in entry. Deleting data affects both copies. The portable script does not remove other copies in different folders. If both types are present, uninstalling the installed copy also clears their shared sign-in entry; re-enable launch at sign-in from the remaining portable copy if needed. The NSIS data checkbox removes the current TopClock data directories; an older `%APPDATA%\com.maxtc.topclock` migration folder may remain.

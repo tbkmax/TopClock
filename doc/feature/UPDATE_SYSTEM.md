@@ -2,30 +2,27 @@
 
 This document describes how TopClock's update system operates using a lightweight **GitHub Releases reminder**.
 
-This is the current direct-download release channel. An [MSIX development package](../plan/MSIX_STORE_PLAN.md) can now be built separately. When TopClock runs with package identity, Settings shows Microsoft Store update delivery and suppresses GitHub installer checks and download actions. The MSIX is not yet the default release artifact; signing, installed-package checks, and Store submission remain.
+This is the GitHub direct-download release channel for the portable ZIP. A [Store-identity MSIX](../plan/MSIX_STORE_PLAN.md) is built locally and submitted separately through Partner Center. When TopClock runs with package identity, Settings shows Microsoft Store update delivery and suppresses GitHub download actions. Store-signed installation, upgrade checks, and submission remain open.
 
 ---
 
 ## 1. Overview & Architecture
 
-TopClock uses a **zero-overhead, heuristic-safe update reminder**:
+Direct builds use a GitHub Releases update reminder:
 
 ```mermaid
 flowchart TD
-    A["Developer pushes Git Tag (e.g. v0.1.0)"] --> B["GitHub Actions CI/CD (.github/workflows/release.yml)"]
+    A["Developer pushes Git Tag (e.g. v1.0.0)"] --> B["GitHub Actions CI/CD (.github/workflows/release.yml)"]
     B --> C["Compiles Frontend & Rust Windows Binary"]
-    C --> D["Uploads to GitHub Release:\n• TopClock_x.x.x_x64-setup.exe (NSIS Installer)\n• TopClock_x.x.x_portable.zip (app and cleanup scripts)\n• checksums-sha256.txt"]
-    D --> E["User's TopClock Application"]
-    E -->|Queries GitHub Releases API| D
+    C --> D["Draft GitHub Release:\n• TopClock_x.x.x_portable.zip (app and cleanup scripts)\n• checksums-sha256.txt"]
+    D --> P["Developer publishes draft"]
+    P --> E["User's TopClock Application"]
+    E -->|Queries GitHub Releases API| P
     E -->|Notifies user when new version exists| E
-    E -->|Click 'Download Update ↗' opens browser| D
+    E -->|Click 'Download Update ↗' opens browser| P
 ```
 
-### Why This Approach Was Chosen
-- 🛡️ **Zero Windows Defender False Positives**: Does not bundle background file-replacement or dropper code, avoiding automated `!ml` (machine-learning) antivirus heuristic flags.
-- ⚡ **Lightweight & Fast**: No external updater runtime plugins or extra runtime binary dependencies.
-- 🆓 **100% Free**: No corporate Microsoft Authenticode / EV signing certificates required.
-- 🔒 **Zero Private Key Management**: No need to manage or configure signing private keys locally or in CI secrets.
+The direct build has no background installer or updater. The portable executable is not signed by this workflow, so [SmartScreen can warn on download or launch](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation). The Store MSIX is signed by Microsoft after certification and follows Store-managed updates.
 
 ---
 
@@ -44,31 +41,37 @@ flowchart TD
 
 ## 3. How to Publish an Update
 
-Publishing an update takes just a single git command:
+Choose one three-part version for the Git tag and local MSIX build. The GitHub workflow builds the portable ZIP from the tagged commit; it does not build or upload the Store MSIX.
 
-### Step 3.1: Commit and Tag
+### Step 3.1: Commit, tag, and build the Store package locally
+
+Commit all intended release changes and confirm `git status --short` is clean before tagging. The tag must point to the same source used for the local MSIX build.
+
 ```powershell
-git add .
-git commit -m "Prepare release v0.1.0"
-git tag v0.1.0
+git tag v1.0.0
+$releaseTag = git describe --tags --exact-match HEAD
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\Build-Msix.ps1 -Version $releaseTag
 git push origin main
-git push origin v0.1.0
+git push origin $releaseTag
 ```
 
+The build script maps `v1.0.0` to MSIX version `1.0.0.0` without changing the repository's development version. Upload the unsigned MSIX to Partner Center, not to the public GitHub release. Do not push the tag until the local build succeeds.
+
 ### Step 3.2: Automated Build in GitHub Actions
-The workflow in [`.github/workflows/release.yml`](file:///../../.github/workflows/release.yml) triggers automatically:
-1. It extracts `0.1.0` from your Git tag and synchronizes `tauri.conf.json` and `Cargo.toml`.
-2. It builds the Windows installer and standalone executable.
-3. It generates SHA-256 checksums and creates a GitHub Release draft with:
-   - `TopClock_0.1.0_x64-setup.exe`
-   - `TopClock_0.1.0_portable.zip` (contains `TopClock.exe`, `Uninstall-TopClock.cmd`, and `Uninstall-TopClock.ps1`)
+The workflow in [`.github/workflows/release.yml`](../../.github/workflows/release.yml) triggers automatically:
+
+1. It extracts `1.0.0` from your Git tag and sets the executable's build version.
+2. It builds the standalone executable with Tauri's `--no-bundle` option; no NSIS installer is produced.
+3. It creates a GitHub Release draft with:
+   - `TopClock_1.0.0_portable.zip` (contains `TopClock.exe`, `Uninstall-TopClock.cmd`, and `Uninstall-TopClock.ps1`)
    - `checksums-sha256.txt`
 
-The portable ZIP contains the standalone `TopClock.exe`; it does not require the NSIS installer. It still stores settings in the user's app config directory. To update a portable copy, quit TopClock and extract the new `TopClock.exe` over the old one in the same folder. Launch at sign-in uses the executable's full path, so keeping both the folder and filename unchanged preserves that setting. Deleting the executable without disabling launch at sign-in leaves a stale Windows Run entry; restore the file at that path or remove the startup entry.
+The portable ZIP contains the standalone `TopClock.exe`. It still stores settings in the user's app config directory. To update a portable copy, quit TopClock and extract the new `TopClock.exe` over the old one in the same folder. Launch at sign-in uses the executable's full path, so keeping both the folder and filename unchanged preserves that setting. Deleting the executable without disabling launch at sign-in leaves a stale Windows Run entry; restore the file at that path or remove the startup entry.
 
-To remove a portable copy, quit TopClock and run `Uninstall-TopClock.cmd` beside that copy's `TopClock.exe`. It removes only the adjacent executable and a sign-in entry that points to it. It asks separately before deleting TopClock data shared by all copies for the current Windows user. Delete the remaining cleanup scripts and extracted folder manually afterward. For an installed copy, use Windows Installed apps; the NSIS uninstaller offers an optional application-data checkbox. See [Uninstalling](../../README.md#uninstalling).
+To remove a portable copy, quit TopClock and run `Uninstall-TopClock.cmd` beside that copy's `TopClock.exe`. It removes only the adjacent executable and a sign-in entry that points to it. It asks separately before deleting TopClock data shared by all copies for the current Windows user. Delete the remaining cleanup scripts and extracted folder manually afterward. Older NSIS installations can still be removed through Windows Installed apps. See [Uninstalling](../../README.md#uninstalling).
 
 ### Step 3.3: Publish the Draft
+
 1. Visit **`https://github.com/tbkmax/TopClock/releases`**.
 2. Click **Edit** on the draft and click **Publish release**.
 

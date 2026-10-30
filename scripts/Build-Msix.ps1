@@ -1,9 +1,9 @@
 param(
     [Parameter(Mandatory = $true)]
     [string] $Version,
-    [string] $IdentityName = 'TopClock.Development',
-    [string] $Publisher = 'CN=TopClock Development',
-    [string] $PublisherDisplayName = 'TopClock Development'
+    [string] $IdentityName = 'tbkmax.TopClock',
+    [string] $Publisher = 'CN=508EFCDF-2961-4370-827D-3736CE5AC66A',
+    [string] $PublisherDisplayName = 'tbkmax'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,11 +26,11 @@ if ($Publisher -notmatch '^CN=.+') {
 }
 
 $assets = [System.IO.Path]::GetFullPath((Join-Path $root 'release-assets'))
-$stage = [System.IO.Path]::GetFullPath((Join-Path $assets 'msix-stage'))
+$stage = [System.IO.Path]::GetFullPath((Join-Path $assets "msix-stage-$IdentityName"))
 if (-not $stage.StartsWith(($assets + [System.IO.Path]::DirectorySeparatorChar), [System.StringComparison]::OrdinalIgnoreCase)) {
     throw 'The MSIX staging directory must remain inside release-assets.'
 }
-$output = Join-Path $assets "TopClock_${msixVersion}_x64.msix"
+$output = Join-Path $assets "TopClock_${IdentityName}_${msixVersion}_x64.msix"
 $binary = Join-Path $root 'src-tauri\target\release\top_clock.exe'
 $sdkLocal = Join-Path $root '.tools\sdk-core\c\bin\10.0.26100.0\x64\makeappx.exe'
 $makeAppx = if (Test-Path $sdkLocal) { $sdkLocal } else {
@@ -54,6 +54,13 @@ if (-not (Test-Path $binary)) { throw "Tauri executable was not found: $binary" 
 if (Test-Path $stage) {
     if ((Get-Item -LiteralPath $stage).Attributes -band [System.IO.FileAttributes]::ReparsePoint) {
         throw 'Refusing to remove a linked MSIX staging directory.'
+    }
+    $registered = Get-AppxPackage | Where-Object {
+        $_.InstallLocation -and
+        [System.IO.Path]::GetFullPath($_.InstallLocation).TrimEnd('\') -eq $stage.TrimEnd('\')
+    } | Select-Object -First 1
+    if ($registered) {
+        throw "Refusing to replace the staging directory registered by $($registered.PackageFullName). Unregister that development package first."
     }
     Remove-Item -LiteralPath $stage -Recurse -Force
 }
@@ -103,4 +110,4 @@ if (Test-Path $output) { Remove-Item -LiteralPath $output -Force }
 if ($LASTEXITCODE -ne 0) { throw "MakeAppx failed with exit code $LASTEXITCODE." }
 Write-Host "Created $output"
 Write-Host "Identity: $IdentityName; Publisher: $Publisher; Version: $msixVersion"
-Write-Host 'This package is unsigned. Sign with a matching development certificate before installation.'
+Write-Host 'This package is unsigned for Partner Center upload. Local installation requires a matching trusted signature.'

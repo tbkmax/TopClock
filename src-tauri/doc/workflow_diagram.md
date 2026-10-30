@@ -52,4 +52,6 @@ The startup order comes from [lib.rs](../src/lib.rs), with settings loading in [
 
 The separate MSIX build is defined in [Build-Msix.ps1](../../scripts/Build-Msix.ps1) and its [script workflow](../../scripts/doc/workflow_diagram.md). The manifest's `TopClockStartup` task starts disabled. At runtime, [startup.rs](../src/startup.rs) probes package identity and routes the sign-in setting to Windows StartupTask or the direct build's Run key. This package flow does not change window creation or click-through.
 
+The [tag-triggered GitHub workflow](../../.github/workflows/release.yml) builds this same executable with `--no-bundle`, then archives it with the portable cleanup scripts. The local MSIX build and Partner Center upload are separate from that GitHub release flow.
+
 If the WebView2 check fails, [webview_runtime.rs](../src/webview_runtime.rs) shows native download guidance and exits before the settings read or webview steps above.
