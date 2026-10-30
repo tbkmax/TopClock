@@ -54,6 +54,8 @@ The startup order comes from [lib.rs](../src/lib.rs), with settings loading in [
 
 The separate MSIX build is defined in [Build-Msix.ps1](../../scripts/Build-Msix.ps1) and its [script workflow](../../scripts/doc/workflow_diagram.md). The manifest's `TopClockStartup` task starts disabled. At runtime, [startup.rs](../src/startup.rs) probes package identity and routes the sign-in setting to Windows StartupTask or the direct build's Run key. This package flow does not change window creation or click-through.
 
+For a Store-installed MSIX, [store_updates.rs](../src/store_updates.rs) uses the Settings window handle to check published package updates and request Store download and installation. The Store owns the permission dialog and package installation. A future package must first be submitted and certified through Partner Center. A direct build uses GitHub only as a release reminder and opens the browser; it never installs that download inside TopClock. See the [update channel guide](../../doc/feature/UPDATE_SYSTEM.md) and [native update workflow](../src/doc/workflow_diagram.md).
+
 The [tag-triggered GitHub workflow](../../.github/workflows/release.yml) builds this same executable with `--no-bundle`, then archives it with the portable cleanup scripts. The local MSIX build and Partner Center upload are separate from that GitHub release flow.
 
 If the WebView2 check fails, [webview_runtime.rs](../src/webview_runtime.rs) shows native download guidance and exits before the settings read or webview steps above.

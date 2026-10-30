@@ -287,14 +287,14 @@
                                 <div class="control-title">Software Updates</div>
                                 <div class="control-description" role="status" aria-live="polite" x-text="updateStatusText"></div>
                             </div>
-                            <div class="update-actions" x-show="!isPackaged">
+                            <div class="update-actions">
                                 <template x-if="updateAvailable">
-                                    <button type="button" class="action-button primary-action" @click="openRelease()">
-                                        <span>Download Update ↗</span>
+                                    <button type="button" class="action-button primary-action" :disabled="isInstallingUpdate" @click="isPackaged ? installStoreUpdate() : openRelease()">
+                                        <span x-text="t(isPackaged ? (isInstallingUpdate ? 'general.installingUpdate' : 'general.installUpdate') : 'general.downloadUpdate')"></span>
                                     </button>
                                 </template>
                                 <template x-if="!updateAvailable">
-                                    <button type="button" class="action-button" :disabled="isCheckingUpdate" @click="checkForUpdates(true)">
+                                    <button type="button" class="action-button" :disabled="isCheckingUpdate || isInstallingUpdate" @click="checkForUpdates(true)">
                                         <span x-text="t(isCheckingUpdate ? 'general.checking' : 'general.checkUpdates')"></span>
                                     </button>
                                 </template>

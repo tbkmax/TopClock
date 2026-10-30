@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-29 - Request published updates from Microsoft Store
+
+- Packaged Settings can now query available Store packages and ask Windows to download and install an update with the Settings window as dialog owner. Direct builds reject these commands and keep the GitHub browser reminder. Store-signed installation remains to be tested; no settings migration is required.
+
 ### 2026-10-29 - Persisted language and Windows UI language detection
 
 - Existing settings files now default to System language; users can save English, Simplified Chinese, Traditional Chinese, or Japanese. The tray Quit label and tooltip follow that choice, and direct and MSIX builds read the Windows UI language for System default. No user action is required.

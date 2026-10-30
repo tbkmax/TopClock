@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-29 - Check and install Store updates from Settings
+
+- Store-installed builds now show **Check for updates** in General and change it to **Update** when Microsoft Store reports a published package. The action asks the Store to install it, while GitHub builds still only open a release page. No settings migration is required; Store-signed installation and update delivery still need live verification.
+
 ### 2026-10-29 - Chinese and Japanese language selection
 
 - General now offers System default, English, Simplified Chinese, Traditional Chinese, and Japanese. Settings and clock menu labels switch immediately, and the Date add-on's short weekday follows the effective language in both preview and desktop clocks. Existing settings default to the Windows UI language. No user action is required.

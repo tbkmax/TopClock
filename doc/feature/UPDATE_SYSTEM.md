@@ -1,8 +1,8 @@
-# TopClock Update Reminder & Release Guide
+# TopClock update channels and release guide
 
-This document describes how TopClock's update system operates using a lightweight **GitHub Releases reminder**.
+TopClock has two distinct update flows. The direct build uses a GitHub Releases reminder and opens a browser. The Store-installed MSIX checks Microsoft Store and can ask the Store to install a published update from inside Settings.
 
-This is the GitHub direct-download release channel for the portable ZIP. A [Store-identity MSIX](../plan/MSIX_STORE_PLAN.md) is built locally and submitted separately through Partner Center. When TopClock runs with package identity, Settings shows Microsoft Store update delivery and suppresses GitHub download actions. Store-signed installation, upgrade checks, and submission remain open.
+The [Store-identity MSIX](../plan/MSIX_STORE_PLAN.md) is built locally and submitted separately through Partner Center. Package identity selects the Store flow; direct builds retain the GitHub flow. Store-signed installation, in-app update delivery, upgrade checks, and submission remain unverified.
 
 ---
 
@@ -22,11 +22,26 @@ flowchart TD
     E -->|Click 'Download Update ↗' opens browser| P
 ```
 
-The direct build has no background installer or updater. The portable executable is not signed by this workflow, so [SmartScreen can warn on download or launch](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation). The Store MSIX is signed by Microsoft after certification and follows Store-managed updates.
+The direct build has no background installer or updater. Clicking **Download Update ↗** only opens GitHub; users download and replace the portable executable themselves. The portable executable is not signed by this workflow, so [SmartScreen can warn on download or launch](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation). A Store MSIX is signed by Microsoft after certification and follows Store-managed updates.
+
+Store-installed flow:
+
+```mermaid
+flowchart TD
+    A[Developer builds a higher-version MSIX] --> B[Partner Center submission and certification]
+    B --> C[Microsoft Store publishes the package]
+    C --> D[Store delivers automatic updates]
+    C --> E[TopClock Settings checks Store for an available update]
+    E -->|Update button| F[Store asks permission and installs]
+```
+
+The in-app button can only install an update that has already been published through Partner Center. The current implementation does not publish packages or download GitHub binaries inside the app.
 
 ---
 
-## 2. How the In-App Check Works
+## 2. How the checks work
+
+### Direct GitHub builds
 
 1. **Automatic Check on Launch**:  
    If **"Automatically check for updates"** is toggled on in **Settings > General** (enabled by default), TopClock fetches `https://api.github.com/repos/tbkmax/TopClock/releases/latest`.
@@ -36,6 +51,13 @@ The direct build has no background installer or updater. The portable executable
    - If an update is found, Settings shows:  
      `New version v0.1.0 is available!` with a **Download Update ↗** button.
    - Clicking it calls `open_release_page`, opening the GitHub release download page directly in the user's default web browser.
+
+### Store-installed MSIX
+
+1. Settings detects package identity and shows **Check for updates**. The GitHub automatic-check preference and GitHub download action are hidden.
+2. Clicking the button calls `check_store_updates`. Rust queries `Windows.Services.Store.StoreContext` for updates to this installed package. It does not compare GitHub tags.
+3. If an update exists, the button becomes **Update**. Clicking it calls `install_store_update`; the Store requests permission, downloads, and installs the published package. Settings reports cancellation or failure and keeps the Update action available for another attempt. The app may need to restart.
+4. The Store can also deliver updates automatically. A new version still requires a higher-version MSIX submission and certification in Partner Center. The Store-side flow requires a Store-signed install to test; an unpackaged `tauri dev` process follows the GitHub flow.
 
 ---
 
@@ -56,6 +78,8 @@ git push origin $releaseTag
 ```
 
 The build script maps `v1.0.0` to MSIX version `1.0.0.0` without changing the repository's development version. Upload the unsigned MSIX to Partner Center, not to the public GitHub release. Do not push the tag until the local build succeeds.
+
+For every Store update, choose a higher MSIX version, open the app's **Product release** in Partner Center, start an update, upload the new MSIX under **Packages**, and submit it for certification. After Microsoft publishes it, Store-installed copies can receive it automatically or through TopClock's **Update** button. The button cannot publish an unpublished package. See [Microsoft's MSIX update instructions](https://learn.microsoft.com/en-us/windows/apps/publish/publish-your-app/msix/publish-update-to-your-app-on-store).
 
 ### Step 3.2: Automated Build in GitHub Actions
 The workflow in [`.github/workflows/release.yml`](../../.github/workflows/release.yml) triggers automatically:

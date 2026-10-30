@@ -22,7 +22,29 @@ sequenceDiagram
 
 The General tab's Settings files button calls `open_settings_folder`; Rust opens the app config directory in Explorer. Failures appear in the Settings error toast, and this action does not change saved settings.
 
-General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings-updates.js) leaves GitHub checks and the release-page action inactive, and [settings.html](../../settings.html) shows Store delivery text. If false, the existing GitHub reminder flow remains. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
+General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings-updates.js) calls the native Store check on button press and changes the button to **Update** when a published package is available. That action asks Windows Store to install the update, with cancellation and failure reported in Settings. If false, the GitHub reminder opens a release page; TopClock never installs that download. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Settings as settingsApp
+    participant Rust as store_updates.rs
+    participant Store as Microsoft Store
+    User->>Settings: Check for updates (packaged build)
+    Settings->>Rust: check_store_updates
+    Rust->>Store: Query available package updates
+    Store-->>Settings: Available or current
+    alt Update available
+        Settings->>User: Show Update button
+        User->>Settings: Update
+        Settings->>Rust: install_store_update
+        Rust->>Store: Request download and install
+        Store->>User: Permission dialog
+        Store-->>Settings: Completed, canceled, or failed
+    end
+```
+
+The Store publishes updates only after a separate Partner Center submission and certification. This diagram describes the Store-installed MSIX path; an unpackaged process uses the GitHub browser path.
 
 Every clock window runs `clockApp` with the same persisted appearance and add-ons. `settingsApp` broadcasts a preview to all windows, while `get_displays` and `set_display_enabled` control which display windows are present. The General tab renders these switches in a separate display section, and `displayLabel()` strips the Windows device prefix for visible and accessible names without changing the display ID sent to Rust. Rust owns per-display position persistence; Ctrl-drag and resize anchoring can place a clock beyond display edges.
 
@@ -81,6 +103,8 @@ classDiagram
       set_display_enabled()
       set_startup_enabled()
       open_settings_folder()
+      check_store_updates()
+      install_store_update()
       open_settings()
       quit()
     }
@@ -155,4 +179,4 @@ sequenceDiagram
 
 The [Add-ons tab](../../settings.html) controls placement, order, a visible 10%–100% size slider, and options. It previews the localized Date weekday and Region label switches using the shared formatter in [addons.js](../addons.js). The [clock](../../index.html) reserves distinct rows above and below the main display; the optional weekday uses 80% of its Date row's font size. Timer actions and running progress are native state; frontend display values are computed on each tick without a mode label. The menu Reset action calls the same timer command.
 
-In the [General tab](../../settings.html), the startup or manual release check in [settings.js](../settings.js) sets `updateAvailable` after comparing the latest tag with the installed version. The General sidebar badge and its accessible label follow that state, while the update row shows the status text and download action. A successful current-version result hides the badge; a failed network check does not claim that an available update disappeared.
+In the [General tab](../../settings.html), the direct-build check compares the latest GitHub tag with the installed version. The packaged check uses Store availability instead. The General sidebar badge and its accessible label follow `updateAvailable`; the action is **Download Update ↗** for a browser release page or **Update** for a Store installation. A successful current-version result hides the badge; a failed check leaves any earlier available state intact.

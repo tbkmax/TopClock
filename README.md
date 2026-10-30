@@ -127,7 +127,7 @@ The MSIX uses Evergreen WebView2. If the runtime is missing, TopClock shows a na
 
 ## Updates & Releases
 
-Direct builds check GitHub Releases for newer versions and open the release page for the portable ZIP. Store builds use Store-managed updates. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for the build and publishing steps.
+Direct builds check GitHub Releases for newer versions and open the release page for the portable ZIP; TopClock does not install that download. Store-installed MSIX builds can check Microsoft Store from Settings and request an available update there. Each new Store version must first be submitted and certified in Partner Center. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for both paths.
 
 ## Uninstalling
 

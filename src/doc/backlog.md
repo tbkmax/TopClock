@@ -17,11 +17,11 @@ TODO 4's Settings files button and multiple-display controls are implemented. Ma
 
 - **Title:** Check General from an installed MSIX.
 - **Problem or opportunity:** Frontend tests and build confirm the code paths, but a packaged webview has not been exercised interactively.
-- **Desired outcome:** Store users see no GitHub download prompt, and the sign-in switch reflects Windows Startup settings.
+- **Desired outcome:** Store users can check for and install a published Store update inside Settings without seeing a GitHub download prompt, and the sign-in switch reflects Windows Startup settings.
 - **Scope:** [settings.html](../../settings.html), [settings.js](../settings.js), and [settings-updates.js](../settings-updates.js).
-- **Acceptance criteria:** The Store message appears; no GitHub request or button is shown; Windows disabling startup is reflected and reported; direct builds retain the GitHub reminder.
+- **Acceptance criteria:** A first Store version shows Check for updates and no GitHub request; after a higher-version private submission is published, the button becomes Update, the Store permission dialog appears, and the update installs. Cancellation or failure keeps a retry action. Windows disabling startup is reflected and reported; direct builds retain the GitHub reminder and only open the release page.
 - **Dependencies and risks:** Requires signed MSIX installation; keep the direct build behavior intact.
-- **Verification:** Open General in both installed MSIX and direct builds, including after Windows Startup settings changes.
+- **Verification:** Open General in both installed MSIX and direct builds, test two increasing private Store versions, and check Windows Startup settings changes.
 - **Priority:** High before Store submission.
 
 ## Multi-display interaction verification

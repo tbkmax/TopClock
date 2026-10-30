@@ -23,7 +23,25 @@ The [native locale command](../locale.rs) reads the current user's Windows UI pr
 
 The General tab calls `open_settings_folder` in [window_commands.rs](../window_commands.rs). The command derives the folder from `ClockState.settings_path`, creates it if necessary, and asks Explorer to open it. Directory or process launch errors return to Settings; this flow does not write `settings.json`.
 
-The sign-in toggle uses [startup.rs](../startup.rs). `is_packaged` probes the process package identity. Packaged builds query the manifest's `TopClockStartup` task and request enablement or disable it through Windows; direct builds continue to read and write the `TopClock` Run value. If Windows disabled the task as a user action, the enable request reports that state and leaves it disabled. Settings reads the authoritative state after a toggle. The Store update UI uses the same package identity query to suppress the direct-build GitHub download action.
+The sign-in toggle uses [startup.rs](../startup.rs). `is_packaged` probes the process package identity. Packaged builds query the manifest's `TopClockStartup` task and request enablement or disable it through Windows; direct builds continue to read and write the `TopClock` Run value. If Windows disabled the task as a user action, the enable request reports that state and leaves it disabled. Settings reads the authoritative state after a toggle. The Store update UI uses the same package identity query to select [store_updates.rs](../store_updates.rs) instead of the direct-build GitHub release page.
+
+```mermaid
+sequenceDiagram
+    participant Settings
+    participant Rust as store_updates.rs
+    participant UI as Settings window UI thread
+    participant Store as Microsoft Store
+    Settings->>Rust: check_store_updates
+    Rust->>UI: Create StoreContext with Settings HWND
+    UI->>Store: Get available package updates
+    Store-->>Settings: Available or up to date
+    Settings->>Rust: install_store_update when available
+    Rust->>UI: Request download and install
+    UI->>Store: Show permission dialog and install
+    Store-->>Settings: Completed, canceled, or error
+```
+
+The installation command rechecks availability before requesting installation, so a stale button can return up to date. The Store owns the package and permission dialog. This path needs a Store-signed two-version check; direct builds can only open the GitHub release page.
 
 ```mermaid
 sequenceDiagram

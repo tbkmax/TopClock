@@ -10,6 +10,17 @@ Use this file for verified unfinished native work. Each item should include prob
 
 The runtime module extraction is complete; [main.rs](../main.rs) remains a small entry point and [lib.rs](../lib.rs) owns startup wiring. TODO 7's shortcut persistence, modifier key validation, and dynamic Win32 modifier polling are complete. TODO 3's persistence, validation of independent animation choices and the 24–200 pixel size range, and Windows font enumeration are complete. Existing proposals in the [repository backlog](../../../doc/backlog.md) may be outdated; check [settings.rs](../settings.rs), [interaction.rs](../interaction.rs), and [fonts.rs](../fonts.rs) before adding them here.
 
+## Store update command verification
+
+- **Title:** Verify Store update checks and installation in a certified private package.
+- **Problem or opportunity:** The new StoreContext commands compile but a local unpackaged process cannot query a published update or show the Store permission dialog.
+- **Desired outcome:** A Store-installed TopClock reports a higher version and installs it from Settings.
+- **Scope:** [store_updates.rs](../store_updates.rs), [lib.rs](../lib.rs), and the packaged Settings UI.
+- **Acceptance criteria:** A first private Store version reports no update; after a higher-version private submission is published, Settings shows Update, the Store dialog appears, installation completes, and the new version starts with settings intact. Cancellation, offline failure, and a stale update result show recoverable status. Direct builds cannot invoke the Store commands.
+- **Dependencies and risks:** Requires two certified private MSIX versions with the same identity; preserve package data and allow Windows to close the app during installation.
+- **Verification:** Install version one through Store, submit version two, check and update in Settings, then repeat the failure and cancellation cases.
+- **Priority:** High before public Store release because compilation cannot prove Store service behavior.
+
 ## Packaged settings location and startup behavior
 
 - **Title:** Verify the MSIX data path, folder action, and sign-in state in an installed package.

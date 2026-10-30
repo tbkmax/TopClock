@@ -10,6 +10,7 @@ mod settings;
 mod settings_commands;
 mod startup;
 mod state;
+mod store_updates;
 mod timer;
 mod tray;
 mod webview_runtime;
@@ -43,6 +44,8 @@ pub fn run() {
             startup::get_startup_enabled,
             startup::set_startup_enabled,
             startup::is_packaged,
+            store_updates::check_store_updates,
+            store_updates::install_store_update,
             window_commands::quit
         ])
         .setup(|app| {

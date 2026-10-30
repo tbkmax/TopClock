@@ -49,6 +49,7 @@ Alpine.data('settingsApp', () => ({
     updateStatusKey: 'updates.currentVersion',
     updateStatusVars: { version: '0.0.0' },
     isCheckingUpdate: false,
+    isInstallingUpdate: false,
     updateAvailable: false,
     latestReleaseUrl: 'https://github.com/tbkmax/TopClock/releases/latest',
     latestReleaseTag: '',

@@ -16,7 +16,7 @@ windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Devices
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.56"
-windows = { version = "0.62", features = ["ApplicationModel"] }
+windows = { version = "0.62", features = ["ApplicationModel", "Services_Store", "Win32_System_WinRT", "Win32_UI_Shell"] }
 webview2-com-sys = "0.39"
 
 [profile.release]

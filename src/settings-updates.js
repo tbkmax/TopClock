@@ -14,9 +14,21 @@ export function isNewerVersion(latest, current) {
 
 export const updateMethods = {
     async checkForUpdates(manual = false) {
-        if (this.isPackaged) return;
-        if (this.isCheckingUpdate) return;
+        if (this.isCheckingUpdate || this.isInstallingUpdate) return;
         this.isCheckingUpdate = true;
+        if (this.isPackaged) {
+            this.setUpdateStatus('updates.checkingStore');
+            try {
+                this.updateAvailable = await invoke('check_store_updates');
+                this.setUpdateStatus(this.updateAvailable ? 'updates.storeAvailable' : 'updates.upToDate', { version: this.appVersion });
+            } catch (error) {
+                console.warn('Store update check failed:', error);
+                this.setUpdateStatus('updates.storeCheckFailed');
+            } finally {
+                this.isCheckingUpdate = false;
+            }
+            return;
+        }
         if (manual) {
             this.setUpdateStatus('updates.checkingGithub');
         }
@@ -58,6 +70,26 @@ export const updateMethods = {
     openRelease() {
         if (this.isPackaged) return;
         invoke('open_release_page', { url: this.latestReleaseUrl }).catch(console.error);
+    },
+
+    async installStoreUpdate() {
+        if (!this.isPackaged || !this.updateAvailable || this.isInstallingUpdate) return;
+        this.isInstallingUpdate = true;
+        this.setUpdateStatus('updates.storeInstalling');
+        try {
+            const outcome = await invoke('install_store_update');
+            if (outcome === 'completed' || outcome === 'up_to_date') {
+                this.updateAvailable = false;
+                this.setUpdateStatus(outcome === 'completed' ? 'updates.storeInstalled' : 'updates.upToDate', { version: this.appVersion });
+            } else {
+                this.setUpdateStatus('updates.storeCanceled');
+            }
+        } catch (error) {
+            console.warn('Store update failed:', error);
+            this.setUpdateStatus('updates.storeInstallFailed');
+        } finally {
+            this.isInstallingUpdate = false;
+        }
     },
 
 };
