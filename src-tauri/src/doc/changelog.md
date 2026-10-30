@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-30 - Validate repeatable Progress add-ons
+
+- Saved settings now accept multiple Progress instances with date or daily-time mode, valid date bounds, ordered same-day time ranges, and an auto-hide flag. Invalid options are rejected without changing other settings. Existing saved add-ons need no migration; live Windows behavior still needs review.
+
 ### 2026-10-29 - Request published updates from Microsoft Store
 
 - Packaged Settings can now query available Store packages and ask Windows to download and install an update with the Settings window as dialog owner. Direct builds reject these commands and keep the GitHub browser reminder. Store-signed installation remains to be tested; no settings migration is required.

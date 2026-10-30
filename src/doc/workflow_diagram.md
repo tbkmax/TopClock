@@ -1,5 +1,29 @@
 # Frontend workflows
 
+## Progress add-on settings and display
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Settings as settingsApp
+    participant Progress as progress.js
+    participant Rust as update_settings
+    participant Clocks as clockApp windows
+    User->>Settings: Add Progress, choose mode and valid dates or ranges
+    Settings->>Progress: Calculate preview from local current time
+    Settings->>Clocks: clock-settings-preview
+    Settings->>Rust: update_settings with ordered add-on instances
+    alt Valid and saved
+        Rust->>Clocks: clock-settings-changed
+        Clocks->>Progress: Recalculate each enabled instance every tick
+    else Invalid or save failed
+        Rust-->>Settings: Error
+        Settings->>Clocks: Restore persisted settings preview
+    end
+```
+
+[settings-addons.js](../settings-addons.js) rejects invalid edits before `save()`. [addons.rs](../../src-tauri/src/addons.rs) validates the final saved shape. [progress.js](../progress.js) uses local dates and daily time ranges; it owns no durable session. Each time range has its own bar, and optional auto-hide applies only after the final range has been complete for one minute. The clock and Settings preview use the same calculation and [progress.css](../progress.css). The diagram omits CSS animation frames and the existing 200 ms clock tick.
+
 ## Language selection and Date weekday
 
 ```mermaid

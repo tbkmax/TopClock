@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-30 - Repeatable date and daily-time progress bars
+
+- Add-ons now offers multiple Progress instances. Each can show calendar-date progress or separate bars for up to eight daily time ranges, with phase colors, a brief completion pulse, and optional hide one minute after the last daily range. Settings previews the same bars. Existing settings need no migration; live Windows layout and interaction checks remain.
+
 ### 2026-10-29 - Check and install Store updates from Settings
 
 - Store-installed builds now show **Check for updates** in General and change it to **Update** when Microsoft Store reports a published package. The action asks the Store to install it, while GitHub builds still only open a release page. No settings migration is required; Store-signed installation and update delivery still need live verification.

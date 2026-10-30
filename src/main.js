@@ -8,6 +8,7 @@ import { markChangedNumbers } from './clock-animations.js';
 import { displayAddon } from './addons.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
+import './progress.css';
 
 const appWindow = getCurrentWindow();
 let resizeQueue = Promise.resolve();
@@ -191,7 +192,7 @@ Alpine.data('clockApp', () => ({
                 this.addonNumberActiveUntil[addon.id] = animation.activeUntil;
             }
             return display;
-        });
+        }).filter((addon) => !addon.hidden);
     },
 
     get timerEnabled() { return (this.settings?.addons || []).some((addon) => addon.kind === 'timer' && addon.enabled); },

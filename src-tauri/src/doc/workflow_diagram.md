@@ -1,5 +1,26 @@
 # Rust workflows
 
+## Progress add-on save boundary
+
+```mermaid
+sequenceDiagram
+    participant Settings
+    participant Command as settings_commands.rs
+    participant Validator as addons.rs
+    participant Store as config_store.rs
+    participant Clocks as clockApp windows
+    Settings->>Command: update_settings with Progress instances
+    Command->>Validator: valid_settings and valid_addons
+    alt Valid options
+        Command->>Store: Persist settings.json
+        Command->>Clocks: clock-settings-changed
+    else Invalid options or write failure
+        Command-->>Settings: Error, previous settings retained
+    end
+```
+
+[addons.rs](../addons.rs) accepts multiple Progress instances within the shared 16-instance limit. It validates the mode, calendar dates, range order, same-day boundaries, and auto-hide flag. [settings_commands.rs](../settings_commands.rs) saves only validated settings and rolls back memory on write failure. Progress has no native timer session; both frontend views derive it from local time. The diagram omits the Settings preview event, which is described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
+
 ## Windows language and saved preference
 
 ```mermaid

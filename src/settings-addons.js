@@ -1,11 +1,27 @@
 import { invoke } from '@tauri-apps/api/core';
 import { createAddon, timerElapsed } from './addons.js';
+import { nextLocalDateValue, timeMinutes, validDateValue } from './progress.js';
+
+const MAX_PROGRESS_RANGES = 8;
+
+function timeValue(minutes) {
+    return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+}
+
+function validRanges(ranges) {
+    return ranges.length >= 1 && ranges.length <= MAX_PROGRESS_RANGES && ranges.every((range, index) => {
+        const start = timeMinutes(range.start);
+        const end = timeMinutes(range.end);
+        const previousEnd = index ? timeMinutes(ranges[index - 1].end) : 0;
+        return start !== null && end !== null && start < end && (index === 0 || start >= previousEnd);
+    });
+}
 
 export const addonMethods = {
     hasAddon(kind) { return (this.settings.addons || []).some((addon) => addon.kind === kind); },
 
     addAddon(kind) {
-        if (kind !== 'region_clock' && this.hasAddon(kind)) return;
+        if (!['region_clock', 'progress'].includes(kind) && this.hasAddon(kind)) return;
         if (this.settings.addons.length >= 16) return;
         this.settings.addons.push(createAddon(kind));
         this.save();
@@ -24,6 +40,72 @@ export const addonMethods = {
         while (other >= 0 && other < this.settings.addons.length && this.settings.addons[other].placement !== placement) other += direction;
         if (other < 0 || other >= this.settings.addons.length) return;
         [this.settings.addons[index], this.settings.addons[other]] = [this.settings.addons[other], this.settings.addons[index]];
+        this.save();
+    },
+
+    progressSubtitle(addon) {
+        return addon.options.mode === 'date'
+            ? `${addon.options.start_date} → ${addon.options.end_date}`
+            : this.t('addons.progressRangeCount', { count: addon.options.ranges.length });
+    },
+
+    setProgressMode(id, mode) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        if (!addon || !['date', 'time'].includes(mode)) return;
+        addon.options.mode = mode;
+        this.save();
+    },
+
+    updateProgressDate(id, field, value) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        if (!addon || !['start_date', 'end_date'].includes(field) || !validDateValue(value)) {
+            this.error = this.t('addons.invalidProgressDate');
+            return;
+        }
+        if (field === 'end_date' && value <= addon.options.start_date) {
+            this.error = this.t('addons.invalidProgressDate');
+            return;
+        }
+        addon.options[field] = value;
+        if (field === 'start_date' && addon.options.end_date <= value) {
+            const [year, month, day] = value.split('-').map(Number);
+            addon.options.end_date = nextLocalDateValue(new Date(year, month - 1, day));
+        }
+        this.error = '';
+        this.save();
+    },
+
+    canAddProgressRange(addon) {
+        const ranges = addon.options.ranges;
+        return ranges.length < MAX_PROGRESS_RANGES && timeMinutes(ranges.at(-1).end) <= 1379;
+    },
+
+    addProgressRange(id) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        if (!addon || !this.canAddProgressRange(addon)) return;
+        const start = timeMinutes(addon.options.ranges.at(-1).end);
+        addon.options.ranges.push({ start: timeValue(start), end: timeValue(start + 60) });
+        this.save();
+    },
+
+    removeProgressRange(id, index) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        if (!addon || addon.options.ranges.length <= 1) return;
+        addon.options.ranges.splice(index, 1);
+        this.save();
+    },
+
+    updateProgressRange(id, index, field, value) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        if (!addon || !['start', 'end'].includes(field) || !addon.options.ranges[index]) return;
+        const ranges = addon.options.ranges.map((range) => ({ ...range }));
+        ranges[index][field] = value;
+        if (!validRanges(ranges)) {
+            this.error = this.t('addons.invalidProgressRange');
+            return;
+        }
+        addon.options.ranges = ranges;
+        this.error = '';
         this.save();
     },
 

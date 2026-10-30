@@ -24,7 +24,7 @@
 .addon-preview-clock { font-size:32px!important; line-height:1.1; white-space:nowrap; }
 .addon-section-title { font-size:10px; font-weight:700; letter-spacing:1.3px; color:#faff69; margin:18px 0 9px; }
 .addon-section-title span { color:#777; }
-.addon-catalog { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
+.addon-catalog { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
 .addon-catalog-card { min-width:0; min-height:100px; border:1px solid #303030; border-radius:10px; background:#1a1a1a; padding:11px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:10px; }
 .addon-catalog-card strong, .addon-instance strong { font-size:12px; }
 .addon-catalog-card p { font-size:10px; color:#999; line-height:1.4; margin-top:4px; }
@@ -41,6 +41,19 @@
 .addon-instance-controls .size-range { margin:11px 0; }
 .addon-instance-controls small { color:#faff69; font-size:10px; }
 .addon-number { width:96px; padding:8px 9px; background:#242424; border:1px solid #3a3a3a; border-radius:8px; color:#fff; font-size:12px; }
+.addon-date,.addon-time-input { color:#fff; color-scheme:dark; background:#242424; border:1px solid #3a3a3a; border-radius:8px; padding:7px 8px; font-size:12px; }
+.addon-date { width:170px; }
+.addon-time-input { width:120px; }
+.progress-settings { margin-top:12px; border-top:1px solid #303030; }
+.progress-settings .addon-instance-controls { margin-top:10px; }
+.progress-range-heading { margin:12px 0 7px; color:#faff69; font-size:10px; font-weight:700; }
+.progress-range { display:flex; align-items:end; gap:9px; margin:7px 0; flex-wrap:wrap; }
+.progress-range label { display:flex; flex-direction:column; gap:4px; color:#aaa; font-size:10px; }
+.progress-range .action-button { padding:5px 10px; }
+.progress-add-range { margin-top:5px; }
+.progress-hide-option { display:flex; align-items:center; gap:12px; color:#ddd; font-size:11px; margin-top:13px; }
+.progress-hint { color:#888; font-size:10px; line-height:1.4; margin:7px 0 0; }
+.addon-preview-progress { display:block; -webkit-text-stroke:0!important; }
 .addon-instance-actions { display:flex; gap:7px; margin-top:13px; }
 .addon-instance-actions .action-button { padding:6px 9px; font-size:10px; }
 .addon-remove { margin-left:auto; color:#ef8888; }

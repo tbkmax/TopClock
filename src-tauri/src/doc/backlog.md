@@ -1,5 +1,7 @@
 # Rust application backlog
 
+Progress configuration validation passes Rust tests. The running Windows settings persistence and clock interaction check remains in the [frontend Progress backlog](../../../src/doc/backlog.md); no native runtime session or command was added for Progress.
+
 The new language schema, Windows UI language command, and tray update compile and pass Rust tests. Installed MSIX behavior remains to be checked in the [package backlog](../../doc/backlog.md), alongside the frontend's [live localization check](../../../src/doc/backlog.md).
 
 TODO 4's settings-folder command and per-display windows, visibility and positions are implemented. Manual verification with multiple physical displays remains in the [frontend backlog](../../../src/doc/backlog.md).

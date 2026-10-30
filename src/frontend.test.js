@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { displayAddon, timerText } from './addons.js';
+import { createAddon, displayAddon, timerText } from './addons.js';
+import { progressDisplay, validDateValue } from './progress.js';
+import { addonMethods } from './settings-addons.js';
 import { resolveLanguage, translate, weekdayText } from './i18n.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { createSettingsPersistence } from './settings-persistence.js';
@@ -182,4 +184,68 @@ test('date weekday uses the selected language in clock and preview', () => {
     assert.notEqual(weekdayText(date, 'zh-Hant'), weekdayText(date, 'zh-Hans'));
     assert.notEqual(weekdayText(date, 'ja'), weekdayText(date, 'en'));
     assert.equal(translate('ja', 'general.system'), 'システム設定に従う');
+});
+
+test('date progress follows local calendar days and reaches a finished state', () => {
+    const options = { mode: 'date', start_date: '2026-10-30', end_date: '2026-11-01' };
+    assert.equal(progressDisplay(options, new Date(2026, 9, 29, 23, 59)).rows[0].percent, 0);
+    assert.equal(progressDisplay(options, new Date(2026, 9, 30, 12)).rows[0].percent, 0);
+    assert.equal(progressDisplay(options, new Date(2026, 9, 31, 12)).rows[0].percent, 50);
+    const completed = progressDisplay(options, new Date(2026, 10, 1, 0));
+    assert.equal(completed.rows[0].percent, 100);
+    assert.equal(completed.rows[0].phase, 'complete');
+    assert.equal(completed.hidden, false);
+    assert.equal(validDateValue('2028-02-29'), true);
+    assert.equal(validDateValue('2026-02-29'), false);
+});
+
+test('daily ranges have independent bars, finish pulse, final hide, and midnight reset', () => {
+    const options = {
+        mode: 'time', start_date: '2026-10-30', end_date: '2026-10-31',
+        ranges: [{ start: '09:00', end: '10:00' }, { start: '12:00', end: '13:00' }],
+        auto_hide: true,
+    };
+    assert.deepEqual(progressDisplay(options, new Date(2026, 9, 30, 11)).rows.map((row) => row.percent), [100, 0]);
+    assert.deepEqual(progressDisplay(options, new Date(2026, 9, 30, 12, 30)).rows.map((row) => row.percent), [100, 50]);
+    const finished = progressDisplay(options, new Date(2026, 9, 30, 13, 0, 0, 200));
+    assert.equal(finished.rows[1].celebrating, true);
+    assert.equal(finished.hidden, false);
+    assert.equal(progressDisplay(options, new Date(2026, 9, 30, 13, 1)).hidden, true);
+    const tomorrow = progressDisplay(options, new Date(2026, 9, 31, 8));
+    assert.equal(tomorrow.hidden, false);
+    assert.deepEqual(tomorrow.rows.map((row) => row.percent), [0, 0]);
+});
+
+test('new progress instances do not share ranges or dates', () => {
+    const first = createAddon('progress');
+    const second = createAddon('progress');
+    assert.equal(first.options.start_date, second.options.start_date);
+    first.options.ranges[0].start = '08:00';
+    first.options.end_date = '2030-01-01';
+    assert.equal(second.options.ranges[0].start, '09:00');
+    assert.notEqual(second.options.end_date, first.options.end_date);
+});
+
+test('progress Settings edits preserve valid saved ranges and mode values', () => {
+    const addon = createAddon('progress');
+    let saves = 0;
+    const app = {
+        ...addonMethods,
+        settings: { addons: [addon] },
+        save() { saves++; },
+        t(key) { return key; },
+        error: '',
+    };
+    app.addProgressRange(addon.id);
+    assert.equal(addon.options.ranges.length, 2);
+    const saved = saves;
+    app.updateProgressRange(addon.id, 1, 'start', '10:00');
+    assert.equal(saves, saved);
+    assert.equal(addon.options.ranges[1].start, '17:00');
+    assert.equal(app.error, 'addons.invalidProgressRange');
+    app.setProgressMode(addon.id, 'time');
+    app.setProgressMode(addon.id, 'date');
+    assert.equal(addon.options.ranges.length, 2);
+    app.updateProgressDate(addon.id, 'end_date', addon.options.start_date);
+    assert.equal(app.error, 'addons.invalidProgressDate');
 });

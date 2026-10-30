@@ -35,6 +35,98 @@ pub(crate) fn timer_options(addons: &[AddonInstance]) -> Option<(&str, u64)> {
         })
 }
 
+fn valid_date(value: &str) -> bool {
+    let bytes = value.as_bytes();
+    if bytes.len() != 10
+        || bytes[4] != b'-'
+        || bytes[7] != b'-'
+        || !bytes
+            .iter()
+            .enumerate()
+            .all(|(index, byte)| index == 4 || index == 7 || byte.is_ascii_digit())
+    {
+        return false;
+    }
+    let year: u32 = value[0..4].parse().unwrap_or(0);
+    let month: u32 = value[5..7].parse().unwrap_or(0);
+    let day: u32 = value[8..10].parse().unwrap_or(0);
+    let leap = year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    let days = match month {
+        1 | 3 | 5 | 7 | 8 | 10 | 12 => 31,
+        4 | 6 | 9 | 11 => 30,
+        2 if leap => 29,
+        2 => 28,
+        _ => 0,
+    };
+    (1000..=9999).contains(&year) && day >= 1 && day <= days
+}
+
+fn time_minutes(value: &str) -> Option<u16> {
+    let bytes = value.as_bytes();
+    if bytes.len() != 5
+        || bytes[2] != b':'
+        || !bytes
+            .iter()
+            .enumerate()
+            .all(|(index, byte)| index == 2 || byte.is_ascii_digit())
+    {
+        return None;
+    }
+    let hour: u16 = value[0..2].parse().ok()?;
+    let minute: u16 = value[3..5].parse().ok()?;
+    (hour < 24 && minute < 60).then_some(hour * 60 + minute)
+}
+
+fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
+    if options.len() != 5
+        || !matches!(
+            options.get("mode").and_then(Value::as_str),
+            Some("date" | "time")
+        )
+    {
+        return false;
+    }
+    let (Some(start), Some(end), Some(ranges), Some(_auto_hide)) = (
+        options.get("start_date").and_then(Value::as_str),
+        options.get("end_date").and_then(Value::as_str),
+        options.get("ranges").and_then(Value::as_array),
+        options.get("auto_hide").and_then(Value::as_bool),
+    ) else {
+        return false;
+    };
+    if !valid_date(start)
+        || !valid_date(end)
+        || start >= end
+        || ranges.is_empty()
+        || ranges.len() > 8
+    {
+        return false;
+    }
+    let mut previous_end = 0;
+    ranges.iter().all(|range| {
+        let Some(range) = range.as_object() else {
+            return false;
+        };
+        let (Some(start), Some(end)) = (
+            range
+                .get("start")
+                .and_then(Value::as_str)
+                .and_then(time_minutes),
+            range
+                .get("end")
+                .and_then(Value::as_str)
+                .and_then(time_minutes),
+        ) else {
+            return false;
+        };
+        if range.len() != 2 || start < previous_end || start >= end {
+            return false;
+        }
+        previous_end = end;
+        true
+    })
+}
+
 pub(crate) fn valid_addons(addons: &[AddonInstance]) -> bool {
     if addons.len() > 16 {
         return false;
@@ -102,6 +194,7 @@ pub(crate) fn valid_addons(addons: &[AddonInstance]) -> bool {
                         .and_then(Value::as_u64)
                         .is_some_and(|seconds| (1..=359_999).contains(&seconds))
             }
+            "progress" => valid_progress_options(options),
             _ => false,
         }
     })
@@ -192,6 +285,30 @@ mod tests {
             addon.options[key] = serde_json::json!("yes");
             assert!(!valid_addons(&[addon]));
         }
+    }
+
+    #[test]
+    fn validates_repeatable_progress_and_rejects_invalid_boundaries() {
+        let mut first = legacy_timer();
+        first.id = "progress-one".into();
+        first.kind = "progress".into();
+        first.options = serde_json::json!({
+            "mode":"time", "start_date":"2026-10-30", "end_date":"2026-11-01",
+            "ranges":[{"start":"09:00","end":"10:00"},{"start":"10:00","end":"11:00"}],
+            "auto_hide":true
+        });
+        let mut second = first.clone();
+        second.id = "progress-two".into();
+        second.options["mode"] = serde_json::json!("date");
+        assert!(valid_addons(&[first.clone(), second]));
+        first.options["ranges"][1]["start"] = serde_json::json!("09:30");
+        assert!(!valid_addons(&[first.clone()]));
+        first.options["ranges"][1]["start"] = serde_json::json!("10:00");
+        first.options["end_date"] = serde_json::json!("2026-02-30");
+        assert!(!valid_addons(&[first.clone()]));
+        first.options["end_date"] = serde_json::json!("2026-11-01");
+        first.options["auto_hide"] = serde_json::json!("yes");
+        assert!(!valid_addons(&[first]));
     }
 
     #[test]

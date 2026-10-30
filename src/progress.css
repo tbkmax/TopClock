@@ -1,0 +1,13 @@
+.progress-rows { display:flex; flex-direction:column; gap:.45em; width:clamp(110px,12em,320px); }
+.progress-row { --progress-color:#888; width:100%; }
+.progress-middle { --progress-color:#faff69; }
+.progress-late { --progress-color:#ef4444; }
+.progress-complete { --progress-color:#22c55e; }
+.progress-caption { display:flex; justify-content:space-between; gap:1em; font-size:.65em; line-height:1.2; white-space:nowrap; color:inherit; }
+.progress-caption span:first-child { overflow:hidden; text-overflow:ellipsis; }
+.progress-caption span:last-child { flex:none; }
+.progress-track { height:clamp(4px,.45em,10px); overflow:hidden; border-radius:4px; background:#3a3a3a; border:1px solid #555; }
+.progress-fill { height:100%; background:var(--progress-color); transition:width .2s linear,background-color .25s ease; }
+.progress-celebrate .progress-track { animation:progressComplete 1.2s ease-out; }
+@keyframes progressComplete { 30% { box-shadow:0 0 12px 3px #22c55e; transform:scaleY(1.35); } 100% { box-shadow:none; transform:scaleY(1); } }
+@media (prefers-reduced-motion:reduce) { .progress-fill { transition:none; } .progress-celebrate .progress-track { animation:none; } }

@@ -1,5 +1,16 @@
 # Frontend backlog
 
+## Progress add-on live verification
+
+- **Title:** Verify Progress bars in the running Windows clock and Settings.
+- **Problem or opportunity:** Frontend tests, Vite build, and native validation tests pass, but the Tauri clock and Settings UI have not been exercised interactively after the new controls and bars were added.
+- **Desired outcome:** Multiple independent date and daily-time instances render, save, restore, and resize cleanly without affecting other add-ons or clock input behavior.
+- **Scope:** [progress.js](../progress.js), [progress.css](../progress.css), [settings-addons.js](../settings-addons.js), [settings.html](../../settings.html), and [index.html](../../index.html).
+- **Acceptance criteria:** Add and edit several Progress instances; switch modes while retaining prior values; reject invalid or overlapping ranges without losing saved values; confirm every range's fill and completion pulse; confirm optional hide after the final range and next-day reset. Check clock and Settings preview, tray actions, modifier drag/click-through, settings persistence after restart, and position restore with above and below stacks.
+- **Dependencies and risks:** Requires a running Tauri Windows desktop. Large stacks can exceed a small display; see the add-on layout item below. Daylight-saving transitions can skip or repeat local wall-clock times and need explicit observation.
+- **Verification:** Run `npm run tauri:dev` with a disposable settings file and inspect the listed flows around short test ranges, then restart. Check a small display or reduced resolution and a second display if available.
+- **Priority:** High before treating the UI as fully verified because the browser-only preview cannot initialize Tauri APIs.
+
 ## Language layout and live package check
 
 - **Title:** Verify translated Settings and weekday display in running direct and MSIX builds.

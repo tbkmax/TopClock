@@ -1,22 +1,30 @@
 import { timeParts } from './time-format.js';
 import { translate, weekdayText } from './i18n.js';
+import { localDateValue, nextLocalDateValue, progressDisplay } from './progress.js';
 
 export const addonCatalog = [
     { kind: 'date', label: 'Date', description: 'Show the local calendar date.', options: { format: 'ymd', show_weekday: false } },
     { kind: 'region_clock', label: 'Region clock', description: 'Show time in another region.', options: { time_zone: 'Etc/UTC', show_label: true } },
     { kind: 'timer', label: 'Timer', description: 'Count down or use a stopwatch.', options: { mode: 'countdown', duration_seconds: 300 } },
+    { kind: 'progress', label: 'Progress', description: 'Track a date or daily time ranges.', options: { mode: 'date', start_date: '', end_date: '', ranges: [{ start: '09:00', end: '17:00' }], auto_hide: false } },
 ];
 
 export function createAddon(kind) {
     const entry = addonCatalog.find((item) => item.kind === kind);
     if (!entry) throw new Error('Unknown add-on type');
+    const options = structuredClone(entry.options);
+    if (kind === 'progress') {
+        const today = new Date();
+        options.start_date = localDateValue(today);
+        options.end_date = nextLocalDateValue(today);
+    }
     return {
         id: crypto.randomUUID(),
         kind,
         enabled: true,
         placement: 'below',
         size_percent: 30,
-        options: { ...entry.options },
+        options,
     };
 }
 
@@ -56,7 +64,7 @@ export function timerText(addon, session, nowMs) {
 }
 
 export function displayAddon(addon, now, settings, session, language = 'en') {
-    const base = { ...addon, label: addon.kind === 'region_clock' ? addonName(addon) : translate(language, `addons.${addon.kind}`), text: '', weekday: '', parts: null, finished: false };
+    const base = { ...addon, label: addon.kind === 'region_clock' ? addonName(addon) : translate(language, `addons.${addon.kind}`), text: '', weekday: '', parts: null, finished: false, hidden: false, progress: null };
     if (addon.kind === 'date') {
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -75,6 +83,9 @@ export function displayAddon(addon, now, settings, session, language = 'en') {
     } else if (addon.kind === 'timer') {
         base.text = timerText(addon, session, now.getTime());
         base.finished = Boolean(session?.finished) || (addon.options.mode === 'countdown' && session?.running && timerElapsed(session, now.getTime()) >= addon.options.duration_seconds * 1000);
+    } else if (addon.kind === 'progress') {
+        base.progress = progressDisplay(addon.options, now);
+        base.hidden = base.progress.hidden;
     }
     return base;
 }

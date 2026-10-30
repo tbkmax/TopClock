@@ -13,6 +13,7 @@ import { updateMethods } from './settings-updates.js';
 import { createSettingsPersistence } from './settings-persistence.js';
 import { nextSettingsTab } from './settings-tabs.js';
 import './settings.css';
+import './progress.css';
 
 const settingsWindow = getCurrentWindow();
 window.Alpine = Alpine;
@@ -160,7 +161,8 @@ Alpine.data('settingsApp', () => ({
         this.previousPreviewNumbers = result.numbers;
         this.previewNumberActiveUntil = result.activeUntil;
         this.previewAddons = (this.settings.addons || []).filter((addon) => addon.enabled)
-            .map((addon) => displayAddon(addon, now, this.settings, this.timerSession, this.language));
+            .map((addon) => displayAddon(addon, now, this.settings, this.timerSession, this.language))
+            .filter((addon) => !addon.hidden);
     },
 
     previewStyle() {
@@ -224,6 +226,10 @@ Alpine.data('settingsApp', () => ({
     get updateStatusText() { return this.t(this.updateStatusKey, this.updateStatusVars); },
 
     localizedAddonName(addon) {
+        if (addon.kind === 'progress') {
+            const count = this.settings.addons.filter((item) => item.kind === 'progress').findIndex((item) => item.id === addon.id) + 1;
+            return this.t('addons.progressInstance', { count });
+        }
         return addon.kind === 'region_clock' ? addonName(addon) : this.t(`addons.${addon.kind}`);
     },
 

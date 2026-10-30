@@ -133,6 +133,7 @@ html, body {
     font-variant-numeric: tabular-nums;
 }
 .addon-line.addon-finished { color: var(--color-primary); }
+.addon-line.addon-progress { display:block; -webkit-text-stroke:0; text-shadow:0 1px 3px #000; }
 .addon-label { font-size: .65em; opacity: .85; }
 .addon-weekday { font-size: .8em; margin-left: -.2em; }
 .addon-time { display: inline-flex; align-items: baseline; }
