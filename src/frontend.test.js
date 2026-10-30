@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { timerText } from './addons.js';
+import { displayAddon, timerText } from './addons.js';
+import { resolveLanguage, translate, weekdayText } from './i18n.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { createSettingsPersistence } from './settings-persistence.js';
 import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './settings-shortcuts.js';
@@ -157,4 +158,28 @@ test('time, Timer, and number transition helpers keep their display contracts', 
     const changed = markChangedNumbers([{ kind: 'h', text: '2' }], { h: '1' }, {}, 1000);
     assert.equal(changed.parts[0].changing, true);
     assert.equal(changed.activeUntil.h, 1300);
+});
+
+test('system language distinguishes Chinese scripts and Japanese', () => {
+    assert.equal(resolveLanguage('system', 'zh-CN'), 'zh-Hans');
+    assert.equal(resolveLanguage('system', 'zh-SG'), 'zh-Hans');
+    assert.equal(resolveLanguage('system', 'zh-TW'), 'zh-Hant');
+    assert.equal(resolveLanguage('system', 'zh-HK'), 'zh-Hant');
+    assert.equal(resolveLanguage('system', 'ja-JP'), 'ja');
+    assert.equal(resolveLanguage('system', 'fr-FR'), 'en');
+    assert.equal(resolveLanguage('zh-Hant', 'ja-JP'), 'zh-Hant');
+});
+
+test('date weekday uses the selected language in clock and preview', () => {
+    const date = new Date(2026, 9, 29, 13);
+    const addon = { kind: 'date', options: { format: 'ymd', show_weekday: true } };
+    for (const language of ['en', 'zh-Hans', 'zh-Hant', 'ja']) {
+        const display = displayAddon(addon, date, {}, null, language);
+        assert.equal(display.weekday, weekdayText(date, language));
+        assert.equal(display.text, '2026-10-29');
+    }
+    assert.notEqual(weekdayText(date, 'zh-Hans'), weekdayText(date, 'en'));
+    assert.notEqual(weekdayText(date, 'zh-Hant'), weekdayText(date, 'zh-Hans'));
+    assert.notEqual(weekdayText(date, 'ja'), weekdayText(date, 'en'));
+    assert.equal(translate('ja', 'general.system'), 'システム設定に従う');
 });

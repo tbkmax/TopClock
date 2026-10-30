@@ -6,6 +6,7 @@ import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { displayAddon } from './addons.js';
+import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
 
 const appWindow = getCurrentWindow();
@@ -25,6 +26,8 @@ Alpine.data('clockApp', () => ({
     previousNumbers: {},
     numberActiveUntil: {},
     settings: null,
+    systemLocale: 'en',
+    language: 'en',
     isCtrlHeld: false,
     isNear: false,
     menuOpen: false,
@@ -39,6 +42,8 @@ Alpine.data('clockApp', () => ({
     resizeTimer: null,
 
     async init() {
+        this.systemLocale = await invoke('get_system_locale').catch(() => navigator.language || 'en');
+        this.syncLanguage();
         this.updateClock();
         setInterval(() => this.updateClock(), 200);
         this.loadSettings();
@@ -107,6 +112,7 @@ Alpine.data('clockApp', () => ({
 
     applySettings(settings) {
         this.settings = settings;
+        this.syncLanguage();
         this.updateClock();
         document.documentElement.style.setProperty('--clock-font-color', settings.font_color);
         document.documentElement.style.setProperty('--clock-outline-color', settings.outline_color);
@@ -116,14 +122,23 @@ Alpine.data('clockApp', () => ({
         this.$nextTick(() => this.scheduleResize());
     },
 
+    syncLanguage() {
+        this.language = resolveLanguage(this.settings?.language || 'system', this.systemLocale);
+        document.documentElement.lang = this.language;
+        localizeDocument(this.language);
+    },
+
+    t(key, vars) { return translate(this.language, key, vars); },
+
     scheduleResize() {
         if (!this.settings) return;
         clearTimeout(this.resizeTimer);
         this.resizeTimer = setTimeout(() => {
             if (!this.$refs.clockContainer) return;
             const containerRect = this.$refs.clockContainer.getBoundingClientRect();
-            const minWidth = this.menuOpen ? 138 : 60;
-            const width = Math.max(minWidth, Math.ceil(containerRect.width) + 4);
+            const menuWidth = this.menuOpen && this.$refs.dropdownMenu
+                ? Math.ceil(this.$refs.dropdownMenu.getBoundingClientRect().width) : 0;
+            const width = Math.max(60, Math.ceil(containerRect.width) + 4, this.menuOpen ? this.menuX + menuWidth + 4 : 0);
             const baseHeight = Math.ceil(containerRect.height) + 2;
             let menuExtraHeight = 0;
             if (this.menuOpen) {
@@ -168,7 +183,7 @@ Alpine.data('clockApp', () => ({
         this.previousNumbers = result.numbers;
         this.numberActiveUntil = result.activeUntil;
         this.renderedAddons = (this.settings?.addons || []).filter((addon) => addon.enabled).map((addon) => {
-            const display = displayAddon(addon, now, this.settings, this.timerSession);
+            const display = displayAddon(addon, now, this.settings, this.timerSession, this.language);
             if (display.parts) {
                 const animation = markChangedNumbers(display.parts, this.addonPreviousNumbers[addon.id], this.addonNumberActiveUntil[addon.id], now.getTime());
                 display.parts = animation.parts;

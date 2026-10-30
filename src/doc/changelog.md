@@ -1,5 +1,11 @@
 # Frontend changelog
 
+## Added
+
+### 2026-10-29 - Chinese and Japanese language selection
+
+- General now offers System default, English, Simplified Chinese, Traditional Chinese, and Japanese. Settings and clock menu labels switch immediately, and the Date add-on's short weekday follows the effective language in both preview and desktop clocks. Existing settings default to the Windows UI language. No user action is required.
+
 ## Changed
 
 ### 2026-10-29 - Simplify Settings and keyboard navigation

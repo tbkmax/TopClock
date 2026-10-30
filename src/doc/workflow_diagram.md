@@ -1,5 +1,25 @@
 # Frontend workflows
 
+## Language selection and Date weekday
+
+```mermaid
+sequenceDiagram
+    participant Windows
+    participant Rust
+    participant Settings as settingsApp
+    participant Clocks as clockApp windows
+    Windows->>Rust: Preferred UI languages
+    Settings->>Rust: get_system_locale and get_settings
+    Rust-->>Settings: UI locale and saved language preference
+    Settings->>Settings: Resolve system or explicit language
+    Settings->>Clocks: clock-settings-preview after language change
+    Settings->>Rust: update_settings with language
+    Rust->>Clocks: clock-settings-changed
+    Clocks->>Clocks: Reformat Date weekday and menu labels
+```
+
+[i18n.js](../i18n.js) supplies bundled translations and `Intl.DateTimeFormat` weekdays to both pages. The language preference is durable in `settings.json`; the detected Windows UI language is read at startup and is not saved. Rust updates the tray label after a successful language change. Unsupported Windows languages resolve to English.
+
 The General tab's Settings files button calls `open_settings_folder`; Rust opens the app config directory in Explorer. Failures appear in the Settings error toast, and this action does not change saved settings.
 
 General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings-updates.js) leaves GitHub checks and the release-page action inactive, and [settings.html](../../settings.html) shows Store delivery text. If false, the existing GitHub reminder flow remains. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
@@ -133,6 +153,6 @@ sequenceDiagram
     Rust->>Clock: timer-state-changed
 ```
 
-The [Add-ons tab](../../settings.html) controls placement, order, a visible 10%–100% size slider, and options. It previews the Date weekday and Region label switches using the shared formatter in [addons.js](../addons.js). The [clock](../../index.html) reserves distinct rows above and below the main display; the optional weekday uses 80% of its Date row's font size. Timer actions and running progress are native state; frontend display values are computed on each tick without a mode label. The menu Reset action calls the same timer command.
+The [Add-ons tab](../../settings.html) controls placement, order, a visible 10%–100% size slider, and options. It previews the localized Date weekday and Region label switches using the shared formatter in [addons.js](../addons.js). The [clock](../../index.html) reserves distinct rows above and below the main display; the optional weekday uses 80% of its Date row's font size. Timer actions and running progress are native state; frontend display values are computed on each tick without a mode label. The menu Reset action calls the same timer command.
 
 In the [General tab](../../settings.html), the startup or manual release check in [settings.js](../settings.js) sets `updateAvailable` after comparing the latest tag with the installed version. The General sidebar badge and its accessible label follow that state, while the update row shows the status text and download action. A successful current-version result hides the badge; a failed network check does not claim that an available update disappeared.

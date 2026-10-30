@@ -1,5 +1,26 @@
 # Rust workflows
 
+## Windows language and saved preference
+
+```mermaid
+sequenceDiagram
+    participant Windows
+    participant Rust as locale.rs and settings.rs
+    participant Settings as settingsApp
+    participant Tray as tray.rs
+    participant Clocks as clockApp windows
+    Windows->>Rust: Preferred UI language
+    Settings->>Rust: get_system_locale and get_settings
+    Rust-->>Settings: UI locale and saved preference
+    Settings->>Clocks: clock-settings-preview with language
+    Settings->>Rust: update_settings
+    Rust->>Rust: Validate and save settings.json
+    Rust->>Tray: Update Quit label and tooltip if language changed
+    Rust->>Clocks: clock-settings-changed
+```
+
+The [native locale command](../locale.rs) reads the current user's Windows UI preference in both direct and MSIX processes. The saved value is only `system` or one of four supported language tags; the frontend resolves `system` and formats Date weekdays. Failed validation or save leaves the old setting and tray text in place. See [frontend localization](../../../src/doc/architecture.md).
+
 The General tab calls `open_settings_folder` in [window_commands.rs](../window_commands.rs). The command derives the folder from `ClockState.settings_path`, creates it if necessary, and asks Explorer to open it. Directory or process launch errors return to Settings; this flow does not write `settings.json`.
 
 The sign-in toggle uses [startup.rs](../startup.rs). `is_packaged` probes the process package identity. Packaged builds query the manifest's `TopClockStartup` task and request enablement or disable it through Windows; direct builds continue to read and write the `TopClock` Run value. If Windows disabled the task as a user action, the enable request reports that state and leaves it disabled. Settings reads the authoritative state after a toggle. The Store update UI uses the same package identity query to suppress the direct-build GitHub download action.

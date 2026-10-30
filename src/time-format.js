@@ -52,5 +52,5 @@ export function clockFontStack(family) {
     const valid = typeof family === 'string' && family.length > 0 && family.length <= 80
         && !/[\u0000-\u001f\u007f]/u.test(family);
     const safeFamily = (valid ? family : 'Segoe UI').replaceAll('\\', '\\\\').replaceAll('"', '\\"');
-    return `"${safeFamily}", "Segoe UI", Arial, sans-serif`;
+    return `"${safeFamily}", "Segoe UI", "Microsoft YaHei UI", "Microsoft JhengHei UI", "Yu Gothic UI", Arial, sans-serif`;
 }

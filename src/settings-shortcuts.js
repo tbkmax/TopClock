@@ -59,7 +59,7 @@ export function shortcutConflict(shortcuts, timerEnabled, actionKey) {
 export const shortcutMethods = {
     startRecording(actionKey) {
         if (this.settings.shortcuts[`${actionKey}_enabled`]) {
-            this.error = 'Turn off this shortcut before changing its keys.';
+            this.error = this.t('error.shortcutEnabled');
             return;
         }
         if (this.recordingAction) {
@@ -91,7 +91,7 @@ export const shortcutMethods = {
             else if (key.length === 1) key = key.toUpperCase();
 
             if (!(event.ctrlKey || event.altKey || event.shiftKey) || !supportedGlobalKey(key)) {
-                this.error = 'Choose Ctrl, Alt, or Shift plus a supported key for a system-wide shortcut.';
+                this.error = this.t('error.shortcutKey');
                 return;
             }
 
@@ -141,7 +141,7 @@ export const shortcutMethods = {
     },
 
     formatShortcutKeys(binding) {
-        if (!binding || !binding.trim()) return ['None'];
+        if (!binding || !binding.trim()) return [this.t('shortcuts.none')];
         return binding.split('+').map((k) => k.trim());
     },
 

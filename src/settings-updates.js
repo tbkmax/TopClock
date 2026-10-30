@@ -18,7 +18,7 @@ export const updateMethods = {
         if (this.isCheckingUpdate) return;
         this.isCheckingUpdate = true;
         if (manual) {
-            this.updateStatusText = 'Checking GitHub Releases…';
+            this.setUpdateStatus('updates.checkingGithub');
         }
         try {
             const res = await fetch('https://api.github.com/repos/tbkmax/TopClock/releases/latest', {
@@ -27,7 +27,7 @@ export const updateMethods = {
             if (!res.ok) {
                 if (res.status === 404) {
                     this.updateAvailable = false;
-                    this.updateStatusText = `TopClock v${this.appVersion} is up to date`;
+                    this.setUpdateStatus('updates.upToDate', { version: this.appVersion });
                     return;
                 }
                 throw new Error(`HTTP ${res.status}`);
@@ -40,15 +40,15 @@ export const updateMethods = {
 
             if (isNewerVersion(cleanLatest, this.appVersion)) {
                 this.updateAvailable = true;
-                this.updateStatusText = `New version ${latestTag} is available!`;
+                this.setUpdateStatus('updates.available', { version: latestTag });
             } else {
                 this.updateAvailable = false;
-                this.updateStatusText = `TopClock v${this.appVersion} is up to date`;
+                this.setUpdateStatus('updates.upToDate', { version: this.appVersion });
             }
         } catch (error) {
             console.warn('Update check failed:', error);
             if (manual) {
-                this.updateStatusText = `Could not reach GitHub Releases (v${this.appVersion})`;
+                this.setUpdateStatus('updates.unreachable', { version: this.appVersion });
             }
         } finally {
             this.isCheckingUpdate = false;

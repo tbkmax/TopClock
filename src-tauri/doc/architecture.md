@@ -1,5 +1,7 @@
 # Tauri package architecture
 
+The [Cargo manifest](../Cargo.toml) enables Win32 globalization calls for the app's System default language. [locale.rs](../src/locale.rs) reads the current user's preferred Windows UI language for direct and MSIX processes; no extra webview permission or network service is involved. See the [native language flow](../src/doc/workflow_diagram.md).
+
 The executable checks for the Evergreen WebView2 Runtime with [webview_runtime.rs](../src/webview_runtime.rs) before creating native webviews. A missing runtime produces a native install message. The MSIX payload does not bundle WebView2.
 
 This folder defines the native Windows application. Read the [README](../../README.md) for product behavior and [Rust architecture](../src/doc/architecture.md) for implementation details.

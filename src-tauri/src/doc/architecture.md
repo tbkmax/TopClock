@@ -1,5 +1,7 @@
 # Rust application architecture
 
+[locale.rs](../locale.rs) exposes `get_system_locale`. On Windows it reads the first preferred user UI language as a BCP 47 name, falling back to the user's regional locale and then English if necessary. This applies to direct and MSIX launches. [settings.rs](../settings.rs) adds a validated, serde-defaulted `language` field with `system` as the default for old settings files. [settings_commands.rs](../settings_commands.rs) persists language changes with the other settings; [tray.rs](../tray.rs) builds the initial localized Quit item and tooltip, then updates them when a saved language choice changes. Frontend translation strings and weekday formatting live in [src/i18n.js](../../../src/i18n.js). The OS locale is read, not persisted.
+
 [webview_runtime.rs](../webview_runtime.rs) checks for the Evergreen WebView2 Runtime before [lib.rs](../lib.rs) creates any webview. When unavailable, it shows a native message with Microsoft's download page and exits. The runtime is not bundled with MSIX or direct builds.
 
 The `open_settings_folder` command in [window_commands.rs](../window_commands.rs) uses the managed settings path, ensures its parent exists, and launches that directory in Windows Explorer. It does not accept a caller-supplied path.

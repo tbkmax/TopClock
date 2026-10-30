@@ -1,5 +1,7 @@
 # Tauri package workflow
 
+The package builds the same [native locale command](../src/locale.rs) and bundled frontend translations into direct and MSIX outputs. The `get_system_locale` Tauri command uses the Windows user's UI language; the MSIX manifest does not select or persist the app language. The user's explicit choice remains in `settings.json`. See the [native language workflow](../src/doc/workflow_diagram.md).
+
 The package connects webview configuration to the Rust application. This class diagram describes package relationships rather than Rust inheritance.
 
 ```mermaid

@@ -1,4 +1,5 @@
 import { timeParts } from './time-format.js';
+import { translate, weekdayText } from './i18n.js';
 
 export const addonCatalog = [
     { kind: 'date', label: 'Date', description: 'Show the local calendar date.', options: { format: 'ymd', show_weekday: false } },
@@ -54,8 +55,8 @@ export function timerText(addon, session, nowMs) {
     return display;
 }
 
-export function displayAddon(addon, now, settings, session) {
-    const base = { ...addon, label: addonName(addon), text: '', weekday: '', parts: null, finished: false };
+export function displayAddon(addon, now, settings, session, language = 'en') {
+    const base = { ...addon, label: addon.kind === 'region_clock' ? addonName(addon) : translate(language, `addons.${addon.kind}`), text: '', weekday: '', parts: null, finished: false };
     if (addon.kind === 'date') {
         const year = now.getFullYear();
         const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -63,13 +64,13 @@ export function displayAddon(addon, now, settings, session) {
         base.text = addon.options.format === 'd' ? day
             : addon.options.format === 'md' ? `${month}-${day}` : `${year}-${month}-${day}`;
         if (addon.options.show_weekday === true) {
-            base.weekday = `(${new Intl.DateTimeFormat('en-US', { weekday: 'short' }).format(now)})`;
+            base.weekday = weekdayText(now, language);
         }
     } else if (addon.kind === 'region_clock') {
         try {
             base.parts = timeParts(now, settings, addon.options.time_zone);
         } catch {
-            base.text = 'Invalid region';
+            base.text = translate(language, 'addons.invalidRegion');
         }
     } else if (addon.kind === 'timer') {
         base.text = timerText(addon, session, now.getTime());

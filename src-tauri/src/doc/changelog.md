@@ -1,5 +1,11 @@
 # Rust application changelog
 
+## Added
+
+### 2026-10-29 - Persisted language and Windows UI language detection
+
+- Existing settings files now default to System language; users can save English, Simplified Chinese, Traditional Chinese, or Japanese. The tray Quit label and tooltip follow that choice, and direct and MSIX builds read the Windows UI language for System default. No user action is required.
+
 ## Changed
 
 ### 2026-10-29 - Explain a missing WebView2 Runtime

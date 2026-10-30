@@ -104,6 +104,8 @@ impl Default for ShortcutSettings {
 
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct ClockSettings {
+    #[serde(default = "default_language")]
+    pub(crate) language: String,
     pub(crate) colon_animation: String,
     pub(crate) number_animation: String,
     pub(crate) font_color: String,
@@ -129,6 +131,7 @@ pub(crate) struct ClockSettings {
 impl Default for ClockSettings {
     fn default() -> Self {
         Self {
+            language: default_language(),
             colon_animation: "pulse".into(),
             number_animation: "tick".into(),
             font_color: "#ffffff".into(),
@@ -148,6 +151,10 @@ impl Default for ClockSettings {
     }
 }
 
+fn default_language() -> String {
+    "system".into()
+}
+
 fn valid_color(value: &str) -> bool {
     value.len() == 7
         && value.starts_with('#')
@@ -159,7 +166,10 @@ fn valid_shortcut_string(value: &str) -> bool {
 }
 
 pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
-    valid_color(&settings.font_color)
+    matches!(
+        settings.language.as_str(),
+        "system" | "en" | "zh-Hans" | "zh-Hant" | "ja"
+    ) && valid_color(&settings.font_color)
         && valid_color(&settings.outline_color)
         && (24..=200).contains(&settings.font_size)
         && settings.outline_width.is_finite()
@@ -221,10 +231,22 @@ mod tests {
         assert_eq!(loaded.settings.number_animation, "slide");
         assert_eq!(loaded.settings.shortcuts.interaction_modifier, "Ctrl");
         assert_eq!(loaded.settings.shortcuts.quit, "Ctrl+Alt+Q");
+        assert_eq!(loaded.settings.language, "system");
         assert!(!loaded.settings.shortcuts.quit_enabled);
         assert_eq!(loaded.settings.shortcuts.open_settings, "Ctrl+,");
         assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
+    }
+
+    #[test]
+    fn missing_language_uses_system_default_and_invalid_language_is_rejected() {
+        let mut raw = serde_json::to_value(ClockSettings::default()).unwrap();
+        raw.as_object_mut().unwrap().remove("language");
+        let restored: ClockSettings = serde_json::from_value(raw).unwrap();
+        assert_eq!(restored.language, "system");
+        let mut invalid = restored;
+        invalid.language = "unsupported".into();
+        assert!(!valid_settings(&invalid));
     }
 
     #[test]

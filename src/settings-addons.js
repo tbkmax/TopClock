@@ -50,7 +50,7 @@ export const addonMethods = {
     confirmTimerChange() {
         if (!this.pendingTimerChange) return;
         if (this.timerSession?.running) {
-            this.error = 'Pause the timer before changing its mode or duration.';
+            this.error = this.t('addons.pauseBeforeChange');
             this.pendingTimerChange = null;
             return;
         }
@@ -67,7 +67,7 @@ export const addonMethods = {
             this.timerSession = session;
             this.error = '';
             this.updatePreview();
-        }).catch((error) => { this.error = `Could not control timer: ${error}`; });
+        }).catch((error) => { this.error = this.t('error.timer', { error }); });
     },
 
 };

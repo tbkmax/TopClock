@@ -33,7 +33,7 @@
                     <button type="button" id="tab-shortcuts" class="tab-button" role="tab" aria-controls="panel-shortcuts" :tabindex="tab === 'shortcuts' ? 0 : -1" :class="{ active: tab === 'shortcuts' }" :aria-selected="tab === 'shortcuts'" @click="selectTab('shortcuts')">
                         <span class="tab-glyph">⌨</span> Shortcuts <span class="tab-arrow">›</span>
                     </button>
-                    <button type="button" id="tab-general" class="tab-button" role="tab" aria-controls="panel-general" :tabindex="tab === 'general' ? 0 : -1" :class="{ active: tab === 'general' }" :aria-selected="tab === 'general'" :aria-label="updateAvailable ? 'General, update available' : 'General'" @click="selectTab('general')">
+                    <button type="button" id="tab-general" class="tab-button" role="tab" aria-controls="panel-general" :tabindex="tab === 'general' ? 0 : -1" :class="{ active: tab === 'general' }" :aria-selected="tab === 'general'" :aria-label="t(updateAvailable ? 'tab.generalUpdate' : 'tab.general')" @click="selectTab('general')">
                         <span class="tab-glyph">⚙</span> General <span class="tab-update-badge" x-show="updateAvailable" title="Update available" aria-hidden="true">!</span><span class="tab-arrow">›</span>
                     </button>
                 </nav>
@@ -53,7 +53,7 @@
                                 <span :class="{ 'preview-colon': part.kind === 'separator', 'preview-number': ['h', 'm', 's'].includes(part.kind), 'preview-ampm': part.kind === 'ampm', 'number-changing': part.changing }" x-text="part.text"></span>
                             </template>
                         </div>
-                        <div class="preview-caption" x-text="settings.font_size > 64 ? 'Large sizes are scaled down in this preview' : 'Your desktop clock updates instantly'"></div>
+                        <div class="preview-caption" x-text="t(settings.font_size > 64 ? 'clock.previewScaled' : 'clock.previewInstant')"></div>
                     </div>
 
                     <div class="control-grid">
@@ -78,7 +78,7 @@
                         <div class="slider-area"><input class="size-range" type="range" min="0" max="4" step="0.5" :value="settings.outline_width" :style="rangeStyle(settings.outline_width, 0, 4)" @input="settings.outline_width = Number($event.target.value); save()" aria-label="Outline thickness"><span class="size-value" x-text="`${settings.outline_width} px`"></span></div>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Font family</div><div class="control-description" x-text="fontListError ? 'Windows font list is unavailable' : fontsLoading ? 'Loading installed fonts…' : `${fontFamilies.length} installed fonts`"></div></div>
+                        <div><div class="control-title">Font family</div><div class="control-description" x-text="fontListError ? t('clock.fontUnavailable') : fontsLoading ? t('clock.loadingFonts') : t('clock.installedFonts', { count: fontFamilies.length })"></div></div>
                         <select class="select-control font-select" x-model="settings.font_family" @change="save()" :disabled="fontsLoading || fontListError" :title="settings.font_family" aria-label="Font family">
                             <template x-for="family in fontFamilies" :key="family"><option :value="family" x-text="family"></option></template>
                         </select>
@@ -97,15 +97,15 @@
                     </div>
                     <div class="setting-row">
                         <div><div class="control-title">Colon animation</div><div class="control-description">Motion for the separators</div></div>
-                        <select class="select-control" x-model="settings.colon_animation" @change="save()" aria-label="Colon animation"><template x-for="animation in colonAnimations" :key="animation.value"><option :value="animation.value" x-text="animation.label"></option></template></select>
+                        <select class="select-control" x-model="settings.colon_animation" @change="save()" aria-label="Colon animation"><template x-for="animation in colonAnimations" :key="animation.value"><option :value="animation.value" x-text="t(`animation.${animation.value}`)"></option></template></select>
                     </div>
                     <div class="setting-row">
                         <div><div class="control-title">Number change animation</div><div class="control-description">Motion when a displayed number changes</div></div>
-                        <select class="select-control" x-model="settings.number_animation" @change="save()" aria-label="Number change animation"><template x-for="animation in numberAnimations" :key="animation.value"><option :value="animation.value" x-text="animation.label"></option></template></select>
+                        <select class="select-control" x-model="settings.number_animation" @change="save()" aria-label="Number change animation"><template x-for="animation in numberAnimations" :key="animation.value"><option :value="animation.value" x-text="t(`animation.${animation.value}`)"></option></template></select>
                     </div>
                     <div class="setting-row">
                         <div><div class="control-title">Clock position</div><div class="control-description">Center clocks currently shown on displays</div></div>
-                        <button type="button" class="action-button" :disabled="resettingPositions" @click="resetClockPositions()" x-text="resettingPositions ? 'Resetting…' : 'Reset positions'"></button>
+                        <button type="button" class="action-button" :disabled="resettingPositions" @click="resetClockPositions()" x-text="t(resettingPositions ? 'clock.resetting' : 'clock.resetPositions')"></button>
                     </div>
                 </section>
 
@@ -125,8 +125,8 @@
                     <div class="addon-catalog">
                         <template x-for="item in addonCatalog" :key="item.kind">
                             <div class="addon-catalog-card">
-                                <div><strong x-text="item.label"></strong><p x-text="item.description"></p></div>
-                                <button type="button" class="action-button" :disabled="item.kind !== 'region_clock' && hasAddon(item.kind) || settings.addons.length >= 16" @click="addAddon(item.kind)" x-text="item.kind !== 'region_clock' && hasAddon(item.kind) ? 'Added' : 'Add'"></button>
+                                <div><strong x-text="t(`addons.${item.kind}`)"></strong><p x-text="t(`addons.${item.kind}Description`)"></p></div>
+                                <button type="button" class="action-button" :disabled="item.kind !== 'region_clock' && hasAddon(item.kind) || settings.addons.length >= 16" @click="addAddon(item.kind)" x-text="t(item.kind !== 'region_clock' && hasAddon(item.kind) ? 'addons.added' : 'addons.addButton')"></button>
                             </div>
                         </template>
                     </div>
@@ -135,25 +135,25 @@
                     <template x-for="addon in settings.addons" :key="addon.id">
                         <div class="addon-instance">
                             <div class="addon-instance-head">
-                                <div><strong x-text="addonName(addon)"></strong><small x-text="addon.kind === 'timer' ? 'Countdown or stopwatch' : addon.kind === 'date' ? 'Local date' : addon.options.time_zone"></small></div>
-                                <button type="button" class="switch" role="switch" :aria-checked="addon.enabled" :class="{ on: addon.enabled }" :aria-label="`Enable ${addonName(addon)}`" @click="addon.enabled = !addon.enabled; save()"><span></span></button>
+                                <div><strong x-text="localizedAddonName(addon)"></strong><small x-text="addon.kind === 'timer' ? t('addons.timerSubtitle') : addon.kind === 'date' ? t('addons.localDate') : addon.options.time_zone"></small></div>
+                                <button type="button" class="switch" role="switch" :aria-checked="addon.enabled" :class="{ on: addon.enabled }" :aria-label="t('addons.enable', { name: localizedAddonName(addon) })" @click="addon.enabled = !addon.enabled; save()"><span></span></button>
                             </div>
                             <div class="addon-instance-controls">
-                                <label>Position<select class="select-control" x-model="addon.placement" @change="save()" :aria-label="`Position for ${addonName(addon)}`"><option value="above">Above clock</option><option value="below">Below clock</option></select></label>
-                                <label>Text size <span x-text="`${addon.size_percent}%`"></span><input class="size-range" type="range" min="10" max="100" step="5" x-model.number="addon.size_percent" :style="rangeStyle(addon.size_percent, 10, 100)" @input="save()" :aria-label="`Text size for ${addonName(addon)}`"></label>
+                                <label><span x-text="t('addons.position')"></span><select class="select-control" x-model="addon.placement" @change="save()" :aria-label="t('addons.positionFor', { name: localizedAddonName(addon) })"><option value="above">Above clock</option><option value="below">Below clock</option></select></label>
+                                <label><span x-text="t('addons.textSize')"></span> <span x-text="`${addon.size_percent}%`"></span><input class="size-range" type="range" min="10" max="100" step="5" x-model.number="addon.size_percent" :style="rangeStyle(addon.size_percent, 10, 100)" @input="save()" :aria-label="t('addons.textSizeFor', { name: localizedAddonName(addon) })"></label>
                             </div>
                             <div class="addon-instance-controls" x-show="addon.kind === 'date'"><label>Date format<select class="select-control" x-model="addon.options.format" @change="save()" aria-label="Date format"><option value="ymd">Year-Month-Day</option><option value="md">Month-Day</option><option value="d">Day only</option></select></label><label class="addon-option-switch">Show weekday<button type="button" class="switch" role="switch" :aria-checked="addon.options.show_weekday === true" :class="{ on: addon.options.show_weekday === true }" aria-label="Show weekday after date" @click="addon.options.show_weekday = addon.options.show_weekday !== true; save()"><span></span></button></label></div>
                             <div class="addon-instance-controls" x-show="addon.kind === 'region_clock'"><label>Region<select class="select-control" x-model="addon.options.time_zone" @change="save()" aria-label="Region time zone"><template x-for="zone in timeZones" :key="zone"><option :value="zone" x-text="zone.replaceAll('_', ' ')"></option></template></select></label><label class="addon-option-switch">Show region name<button type="button" class="switch" role="switch" :aria-checked="addon.options.show_label !== false" :class="{ on: addon.options.show_label !== false }" aria-label="Show region name on clock" @click="addon.options.show_label = addon.options.show_label === false; save()"><span></span></button></label></div>
                             <div class="addon-instance-controls" x-show="addon.kind === 'timer'">
                                 <label>Mode<select class="select-control" :value="addon.options.mode" @change="timerChange('mode', $event.target.value); $event.target.value = addon.options.mode" :disabled="timerSession?.running" aria-label="Timer mode"><option value="countdown">Countdown</option><option value="stopwatch">Stopwatch</option></select></label>
-                                <label x-show="addon.options.mode === 'countdown'">Minutes<input class="addon-number" type="number" min="1" max="5999" :value="Math.round(addon.options.duration_seconds / 60)" @change="timerChange('duration_seconds', Math.max(60, Math.min(359940, Math.round(Number($event.target.value) || 1) * 60))); $event.target.value = Math.round(addon.options.duration_seconds / 60)" :disabled="timerSession?.running" aria-label="Countdown minutes"></label>
+                                <label x-show="addon.options.mode === 'countdown'"><span x-text="t('addons.minutes')"></span><input class="addon-number" type="number" min="1" max="5999" :value="Math.round(addon.options.duration_seconds / 60)" @change="timerChange('duration_seconds', Math.max(60, Math.min(359940, Math.round(Number($event.target.value) || 1) * 60))); $event.target.value = Math.round(addon.options.duration_seconds / 60)" :disabled="timerSession?.running" :aria-label="t('addons.countdownMinutes')"></label>
                                 <small x-show="timerSession?.running">Pause the timer before changing its mode or duration.</small>
                             </div>
                             <div class="addon-instance-actions">
-                                <template x-if="addon.kind === 'timer'"><span class="addon-timer-actions"><button type="button" class="action-button primary-action" :disabled="!addon.enabled" @click="runTimerAction('toggle')" x-text="timerSession?.running ? 'Pause' : 'Start'"></button><button type="button" class="action-button" :disabled="!addon.enabled" @click="runTimerAction('reset')">Reset</button></span></template>
-                                <button type="button" class="action-button" @click="moveAddon(addon.id, -1)" :aria-label="`Move ${addonName(addon)} up`">↑ Up</button>
-                                <button type="button" class="action-button" @click="moveAddon(addon.id, 1)" :aria-label="`Move ${addonName(addon)} down`">↓ Down</button>
-                                <button type="button" class="action-button addon-remove" @click="removeAddon(addon.id)" :aria-label="`Remove ${addonName(addon)}`">Remove</button>
+                                <template x-if="addon.kind === 'timer'"><span class="addon-timer-actions"><button type="button" class="action-button primary-action" :disabled="!addon.enabled" @click="runTimerAction('toggle')" x-text="t(timerSession?.running ? 'addons.pause' : 'addons.start')"></button><button type="button" class="action-button" :disabled="!addon.enabled" @click="runTimerAction('reset')">Reset</button></span></template>
+                                <button type="button" class="action-button" @click="moveAddon(addon.id, -1)" :aria-label="t('addons.moveUp', { name: localizedAddonName(addon) })">↑ <span x-text="t('addons.up')"></span></button>
+                                <button type="button" class="action-button" @click="moveAddon(addon.id, 1)" :aria-label="t('addons.moveDown', { name: localizedAddonName(addon) })">↓ <span x-text="t('addons.down')"></span></button>
+                                <button type="button" class="action-button addon-remove" @click="removeAddon(addon.id)" :aria-label="t('addons.removeName', { name: localizedAddonName(addon) })">Remove</button>
                             </div>
                         </div>
                     </template>
@@ -190,10 +190,10 @@
                         <div class="shortcut-box">
                             <div class="shortcut-box-header">
                                 <div class="shortcut-box-header-row">
-                                    <div class="shortcut-box-title" x-text="group.title"></div>
-                                    <span class="addon-status-pill" x-show="group.id === 'addons'" :class="timerAddonEnabled ? 'status-enabled' : 'status-disabled'" x-text="timerAddonEnabled ? 'TIMER: ENABLED' : 'TIMER: DISABLED'"></span>
+                                    <div class="shortcut-box-title" x-text="t(group.id === 'core' ? 'shortcuts.coreTitle' : 'shortcuts.addonTitle')"></div>
+                                    <span class="addon-status-pill" x-show="group.id === 'addons'" :class="timerAddonEnabled ? 'status-enabled' : 'status-disabled'" x-text="t(timerAddonEnabled ? 'shortcuts.timerEnabled' : 'shortcuts.timerDisabled')"></span>
                                 </div>
-                                <div class="shortcut-box-desc" x-text="group.description"></div>
+                                <div class="shortcut-box-desc" x-text="t(group.id === 'core' ? 'shortcuts.coreDescription' : 'shortcuts.addonDescription')"></div>
                             </div>
                             <div class="shortcut-row" x-show="group.id === 'core'">
                                 <div class="shortcut-info">
@@ -211,23 +211,23 @@
                             <template x-for="action in group.actions" :key="action.key">
                                 <div class="shortcut-row" :class="{ 'disabled-row': (action.requiresTimer && !timerAddonEnabled) || !settings.shortcuts[`${action.key}_enabled`], 'has-conflict': getConflict(action.key) }">
                                     <div class="shortcut-info">
-                                        <div class="shortcut-name" x-text="action.label"></div>
-                                        <div class="shortcut-desc" x-text="action.requiresTimer && !timerAddonEnabled ? 'Enable the Timer add-on in the Add-ons tab to configure this shortcut' : action.description"></div>
-                                        <template x-if="getConflict(action.key)"><div class="conflict-badge" x-text="`⚠️ Conflict: Also assigned to ${getConflict(action.key)}`"></div></template>
+                                        <div class="shortcut-name" x-text="t(`shortcuts.${shortcutActionKey(action.key)}`)"></div>
+                                        <div class="shortcut-desc" x-text="t(action.requiresTimer && !timerAddonEnabled ? 'shortcuts.enableTimerFirst' : `shortcuts.${shortcutActionKey(action.key)}Description`)"></div>
+                                        <template x-if="getConflict(action.key)"><div class="conflict-badge" x-text="t('shortcuts.alsoAssigned', { name: getConflictLabel(action.key) })"></div></template>
                                     </div>
                                     <div class="shortcut-action">
-                                        <button type="button" class="switch shortcut-switch" role="switch" :aria-checked="settings.shortcuts[`${action.key}_enabled`]" :class="{ on: settings.shortcuts[`${action.key}_enabled`] }" :disabled="(action.requiresTimer && !timerAddonEnabled) || !settings.shortcuts[action.key]" :aria-label="action.switchLabel" @click="toggleShortcut(action.key)"><span></span></button>
+                                        <button type="button" class="switch shortcut-switch" role="switch" :aria-checked="settings.shortcuts[`${action.key}_enabled`]" :class="{ on: settings.shortcuts[`${action.key}_enabled`] }" :disabled="(action.requiresTimer && !timerAddonEnabled) || !settings.shortcuts[action.key]" :aria-label="t(shortcutEnableKey(action.key))" @click="toggleShortcut(action.key)"><span></span></button>
                                         <div class="keys-container" :class="{ recording: recordingAction === action.key, disabled: action.requiresTimer && !timerAddonEnabled }">
-                                            <template x-if="recordingAction === action.key"><span class="recording-badge">Press keys (Esc to cancel)...</span></template>
+                                            <template x-if="recordingAction === action.key"><span class="recording-badge" x-text="t('shortcuts.pressKeys')"></span></template>
                                             <template x-if="recordingAction !== action.key">
                                                 <div class="keys-list">
-                                                    <template x-for="(key, index) in formatShortcutKeys(settings.shortcuts[action.key])" :key="index"><span class="key-pill" :class="{ 'none-pill': key === 'None' }" x-text="key"></span></template>
+                                                    <template x-for="(key, index) in formatShortcutKeys(settings.shortcuts[action.key])" :key="index"><span class="key-pill" :class="{ 'none-pill': key === t('shortcuts.none') }" x-text="key"></span></template>
                                                 </div>
                                             </template>
                                         </div>
                                         <div class="shortcut-buttons">
-                                            <button type="button" class="action-button record-btn" :class="{ active: recordingAction === action.key }" :disabled="(action.requiresTimer && !timerAddonEnabled) || settings.shortcuts[`${action.key}_enabled`]" title="Turn off this shortcut before changing it" @click="recordingAction === action.key ? stopRecording() : startRecording(action.key)" x-text="recordingAction === action.key ? 'Cancel' : 'Change'"></button>
-                                            <button type="button" class="action-button clear-btn" title="Turn off before clearing" :disabled="(action.requiresTimer && !timerAddonEnabled) || settings.shortcuts[`${action.key}_enabled`] || !settings.shortcuts[action.key]" @click="clearShortcut(action.key)">Clear</button>
+                                            <button type="button" class="action-button record-btn" :class="{ active: recordingAction === action.key }" :disabled="(action.requiresTimer && !timerAddonEnabled) || settings.shortcuts[`${action.key}_enabled`]" :title="t('shortcuts.turnOffToChange')" @click="recordingAction === action.key ? stopRecording() : startRecording(action.key)" x-text="t(recordingAction === action.key ? 'addons.cancel' : 'shortcuts.change')"></button>
+                                            <button type="button" class="action-button clear-btn" :title="t('shortcuts.turnOffToClear')" :disabled="(action.requiresTimer && !timerAddonEnabled) || settings.shortcuts[`${action.key}_enabled`] || !settings.shortcuts[action.key]" @click="clearShortcut(action.key)">Clear</button>
                                         </div>
                                     </div>
                                 </div>
@@ -256,14 +256,20 @@
                             <div class="display-list">
                                 <template x-for="display in displays" :key="display.id">
                                     <div class="display-row">
-                                        <div class="display-row-text"><div class="control-title" x-text="displayLabel(display)"></div><div class="control-description" x-text="display.primary ? 'Main display' : 'Connected display'"></div></div>
-                                        <button type="button" class="switch" role="switch" :aria-checked="display.enabled" :aria-label="`Show clock on ${displayLabel(display)}`" :class="{ on: display.enabled }" @click="toggleDisplay(display)"><span></span></button>
+                                        <div class="display-row-text"><div class="control-title" x-text="displayLabel(display)"></div><div class="control-description" x-text="t(display.primary ? 'general.mainDisplay' : 'general.connectedDisplay')"></div></div>
+                                        <button type="button" class="switch" role="switch" :aria-checked="display.enabled" :aria-label="t('general.showOnDisplay', { name: displayLabel(display) })" :class="{ on: display.enabled }" @click="toggleDisplay(display)"><span></span></button>
                                     </div>
                                 </template>
                             </div>
                             <p class="display-section-note">Appearance and add-ons are shared across displays.</p>
                         </section>
                         <h2 class="general-group-heading">App behavior</h2>
+                        <div class="setting-row">
+                            <div><div class="control-title">Language</div><div class="control-description">Choose the language for TopClock and the date weekday.</div></div>
+                            <select class="select-control" x-model="settings.language" @change="save()" aria-label="Language">
+                                <template x-for="option in languageOptions" :key="option.value"><option :value="option.value" x-text="option.value === 'system' ? t('general.system') : option.name"></option></template>
+                            </select>
+                        </div>
                         <div class="setting-row">
                             <div><div class="control-title">Launch when I sign in</div><div class="control-description">Start the clock with Windows</div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()"><span></span></button>
@@ -289,13 +295,13 @@
                                 </template>
                                 <template x-if="!updateAvailable">
                                     <button type="button" class="action-button" :disabled="isCheckingUpdate" @click="checkForUpdates(true)">
-                                        <span x-text="isCheckingUpdate ? 'Checking…' : 'Check for updates'"></span>
+                                        <span x-text="t(isCheckingUpdate ? 'general.checking' : 'general.checkUpdates')"></span>
                                     </button>
                                 </template>
                             </div>
                         </div>
                     </div>
-                    <div class="tip-card"><span>TIP</span> <span class="tip-copy" x-text="`Hold ${settings.shortcuts.interaction_modifier} and drag the desktop clock to move it. ${settings.shortcuts.interaction_modifier} + click switches time format.`"></span></div>
+                    <div class="tip-card"><span>TIP</span> <span class="tip-copy" x-text="t('general.tipText', { modifier: settings.shortcuts.interaction_modifier })"></span></div>
                 </section>
                 <div class="error-toast" x-show="error" x-transition.opacity x-text="error" x-cloak role="alert"></div>
             </main>

@@ -36,6 +36,7 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
   - **Styling**: Independent text color, outline color, outline size slider, and font size from 24px to 200px.
   - **Animations**: Independent colon animations and numeric transition effects (fade, slide, flip, pulse, or none).
 - 🧩 **Built-in Add-ons** — Add a local date, multiple region clocks, or a Countdown/Stopwatch Timer above or below the clock. Set their order and relative text size (10%–100%) in Settings, optionally show a short weekday after the date, and choose whether region names appear.
+- 🌐 **Language choices** — General can follow the Windows user language or use English, Simplified Chinese, Traditional Chinese, or Japanese. The Date add-on's weekday follows the same choice.
 - ⌨️ **Optional System-wide Shortcuts** — Enable individual Open Settings, Quit, Timer Start/Pause, and Timer Reset bindings in the Shortcuts tab. They are off by default; the interaction modifier remains active.
 - ⚡ **Native Windows Performance** — Written in Rust with direct Win32 API integration, ensuring virtually zero CPU overhead and minimal memory usage.
 - 🔒 **Private & Offline** — No network telemetry, no external font CDNs, no web requests. Settings stay on your machine.

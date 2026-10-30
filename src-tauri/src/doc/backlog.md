@@ -1,5 +1,7 @@
 # Rust application backlog
 
+The new language schema, Windows UI language command, and tray update compile and pass Rust tests. Installed MSIX behavior remains to be checked in the [package backlog](../../doc/backlog.md), alongside the frontend's [live localization check](../../../src/doc/backlog.md).
+
 TODO 4's settings-folder command and per-display windows, visibility and positions are implemented. Manual verification with multiple physical displays remains in the [frontend backlog](../../../src/doc/backlog.md).
 
 The Clock tab's reset command now centers visible windows and stores their per-display positions. Its mixed-DPI, disabled-display, click-through, and restart behavior still needs the live Windows check in the [frontend backlog](../../../src/doc/backlog.md).

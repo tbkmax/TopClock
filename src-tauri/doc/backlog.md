@@ -10,6 +10,8 @@ The add-on system uses existing Tauri window and event permissions. Timer clock-
 
 ## MSIX installed-package validation
 
+Include a Chinese or Japanese Windows UI language in the installed-package pass and confirm System default picks it on first launch and after restart. This verifies [locale.rs](../src/locale.rs) under package identity alongside the existing startup and persistence checks.
+
 - **Title:** Validate Store-signed installation and upgrades.
 - **Problem or opportunity:** MakeAppx accepts the Store-identity manifest and a loose-registered development package works, but a Store-signed install and upgrade have not been exercised.
 - **Desired outcome:** Startup, settings persistence, tray, windows, shortcuts, click-through, and upgrade behavior work from MSIX.

@@ -1,5 +1,16 @@
 # Frontend backlog
 
+## Language layout and live package check
+
+- **Title:** Verify translated Settings and weekday display in running direct and MSIX builds.
+- **Problem or opportunity:** Automated locale tests and the Vite build cannot show clipping, installed font fallback, or packaged Windows language selection.
+- **Desired outcome:** All four explicit languages and System default remain readable in Settings, the clock menu, Date preview, and desktop clocks.
+- **Scope:** [i18n.js](../i18n.js), [settings.html](../../settings.html), [index.html](../../index.html), and the native locale command in [locale.rs](../../src-tauri/src/locale.rs).
+- **Acceptance criteria:** On Chinese and Japanese Windows UI languages, a new or `system` preference shows the corresponding short weekday; explicit choice overrides Windows; Settings and menu text fit without clipping; a restart keeps the choice.
+- **Dependencies and risks:** Requires Windows installations with those UI languages and a signed MSIX for the package check. Preserve click-through and existing numeric time layouts.
+- **Verification:** Run `npm run tauri:dev`, exercise all language choices and Date weekday on the clock and preview, then repeat System default and restart checks in an installed MSIX.
+- **Priority:** High before claiming packaged localization is visually verified.
+
 TODO 4's Settings files button and multiple-display controls are implemented. Manual verification on two or more physical displays remains; see the item below.
 
 ## Packaged General-tab verification

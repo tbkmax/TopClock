@@ -1,5 +1,11 @@
 # Tauri package changelog
 
+## Added
+
+### 2026-10-29 - Windows language detection for packaged builds
+
+- Enabled the Win32 globalization API so System default can use the current user's Windows UI language in both direct and MSIX builds. Existing settings use System default when no language is saved. No operator action is required.
+
 ## Changed
 
 ### 2026-10-29 - GitHub release uses the portable executable

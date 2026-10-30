@@ -6,6 +6,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons.js';
+import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
 import { addonMethods } from './settings-addons.js';
 import { DEFAULT_SHORTCUTS, shortcutGroups, shortcutMethods } from './settings-shortcuts.js';
 import { updateMethods } from './settings-updates.js';
@@ -18,7 +19,11 @@ window.Alpine = Alpine;
 
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
+    systemLocale: 'en',
+    language: 'en',
+    languageOptions,
     settings: {
+        language: 'system',
         colon_animation: 'pulse',
         number_animation: 'tick',
         font_color: '#ffffff',
@@ -41,7 +46,8 @@ Alpine.data('settingsApp', () => ({
     displays: [],
     resettingPositions: false,
     appVersion: '0.0.0',
-    updateStatusText: 'v0.0.0',
+    updateStatusKey: 'updates.currentVersion',
+    updateStatusVars: { version: '0.0.0' },
     isCheckingUpdate: false,
     updateAvailable: false,
     latestReleaseUrl: 'https://github.com/tbkmax/TopClock/releases/latest',
@@ -67,7 +73,9 @@ Alpine.data('settingsApp', () => ({
     shortcutGroups,
 
     async init() {
+        this.systemLocale = await invoke('get_system_locale').catch(() => navigator.language || 'en');
         this.settings = await invoke('get_settings');
+        this.syncLanguage();
         this.saveController = createSettingsPersistence({
             write: (settings) => invoke('update_settings', { settings }),
             preview: (settings) => emit('clock-settings-preview', settings),
@@ -89,10 +97,11 @@ Alpine.data('settingsApp', () => ({
                 }
                 if (!isCurrent()) return;
                 this.settings = settings;
+                this.syncLanguage();
                 this.timerSession = timerSession;
                 this.updatePreview();
             },
-            onError: (error) => { this.error = `Could not save settings: ${error}`; },
+            onError: (error) => { this.error = this.t('error.save', { error }); },
         });
         this.saveController.setCommitted(this.settings);
         this.timerSession = await invoke('get_timer_state');
@@ -102,21 +111,20 @@ Alpine.data('settingsApp', () => ({
             console.error('Could not determine package identity:', error);
             return true;
         });
-        this.updateStatusText = this.isPackaged
-            ? 'Updates are delivered through Microsoft Store'
-            : `Current version: v${this.appVersion}`;
+        this.setUpdateStatus(this.isPackaged ? 'updates.store' : 'updates.currentVersion', { version: this.appVersion });
         await this.loadFontFamilies();
         await this.refreshStartupState();
         try {
             this.displays = await invoke('get_displays');
         } catch (error) {
-            this.error = `Could not list displays: ${error}`;
+            this.error = this.t('error.displays', { error });
         }
         this.updatePreview();
         setInterval(() => this.updatePreview(), 200);
         await listen('clock-settings-changed', (event) => {
             if (!this.saveController.hasPending()) {
                 this.settings = event.payload;
+                this.syncLanguage();
                 this.saveController.setCommitted(event.payload);
                 this.updatePreview();
             }
@@ -151,7 +159,7 @@ Alpine.data('settingsApp', () => ({
         this.previousPreviewNumbers = result.numbers;
         this.previewNumberActiveUntil = result.activeUntil;
         this.previewAddons = (this.settings.addons || []).filter((addon) => addon.enabled)
-            .map((addon) => displayAddon(addon, now, this.settings, this.timerSession));
+            .map((addon) => displayAddon(addon, now, this.settings, this.timerSession, this.language));
     },
 
     previewStyle() {
@@ -187,15 +195,55 @@ Alpine.data('settingsApp', () => ({
             }
         } catch (error) {
             this.fontListError = true;
-            this.error = `Could not list installed fonts: ${error}`;
+            this.error = this.t('error.fonts', { error });
         } finally {
             this.fontsLoading = false;
         }
     },
 
     save() {
+        this.syncLanguage();
         this.updatePreview();
         this.saveController.schedule(this.settings);
+    },
+
+    syncLanguage() {
+        this.language = resolveLanguage(this.settings.language, this.systemLocale);
+        document.documentElement.lang = this.language;
+        localizeDocument(this.language);
+    },
+
+    t(key, vars) { return translate(this.language, key, vars); },
+
+    setUpdateStatus(key, vars = {}) {
+        this.updateStatusKey = key;
+        this.updateStatusVars = vars;
+    },
+
+    get updateStatusText() { return this.t(this.updateStatusKey, this.updateStatusVars); },
+
+    localizedAddonName(addon) {
+        return addon.kind === 'region_clock' ? addonName(addon) : this.t(`addons.${addon.kind}`);
+    },
+
+    shortcutActionKey(key) {
+        return { open_settings: 'openSettings', quit: 'quit', timer_toggle: 'timerToggle', timer_reset: 'timerReset' }[key];
+    },
+
+    shortcutEnableKey(key) {
+        const action = this.shortcutActionKey(key);
+        return `shortcuts.enable${action[0].toUpperCase()}${action.slice(1)}`;
+    },
+
+    getConflictLabel(actionKey) {
+        const label = this.getConflict(actionKey);
+        const keys = {
+            'Open Settings': 'shortcuts.openSettings',
+            'Quit TopClock': 'shortcuts.quit',
+            'Timer Start / Stop': 'shortcuts.timerToggle',
+            'Timer Reset': 'shortcuts.timerReset',
+        };
+        return label ? this.t(keys[label]) : null;
     },
 
     hotkeyErrors: [],
@@ -235,7 +283,7 @@ Alpine.data('settingsApp', () => ({
             this.startupEnabled = await invoke('get_startup_enabled');
         } catch (error) {
             this.startupEnabled = false;
-            this.error = `Could not read startup state: ${error}`;
+            this.error = this.t('error.startupRead', { error });
         }
     },
 
@@ -247,7 +295,7 @@ Alpine.data('settingsApp', () => ({
             await this.refreshStartupState();
         } catch (error) {
             this.startupEnabled = await invoke('get_startup_enabled').catch(() => false);
-            this.error = `Could not update startup: ${error}`;
+            this.error = this.t('error.startupUpdate', { error });
         }
     },
 
@@ -256,7 +304,7 @@ Alpine.data('settingsApp', () => ({
             await invoke('open_settings_folder');
             this.error = '';
         } catch (error) {
-            this.error = `Could not open settings folder: ${error}`;
+            this.error = this.t('error.openFolder', { error });
         }
     },
 
@@ -267,7 +315,7 @@ Alpine.data('settingsApp', () => ({
             await invoke('reset_clock_positions');
             this.error = '';
         } catch (error) {
-            this.error = `Could not reset clock positions: ${error}`;
+            this.error = this.t('error.resetPositions', { error });
         } finally {
             this.resettingPositions = false;
         }
@@ -277,7 +325,8 @@ Alpine.data('settingsApp', () => ({
         const rawName = typeof display.name === 'string' ? display.name : '';
         const devicePrefix = '\\\\.\\';
         const name = (rawName.startsWith(devicePrefix) ? rawName.slice(devicePrefix.length) : rawName).trim();
-        return name.replace(/^DISPLAY(\d+)/i, 'Display $1') || 'Display';
+        const match = /^DISPLAY(\d+)/i.exec(name);
+        return match ? this.t('general.displayNumber', { number: match[1] }) : name || this.t('general.display');
     },
 
     async toggleDisplay(display) {
@@ -286,7 +335,7 @@ Alpine.data('settingsApp', () => ({
             this.displays = await invoke('get_displays');
             this.error = '';
         } catch (error) {
-            this.error = `Could not change display visibility: ${error}`;
+            this.error = this.t('error.displayVisibility', { error });
         }
     },
 

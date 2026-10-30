@@ -20,7 +20,7 @@
             class="clock-container" x-ref="clockContainer"
             :class="{ 'faded': isNear && !isCtrlHeld && !menuOpen }"
             @click="toggleFormat" 
-            title="Hold Ctrl to Move or Right-Click"
+            :title="t('app.moveHint', { modifier: settings?.shortcuts?.interaction_modifier || 'Ctrl' })"
         >
             <div class="addon-stack addon-stack-above" x-show="renderedAddons.some((item) => item.placement === 'above')" x-cloak>
                 <template x-for="addon in renderedAddons.filter((item) => item.placement === 'above')" :key="addon.id">
@@ -69,28 +69,28 @@
             :style="`left: ${menuX}px; top: ${menuY}px;`"
             x-cloak
         >
-            <button class="menu-item" @click="openSettings()" title="Settings">
+            <button class="menu-item" @click="openSettings()" :title="t('app.settings')">
                 <span class="menu-item-left">
                     <svg class="menu-icon settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                    <span>Settings</span>
+                    <span x-text="t('app.settings')"></span>
                 </span>
                 <template x-if="settings?.shortcuts?.open_settings_enabled && settings?.shortcuts?.open_settings">
                     <span class="menu-shortcut" x-text="settings.shortcuts.open_settings"></span>
                 </template>
             </button>
-            <template x-if="timerEnabled"><button class="menu-item" @click="timerAction('reset')" title="Reset timer"><span class="menu-item-left"><span>Reset timer</span></span><template x-if="settings?.shortcuts?.timer_reset_enabled && settings?.shortcuts?.timer_reset"><span class="menu-shortcut" x-text="settings.shortcuts.timer_reset"></span></template></button></template>
+            <template x-if="timerEnabled"><button class="menu-item" @click="timerAction('reset')" :title="t('app.resetTimer')"><span class="menu-item-left"><span x-text="t('app.resetTimer')"></span></span><template x-if="settings?.shortcuts?.timer_reset_enabled && settings?.shortcuts?.timer_reset"><span class="menu-shortcut" x-text="settings.shortcuts.timer_reset"></span></template></button></template>
             <div class="menu-divider"></div>
-            <button class="menu-item" @click="quitApp" title="Quit Application">
+            <button class="menu-item" @click="quitApp" :title="t('app.quit')">
                 <span class="menu-item-left">
                     <svg class="menu-icon quit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
                         <polyline points="16 17 21 12 16 7"></polyline>
                         <line x1="21" y1="12" x2="9" y2="12"></line>
                     </svg>
-                    <span>Quit</span>
+                    <span x-text="t('app.quit')"></span>
                 </span>
                 <template x-if="settings?.shortcuts?.quit_enabled && settings?.shortcuts?.quit">
                     <span class="menu-shortcut" x-text="settings.shortcuts.quit"></span>

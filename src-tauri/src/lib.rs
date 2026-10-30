@@ -5,6 +5,7 @@ mod displays;
 mod fonts;
 mod hotkeys;
 mod interaction;
+mod locale;
 mod settings;
 mod settings_commands;
 mod startup;
@@ -30,6 +31,7 @@ pub fn run() {
             window_commands::minimize_settings,
             window_commands::open_release_page,
             settings_commands::get_settings,
+            locale::get_system_locale,
             fonts::get_font_families,
             settings_commands::update_settings,
             timer::get_timer_state,

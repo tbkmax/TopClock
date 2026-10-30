@@ -22,6 +22,7 @@ pub(crate) fn update_settings(
         return Err("Invalid settings or add-on configuration".into());
     }
     let mut timer_state_changed = false;
+    let language_changed;
     {
         let mut config = state.config.lock().unwrap();
         let previous_session = config.timer_session.clone();
@@ -35,10 +36,16 @@ pub(crate) fn update_settings(
             timer_state_changed = true;
         }
         let previous = std::mem::replace(&mut config.settings, settings.clone());
+        language_changed = previous.language != settings.language;
         if let Err(error) = save_config(&state, &config) {
             config.settings = previous;
             config.timer_session = previous_session;
             return Err(error);
+        }
+    }
+    if language_changed {
+        if let Err(error) = crate::tray::update_language(&app, &settings) {
+            eprintln!("Could not update tray language: {error}");
         }
     }
     app.emit("clock-settings-changed", &settings)
