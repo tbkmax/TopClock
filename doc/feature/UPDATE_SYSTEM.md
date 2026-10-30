@@ -19,10 +19,10 @@ flowchart TD
     P --> E["User's TopClock Application"]
     E -->|Queries GitHub Releases API| P
     E -->|Notifies user when new version exists| E
-    E -->|Click 'Download Update ↗' opens browser| P
+    E -->|Click 'View GitHub release ↗' opens browser| P
 ```
 
-The direct build has no background installer or updater. Clicking **Download Update ↗** only opens GitHub; users download and replace the portable executable themselves. The portable executable is not signed by this workflow, so [SmartScreen can warn on download or launch](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation). A Store MSIX is signed by Microsoft after certification and follows Store-managed updates.
+The direct build has no background installer or updater. Clicking **View GitHub release ↗** only opens GitHub; users download and replace the portable executable themselves. The portable executable is not signed by this workflow, so [SmartScreen can warn on download or launch](https://learn.microsoft.com/en-us/windows/apps/package-and-deploy/smartscreen-reputation). A Store MSIX is signed by Microsoft after certification and follows Store-managed updates.
 
 Store-installed flow:
 
@@ -49,15 +49,15 @@ The in-app button can only install an update that has already been published thr
    TopClock compares the latest release tag (e.g. `v0.1.0`) against the currently running version (e.g. `0.0.0` in dev).
 3. **One-Click Download Action**:  
    - If an update is found, Settings shows:  
-     `New version v0.1.0 is available!` with a **Download Update ↗** button.
+     `New version v0.1.0 is on GitHub Releases.` with a **View GitHub release ↗** button.
    - Clicking it calls `open_release_page`, opening the GitHub release download page directly in the user's default web browser.
 
 ### Store-installed MSIX
 
-1. Settings detects package identity and shows **Check for updates**. The GitHub automatic-check preference and GitHub download action are hidden.
+1. Settings detects package identity and shows **Check Microsoft Store**. The GitHub automatic-check preference and release-page action are hidden.
 2. Clicking the button calls `check_store_updates`. Rust queries `Windows.Services.Store.StoreContext` for updates to this installed package. It does not compare GitHub tags.
 3. If an update exists, the button becomes **Update**. Clicking it calls `install_store_update`; the Store requests permission, downloads, and installs the published package. Settings reports cancellation or failure and keeps the Update action available for another attempt. The app may need to restart.
-4. The Store can also deliver updates automatically. A new version still requires a higher-version MSIX submission and certification in Partner Center. The Store-side flow requires a Store-signed install to test; an unpackaged `tauri dev` process follows the GitHub flow.
+4. The Store can also deliver updates automatically. A new version still requires a higher-version MSIX submission and certification in Partner Center. The Store-side flow requires a Store-signed install to test; an unpackaged `tauri dev` process or a direct launch of `release-assets/msix-stage-tbkmax.TopClock/TopClock.exe` follows the GitHub flow. Building an MSIX does not install or register it.
 
 ---
 

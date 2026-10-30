@@ -20,7 +20,7 @@ export const updateMethods = {
             this.setUpdateStatus('updates.checkingStore');
             try {
                 this.updateAvailable = await invoke('check_store_updates');
-                this.setUpdateStatus(this.updateAvailable ? 'updates.storeAvailable' : 'updates.upToDate', { version: this.appVersion });
+                this.setUpdateStatus(this.updateAvailable ? 'updates.storeAvailable' : 'updates.storeUpToDate', { version: this.appVersion });
             } catch (error) {
                 console.warn('Store update check failed:', error);
                 this.setUpdateStatus('updates.storeCheckFailed');
@@ -39,7 +39,7 @@ export const updateMethods = {
             if (!res.ok) {
                 if (res.status === 404) {
                     this.updateAvailable = false;
-                    this.setUpdateStatus('updates.upToDate', { version: this.appVersion });
+                    this.setUpdateStatus('updates.githubUpToDate', { version: this.appVersion });
                     return;
                 }
                 throw new Error(`HTTP ${res.status}`);
@@ -52,10 +52,10 @@ export const updateMethods = {
 
             if (isNewerVersion(cleanLatest, this.appVersion)) {
                 this.updateAvailable = true;
-                this.setUpdateStatus('updates.available', { version: latestTag });
+                this.setUpdateStatus('updates.githubAvailable', { version: latestTag });
             } else {
                 this.updateAvailable = false;
-                this.setUpdateStatus('updates.upToDate', { version: this.appVersion });
+                this.setUpdateStatus('updates.githubUpToDate', { version: this.appVersion });
             }
         } catch (error) {
             console.warn('Update check failed:', error);
@@ -80,7 +80,7 @@ export const updateMethods = {
             const outcome = await invoke('install_store_update');
             if (outcome === 'completed' || outcome === 'up_to_date') {
                 this.updateAvailable = false;
-                this.setUpdateStatus(outcome === 'completed' ? 'updates.storeInstalled' : 'updates.upToDate', { version: this.appVersion });
+                this.setUpdateStatus(outcome === 'completed' ? 'updates.storeInstalled' : 'updates.storeUpToDate', { version: this.appVersion });
             } else {
                 this.setUpdateStatus('updates.storeCanceled');
             }

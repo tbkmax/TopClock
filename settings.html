@@ -290,12 +290,12 @@
                             <div class="update-actions">
                                 <template x-if="updateAvailable">
                                     <button type="button" class="action-button primary-action" :disabled="isInstallingUpdate" @click="isPackaged ? installStoreUpdate() : openRelease()">
-                                        <span x-text="t(isPackaged ? (isInstallingUpdate ? 'general.installingUpdate' : 'general.installUpdate') : 'general.downloadUpdate')"></span>
+                                        <span x-text="t(isPackaged ? (isInstallingUpdate ? 'general.installingUpdate' : 'general.installUpdate') : 'general.viewGithubRelease')"></span>
                                     </button>
                                 </template>
                                 <template x-if="!updateAvailable">
                                     <button type="button" class="action-button" :disabled="isCheckingUpdate || isInstallingUpdate" @click="checkForUpdates(true)">
-                                        <span x-text="t(isCheckingUpdate ? 'general.checking' : 'general.checkUpdates')"></span>
+                                        <span x-text="t(isCheckingUpdate ? 'general.checking' : isPackaged ? 'general.checkStore' : 'general.checkGithub')"></span>
                                     </button>
                                 </template>
                             </div>

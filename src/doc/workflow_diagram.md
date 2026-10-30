@@ -30,7 +30,7 @@ sequenceDiagram
     participant Settings as settingsApp
     participant Rust as store_updates.rs
     participant Store as Microsoft Store
-    User->>Settings: Check for updates (packaged build)
+    User->>Settings: Check Microsoft Store (packaged build)
     Settings->>Rust: check_store_updates
     Rust->>Store: Query available package updates
     Store-->>Settings: Available or current
@@ -44,7 +44,7 @@ sequenceDiagram
     end
 ```
 
-The Store publishes updates only after a separate Partner Center submission and certification. This diagram describes the Store-installed MSIX path; an unpackaged process uses the GitHub browser path.
+The Store publishes updates only after a separate Partner Center submission and certification. This diagram describes the Store-installed MSIX path; an unpackaged process, including a direct launch from `release-assets/msix-stage-tbkmax.TopClock`, uses the GitHub browser path.
 
 Every clock window runs `clockApp` with the same persisted appearance and add-ons. `settingsApp` broadcasts a preview to all windows, while `get_displays` and `set_display_enabled` control which display windows are present. The General tab renders these switches in a separate display section, and `displayLabel()` strips the Windows device prefix for visible and accessible names without changing the display ID sent to Rust. Rust owns per-display position persistence; Ctrl-drag and resize anchoring can place a clock beyond display edges.
 
@@ -179,4 +179,4 @@ sequenceDiagram
 
 The [Add-ons tab](../../settings.html) controls placement, order, a visible 10%–100% size slider, and options. It previews the localized Date weekday and Region label switches using the shared formatter in [addons.js](../addons.js). The [clock](../../index.html) reserves distinct rows above and below the main display; the optional weekday uses 80% of its Date row's font size. Timer actions and running progress are native state; frontend display values are computed on each tick without a mode label. The menu Reset action calls the same timer command.
 
-In the [General tab](../../settings.html), the direct-build check compares the latest GitHub tag with the installed version. The packaged check uses Store availability instead. The General sidebar badge and its accessible label follow `updateAvailable`; the action is **Download Update ↗** for a browser release page or **Update** for a Store installation. A successful current-version result hides the badge; a failed check leaves any earlier available state intact.
+In the [General tab](../../settings.html), the direct-build check compares the latest GitHub tag with the installed version. The packaged check uses Store availability instead. The General sidebar badge and its accessible label follow `updateAvailable`; the action is **View GitHub release ↗** for a browser release page or **Update** for a Store installation. The check button and current-version message name the active source. A successful current-version result hides the badge; a failed check leaves any earlier available state intact.

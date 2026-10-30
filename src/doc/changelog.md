@@ -12,6 +12,10 @@
 
 ## Changed
 
+### 2026-10-29 - Name the update source in General
+
+- The update check and current-version message now identify GitHub Releases or Microsoft Store. Direct builds label their action **View GitHub release** to show that TopClock does not install the portable download. Launching the MSIX staging executable directly remains a direct build; no migration or user action is required.
+
 ### 2026-10-29 - Simplify Settings and keyboard navigation
 
 - Settings now groups add-on, shortcut, update, and save behavior into focused JavaScript modules. Shortcut actions share one row template, and arrow keys plus Home and End navigate the four accessible Settings tabs. No operator action is required.
