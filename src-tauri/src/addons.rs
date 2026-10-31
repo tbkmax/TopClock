@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
 use std::collections::HashSet;
 
 #[derive(Clone, PartialEq, Serialize, Deserialize)]
@@ -33,6 +34,22 @@ pub(crate) fn timer_options(addons: &[AddonInstance]) -> Option<(&str, u64)> {
                 addon.options.get("duration_seconds")?.as_u64()?,
             ))
         })
+}
+
+pub(crate) fn progress_countdown_options(addons: &[AddonInstance]) -> HashMap<String, u64> {
+    addons
+        .iter()
+        .filter(|addon| {
+            addon.kind == "progress"
+                && addon.options.get("mode").and_then(Value::as_str) == Some("countdown")
+        })
+        .filter_map(|addon| {
+            Some((
+                addon.id.clone(),
+                addon.options.get("countdown_seconds")?.as_u64()?,
+            ))
+        })
+        .collect()
 }
 
 fn valid_date(value: &str) -> bool {
@@ -78,7 +95,7 @@ fn time_minutes(value: &str) -> Option<u16> {
 }
 
 fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
-    if !(5..=8).contains(&options.len())
+    if !(5..=9).contains(&options.len())
         || !options.keys().all(|key| {
             matches!(
                 key.as_str(),
@@ -90,11 +107,12 @@ fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
                     | "show_percentage"
                     | "bar_length_percent"
                     | "bar_thickness_percent"
+                    | "countdown_seconds"
             )
         })
         || !matches!(
             options.get("mode").and_then(Value::as_str),
-            Some("date" | "time")
+            Some("date" | "time" | "countdown")
         )
         || options
             .get("show_percentage")
@@ -108,6 +126,16 @@ fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
             !value
                 .as_u64()
                 .is_some_and(|thickness| (50..=200).contains(&thickness))
+        })
+        || (options.get("mode").and_then(Value::as_str) == Some("countdown")
+            && !options
+                .get("countdown_seconds")
+                .and_then(Value::as_u64)
+                .is_some_and(|seconds| (1..=359_999).contains(&seconds)))
+        || options.get("countdown_seconds").is_some_and(|value| {
+            !value
+                .as_u64()
+                .is_some_and(|seconds| (1..=359_999).contains(&seconds))
         })
     {
         return false;
@@ -371,5 +399,43 @@ mod tests {
         assert!(session.normalize(7_000, "countdown", 5));
         assert_eq!(session.elapsed_ms, 5_000);
         assert!(session.finished);
+    }
+
+    #[test]
+    fn progress_countdown_validates_duration_and_keeps_sessions_independent() {
+        let mut first = legacy_timer();
+        first.id = "progress-one".into();
+        first.kind = "progress".into();
+        first.options = serde_json::json!({
+            "mode":"countdown", "start_date":"2026-10-30", "end_date":"2026-10-31",
+            "ranges":[{"start":"09:00","end":"17:00"}], "auto_hide":false,
+            "countdown_seconds":10
+        });
+        let mut second = first.clone();
+        second.id = "progress-two".into();
+        second.options["countdown_seconds"] = serde_json::json!(20);
+        assert!(valid_addons(&[first.clone(), second.clone()]));
+        let durations = progress_countdown_options(&[first.clone(), second]);
+        assert_eq!(durations["progress-one"], 10);
+        assert_eq!(durations["progress-two"], 20);
+        let mut sessions = HashMap::new();
+        sessions.insert("progress-one".to_string(), TimerSession::default());
+        sessions.insert("progress-two".to_string(), TimerSession::default());
+        sessions
+            .get_mut("progress-one")
+            .unwrap()
+            .toggle(1000, "countdown", 10);
+        assert!(sessions["progress-one"].running);
+        assert!(!sessions["progress-two"].running);
+        first
+            .options
+            .as_object_mut()
+            .unwrap()
+            .remove("countdown_seconds");
+        assert!(!valid_addons(&[first.clone()]));
+        first.options["countdown_seconds"] = serde_json::json!(0);
+        assert!(!valid_addons(&[first.clone()]));
+        first.options["countdown_seconds"] = serde_json::json!(360000);
+        assert!(!valid_addons(&[first]));
     }
 }

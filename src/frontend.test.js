@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createAddon, displayAddon, timerText } from './addons.js';
-import { progressBarStyle, progressDisplay, validDateValue } from './progress.js';
+import { markCountdownCompletion, progressBarStyle, progressDisplay, validDateValue } from './progress.js';
 import { addonMethods } from './settings-addons.js';
 import { resolveLanguage, translate, weekdayText } from './i18n.js';
 import { markChangedNumbers } from './clock-animations.js';
@@ -272,4 +272,55 @@ test('progress Settings edits preserve valid saved ranges and mode values', () =
     assert.equal(saves, afterAppearance);
     app.updateProgressAppearance(addon.id, 'bar_length_percent', 90);
     assert.equal(addon.options.bar_length_percent, 90);
+});
+
+test('Progress countdowns have independent elapsed bars and a completion pulse', () => {
+    const first = createAddon('progress');
+    const second = createAddon('progress');
+    first.options.mode = 'countdown';
+    second.options.mode = 'countdown';
+    first.options.countdown_seconds = 10;
+    second.options.countdown_seconds = 20;
+    const sessions = {
+        [first.id]: { running: true, elapsed_ms: 2000, started_at_ms: 1000, finished: false },
+        [second.id]: { running: false, elapsed_ms: 5000, started_at_ms: null, finished: false },
+    };
+    const now = new Date(4000);
+    assert.equal(displayAddon(first, now, {}, null, 'en', sessions).progress.rows[0].percent, 50);
+    assert.equal(displayAddon(second, now, {}, null, 'en', sessions).progress.rows[0].percent, 25);
+    assert.equal(progressDisplay(first.options, new Date(1000)).rows[0].percent, 0);
+    const previous = { [first.id]: 50 };
+    const activeUntil = {};
+    const done = displayAddon(first, new Date(9000), {}, null, 'en', sessions);
+    markCountdownCompletion(done, first, previous, activeUntil, 9000);
+    assert.equal(done.progress.rows[0].percent, 100);
+    assert.equal(done.progress.rows[0].celebrating, true);
+    assert.equal(done.progress.rows[0].phase, 'complete');
+    const later = displayAddon(first, new Date(10500), {}, null, 'en', sessions);
+    markCountdownCompletion(later, first, previous, activeUntil, 10500);
+    assert.equal(later.progress.rows[0].celebrating, false);
+});
+
+test('Progress countdown duration changes reset only their own session', () => {
+    const first = createAddon('progress');
+    const second = createAddon('progress');
+    const app = {
+        ...addonMethods,
+        settings: { addons: [first, second] },
+        progressTimerSessions: {
+            [first.id]: { running: false, elapsed_ms: 2000, started_at_ms: null, finished: false },
+            [second.id]: { running: true, elapsed_ms: 0, started_at_ms: 1000, finished: false },
+        },
+        saveCount: 0,
+        save() { this.saveCount++; },
+    };
+    app.setProgressMode(first.id, 'countdown');
+    app.setProgressMode(second.id, 'countdown');
+    app.updateProgressCountdownDuration(first.id, 12);
+    assert.equal(first.options.countdown_seconds, 720);
+    assert.equal(app.progressTimerSessions[first.id].elapsed_ms, 0);
+    assert.equal(app.progressTimerSessions[second.id].running, true);
+    app.updateProgressCountdownDuration(second.id, 12);
+    assert.equal(second.options.countdown_seconds, 300);
+    assert.equal(app.saveCount, 3);
 });

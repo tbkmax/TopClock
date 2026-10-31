@@ -6,7 +6,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons.js';
-import { progressBarStyle } from './progress.js';
+import { markCountdownCompletion, progressBarStyle } from './progress.js';
 import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
 import { addonMethods } from './settings-addons.js';
 import { DEFAULT_SHORTCUTS, shortcutGroups, shortcutMethods } from './settings-shortcuts.js';
@@ -58,6 +58,9 @@ Alpine.data('settingsApp', () => ({
     previewParts: [],
     previewAddons: [],
     timerSession: null,
+    progressTimerSessions: {},
+    progressPreviousPercent: {},
+    progressCompletionUntil: {},
     pendingTimerChange: null,
     suppressResetPrompt: false,
     addonCatalog,
@@ -93,21 +96,29 @@ Alpine.data('settingsApp', () => ({
             },
             onRollback: async (settings, isCurrent) => {
                 let timerSession = this.timerSession;
+                let progressTimerSessions = this.progressTimerSessions;
                 try {
                     timerSession = await invoke('get_timer_state');
                 } catch (error) {
                     console.error('Could not reload timer after failed save:', error);
                 }
+                try {
+                    progressTimerSessions = await invoke('get_progress_timer_states');
+                } catch (error) {
+                    console.error('Could not reload Progress countdowns after failed save:', error);
+                }
                 if (!isCurrent()) return;
                 this.settings = settings;
                 this.syncLanguage();
                 this.timerSession = timerSession;
+                this.progressTimerSessions = progressTimerSessions;
                 this.updatePreview();
             },
             onError: (error) => { this.error = this.t('error.save', { error }); },
         });
         this.saveController.setCommitted(this.settings);
         this.timerSession = await invoke('get_timer_state');
+        this.progressTimerSessions = await invoke('get_progress_timer_states');
         this.hotkeyErrors = await invoke('get_hotkey_errors');
         this.appVersion = await getVersion().catch(() => '0.0.0');
         this.isPackaged = await invoke('is_packaged').catch((error) => {
@@ -136,6 +147,10 @@ Alpine.data('settingsApp', () => ({
             this.timerSession = event.payload;
             this.updatePreview();
         });
+        await listen('progress-timer-states-changed', (event) => {
+            this.progressTimerSessions = event.payload;
+            this.updatePreview();
+        });
         await listen('hotkey-errors-changed', (event) => { this.hotkeyErrors = event.payload; });
         await listen('displays-changed', (event) => { this.displays = event.payload; });
         await settingsWindow.onCloseRequested((event) => {
@@ -162,7 +177,11 @@ Alpine.data('settingsApp', () => ({
         this.previousPreviewNumbers = result.numbers;
         this.previewNumberActiveUntil = result.activeUntil;
         this.previewAddons = (this.settings.addons || []).filter((addon) => addon.enabled)
-            .map((addon) => displayAddon(addon, now, this.settings, this.timerSession, this.language))
+            .map((addon) => {
+                const display = displayAddon(addon, now, this.settings, this.timerSession, this.language, this.progressTimerSessions);
+                markCountdownCompletion(display, addon, this.progressPreviousPercent, this.progressCompletionUntil, now.getTime());
+                return display;
+            })
             .filter((addon) => !addon.hidden);
     },
 

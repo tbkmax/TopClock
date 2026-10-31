@@ -74,6 +74,7 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
                 }
             };
             timer::normalize_finished_timer(&window, &state);
+            timer::normalize_finished_progress_timers(&window, &state);
             if !window.is_visible().unwrap_or(false) {
                 thread::sleep(Duration::from_millis(30));
                 continue;

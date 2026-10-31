@@ -9,8 +9,8 @@ sequenceDiagram
     participant Progress as progress.js
     participant Rust as update_settings
     participant Clocks as clockApp windows
-    User->>Settings: Add Progress, choose mode and valid dates or ranges
-    Settings->>Progress: Calculate preview from local current time
+    User->>Settings: Add Progress, choose mode and valid dates, ranges, or duration
+    Settings->>Progress: Calculate preview from local time or countdown session
     Settings->>Clocks: clock-settings-preview
     Settings->>Rust: update_settings with ordered add-on instances
     alt Valid and saved
@@ -22,7 +22,7 @@ sequenceDiagram
     end
 ```
 
-[settings-addons.js](../settings-addons.js) rejects invalid edits before `save()` and saves per-instance percentage, length, and thickness choices. [addons.rs](../../src-tauri/src/addons.rs) validates the final saved shape, including optional appearance fields for compatibility. [progress.js](../progress.js) uses local dates and daily time ranges; it owns no durable session. Each time range has its own caption-free bar, and optional auto-hide applies only after the final range has been complete for one minute. The clock and Settings preview use the same calculation, responsive dimensions, and [progress.css](../progress.css). The diagram omits CSS animation frames and the existing 200 ms clock tick.
+[settings-addons.js](../settings-addons.js) rejects invalid edits before `save()` and saves per-instance percentage, length, and thickness choices. [addons.rs](../../src-tauri/src/addons.rs) validates the final saved shape, including optional appearance fields for compatibility. [progress.js](../progress.js) uses local dates and daily time ranges; each time range has its own caption-free bar, and optional auto-hide applies only after the final range has been complete for one minute. Countdown mode reads each instance's durable native session, fills one bar from empty to full, and pulses on completion. Settings Start/Pause and Reset, or modifier-click on that clock bar, invoke `progress_timer_action(id, action)`; `progress-timer-states-changed` refreshes both views. The numeric Timer uses its own session and controls. The clock and Settings preview use the same calculation, responsive dimensions, and [progress.css](../progress.css). The diagram omits CSS animation frames and the existing 200 ms clock tick.
 
 ## Language selection and Date weekday
 

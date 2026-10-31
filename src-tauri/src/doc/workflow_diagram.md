@@ -19,7 +19,22 @@ sequenceDiagram
     end
 ```
 
-[addons.rs](../addons.rs) accepts multiple Progress instances within the shared 16-instance limit. It validates the mode, calendar dates, range order, same-day boundaries, auto-hide flag, and optional percentage, length, and thickness fields. Missing appearance fields from older saved instances remain valid. [settings_commands.rs](../settings_commands.rs) saves only validated settings and rolls back memory on write failure. Progress has no native timer session; both frontend views derive it from local time. The diagram omits the Settings preview event, which is described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
+[addons.rs](../addons.rs) accepts multiple Progress instances within the shared 16-instance limit. It validates date, daily time, and countdown modes, their bounds, auto-hide, and optional appearance fields. Missing appearance fields from older saved instances remain valid. [settings_commands.rs](../settings_commands.rs) saves only validated settings, rejects duration changes while that countdown runs, prunes sessions when a countdown mode or duration is removed, and rolls back memory on write failure. Date and daily time bars derive from local time. Countdown sessions are stored by add-on ID in `PersistedConfig`, separate from the numeric Timer. `progress_timer_action` saves Start/Pause or Reset and emits `progress-timer-states-changed`; the monitor normalizes completed sessions. The diagram omits the Settings preview event and countdown action, described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
+
+```mermaid
+sequenceDiagram
+    participant UI as Settings or clock
+    participant Rust as timer.rs
+    participant File as settings.json
+    UI->>Rust: progress_timer_action(id, toggle or reset)
+    Rust->>File: Save session for id
+    Rust-->>UI: progress-timer-states-changed
+    loop Clock monitor
+        Rust->>Rust: Normalize completed countdowns
+        Rust->>File: Save finished sessions
+        Rust-->>UI: progress-timer-states-changed
+    end
+```
 
 ## Windows language and saved preference
 

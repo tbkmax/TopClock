@@ -1,5 +1,5 @@
 use crate::{
-    addons::{self, timer_options, TimerSession},
+    addons::{self, progress_countdown_options, timer_options, TimerSession},
     settings::{valid_settings, ClockSettings, PersistedConfig},
     state::ClockState,
     timer::epoch_ms,
@@ -33,10 +33,16 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
             serde_json::from_value::<PersistedConfig>(raw.clone())
                 .ok()
                 .or_else(|| {
+                    let mut recovered = raw.clone();
+                    recovered.as_object_mut()?.remove("progress_timer_sessions");
+                    serde_json::from_value::<PersistedConfig>(recovered).ok()
+                })
+                .or_else(|| {
                     let mut recovered = raw;
                     let object = recovered.as_object_mut()?;
                     object.remove("addons");
                     object.remove("timer_session");
+                    object.remove("progress_timer_sessions");
                     serde_json::from_value::<PersistedConfig>(recovered).ok()
                 })
         })
@@ -44,6 +50,7 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
     if !addons::valid_addons(&config.settings.addons) {
         config.settings.addons.clear();
         config.timer_session = TimerSession::default();
+        config.progress_timer_sessions.clear();
     }
     if !valid_settings(&config.settings) {
         config.settings = ClockSettings::default();
@@ -72,5 +79,17 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
     } else {
         config.timer_session = TimerSession::default();
     }
+    let countdowns = progress_countdown_options(&config.settings.addons);
+    let now_ms = epoch_ms();
+    config.progress_timer_sessions.retain(|id, session| {
+        if !countdowns.contains_key(id)
+            || session.running != session.started_at_ms.is_some()
+            || (session.running && session.finished)
+        {
+            return false;
+        }
+        session.normalize(now_ms, "countdown", countdowns[id]);
+        true
+    });
     config
 }

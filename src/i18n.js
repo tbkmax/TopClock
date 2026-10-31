@@ -76,7 +76,8 @@ const messages = {
     'addons.timerSubtitle': ['Countdown or stopwatch', '倒计时或正计时', '倒數計時或碼錶', 'カウントダウンまたはストップウォッチ'],
     'addons.progress': ['Progress', '进度', '進度', '進捗'],
     'addons.progressInstance': ['Progress {count}', '进度 {count}', '進度 {count}', '進捗 {count}'],
-    'addons.progressDescription': ['Track a date or daily time ranges.', '跟踪日期或每日时段。', '追蹤日期或每日時段。', '日付または毎日の時間帯の進捗を表示します。'],
+    'addons.progressDescription': ['Track a date, daily time ranges, or a countdown.', '跟踪日期、每日时段或倒计时。', '追蹤日期、每日時段或倒數計時。', '日付、毎日の時間帯、またはカウントダウンの進捗を表示します。'],
+    'addons.progressCountdownSubtitle': ['{minutes} minute countdown', '{minutes} 分钟倒计时', '{minutes} 分鐘倒數計時', '{minutes} 分のカウントダウン'],
     'addons.progressMode': ['Progress mode', '进度模式', '進度模式', '進捗モード'],
     'addons.barLength': ['Bar length', '进度条长度', '進度條長度', 'バーの長さ'],
     'addons.barThickness': ['Bar thickness', '进度条粗细', '進度條粗細', 'バーの太さ'],
@@ -224,6 +225,7 @@ const messages = {
     'error.resetPositions': ['Could not reset clock positions: {error}', '无法重置时钟位置：{error}', '無法重設時鐘位置：{error}', '時計の位置をリセットできませんでした: {error}'],
     'error.displayVisibility': ['Could not change display visibility: {error}', '无法更改显示器可见性：{error}', '無法變更顯示器可見性：{error}', 'ディスプレイの表示設定を変更できませんでした: {error}'],
     'error.timer': ['Could not control timer: {error}', '无法控制计时器：{error}', '無法控制計時器：{error}', 'タイマーを操作できませんでした: {error}'],
+    'error.progressTimer': ['Could not control Progress countdown: {error}', '无法控制进度倒计时：{error}', '無法控制進度倒數計時：{error}', '進捗カウントダウンを操作できませんでした: {error}'],
     'error.shortcutEnabled': ['Turn off this shortcut before changing its keys.', '更改按键前请先关闭此快捷键。', '變更按鍵前請先關閉此快速鍵。', 'キーを変更する前にショートカットを無効にしてください。'],
     'error.shortcutKey': ['Choose Ctrl, Alt, or Shift plus a supported key for a system-wide shortcut.', '请选择 Ctrl、Alt 或 Shift 加一个支持的按键作为系统快捷键。', '請選擇 Ctrl、Alt 或 Shift 加上一個支援的按鍵作為系統快速鍵。', 'システム全体のショートカットには Ctrl、Alt、Shift のいずれかと対応するキーを選んでください。'],
 };

@@ -44,16 +44,41 @@ export const addonMethods = {
     },
 
     progressSubtitle(addon) {
-        return addon.options.mode === 'date'
-            ? `${addon.options.start_date} → ${addon.options.end_date}`
-            : this.t('addons.progressRangeCount', { count: addon.options.ranges.length });
+        if (addon.options.mode === 'date') return `${addon.options.start_date} → ${addon.options.end_date}`;
+        if (addon.options.mode === 'countdown') {
+            return this.t('addons.progressCountdownSubtitle', { minutes: Math.round((addon.options.countdown_seconds ?? 300) / 60) });
+        }
+        return this.t('addons.progressRangeCount', { count: addon.options.ranges.length });
     },
 
     setProgressMode(id, mode) {
         const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
-        if (!addon || !['date', 'time'].includes(mode)) return;
+        if (!addon || !['date', 'time', 'countdown'].includes(mode)) return;
+        if (mode === 'countdown' && !addon.options.countdown_seconds) addon.options.countdown_seconds = 300;
         addon.options.mode = mode;
         this.save();
+    },
+
+    updateProgressCountdownDuration(id, minutes) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        if (!addon || this.progressTimerSessions[id]?.running || !Number.isInteger(minutes) || minutes < 1 || minutes > 5999) return;
+        const seconds = minutes * 60;
+        if (addon.options.countdown_seconds === seconds) return;
+        addon.options.countdown_seconds = seconds;
+        this.progressTimerSessions = {
+            ...this.progressTimerSessions,
+            [id]: { running: false, elapsed_ms: 0, started_at_ms: null, finished: false },
+        };
+        this.save();
+    },
+
+    async runProgressTimerAction(id, action) {
+        if (!await this.saveController.flush()) return;
+        invoke('progress_timer_action', { id, action }).then((session) => {
+            this.progressTimerSessions = { ...this.progressTimerSessions, [id]: session };
+            this.error = '';
+            this.updatePreview();
+        }).catch((error) => { this.error = this.t('error.progressTimer', { error }); });
     },
 
     updateProgressAppearance(id, field, value) {

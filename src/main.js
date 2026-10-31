@@ -6,7 +6,7 @@ import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { displayAddon } from './addons.js';
-import { progressBarStyle } from './progress.js';
+import { markCountdownCompletion, progressBarStyle } from './progress.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
 import './progress.css';
@@ -25,6 +25,9 @@ Alpine.data('clockApp', () => ({
     addonPreviousNumbers: {},
     addonNumberActiveUntil: {},
     timerSession: null,
+    progressTimerSessions: {},
+    progressPreviousPercent: {},
+    progressCompletionUntil: {},
     previousNumbers: {},
     numberActiveUntil: {},
     settings: null,
@@ -50,6 +53,7 @@ Alpine.data('clockApp', () => ({
         setInterval(() => this.updateClock(), 200);
         this.loadSettings();
         invoke('get_timer_state').then((session) => { this.timerSession = session; this.updateClock(); }).catch(console.error);
+        invoke('get_progress_timer_states').then((sessions) => { this.progressTimerSessions = sessions; this.updateClock(); }).catch(console.error);
         this.$nextTick(() => {
             new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockContainer);
             this.scheduleResize();
@@ -72,6 +76,10 @@ Alpine.data('clockApp', () => ({
             }),
             listen('timer-state-changed', (event) => {
                 this.timerSession = event.payload;
+                this.updateClock();
+            }),
+            listen('progress-timer-states-changed', (event) => {
+                this.progressTimerSessions = event.payload;
                 this.updateClock();
             }),
         ]);
@@ -187,7 +195,8 @@ Alpine.data('clockApp', () => ({
         this.previousNumbers = result.numbers;
         this.numberActiveUntil = result.activeUntil;
         this.renderedAddons = (this.settings?.addons || []).filter((addon) => addon.enabled).map((addon) => {
-            const display = displayAddon(addon, now, this.settings, this.timerSession, this.language);
+            const display = displayAddon(addon, now, this.settings, this.timerSession, this.language, this.progressTimerSessions);
+            markCountdownCompletion(display, addon, this.progressPreviousPercent, this.progressCompletionUntil, now.getTime());
             if (display.parts) {
                 const animation = markChangedNumbers(display.parts, this.addonPreviousNumbers[addon.id], this.addonNumberActiveUntil[addon.id], now.getTime());
                 display.parts = animation.parts;
@@ -210,6 +219,15 @@ Alpine.data('clockApp', () => ({
             this.timerSession = session;
             this.updateClock();
             if (action === 'reset') this.closeMenu();
+        }).catch(console.error);
+    },
+
+    progressCountdownClick(addon) {
+        if (this.dragStarted) { this.dragStarted = false; return; }
+        if (!this.isCtrlHeld || addon.kind !== 'progress' || addon.options.mode !== 'countdown') return;
+        invoke('progress_timer_action', { id: addon.id, action: 'toggle' }).then((session) => {
+            this.progressTimerSessions = { ...this.progressTimerSessions, [addon.id]: session };
+            this.updateClock();
         }).catch(console.error);
     },
 

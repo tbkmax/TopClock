@@ -42,6 +42,14 @@ export function progressBarStyle(addon, clockFontSize) {
     return { '--progress-length': `${length}px`, '--progress-thickness': `${thickness}px` };
 }
 
+export function markCountdownCompletion(display, addon, previous, activeUntil, nowMs) {
+    if (addon.kind !== 'progress' || addon.options.mode !== 'countdown') return;
+    const percent = display.progress.rows[0].percent;
+    if (previous[addon.id] < 100 && percent >= 100) activeUntil[addon.id] = nowMs + 1500;
+    display.progress.rows[0].celebrating = nowMs < (activeUntil[addon.id] ?? 0);
+    previous[addon.id] = percent;
+}
+
 function clampPercent(value) {
     return Math.max(0, Math.min(100, value));
 }
@@ -57,7 +65,13 @@ function row(label, percent, nowMs = 0, finishedAtMs = 0) {
     };
 }
 
-export function progressDisplay(options, now) {
+export function progressDisplay(options, now, session = null) {
+    if (options.mode === 'countdown') {
+        const durationMs = (options.countdown_seconds ?? 300) * 1000;
+        const elapsedMs = (session?.elapsed_ms ?? 0) + (session?.running
+            ? Math.max(0, now.getTime() - (session.started_at_ms ?? now.getTime())) : 0);
+        return { rows: [row('Countdown', 100 * elapsedMs / durationMs)], hidden: false };
+    }
     if (options.mode === 'date') {
         const day = localDateValue(now);
         const ordinal = (value) => {

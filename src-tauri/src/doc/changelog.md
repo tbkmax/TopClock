@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-30 - Persist independent Progress countdown sessions
+
+- Progress accepts a countdown duration per instance and stores sessions by add-on ID, separate from the numeric Timer. Native commands start, pause, reset, restore, and finish those sessions; state changes reach all clock windows and Settings. Invalid durations are rejected, and removed or changed countdowns discard their old session. Older settings files load with an empty session map. Live Windows interaction verification remains open.
+
 ### 2026-10-30 - Validate repeatable Progress add-ons
 
 - Saved settings now accept multiple Progress instances with date or daily-time mode, valid date bounds, ordered same-day time ranges, and an auto-hide flag. Invalid options are rejected without changing other settings. Existing saved add-ons need no migration; live Windows behavior still needs review.

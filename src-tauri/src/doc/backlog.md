@@ -1,6 +1,6 @@
 # Rust application backlog
 
-Progress configuration and optional appearance-field validation pass Rust tests, including legacy Progress instances without those fields. The running Windows settings persistence and clock interaction check remains in the [frontend Progress backlog](../../../src/doc/backlog.md); no native runtime session or command was added for Progress.
+Progress configuration, countdown duration, and optional appearance-field validation pass Rust tests, including legacy Progress instances without those fields. Independent Progress countdown sessions and native commands are implemented. The running Windows settings persistence and clock interaction check remains in the [frontend Progress backlog](../../../src/doc/backlog.md).
 
 The new language schema, Windows UI language command, and tray update compile and pass Rust tests. Installed MSIX behavior remains to be checked in the [package backlog](../../doc/backlog.md), alongside the frontend's [live localization check](../../../src/doc/backlog.md).
 

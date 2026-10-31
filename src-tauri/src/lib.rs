@@ -37,6 +37,8 @@ pub fn run() {
             settings_commands::update_settings,
             timer::get_timer_state,
             timer::timer_action,
+            timer::get_progress_timer_states,
+            timer::progress_timer_action,
             settings_commands::get_hotkey_errors,
             displays::get_displays,
             displays::reset_clock_positions,

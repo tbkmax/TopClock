@@ -38,6 +38,8 @@ pub(crate) struct PersistedConfig {
     pub(crate) displays: HashMap<String, DisplayPreference>,
     #[serde(default)]
     pub(crate) timer_session: TimerSession,
+    #[serde(default)]
+    pub(crate) progress_timer_sessions: HashMap<String, TimerSession>,
 }
 
 fn default_auto_check_updates() -> bool {
@@ -219,6 +221,7 @@ mod tests {
             position: Some(ClockPosition { x: -120, y: 240 }),
             displays: HashMap::new(),
             timer_session: TimerSession::default(),
+            progress_timer_sessions: HashMap::new(),
         };
         let loaded: PersistedConfig =
             serde_json::from_str(&serde_json::to_string(&config).unwrap()).unwrap();
@@ -236,6 +239,31 @@ mod tests {
         assert_eq!(loaded.settings.shortcuts.open_settings, "Ctrl+,");
         assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
+    }
+
+    #[test]
+    fn progress_sessions_round_trip_separately_from_numeric_timer() {
+        let mut config = PersistedConfig::default();
+        config.timer_session.toggle(1_000, "countdown", 30);
+        let mut progress = TimerSession::default();
+        progress.toggle(2_000, "countdown", 10);
+        config
+            .progress_timer_sessions
+            .insert("progress-a".into(), progress);
+        let raw = serde_json::to_value(&config).unwrap();
+        let loaded: PersistedConfig = serde_json::from_value(raw.clone()).unwrap();
+        assert_eq!(loaded.timer_session.elapsed(5_000), 4_000);
+        assert_eq!(
+            loaded.progress_timer_sessions["progress-a"].elapsed(5_000),
+            3_000
+        );
+        let mut legacy = raw;
+        legacy
+            .as_object_mut()
+            .unwrap()
+            .remove("progress_timer_sessions");
+        let loaded_legacy: PersistedConfig = serde_json::from_value(legacy).unwrap();
+        assert!(loaded_legacy.progress_timer_sessions.is_empty());
     }
 
     #[test]

@@ -24,7 +24,7 @@
         >
             <div class="addon-stack addon-stack-above" x-show="renderedAddons.some((item) => item.placement === 'above')" x-cloak>
                 <template x-for="addon in renderedAddons.filter((item) => item.placement === 'above')" :key="addon.id">
-                    <div class="addon-line" :class="{ 'addon-finished': addon.finished, 'addon-interactive': addon.kind === 'timer', 'addon-progress': addon.kind === 'progress' }" :style="`font-size:${(settings?.font_size || 42) * addon.size_percent / 100}px`" @click.stop="addon.kind === 'timer' && timerClick()">
+                    <div class="addon-line" :class="{ 'addon-finished': addon.finished, 'addon-interactive': addon.kind === 'timer' || (addon.kind === 'progress' && addon.options.mode === 'countdown'), 'addon-progress': addon.kind === 'progress' }" :style="`font-size:${(settings?.font_size || 42) * addon.size_percent / 100}px`" @click.stop="addon.kind === 'timer' ? timerClick() : progressCountdownClick(addon)">
                         <span class="addon-label" x-show="addon.kind === 'region_clock' && addon.options.show_label !== false" x-text="addon.label"></span>
                         <span class="addon-text" x-show="addon.kind !== 'progress' && !addon.parts" x-text="addon.text"></span>
                         <span class="addon-weekday" x-show="addon.weekday" x-text="addon.weekday"></span>
@@ -42,7 +42,7 @@
             </div>
             <div class="addon-stack" x-show="renderedAddons.some((item) => item.placement === 'below')" x-cloak>
                 <template x-for="addon in renderedAddons.filter((item) => item.placement === 'below')" :key="addon.id">
-                    <div class="addon-line" :class="{ 'addon-finished': addon.finished, 'addon-interactive': addon.kind === 'timer', 'addon-progress': addon.kind === 'progress' }" :style="`font-size:${(settings?.font_size || 42) * addon.size_percent / 100}px`" @click.stop="addon.kind === 'timer' && timerClick()">
+                    <div class="addon-line" :class="{ 'addon-finished': addon.finished, 'addon-interactive': addon.kind === 'timer' || (addon.kind === 'progress' && addon.options.mode === 'countdown'), 'addon-progress': addon.kind === 'progress' }" :style="`font-size:${(settings?.font_size || 42) * addon.size_percent / 100}px`" @click.stop="addon.kind === 'timer' ? timerClick() : progressCountdownClick(addon)">
                         <span class="addon-label" x-show="addon.kind === 'region_clock' && addon.options.show_label !== false" x-text="addon.label"></span>
                         <span class="addon-text" x-show="addon.kind !== 'progress' && !addon.parts" x-text="addon.text"></span>
                         <span class="addon-weekday" x-show="addon.weekday" x-text="addon.weekday"></span>

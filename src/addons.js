@@ -6,7 +6,7 @@ export const addonCatalog = [
     { kind: 'date', label: 'Date', description: 'Show the local calendar date.', options: { format: 'ymd', show_weekday: false } },
     { kind: 'region_clock', label: 'Region clock', description: 'Show time in another region.', options: { time_zone: 'Etc/UTC', show_label: true } },
     { kind: 'timer', label: 'Timer', description: 'Count down or use a stopwatch.', options: { mode: 'countdown', duration_seconds: 300 } },
-    { kind: 'progress', label: 'Progress', description: 'Track a date or daily time ranges.', options: { mode: 'date', start_date: '', end_date: '', ranges: [{ start: '09:00', end: '17:00' }], auto_hide: false, show_percentage: false, bar_length_percent: 85, bar_thickness_percent: 100 } },
+    { kind: 'progress', label: 'Progress', description: 'Track a date, daily time ranges, or a countdown.', options: { mode: 'date', start_date: '', end_date: '', ranges: [{ start: '09:00', end: '17:00' }], auto_hide: false, show_percentage: false, bar_length_percent: 85, bar_thickness_percent: 100, countdown_seconds: 300 } },
 ];
 
 export function createAddon(kind) {
@@ -63,7 +63,7 @@ export function timerText(addon, session, nowMs) {
     return display;
 }
 
-export function displayAddon(addon, now, settings, session, language = 'en') {
+export function displayAddon(addon, now, settings, session, language = 'en', progressSessions = {}) {
     const base = { ...addon, label: addon.kind === 'region_clock' ? addonName(addon) : translate(language, `addons.${addon.kind}`), text: '', weekday: '', parts: null, finished: false, hidden: false, progress: null };
     if (addon.kind === 'date') {
         const year = now.getFullYear();
@@ -84,7 +84,7 @@ export function displayAddon(addon, now, settings, session, language = 'en') {
         base.text = timerText(addon, session, now.getTime());
         base.finished = Boolean(session?.finished) || (addon.options.mode === 'countdown' && session?.running && timerElapsed(session, now.getTime()) >= addon.options.duration_seconds * 1000);
     } else if (addon.kind === 'progress') {
-        base.progress = progressDisplay(addon.options, now);
+        base.progress = progressDisplay(addon.options, now, progressSessions[addon.id]);
         base.hidden = base.progress.hidden;
     }
     return base;

@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-30 - Independent Progress countdown bars
+
+- Each Progress instance can now run a countdown with its own Start/Pause and Reset controls and saved session. The bar fills from empty to full, pulses briefly at completion, and can be toggled by modifier-click on the clock. The numeric Timer is unchanged. Settings preview and desktop use the same progress, while percentages remain optional and off by default. Live Windows interaction verification remains open.
+
 ### 2026-10-30 - Repeatable date and daily-time progress bars
 
 - Add-ons now offers multiple Progress instances. Each can show calendar-date progress or separate bars for up to eight daily time ranges, with phase colors, a brief completion pulse, and optional hide one minute after the last daily range. Settings previews the same bars. Existing settings need no migration; live Windows layout and interaction checks remain.
