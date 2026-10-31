@@ -19,6 +19,12 @@ Status: implemented on 2026-10-30; focused frontend tests, Vite build, Rust test
 
 The implementation uses local calendar dates and local wall-clock times. The end date must follow the start date; each daily range must end on the same day, be ordered, and not overlap. A progress instance can hold 1–8 ranges. The overall add-on limit remains 16. Cross-midnight ranges would need a separate definition for which day owns completion and auto-hide.
 
+## 2026-10-30 appearance follow-up
+
+Progress bars now show no visible date or time captions in either the clock or Settings preview; range and date labels remain available to screen readers. A per-instance percentage switch starts off. The length slider spans 50–150% of the previous responsive bar width and defaults to 85%, making bars a little shorter. The thickness slider spans 50–200% of the previous responsive height and defaults to 100%. [progress.js](../../src/progress.js) calculates both dimensions from the rendered clock font size, so preview and desktop use the same rules. [addons.rs](../../src-tauri/src/addons.rs) accepts the new fields as optional so existing Progress settings still load with these defaults. The live Windows layout check remains open.
+
+The follow-up passed `npm run test:frontend` (15 tests), `npm run build`, and `cargo test --manifest-path src-tauri/Cargo.toml` (17 tests). Visual Tauri window checks remain open.
+
 ## Implementation and verification
 
 1. [addons.js](../../src/addons.js) creates independent Progress instances and [settings-addons.js](../../src/settings-addons.js) edits their modes, dates, ranges, and auto-hide option. Invalid edits are rejected before saving.

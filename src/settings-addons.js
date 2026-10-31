@@ -56,6 +56,17 @@ export const addonMethods = {
         this.save();
     },
 
+    updateProgressAppearance(id, field, value) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        if (!addon) return;
+        const valid = field === 'show_percentage' ? typeof value === 'boolean'
+            : field === 'bar_length_percent' ? Number.isInteger(value) && value >= 50 && value <= 150
+                : field === 'bar_thickness_percent' && Number.isInteger(value) && value >= 50 && value <= 200;
+        if (!valid) return;
+        addon.options[field] = value;
+        this.save();
+    },
+
     updateProgressDate(id, field, value) {
         const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
         if (!addon || !['start_date', 'end_date'].includes(field) || !validDateValue(value)) {

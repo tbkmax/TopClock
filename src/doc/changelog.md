@@ -16,6 +16,10 @@
 
 ## Changed
 
+### 2026-10-30 - Simplify Progress bars and add size controls
+
+- Progress now shows only bars by default. Each instance can optionally show percentages and can adjust bar length and thickness independently. The default length is slightly shorter; default thickness keeps the previous responsive size. Existing Progress instances use the new defaults without a settings migration. Live Windows layout checks remain.
+
 ### 2026-10-29 - Name the update source in General
 
 - The update check and current-version message now identify GitHub Releases or Microsoft Store. Direct builds label their action **View GitHub release** to show that TopClock does not install the portable download. Launching the MSIX staging executable directly remains a direct build; no migration or user action is required.

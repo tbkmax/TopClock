@@ -78,11 +78,37 @@ fn time_minutes(value: &str) -> Option<u16> {
 }
 
 fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
-    if options.len() != 5
+    if !(5..=8).contains(&options.len())
+        || !options.keys().all(|key| {
+            matches!(
+                key.as_str(),
+                "mode"
+                    | "start_date"
+                    | "end_date"
+                    | "ranges"
+                    | "auto_hide"
+                    | "show_percentage"
+                    | "bar_length_percent"
+                    | "bar_thickness_percent"
+            )
+        })
         || !matches!(
             options.get("mode").and_then(Value::as_str),
             Some("date" | "time")
         )
+        || options
+            .get("show_percentage")
+            .is_some_and(|value| !value.is_boolean())
+        || options.get("bar_length_percent").is_some_and(|value| {
+            !value
+                .as_u64()
+                .is_some_and(|length| (50..=150).contains(&length))
+        })
+        || options.get("bar_thickness_percent").is_some_and(|value| {
+            !value
+                .as_u64()
+                .is_some_and(|thickness| (50..=200).contains(&thickness))
+        })
     {
         return false;
     }
@@ -309,6 +335,29 @@ mod tests {
         first.options["end_date"] = serde_json::json!("2026-11-01");
         first.options["auto_hide"] = serde_json::json!("yes");
         assert!(!valid_addons(&[first]));
+    }
+
+    #[test]
+    fn progress_appearance_accepts_legacy_defaults_and_validates_new_fields() {
+        let mut addon = legacy_timer();
+        addon.kind = "progress".into();
+        addon.options = serde_json::json!({
+            "mode":"date", "start_date":"2026-10-30", "end_date":"2026-10-31",
+            "ranges":[{"start":"09:00","end":"17:00"}], "auto_hide":false
+        });
+        assert!(valid_addons(&[addon.clone()]));
+        addon.options["show_percentage"] = serde_json::json!(false);
+        addon.options["bar_length_percent"] = serde_json::json!(85);
+        addon.options["bar_thickness_percent"] = serde_json::json!(100);
+        assert!(valid_addons(&[addon.clone()]));
+        addon.options["bar_length_percent"] = serde_json::json!(151);
+        assert!(!valid_addons(&[addon.clone()]));
+        addon.options["bar_length_percent"] = serde_json::json!(85);
+        addon.options["show_percentage"] = serde_json::json!("false");
+        assert!(!valid_addons(&[addon.clone()]));
+        addon.options["show_percentage"] = serde_json::json!(false);
+        addon.options["unexpected"] = serde_json::json!(true);
+        assert!(!valid_addons(&[addon]));
     }
 
     #[test]

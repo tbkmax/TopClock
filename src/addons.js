@@ -6,7 +6,7 @@ export const addonCatalog = [
     { kind: 'date', label: 'Date', description: 'Show the local calendar date.', options: { format: 'ymd', show_weekday: false } },
     { kind: 'region_clock', label: 'Region clock', description: 'Show time in another region.', options: { time_zone: 'Etc/UTC', show_label: true } },
     { kind: 'timer', label: 'Timer', description: 'Count down or use a stopwatch.', options: { mode: 'countdown', duration_seconds: 300 } },
-    { kind: 'progress', label: 'Progress', description: 'Track a date or daily time ranges.', options: { mode: 'date', start_date: '', end_date: '', ranges: [{ start: '09:00', end: '17:00' }], auto_hide: false } },
+    { kind: 'progress', label: 'Progress', description: 'Track a date or daily time ranges.', options: { mode: 'date', start_date: '', end_date: '', ranges: [{ start: '09:00', end: '17:00' }], auto_hide: false, show_percentage: false, bar_length_percent: 85, bar_thickness_percent: 100 } },
 ];
 
 export function createAddon(kind) {

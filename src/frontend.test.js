@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createAddon, displayAddon, timerText } from './addons.js';
-import { progressDisplay, validDateValue } from './progress.js';
+import { progressBarStyle, progressDisplay, validDateValue } from './progress.js';
 import { addonMethods } from './settings-addons.js';
 import { resolveLanguage, translate, weekdayText } from './i18n.js';
 import { markChangedNumbers } from './clock-animations.js';
@@ -226,6 +226,23 @@ test('new progress instances do not share ranges or dates', () => {
     assert.notEqual(second.options.end_date, first.options.end_date);
 });
 
+test('Progress defaults to bar-only display and scales length and thickness independently', () => {
+    const addon = createAddon('progress');
+    assert.equal(addon.options.show_percentage, false);
+    const defaultStyle = progressBarStyle(addon, 42);
+    assert.ok(Math.abs(parseFloat(defaultStyle['--progress-length']) - 128.52) < 1e-9);
+    assert.ok(Math.abs(parseFloat(defaultStyle['--progress-thickness']) - 5.67) < 1e-9);
+    const legacy = { ...addon, options: { ...addon.options } };
+    delete legacy.options.show_percentage;
+    delete legacy.options.bar_length_percent;
+    delete legacy.options.bar_thickness_percent;
+    assert.deepEqual(progressBarStyle(legacy, 42), defaultStyle);
+    addon.options.bar_length_percent = 50;
+    addon.options.bar_thickness_percent = 150;
+    assert.ok(Math.abs(parseFloat(progressBarStyle(addon, 42)['--progress-length']) - 75.6) < 1e-9);
+    assert.ok(Math.abs(parseFloat(progressBarStyle(addon, 42)['--progress-thickness']) - 8.505) < 1e-9);
+});
+
 test('progress Settings edits preserve valid saved ranges and mode values', () => {
     const addon = createAddon('progress');
     let saves = 0;
@@ -248,4 +265,11 @@ test('progress Settings edits preserve valid saved ranges and mode values', () =
     assert.equal(addon.options.ranges.length, 2);
     app.updateProgressDate(addon.id, 'end_date', addon.options.start_date);
     assert.equal(app.error, 'addons.invalidProgressDate');
+    app.updateProgressAppearance(addon.id, 'show_percentage', true);
+    assert.equal(addon.options.show_percentage, true);
+    const afterAppearance = saves;
+    app.updateProgressAppearance(addon.id, 'bar_length_percent', 151);
+    assert.equal(saves, afterAppearance);
+    app.updateProgressAppearance(addon.id, 'bar_length_percent', 90);
+    assert.equal(addon.options.bar_length_percent, 90);
 });

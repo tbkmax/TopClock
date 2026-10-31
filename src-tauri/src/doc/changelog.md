@@ -16,6 +16,10 @@
 
 ## Changed
 
+### 2026-10-30 - Accept optional Progress appearance settings
+
+- Saved Progress instances may now include a percentage switch and independent bar length and thickness values. Older instances without these fields still load; invalid values are rejected. No migration or user action is required.
+
 ### 2026-10-29 - Explain a missing WebView2 Runtime
 
 - TopClock checks for Evergreen WebView2 before creating windows. If missing, a native message directs the user to Microsoft's runtime download page and the app exits. This adds no bundled runtime. No action is required where WebView2 is installed; clean Windows 10 behavior still needs verification.

@@ -35,6 +35,13 @@ export function progressPhase(percent) {
     return 'early';
 }
 
+export function progressBarStyle(addon, clockFontSize) {
+    const fontSize = clockFontSize * addon.size_percent / 100;
+    const length = Math.max(110, Math.min(12 * fontSize, 320)) * (addon.options.bar_length_percent ?? 85) / 100;
+    const thickness = Math.max(4, Math.min(.45 * fontSize, 10)) * (addon.options.bar_thickness_percent ?? 100) / 100;
+    return { '--progress-length': `${length}px`, '--progress-thickness': `${thickness}px` };
+}
+
 function clampPercent(value) {
     return Math.max(0, Math.min(100, value));
 }

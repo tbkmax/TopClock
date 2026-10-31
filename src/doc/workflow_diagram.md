@@ -22,7 +22,7 @@ sequenceDiagram
     end
 ```
 
-[settings-addons.js](../settings-addons.js) rejects invalid edits before `save()`. [addons.rs](../../src-tauri/src/addons.rs) validates the final saved shape. [progress.js](../progress.js) uses local dates and daily time ranges; it owns no durable session. Each time range has its own bar, and optional auto-hide applies only after the final range has been complete for one minute. The clock and Settings preview use the same calculation and [progress.css](../progress.css). The diagram omits CSS animation frames and the existing 200 ms clock tick.
+[settings-addons.js](../settings-addons.js) rejects invalid edits before `save()` and saves per-instance percentage, length, and thickness choices. [addons.rs](../../src-tauri/src/addons.rs) validates the final saved shape, including optional appearance fields for compatibility. [progress.js](../progress.js) uses local dates and daily time ranges; it owns no durable session. Each time range has its own caption-free bar, and optional auto-hide applies only after the final range has been complete for one minute. The clock and Settings preview use the same calculation, responsive dimensions, and [progress.css](../progress.css). The diagram omits CSS animation frames and the existing 200 ms clock tick.
 
 ## Language selection and Date weekday
 

@@ -6,6 +6,7 @@ import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { displayAddon } from './addons.js';
+import { progressBarStyle } from './progress.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
 import './progress.css';
@@ -130,6 +131,8 @@ Alpine.data('clockApp', () => ({
     },
 
     t(key, vars) { return translate(this.language, key, vars); },
+
+    progressStyle(addon) { return progressBarStyle(addon, this.settings?.font_size || 42); },
 
     scheduleResize() {
         if (!this.settings) return;

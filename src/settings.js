@@ -6,6 +6,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons.js';
+import { progressBarStyle } from './progress.js';
 import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
 import { addonMethods } from './settings-addons.js';
 import { DEFAULT_SHORTCUTS, shortcutGroups, shortcutMethods } from './settings-shortcuts.js';
@@ -183,6 +184,8 @@ Alpine.data('settingsApp', () => ({
             WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
         };
     },
+
+    progressStyle(addon) { return progressBarStyle(addon, Math.min(this.settings.font_size, 64)); },
 
     rangeStyle(value, min, max) {
         return { '--range-progress': `${((value - min) / (max - min)) * 100}%` };
