@@ -2,13 +2,85 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createAddon, displayAddon, timerText } from './addons.js';
 import { markCountdownCompletion, progressBarStyle, progressDisplay, validDateValue } from './progress.js';
-import { addonMethods } from './settings-addons.js';
+import { addonMethods, reorderAddons } from './settings-addons.js';
 import { resolveLanguage, translate, weekdayText } from './i18n.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { createSettingsPersistence } from './settings-persistence.js';
 import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './settings-shortcuts.js';
 import { nextSettingsTab } from './settings-tabs.js';
 import { timeParts } from './time-format.js';
+
+test('drag ordering moves add-ons within a stack and across the clock', () => {
+    const addons = [
+        { id: 'a', placement: 'above' },
+        { id: 'b', placement: 'above' },
+        { id: 'c', placement: 'below' },
+        { id: 'd', placement: 'below' },
+    ];
+    const within = reorderAddons(addons, 'a', 'b', 'above', true);
+    assert.deepEqual(within.map((addon) => addon.id), ['b', 'a', 'c', 'd']);
+    const across = reorderAddons(within, 'b', null, 'below');
+    assert.deepEqual(across.map((addon) => [addon.id, addon.placement]), [
+        ['a', 'above'], ['b', 'below'], ['c', 'below'], ['d', 'below'],
+    ]);
+    const lastAbove = reorderAddons(across, 'd', null, 'above');
+    assert.deepEqual(lastAbove.map((addon) => addon.id), ['a', 'd', 'b', 'c']);
+    assert.equal(reorderAddons(lastAbove, 'd', null, 'above'), null);
+    assert.deepEqual(addons.map((addon) => addon.id), ['a', 'b', 'c', 'd']);
+});
+
+test('pointer drag moves the card and commits its new placement on release', () => {
+    const above = { id: 'a', placement: 'above' };
+    const below = { id: 'b', placement: 'below' };
+    const card = (id, top, bottom) => ({
+        dataset: { addonId: id },
+        getBoundingClientRect: () => ({ top, bottom }),
+        classList: { contains: () => false },
+        querySelector: () => ({ getBoundingClientRect: () => ({ top, height: 40 }) }),
+    });
+    const clock = {
+        dataset: {},
+        getBoundingClientRect: () => ({ top: 170, bottom: 230, height: 60 }),
+        classList: { contains: (name) => name === 'addon-clock-block' },
+    };
+    const panel = {
+        scrollTop: 0,
+        getBoundingClientRect: () => ({ left: 0, right: 400, top: 0, bottom: 400 }),
+        querySelectorAll: () => [card('a', 80, 140), clock, card('b', 240, 300)],
+    };
+    const originalDocument = globalThis.document;
+    globalThis.document = { getElementById: () => panel };
+    try {
+        let saves = 0;
+        const app = {
+            ...addonMethods,
+            settings: { addons: [above, below] },
+            draggedAddonId: null,
+            addonDragOffsetY: 0,
+            addonDropTarget: null,
+            addonPointer: null,
+            save() { saves++; },
+            $nextTick() {},
+        };
+        const handle = { focus() {}, setPointerCapture() {} };
+        app.startAddonPointer({ button: 0, isPrimary: true, pointerId: 1, clientY: 100, currentTarget: handle, preventDefault() {} }, 'a');
+        app.moveAddonPointer({ pointerId: 1, clientY: 250 });
+        assert.equal(app.addonDragOffsetY, 150);
+        assert.deepEqual(app.addonDropTarget, { id: 'b', after: false });
+        app.finishAddonPointer({ pointerId: 1, clientX: 100, clientY: 250 });
+        assert.deepEqual(app.settings.addons.map((addon) => [addon.id, addon.placement]), [['a', 'below'], ['b', 'below']]);
+        assert.equal(saves, 1);
+        assert.equal(app.draggedAddonId, null);
+        app.startAddonPointer({ button: 0, isPrimary: true, pointerId: 2, clientY: 260, currentTarget: handle, preventDefault() {} }, 'b');
+        app.moveAddonPointer({ pointerId: 2, clientY: 180 });
+        assert.deepEqual(app.addonDropTarget, { placement: 'above' });
+        app.finishAddonPointer({ pointerId: 2, clientX: 100, clientY: 180 });
+        assert.deepEqual(app.settings.addons.map((addon) => [addon.id, addon.placement]), [['b', 'above'], ['a', 'below']]);
+        assert.equal(saves, 2);
+    } finally {
+        globalThis.document = originalDocument;
+    }
+});
 
 test('settings saves a snapshot and commits it in order', async () => {
     const writes = [];

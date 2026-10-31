@@ -20,6 +20,14 @@
 
 ## Changed
 
+### 2026-10-30 - Drag add-ons around the clock block
+
+- Configured add-ons now have drag handles for ordering. A clock block separates above and below stacks, so dropping across it also changes placement. The handles support Up and Down arrow keys for keyboard ordering. The old Up, Down, and position controls are removed from Edit. Existing add-on settings require no migration; native drag behavior still needs a live Windows check.
+
+### 2026-10-30 - Put configured add-ons first in Settings
+
+- The Add-ons tab now shows compact configured rows first. Each row opens its own settings on demand, while the add catalog and live layout preview use collapsible sections. The catalog scrolls within a limited height as types are added. Saved add-on settings and clock behavior are unchanged; no user action is required. Live Windows layout verification remains open.
+
 ### 2026-10-30 - Clarify Progress countdown controls and button contrast
 
 - The Progress Minutes field now saves valid edits while typing when the countdown is stopped, then restores the last valid value on blur if needed. Once started, it stays locked through Pause until finish or Reset; the hint names that countdown instead of the numeric Timer. Primary action buttons keep dark text against their yellow hover background.
@@ -41,6 +49,10 @@
 - General now puts display switches in their own section, separate from app behavior controls. Display labels omit the Windows `\\.\` prefix and space the display number for readability; display identities and saved choices are unchanged. No operator action is required.
 
 ## Fixed
+
+### 2026-10-30 - Commit add-on moves after dragging
+
+- The configured add-on card now follows the pointer from its handle and commits the indicated row or clock placement when released inside Settings. This replaces the drag preview that could move without moving the card. Existing settings need no migration; the native Windows gesture still needs a live check.
 
 ### 2026-10-29 - Restore clock preview after a failed Settings save
 

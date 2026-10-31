@@ -1,5 +1,16 @@
 # Frontend backlog
 
+## Add-on dashboard live verification
+
+- **Title:** Check the compact Add-ons tab in the running Settings window.
+- **Problem or opportunity:** The redesigned Alpine markup and Vite build have not been checked in the native WebView at the fixed 760 × 650 window size.
+- **Desired outcome:** Configured add-ons are reachable immediately, drag ordering and placement work across the clock block, and catalog, detail, and preview disclosures stay usable with many instances and translated labels.
+- **Scope:** [settings.html](../../settings.html), [settings-addons.js](../settings-addons.js), [settings.css](../settings.css), and [i18n.js](../i18n.js).
+- **Acceptance criteria:** With zero, one, and 16 instances, the first view exposes the configured list; Add scrolls to a catalog that opens and closes; adding an item returns to the list; each Edit button controls only its own details. A dragged card visibly follows the pointer, shows a drop indicator, and settles before or after another row, across the clock block, or into an empty stack when released; releasing outside cancels the move. The main clock and preview match the saved order after reopening. Arrow keys on a focused handle make the same moves. Enable switches and Timer actions still work; the preview opens and updates; keyboard focus and labels remain usable in all supported languages.
+- **Dependencies and risks:** Requires a running Windows Tauri session. Use a disposable settings file when filling the list.
+- **Verification:** Run `npm run tauri:dev` and exercise the Add-ons tab at the fixed Settings size and with keyboard navigation.
+- **Priority:** Medium because automated frontend checks and build do not render the native WebView.
+
 ## Progress add-on live verification
 
 - **Title:** Verify Progress bars in the running Windows clock and Settings.

@@ -16,7 +16,19 @@
 .control-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}.control-card{min-height:103px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;padding:13px 15px;display:flex;flex-direction:column}.control-title{font-size:13px;font-weight:600;color:#fff}.control-description{font-size:11px;color:#888;margin-top:4px;line-height:1.4}.color-control{display:flex;align-items:center;gap:8px;margin-top:auto;color:#ddd;font:600 11px "JetBrains Mono",Consolas,monospace}.color-control input{width:25px;height:25px;padding:0;border:1px solid #555;border-radius:5px;background:transparent;cursor:pointer}.color-control input::-webkit-color-swatch-wrapper{padding:2px}.color-control input::-webkit-color-swatch{border:0;border-radius:2px}
 .setting-row{min-height:60px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:9px 15px;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;margin-bottom:9px}.slider-area{display:flex;align-items:center;gap:11px;flex:none}.size-range{appearance:none;-webkit-appearance:none;width:148px;height:6px;margin:0;border:0;border-radius:999px;background:linear-gradient(90deg,#faff69 0 var(--range-progress),#3a3a3a var(--range-progress) 100%);cursor:pointer}.size-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:17px;height:17px;border:3px solid #1a1a1a;border-radius:50%;background:#faff69;box-shadow:0 0 0 1px #faff69;transition:box-shadow .15s}.size-range:hover::-webkit-slider-thumb,.size-range:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 1px #faff69,0 0 0 5px #faff6922}.size-range::-moz-range-thumb{width:11px;height:11px;border:3px solid #1a1a1a;border-radius:50%;background:#faff69;box-shadow:0 0 0 1px #faff69}.size-value{color:#faff69;background:#242424;border:1px solid #3a3a3a;border-radius:6px;padding:5px 7px;font:700 11px "JetBrains Mono",Consolas,monospace;min-width:49px;text-align:center}.switch{width:38px;height:22px;flex:none;border:1px solid #555;border-radius:999px;background:#333;padding:2px;transition:background .18s,border-color .18s}.switch span{display:block;width:16px;height:16px;background:#aaa;border-radius:50%;transition:transform .18s,background .18s}.switch.on{background:#faff69;border-color:#faff69}.switch.on span{background:#0a0a0a;transform:translateX(16px)}
 .select-control{width:178px;min-width:0;flex:none;padding:8px 9px;color:#fff;background:#242424;border:1px solid #3a3a3a;border-radius:8px;font-size:12px;cursor:pointer}.select-control option{background:#242424;color:#fff}.select-control:disabled{opacity:.5;cursor:not-allowed}.font-select{width:218px}
-.addon-preview { border:1px solid #303030; border-radius:12px; background:#1a1a1a; padding:12px 16px; margin-bottom:18px; min-height:110px; }
+.addon-preview { border:1px solid #303030; border-radius:10px; background:#1a1a1a; margin:10px 0 18px; overflow:hidden; }
+.addon-section-toggle { width:100%; min-height:42px; display:flex; justify-content:space-between; align-items:center; gap:12px; border:0; background:transparent; color:#faff69; padding:10px 13px; text-align:left; font-size:10px; font-weight:700; letter-spacing:1.2px; }
+.addon-section-toggle:hover,.addon-section-toggle:focus-visible { background:#292929; }
+.addon-section-toggle-end { display:flex; align-items:center; gap:12px; color:#888; font-size:10px; letter-spacing:0; }
+.addon-chevron { display:inline-block; color:#aaa; font-size:18px; line-height:1; transition:transform .15s; }
+.addon-chevron.expanded { transform:rotate(180deg); }
+.addon-preview-stack { border-top:1px solid #303030; margin:0 12px 12px; }
+.addon-dashboard-heading { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 10px; }
+.addon-dashboard-heading .addon-section-title { margin:0; }
+.addon-count { display:inline-grid; place-items:center; min-width:20px; height:20px; margin-left:6px; padding:0 5px; border-radius:999px; background:#292929; color:#ddd!important; letter-spacing:0; }
+.addon-add-shortcut { border:1px solid #faff69; border-radius:7px; background:#faff69; color:#111; padding:7px 11px; font-size:11px; font-weight:700; white-space:nowrap; }
+.addon-add-shortcut:hover,.addon-add-shortcut:focus-visible { background:#fff; }
+.addon-catalog-section { border:1px solid #303030; border-radius:10px; background:#1a1a1a; margin-top:14px; overflow:hidden; }
 .addon-preview-stack { display:flex; flex-direction:column; align-items:center; gap:3px; padding:11px 0 3px; max-height:180px; overflow:auto; }
 .addon-preview-line { display:flex; align-items:baseline; gap:.45em; font-weight:700; color:#ddd; font-size:14px; font-variant-numeric:tabular-nums; }
 .addon-preview-label { font-size:.65em; opacity:.85; }
@@ -24,15 +36,33 @@
 .addon-preview-clock { font-size:32px!important; line-height:1.1; white-space:nowrap; }
 .addon-section-title { font-size:10px; font-weight:700; letter-spacing:1.3px; color:#faff69; margin:18px 0 9px; }
 .addon-section-title span { color:#777; }
-.addon-catalog { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
-.addon-catalog-card { min-width:0; min-height:100px; border:1px solid #303030; border-radius:10px; background:#1a1a1a; padding:11px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:10px; }
+.addon-catalog { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; max-height:260px; overflow-y:auto; padding:0 10px 10px; scrollbar-width:thin; scrollbar-color:#555 transparent; }
+.addon-catalog-card { min-width:0; min-height:90px; border:1px solid #303030; border-radius:8px; background:#202020; padding:10px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:7px; }
 .addon-catalog-card strong, .addon-instance strong { font-size:12px; }
 .addon-catalog-card p { font-size:10px; color:#999; line-height:1.4; margin-top:4px; }
 .addon-catalog-card .action-button { padding:6px 10px; }
 .addon-empty { font-size:12px; color:#888; border:1px dashed #3a3a3a; border-radius:8px; padding:15px; }
-.addon-instance { background:#1a1a1a; border:1px solid #303030; border-radius:10px; padding:13px; margin-bottom:9px; }
+.addon-instance { background:#1a1a1a; border:1px solid #303030; border-radius:10px; padding:11px 13px; margin-bottom:7px; }
+.addon-instance.is-expanded { border-color:#666; }
+.addon-instance.is-dragging { position:relative; z-index:5; border-color:#faff69; background:#28291f; box-shadow:0 10px 28px #000a; opacity:.94; }
+.addon-instance.drop-before { box-shadow:0 -3px 0 #faff69; }
+.addon-instance.drop-after { box-shadow:0 3px 0 #faff69; }
 .addon-instance-head { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.addon-drag-handle { flex:none; align-self:stretch; width:27px; border:1px solid #404040; border-radius:7px; background:#242424; color:#aaa; font-size:19px; line-height:1; cursor:grab; touch-action:none; user-select:none; }
+.addon-drag-handle:hover,.addon-drag-handle:focus-visible { border-color:#faff69; color:#faff69; }
+.addon-drag-handle:active { cursor:grabbing; }
+.addon-clock-block { display:flex; flex-direction:column; align-items:center; gap:3px; margin:10px 0 16px; border:1px solid #515139; border-radius:10px; background:#23241c; color:#faff69; text-align:center; overflow:hidden; }
+.addon-clock-side { display:block; width:100%; padding:4px 8px; color:#a9ab8a; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+.addon-clock-center { display:flex; align-items:center; justify-content:space-between; gap:12px; width:100%; padding:8px 14px; border-top:1px solid #454633; border-bottom:1px solid #454633; color:#faff69; font-size:10px; font-weight:700; letter-spacing:1px; }
+.addon-clock-center strong { font-size:17px; font-variant-numeric:tabular-nums; letter-spacing:0; }
+.addon-clock-block.drop-above { box-shadow:inset 0 4px 0 #faff69; }
+.addon-clock-block.drop-below { box-shadow:inset 0 -4px 0 #faff69; }
+.addon-instance-identity { flex:1; min-width:0; }
 .addon-instance-head small { display:block; color:#888; font-size:10px; margin-top:3px; }
+.addon-instance-head .addon-instance-meta { color:#aaa; }
+.addon-edit-button { display:flex; align-items:center; gap:6px; flex:none; border:1px solid #404040; border-radius:7px; background:#242424; color:#ddd; padding:6px 8px; font-size:10px; font-weight:600; }
+.addon-edit-button:hover,.addon-edit-button:focus-visible { border-color:#888; color:#fff; }
+.addon-instance-details { border-top:1px solid #303030; margin-top:11px; padding-top:1px; }
 .addon-instance-controls { display:flex; align-items:end; gap:12px; flex-wrap:wrap; margin-top:12px; }
 .addon-instance-controls label { display:flex; flex-direction:column; gap:5px; color:#aaa; font-size:10px; min-width:140px; }
 .addon-instance-controls label span { color:#faff69; }
