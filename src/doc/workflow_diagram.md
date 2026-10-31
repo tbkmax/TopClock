@@ -22,7 +22,7 @@ sequenceDiagram
     end
 ```
 
-[settings-addons.js](../settings-addons.js) rejects invalid edits before `save()` and saves per-instance percentage, length, and thickness choices. [addons.rs](../../src-tauri/src/addons.rs) validates the final saved shape, including optional appearance fields for compatibility. [progress.js](../progress.js) uses local dates and daily time ranges; each time range has its own caption-free bar, and optional auto-hide applies only after the final range has been complete for one minute. Countdown mode reads each instance's durable native session, fills one bar from empty to full, and pulses on completion. Settings Start/Pause and Reset, or modifier-click on that clock bar, invoke `progress_timer_action(id, action)`; `progress-timer-states-changed` refreshes both views. The numeric Timer uses its own session and controls. The clock and Settings preview use the same calculation, responsive dimensions, and [progress.css](../progress.css). The diagram omits CSS animation frames and the existing 200 ms clock tick.
+[settings-addons.js](../settings-addons.js) rejects invalid edits before `save()` and saves per-instance percentage, length, and thickness choices. A valid Minutes edit before the first Start or after finish or Reset saves on input; blur restores the last valid value if entry is incomplete. The field stays locked through Pause and restart because the native session records whether it has started. [addons.rs](../../src-tauri/src/addons.rs) validates the final saved shape, including optional appearance fields for compatibility. [progress.js](../progress.js) uses local dates and daily time ranges; each time range has its own caption-free bar, and optional auto-hide applies only after the final range has been complete for one minute. Countdown mode reads each instance's durable native session, fills one bar from empty to full, and pulses on completion. Settings Start/Pause and Reset, or modifier-click on that clock bar, invoke `progress_timer_action(id, action)`; `progress-timer-states-changed` refreshes both views. The numeric Timer uses its own session and controls. The clock and Settings preview use the same calculation, responsive dimensions, and [progress.css](../progress.css). The diagram omits CSS animation frames and the existing 200 ms clock tick.
 
 ## Language selection and Date weekday
 
@@ -81,6 +81,7 @@ classDiagram
       parts
       renderedAddons
       timerSession
+      progressTimerSessions
       isCtrlHeld
       isNear
       updateClock()
@@ -94,10 +95,12 @@ classDiagram
       settings
       previewParts
       previewAddons
+      progressTimerSessions
       saveController
       addAddon()
       moveAddon()
       timerChange()
+      progressCountdownDurationLocked()
       save()
       selectTab()
       onTabKeydown()
@@ -119,9 +122,11 @@ classDiagram
     class TauriCommands {
       get_settings()
       get_timer_state()
+      get_progress_timer_states()
       get_font_families()
       update_settings()
       timer_action()
+      progress_timer_action()
       get_displays()
       reset_clock_positions()
       set_display_enabled()

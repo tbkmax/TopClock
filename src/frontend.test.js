@@ -301,26 +301,36 @@ test('Progress countdowns have independent elapsed bars and a completion pulse',
     assert.equal(later.progress.rows[0].celebrating, false);
 });
 
-test('Progress countdown duration changes reset only their own session', () => {
+test('Progress countdown minutes lock after Start through Pause, then unlock on finish or Reset', () => {
     const first = createAddon('progress');
     const second = createAddon('progress');
     const app = {
         ...addonMethods,
         settings: { addons: [first, second] },
         progressTimerSessions: {
-            [first.id]: { running: false, elapsed_ms: 2000, started_at_ms: null, finished: false },
-            [second.id]: { running: true, elapsed_ms: 0, started_at_ms: 1000, finished: false },
+            [first.id]: { running: false, elapsed_ms: 0, started_at_ms: null, finished: false, has_started: true },
+            [second.id]: { running: true, elapsed_ms: 0, started_at_ms: 1000, finished: false, has_started: true },
         },
         saveCount: 0,
         save() { this.saveCount++; },
     };
     app.setProgressMode(first.id, 'countdown');
     app.setProgressMode(second.id, 'countdown');
+    assert.equal(app.progressCountdownDurationLocked(first.id), true);
+    assert.equal(app.progressCountdownDurationLocked(second.id), true);
     app.updateProgressCountdownDuration(first.id, 12);
-    assert.equal(first.options.countdown_seconds, 720);
-    assert.equal(app.progressTimerSessions[first.id].elapsed_ms, 0);
-    assert.equal(app.progressTimerSessions[second.id].running, true);
+    assert.equal(first.options.countdown_seconds, 300);
     app.updateProgressCountdownDuration(second.id, 12);
     assert.equal(second.options.countdown_seconds, 300);
-    assert.equal(app.saveCount, 3);
+    assert.equal(app.saveCount, 2);
+    app.progressTimerSessions[first.id] = { ...app.progressTimerSessions[first.id], finished: true };
+    assert.equal(app.progressCountdownDurationLocked(first.id), false);
+    app.updateProgressCountdownDuration(first.id, 12);
+    assert.equal(first.options.countdown_seconds, 720);
+    assert.equal(app.progressTimerSessions[first.id].has_started, false);
+    assert.equal(app.progressTimerSessions[second.id].running, true);
+    app.progressTimerSessions[first.id] = { running: false, elapsed_ms: 0, started_at_ms: null, finished: false, has_started: false };
+    app.updateProgressCountdownDuration(first.id, 13);
+    assert.equal(first.options.countdown_seconds, 780);
+    assert.equal(app.saveCount, 4);
 });

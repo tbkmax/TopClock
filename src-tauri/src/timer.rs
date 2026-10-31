@@ -57,7 +57,7 @@ pub(crate) fn progress_timer_action(
         .entry(id.clone())
         .or_default();
     match action.as_str() {
-        "toggle" => session.toggle(epoch_ms(), "countdown", duration),
+        "toggle" => session.toggle_progress(epoch_ms(), duration),
         "reset" => *session = TimerSession::default(),
         _ => unreachable!(),
     }

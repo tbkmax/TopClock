@@ -51,6 +51,11 @@ export const addonMethods = {
         return this.t('addons.progressRangeCount', { count: addon.options.ranges.length });
     },
 
+    progressCountdownDurationLocked(id) {
+        const session = this.progressTimerSessions[id];
+        return session?.has_started === true && session.finished !== true;
+    },
+
     setProgressMode(id, mode) {
         const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
         if (!addon || !['date', 'time', 'countdown'].includes(mode)) return;
@@ -61,13 +66,13 @@ export const addonMethods = {
 
     updateProgressCountdownDuration(id, minutes) {
         const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
-        if (!addon || this.progressTimerSessions[id]?.running || !Number.isInteger(minutes) || minutes < 1 || minutes > 5999) return;
+        if (!addon || this.progressCountdownDurationLocked(id) || !Number.isInteger(minutes) || minutes < 1 || minutes > 5999) return;
         const seconds = minutes * 60;
         if (addon.options.countdown_seconds === seconds) return;
         addon.options.countdown_seconds = seconds;
         this.progressTimerSessions = {
             ...this.progressTimerSessions,
-            [id]: { running: false, elapsed_ms: 0, started_at_ms: null, finished: false },
+            [id]: { running: false, elapsed_ms: 0, started_at_ms: null, finished: false, has_started: false },
         };
         this.save();
     },

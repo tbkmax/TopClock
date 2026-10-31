@@ -89,6 +89,8 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
             return false;
         }
         session.normalize(now_ms, "countdown", countdowns[id]);
+        // Older persisted sessions predate the explicit edit lock.
+        session.restore_progress_started();
         true
     });
     config

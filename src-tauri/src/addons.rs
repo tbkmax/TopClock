@@ -260,9 +260,24 @@ pub(crate) struct TimerSession {
     pub(crate) elapsed_ms: u64,
     pub(crate) started_at_ms: Option<u64>,
     pub(crate) finished: bool,
+    #[serde(default)]
+    pub(crate) has_started: bool,
 }
 
 impl TimerSession {
+    pub(crate) fn progress_duration_locked(&self) -> bool {
+        self.has_started && !self.finished
+    }
+
+    pub(crate) fn toggle_progress(&mut self, now_ms: u64, duration_seconds: u64) {
+        self.toggle(now_ms, "countdown", duration_seconds);
+        self.has_started = true;
+    }
+
+    pub(crate) fn restore_progress_started(&mut self) {
+        self.has_started |= self.running || self.elapsed_ms > 0 || self.finished;
+    }
+
     pub(crate) fn elapsed(&self, now_ms: u64) -> u64 {
         self.elapsed_ms.saturating_add(if self.running {
             now_ms.saturating_sub(self.started_at_ms.unwrap_or(now_ms))
@@ -437,5 +452,32 @@ mod tests {
         assert!(!valid_addons(&[first.clone()]));
         first.options["countdown_seconds"] = serde_json::json!(360000);
         assert!(!valid_addons(&[first]));
+    }
+
+    #[test]
+    fn progress_minutes_lock_survives_pause_and_unlocks_on_finish_or_reset() {
+        let mut session = TimerSession::default();
+        assert!(!session.progress_duration_locked());
+        session.toggle_progress(1_000, 5);
+        assert!(session.progress_duration_locked());
+        session.toggle_progress(1_000, 5);
+        assert!(!session.running);
+        assert_eq!(session.elapsed_ms, 0);
+        assert!(session.progress_duration_locked());
+        let restored: TimerSession =
+            serde_json::from_value(serde_json::to_value(&session).unwrap()).unwrap();
+        assert!(restored.progress_duration_locked());
+        let mut finished = restored;
+        finished.toggle_progress(2_000, 5);
+        assert!(finished.normalize(7_000, "countdown", 5));
+        assert!(!finished.progress_duration_locked());
+        finished = TimerSession::default();
+        assert!(!finished.progress_duration_locked());
+        let mut legacy: TimerSession = serde_json::from_value(serde_json::json!({
+            "running": false, "elapsed_ms": 1000, "started_at_ms": null, "finished": false
+        }))
+        .unwrap();
+        legacy.restore_progress_started();
+        assert!(legacy.progress_duration_locked());
     }
 }

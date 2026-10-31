@@ -20,6 +20,10 @@
 
 ## Changed
 
+### 2026-10-30 - Lock Progress minutes after first Start
+
+- A Progress countdown now remembers that it was started even after Pause or restart. Its duration stays fixed until it finishes or is reset. Older running or elapsed countdown sessions recover this lock when loaded; numeric Timer controls are unchanged.
+
 ### 2026-10-30 - Accept optional Progress appearance settings
 
 - Saved Progress instances may now include a percentage switch and independent bar length and thickness values. Older instances without these fields still load; invalid values are rejected. No migration or user action is required.

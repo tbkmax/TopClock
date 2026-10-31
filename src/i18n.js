@@ -121,6 +121,7 @@ const messages = {
     'addons.minutes': ['Minutes', '分钟', '分鐘', '分'],
     'addons.countdownMinutes': ['Countdown minutes', '倒计时分钟数', '倒數計時分鐘數', 'カウントダウンの分数'],
     'addons.pauseBeforeChange': ['Pause the timer before changing its mode or duration.', '更改模式或时长前请暂停计时器。', '變更模式或時間長度前請暫停計時器。', 'モードや時間を変更する前にタイマーを一時停止してください。'],
+    'addons.progressMinutesLocked': ['Minutes unlock when this countdown finishes or is reset.', '此倒计时完成或重置后可更改分钟数。', '此倒數計時完成或重設後可變更分鐘數。', 'このカウントダウンが完了またはリセットされると分数を変更できます。'],
     'addons.pause': ['Pause', '暂停', '暫停', '一時停止'],
     'addons.start': ['Start', '开始', '開始', '開始'],
     'addons.reset': ['Reset', '重置', '重設', 'リセット'],

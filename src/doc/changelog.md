@@ -20,6 +20,10 @@
 
 ## Changed
 
+### 2026-10-30 - Clarify Progress countdown controls and button contrast
+
+- The Progress Minutes field now saves valid edits while typing when the countdown is stopped, then restores the last valid value on blur if needed. Once started, it stays locked through Pause until finish or Reset; the hint names that countdown instead of the numeric Timer. Primary action buttons keep dark text against their yellow hover background.
+
 ### 2026-10-30 - Simplify Progress bars and add size controls
 
 - Progress now shows only bars by default. Each instance can optionally show percentages and can adjust bar length and thickness independently. The default length is slightly shorter; default thickness keeps the previous responsive size. Existing Progress instances use the new defaults without a settings migration. Live Windows layout checks remain.

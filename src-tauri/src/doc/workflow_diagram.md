@@ -19,7 +19,7 @@ sequenceDiagram
     end
 ```
 
-[addons.rs](../addons.rs) accepts multiple Progress instances within the shared 16-instance limit. It validates date, daily time, and countdown modes, their bounds, auto-hide, and optional appearance fields. Missing appearance fields from older saved instances remain valid. [settings_commands.rs](../settings_commands.rs) saves only validated settings, rejects duration changes while that countdown runs, prunes sessions when a countdown mode or duration is removed, and rolls back memory on write failure. Date and daily time bars derive from local time. Countdown sessions are stored by add-on ID in `PersistedConfig`, separate from the numeric Timer. `progress_timer_action` saves Start/Pause or Reset and emits `progress-timer-states-changed`; the monitor normalizes completed sessions. The diagram omits the Settings preview event and countdown action, described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
+[addons.rs](../addons.rs) accepts multiple Progress instances within the shared 16-instance limit. It validates date, daily time, and countdown modes, their bounds, auto-hide, and optional appearance fields. Missing appearance fields from older saved instances remain valid. [settings_commands.rs](../settings_commands.rs) saves only validated settings, rejects duration changes after first Start until finish or Reset, prunes sessions when a countdown mode or duration is removed, and rolls back memory on write failure. Date and daily time bars derive from local time. Countdown sessions are stored by add-on ID in `PersistedConfig`, separate from the numeric Timer. `progress_timer_action` saves Start/Pause or Reset and emits `progress-timer-states-changed`; the monitor normalizes completed sessions. The diagram omits the Settings preview event and countdown action, described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
 
 ```mermaid
 sequenceDiagram
@@ -119,6 +119,7 @@ classDiagram
       position: Option~ClockPosition~
       displays: HashMap~String_DisplayPreference~
       timer_session: TimerSession
+      progress_timer_sessions: HashMap~String_TimerSession~
     }
     class DisplayPreference {
       visible: bool
@@ -165,6 +166,7 @@ classDiagram
       elapsed_ms: u64
       started_at_ms: Option~u64~
       finished: bool
+      has_started: bool
     }
     class ClockPosition {
       x: i32

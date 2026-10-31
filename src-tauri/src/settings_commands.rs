@@ -38,9 +38,11 @@ pub(crate) fn update_settings(
                 && config
                     .progress_timer_sessions
                     .get(id)
-                    .is_some_and(|session| session.running)
+                    .is_some_and(|session| session.progress_duration_locked())
         }) {
-            return Err("Pause the Progress countdown before changing its duration".into());
+            return Err(
+                "Finish or reset the Progress countdown before changing its duration".into(),
+            );
         }
         if old_timer != new_timer {
             if config.timer_session.running && new_timer.is_some() {
