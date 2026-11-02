@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-31 - Store listing icon sizes
+
+- Added 300×300 and 71×71 PNG exports from the TopClock vector icon for manual Store listing upload. The MSIX package and installed app icon are unchanged. The publisher must upload these files in Partner Center; no action is required for existing users.
+
 ### 2026-10-29 - MSIX package logos
 
 - Added 44, 50, and 150 pixel PNGs derived from the existing icon for the MSIX package manifest. The existing executable and tray icon remain the same. No operator action is required.

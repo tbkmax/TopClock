@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-10-31 - Store listing icon exports
+
+- Added 300×300 and 71×71 listing images in [icons/](../icons/doc/changelog.md) for manual Partner Center upload. The MSIX package payload is unchanged; the publisher must upload the new images separately.
+
 ### 2026-10-29 - Enable Store update commands in the MSIX build
 
 - The native build now includes Microsoft Store APIs so a packaged Settings window can check for a published update and request Store installation. Direct-build release handling is unchanged. No operator action is required until a Store package is published; a Store-signed two-version check remains open.
