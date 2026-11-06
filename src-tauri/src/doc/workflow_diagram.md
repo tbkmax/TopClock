@@ -1,5 +1,28 @@
 # Rust workflows
 
+## Per-clock menu input observation
+
+```mermaid
+classDiagram
+    class MenuDismissal {
+      buttons: u8
+      was_open: bool
+      foreground: isize
+      update()
+    }
+    class ClockState {
+      menu_open: Mutex~HashSet_String~
+    }
+    class WebviewWindow {
+      label()
+      emit_to()
+    }
+    MenuDismissal ..> ClockState : observes own menu flag
+    MenuDismissal ..> WebviewWindow : monitor emits dismissal decision
+```
+
+[interaction.rs](../interaction.rs) owns one `MenuDismissal` per monitor thread; it is discarded with that window. On each visible poll, new button-down edges outside the physical window and changes to another non-null foreground window can request `dismiss-menu`. Inside-window presses send logical `menu-pointer-down` coordinates so [main.js](../../../src/main.js) can reject clicks in transparent padding. These events target the owning clock and do not consume input. Hidden polls reset the observation state. After hiding the menu, the frontend sends `set_menu_open(false)`; normal modifier/menu reconciliation restores click-through. Focus-loss events also dismiss from the frontend. No durable state or settings schema is added; the [report](../../../doc/report/CONTEXT_MENU_FIX.md) describes polling and display-edge limitations.
+
 ## Clock topmost recovery
 
 ```mermaid

@@ -5,6 +5,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
+import { clockWindowLayout } from './menu-layout.js';
 import { displayAddon } from './addons.js';
 import { markCountdownCompletion, progressBarStyle } from './progress.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
@@ -13,6 +14,7 @@ import './progress.css';
 
 const appWindow = getCurrentWindow();
 let resizeQueue = Promise.resolve();
+let menuStateQueue = Promise.resolve();
 let isFirstResize = true;
 let lastMainRightOffset = 0;
 let lastMainTopOffset = 0;
@@ -36,6 +38,7 @@ Alpine.data('clockApp', () => ({
     isCtrlHeld: false,
     isNear: false,
     menuOpen: false,
+    menuReady: false,
     menuX: 0,
     menuY: 0,
     dragStart: null,
@@ -65,6 +68,15 @@ Alpine.data('clockApp', () => ({
             }),
             listen('proximity', (event) => {
                 this.isNear = event.payload;
+            }),
+            listen('dismiss-menu', () => this.closeMenu()),
+            listen('menu-pointer-down', ({ payload: [x, y] }) => {
+                if (!this.menuOpen || !this.menuReady) return;
+                const rect = this.$refs.dropdownMenu.getBoundingClientRect();
+                if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) this.closeMenu();
+            }),
+            appWindow.onFocusChanged(({ payload: focused }) => {
+                if (!focused) this.closeMenu();
             }),
             listen('clock-settings-changed', (event) => {
                 this.applySettings(event.payload);
@@ -98,6 +110,9 @@ Alpine.data('clockApp', () => ({
             if (event.key === expectedKey) this.isCtrlHeld = false;
         });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
+        window.addEventListener('pointerdown', (event) => {
+            if (this.menuOpen && !this.$refs.dropdownMenu.contains(event.target)) this.closeMenu();
+        }, true);
         window.addEventListener('mousemove', (event) => this.handleMouseMove(event));
         window.addEventListener('mouseup', () => this.handleMouseUp());
 
@@ -147,18 +162,18 @@ Alpine.data('clockApp', () => ({
         clearTimeout(this.resizeTimer);
         this.resizeTimer = setTimeout(() => {
             if (!this.$refs.clockContainer) return;
-            const containerRect = this.$refs.clockContainer.getBoundingClientRect();
-            const menuWidth = this.menuOpen && this.$refs.dropdownMenu
-                ? Math.ceil(this.$refs.dropdownMenu.getBoundingClientRect().width) : 0;
-            const width = Math.max(60, Math.ceil(containerRect.width) + 4, this.menuOpen ? this.menuX + menuWidth + 4 : 0);
-            const baseHeight = Math.ceil(containerRect.height) + 2;
-            let menuExtraHeight = 0;
-            if (this.menuOpen) {
-                const measuredHeight = this.$refs.dropdownMenu ? Math.ceil(this.$refs.dropdownMenu.getBoundingClientRect().height) : 0;
-                menuExtraHeight = measuredHeight > 0 ? measuredHeight + 4 : 78;
-            }
-            const height = baseHeight + menuExtraHeight;
             resizeQueue = resizeQueue.then(async () => {
+                // Measure inside the queue, after Alpine has applied the latest state.
+                // offset sizes exclude the clock's pressed transform and menu animation.
+                const container = this.$refs.clockContainer;
+                const menu = this.menuOpen ? this.$refs.dropdownMenu : null;
+                const layout = clockWindowLayout(container.offsetWidth, container.offsetHeight,
+                    menu ? { x: this.menuX, width: menu.offsetWidth, height: menu.offsetHeight } : null);
+                const { width, height } = layout;
+                if (menu) {
+                    this.menuX = layout.x;
+                    this.menuY = layout.y;
+                }
                 const oldSize = await appWindow.outerSize();
                 const scale = await appWindow.scaleFactor();
                 const oldPosition = await appWindow.outerPosition();
@@ -168,17 +183,21 @@ Alpine.data('clockApp', () => ({
                     || Math.abs(oldSize.height - height * scale) >= 2) {
                     await appWindow.setSize(new LogicalSize(width, height));
                 }
-                const mainRect = this.$refs.clockDigits.getBoundingClientRect();
+                // Layout offsets stay stable during the container's pressed animation.
+                const digits = this.$refs.clockDigits;
+                const mainRight = digits.offsetLeft + digits.offsetWidth;
+                const mainTop = digits.offsetTop;
                 const newX = isFirstResize
                     ? oldPosition.x
-                    : Math.round(targetMainRight - mainRect.right * scale);
+                    : Math.round(targetMainRight - mainRight * scale);
                 const newY = isFirstResize
                     ? oldPosition.y
-                    : Math.round(targetMainTop - mainRect.top * scale);
+                    : Math.round(targetMainTop - mainTop * scale);
                 isFirstResize = false;
-                lastMainRightOffset = mainRect.right;
-                lastMainTopOffset = mainRect.top;
+                lastMainRightOffset = mainRight;
+                lastMainTopOffset = mainTop;
                 await appWindow.setPosition(new PhysicalPosition(newX, newY));
+                if (menu && this.menuOpen) this.menuReady = true;
             }).catch(console.error);
         }, 40);
     },
@@ -244,6 +263,7 @@ Alpine.data('clockApp', () => ({
     },
 
     async handleMouseDown(event) {
+        if (this.$refs.dropdownMenu.contains(event.target)) return;
         this.dragStarted = false;
         if (event.button === 0 && this.isCtrlHeld) {
             const pos = await appWindow.outerPosition();
@@ -305,22 +325,29 @@ Alpine.data('clockApp', () => ({
     handleContextMenu(event) {
         event.preventDefault();
         if (!this.isCtrlHeld) return;
-        const containerHeight = this.$refs.clockContainer ? Math.ceil(this.$refs.clockContainer.getBoundingClientRect().height) : 48;
-        this.menuX = Math.max(4, Math.min(event.clientX, window.innerWidth - 134));
-        this.menuY = containerHeight;
+        if (this.$refs.dropdownMenu.contains(event.target)) return;
+        this.menuX = event.clientX;
         this.openMenu();
     },
 
     openMenu() {
+        this.menuReady = false;
         this.menuOpen = true;
-        invoke('set_menu_open', { open: true }).catch(console.error);
-        this.scheduleResize();
+        this.syncMenuState(true);
+        this.$nextTick(() => this.scheduleResize());
     },
 
     closeMenu() {
+        if (!this.menuOpen) return;
+        this.menuReady = false;
         this.menuOpen = false;
-        invoke('set_menu_open', { open: false }).catch(console.error);
-        this.scheduleResize();
+        this.syncMenuState(false);
+        this.$nextTick(() => this.scheduleResize());
+    },
+
+    syncMenuState(open) {
+        // Preserve open/close order across asynchronous native commands.
+        menuStateQueue = menuStateQueue.then(() => invoke('set_menu_open', { open })).catch(console.error);
     },
 
     openSettings() {

@@ -1,5 +1,14 @@
 # Frontend backlog
 
+## Context menu live Windows acceptance
+
+- **Problem and desired outcome:** Automated layout and mocked-native browser checks pass, but the actual WebView must show an unclipped shadow and dismiss on outside input without leaving click-through disabled or shifting saved positions.
+- **Scope:** [main.js](../main.js), [menu-layout.js](../menu-layout.js), [style.css](../style.css), [index.html](../../index.html), and [interaction.rs](../../src-tauri/src/interaction.rs).
+- **Acceptance criteria:** Complete the [five-step native checklist](../../doc/report/CONTEXT_MENU_FIX.md#residual-risks-and-verification), including menu actions, tray, all mouse buttons, modifier hold/release, Escape, Alt-Tab, settings persistence and restart, and mixed-DPI/negative-origin displays. Distinguish off-screen placement from WebView clipping.
+- **Dependencies and risks:** Requires an interactive Windows desktop; 30 ms polling can miss short nonactivating clicks and samples pointer location after the exact press. The enlarged menu surface and native resize timing need live checks. Physical display-edge fitting remains a separate limitation.
+- **Verification:** Run `npm run tauri:dev`; record results against the report. Browser rendering alone cannot verify Windows input delivery.
+- **Priority:** High before release because this change touches input and window geometry.
+
 ## Add-on dashboard live verification
 
 - **Title:** Check the compact Add-ons tab in the running Settings window.

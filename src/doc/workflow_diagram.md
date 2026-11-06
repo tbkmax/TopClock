@@ -1,5 +1,27 @@
 # Frontend workflows
 
+## Menu layout and dismissal
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Clock as clockApp
+    participant Native as Tauri window and input monitor
+    User->>Clock: Ctrl-right-click
+    Clock->>Native: Serialized set_menu_open(true)
+    Clock->>Clock: Measure menu and reserve shadow space
+    Clock->>Native: Resize while preserving clock anchor
+    Native-->>Clock: Resize completed
+    Clock->>Clock: Reveal menu
+    User->>Native: Click elsewhere or change foreground window
+    Native-->>Clock: dismiss-menu or menu-pointer-down
+    Clock->>Clock: Hit-test pointer if needed, hide menu
+    Clock->>Native: Serialized set_menu_open(false), shrink window
+    Native->>Native: Restore click-through when modifier is up
+```
+
+[main.js](../main.js) also handles DOM outside pointer-down, Escape and native window blur. The menu is hidden immediately on close, avoiding a leave animation clipped by shrinking. [menu-layout.js](../menu-layout.js) measures the menu box plus shadow space; layout offsets and a fixed clock inset keep menu growth from moving the clock. A resize failure is logged and does not reveal the pending menu. Native events are targeted to one clock; [native polling limitations](../../doc/report/CONTEXT_MENU_FIX.md) still apply. The class diagram below describes the owning Alpine component and command boundary.
+
 ## Progress add-on settings and display
 
 ```mermaid

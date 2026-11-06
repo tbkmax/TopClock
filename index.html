@@ -59,16 +59,8 @@
         <div 
             x-ref="dropdownMenu"
             x-show="menuOpen"
-            @click.outside="closeMenu()"
-            @keydown.escape.window="closeMenu()"
-            x-transition:enter="menu-enter"
-            x-transition:enter-start="menu-enter-start"
-            x-transition:enter-end="menu-enter-end"
-            x-transition:leave="menu-leave"
-            x-transition:leave-start="menu-leave-start"
-            x-transition:leave-end="menu-leave-end"
             class="dropdown-menu"
-            :style="`left: ${menuX}px; top: ${menuY}px;`"
+            :style="`left: ${menuX}px; top: ${menuY}px; visibility: ${menuReady ? 'visible' : 'hidden'};`"
             x-cloak
         >
             <button class="menu-item" @click="openSettings()" :title="t('app.settings')">

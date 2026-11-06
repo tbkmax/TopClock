@@ -1,5 +1,9 @@
 # Rust application backlog
 
+## Context menu input acceptance
+
+The native dismissal observer and tests are implemented. Live verification of outside presses, focus changes, transparent padding, click-through restoration, tray actions and position persistence is tracked in the [frontend context-menu checklist](../../../src/doc/backlog.md#context-menu-live-windows-acceptance). This is high-priority release acceptance: a 30 ms poll can miss short nonactivating clicks, and mixed-DPI conversion/native focus timing require an interactive Windows desktop. See [solutions and residual risks](../../../doc/report/CONTEXT_MENU_FIX.md).
+
 ## Topmost recovery acceptance
 
 - **Title:** Check the recovery interval with the user's triggering applications.

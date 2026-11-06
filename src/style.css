@@ -64,7 +64,7 @@ html, body {
     position: relative;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
     padding-top: 0;
     background: transparent !important;
@@ -94,6 +94,8 @@ html, body {
 
 /* Clock Container */
 .clock-container {
+    /* Keep the clock fixed when the native window grows to fit its menu. */
+    margin-left: 2px;
     display: inline-flex;
     flex-direction: column;
     align-items: center;
@@ -315,35 +317,6 @@ html, body {
 
 .menu-item:active {
     background-color: var(--color-hairline);
-}
-
-/* Alpine.js dropdown transitions */
-.menu-enter {
-    transition: opacity 150ms cubic-bezier(0, 0, 0.2, 1), transform 150ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-.menu-enter-start {
-    opacity: 0;
-    transform: scale(0.92) translateY(-4px);
-}
-
-.menu-enter-end {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-}
-
-.menu-leave {
-    transition: opacity 100ms cubic-bezier(0.4, 0, 1, 1), transform 100ms cubic-bezier(0.4, 0, 1, 1);
-}
-
-.menu-leave-start {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-}
-
-.menu-leave-end {
-    opacity: 0;
-    transform: scale(0.92) translateY(-4px);
 }
 
 @media (prefers-reduced-motion: reduce) {

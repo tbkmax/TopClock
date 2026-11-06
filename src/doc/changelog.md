@@ -50,6 +50,12 @@
 
 ## Fixed
 
+### 2026-11-06 - Reserve menu shadow space and dismiss outside the clock
+
+- The custom menu now reserves space around its shadow and appears after native resize. Stable layout measurements and a fixed clock inset prevent menu growth from recentering the clock; immediate hiding avoids a clipped closing transition.
+- Outside pointer-down, native dismissal and focus-loss events close the menu; transparent padding is hit-tested against the actual menu. Open/close commands are ordered, and menu-item presses no longer start clock dragging.
+- Frontend tests, build and mocked-native headless rendering passed. Live Windows cross-app, tray, mixed-DPI and persistence checks remain in the [backlog](backlog.md). No settings migration or user action is required.
+
 ### 2026-10-30 - Commit add-on moves after dragging
 
 - The configured add-on card now follows the pointer from its handle and commits the indicated row or clock placement when released inside Settings. This replaces the drag preview that could move without moving the card. Existing settings need no migration; the native Windows gesture still needs a live check.

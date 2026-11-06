@@ -42,6 +42,11 @@
 
 ## Fixed
 
+### 2026-11-06 - Observe outside input for clock menu dismissal
+
+- The existing monitor now requests per-clock menu dismissal on new outside mouse-button presses and foreground changes. Presses within the HWND send logical coordinates so the frontend can dismiss clicks in transparent padding as well. Held buttons and releases do not repeatedly dismiss; input is observed without capture.
+- Three new tests cover button transitions, focus baselines, and negative-origin physical bounds; all 25 Rust tests passed. Live cross-app and mixed-DPI acceptance remains in the [frontend checklist](../../../src/doc/backlog.md). No migration, capability change, or user action is required.
+
 ### 2026-11-06 - Recover clock stacking order without restarting
 
 - Visible clocks now reassert native topmost order every two seconds and after returning from hidden state, without activation, movement, resizing, or changes to click-through styles. This repairs both lost topmost status and coverage by another topmost window; exclusive-fullscreen games remain outside the guarantee.
