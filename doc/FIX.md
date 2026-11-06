@@ -1,4 +1,5 @@
 ### FIX 1: Not always on top situation:
+- Native recovery implemented on 2026-11-06; original-app acceptance remains open. See [investigation, solutions and risks](report/TOPMOST_RECOVERY.md). True exclusive fullscreen is a separate limitation.
 - [ ] when some game when fullscreen size clock will not always on top
 - [ ] when open some app like after clock open it (might not be the reasons), clock will not always on top (make sure clock will always on top)
 

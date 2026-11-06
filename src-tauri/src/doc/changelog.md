@@ -42,6 +42,11 @@
 
 ## Fixed
 
+### 2026-11-06 - Recover clock stacking order without restarting
+
+- Visible clocks now reassert native topmost order every two seconds and after returning from hidden state, without activation, movement, resizing, or changes to click-through styles. This repairs both lost topmost status and coverage by another topmost window; exclusive-fullscreen games remain outside the guarantee.
+- Added native Windows regression tests for competing topmost windows, forced demotion, preserved geometry/input styles/focus, and hidden/minimized exclusions. Full game, tray, Ctrl interaction, and multi-monitor acceptance remains in the [backlog](backlog.md). No settings migration or operator action is required.
+
 ### 2026-10-29 - Preserve saved positions beyond display edges
 
 - Restoring a display clock no longer pushes a saved origin back inside monitor bounds. This keeps intentionally placed edge positions when reopening or reconnecting a display. No operator action is required.

@@ -1,5 +1,28 @@
 # Rust workflows
 
+## Clock topmost recovery
+
+```mermaid
+sequenceDiagram
+    participant Monitor as interaction.rs per-clock monitor
+    participant UI as Tauri UI thread
+    participant Windows as Win32 window manager
+    loop Existing 30 ms monitor poll
+        alt Clock hidden
+            Monitor->>Monitor: Reset topmost refresh timestamp
+        else First visible poll or two seconds elapsed
+            Monitor->>UI: topmost::schedule_refresh(clock)
+            UI->>UI: Resolve current HWND
+            alt Still visible and not minimized
+                UI->>Windows: SetWindowPos(HWND_TOPMOST, no activation/move/resize)
+                Windows-->>UI: Success or error logged to stderr
+            end
+        end
+    end
+```
+
+[topmost.rs](../topmost.rs) bypasses the cached framework topmost flag, restoring order even when another topmost window covers a clock that still has `WS_EX_TOPMOST`. The callback checks visibility again so queued work does not show a disabled display or restore a minimized window. A dispatch failure is logged by [interaction.rs](../interaction.rs); retry waits for the next two-second interval. The timestamp is per-monitor in-memory state and is discarded when that clock's monitor exits. Existing input polling, proximity events, position persistence, and display lifecycle continue independently. UI stalls can delay recovery; competing overlays may obscure the clock again. No global OS event hook or additional thread is installed.
+
 ## Progress add-on save boundary
 
 ```mermaid

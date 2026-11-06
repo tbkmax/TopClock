@@ -1,4 +1,6 @@
-use crate::{config_store::save_config, settings::ClockPosition, state::ClockState, timer};
+use crate::{
+    config_store::save_config, settings::ClockPosition, state::ClockState, timer, topmost,
+};
 use std::{
     sync::Arc,
     thread,
@@ -56,6 +58,7 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
         let mut last_ignore = None;
         let mut last_position = window.outer_position().ok();
         let mut position_changed_at = None;
+        let mut last_topmost_refresh: Option<Instant> = None;
 
         loop {
             if window
@@ -76,8 +79,17 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
             timer::normalize_finished_timer(&window, &state);
             timer::normalize_finished_progress_timers(&window, &state);
             if !window.is_visible().unwrap_or(false) {
+                last_topmost_refresh = None;
                 thread::sleep(Duration::from_millis(30));
                 continue;
+            }
+            if last_topmost_refresh.is_none_or(|last| last.elapsed() >= topmost::REFRESH_INTERVAL) {
+                // Refresh even if WS_EX_TOPMOST is still set: another topmost
+                // window can be above us within the same Z-order band.
+                last_topmost_refresh = Some(Instant::now());
+                if let Err(error) = topmost::schedule_refresh(&window) {
+                    eprintln!("Unable to schedule clock topmost recovery: {error}");
+                }
             }
             let ctrl = unsafe { GetAsyncKeyState(modifier_vk) as u16 & 0x8000 != 0 };
             let menu_open = state.menu_open.lock().unwrap().contains(window.label());

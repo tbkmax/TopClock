@@ -1,5 +1,16 @@
 # Rust application backlog
 
+## Topmost recovery acceptance
+
+- **Title:** Check the recovery interval with the user's triggering applications.
+- **Problem or opportunity:** Native regression coverage can reproduce Z-order loss, but the original intermittent trigger and full desktop interaction matrix have not been observed.
+- **Desired outcome:** Visible desktop clocks recover without restart and without focus theft or input regressions.
+- **Scope:** [topmost.rs](../topmost.rs), [interaction.rs](../interaction.rs), and the [investigation checklist](../../../doc/report/TOPMOST_RECOVERY.md).
+- **Acceptance criteria:** Test launching another topmost app, borderless fullscreen and Alt-Tab, lock/unlock and resume, and display disconnect/reconnect. Verify recovery in roughly two seconds when the UI is responsive, hidden display clocks stay hidden, Ctrl-drag/menu and released click-through work, tray Settings/Quit work, and settings/positions survive restart.
+- **Dependencies and risks:** Requires the affected apps and an interactive multi-display Windows session. Two apps repeatedly raising themselves can flicker; exclusive fullscreen and secure desktops are outside this recovery's scope.
+- **Verification:** Run `npm run tauri:dev` and the checklist; record the triggering app/display mode and observed results before claiming the intermittent incident resolved.
+- **Priority:** High before release because the original failure is intermittent and native tests cannot validate all desktop/game behavior.
+
 Progress configuration, countdown duration, and optional appearance-field validation pass Rust tests, including legacy Progress instances without those fields. Independent Progress countdown sessions and native commands are implemented. The first-Start duration lock now persists through Pause and restart, with legacy active sessions migrated on load. The running Windows settings persistence and clock interaction check remains in the [frontend Progress backlog](../../../src/doc/backlog.md).
 
 The new language schema, Windows UI language command, and tray update compile and pass Rust tests. Installed MSIX behavior remains to be checked in the [package backlog](../../doc/backlog.md), alongside the frontend's [live localization check](../../../src/doc/backlog.md).
