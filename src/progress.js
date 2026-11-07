@@ -1,4 +1,5 @@
 const DAY_MS = 86_400_000;
+export const PROGRESS_WEEKDAYS = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
 export function localDateValue(date) {
     const year = date.getFullYear();
@@ -89,13 +90,16 @@ export function progressDisplay(options, now, session = null) {
         now.getFullYear(), now.getMonth(), now.getDate(),
         Math.floor(minutes / 60), minutes % 60,
     ).getTime();
-    const rows = options.ranges.map((range) => {
+    const weekday = PROGRESS_WEEKDAYS[now.getDay()];
+    const activeRanges = options.ranges.filter((range) => !range.days?.length || range.days.includes(weekday));
+    if (!activeRanges.length) return { rows: [], hidden: true };
+    const rows = activeRanges.map((range) => {
         const start = timeMinutes(range.start);
         const end = timeMinutes(range.end);
         const percent = 100 * (minute - start) / (end - start);
         return row(`${range.start}–${range.end}`, percent, nowMs, boundary(end));
     });
-    const finalEnd = timeMinutes(options.ranges.at(-1).end);
+    const finalEnd = timeMinutes(activeRanges.at(-1).end);
     const hidden = options.auto_hide === true && nowMs >= boundary(finalEnd) + 60_000;
     return { rows, hidden };
 }

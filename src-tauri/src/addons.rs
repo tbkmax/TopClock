@@ -173,7 +173,33 @@ fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
         ) else {
             return false;
         };
-        if range.len() != 2 || start < previous_end || start >= end {
+        if !range
+            .keys()
+            .all(|key| matches!(key.as_str(), "start" | "end" | "days"))
+            || range.len() < 2
+            || range.len() > 3
+            || range.get("days").is_some_and(|value| {
+                !value.as_array().is_some_and(|days| {
+                    days.len() <= 7
+                        && days.iter().all(|day| {
+                            day.as_str().is_some_and(|name| {
+                                matches!(
+                                    name,
+                                    "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat"
+                                )
+                            })
+                        })
+                        && days
+                            .iter()
+                            .filter_map(Value::as_str)
+                            .collect::<HashSet<_>>()
+                            .len()
+                            == days.len()
+                })
+            })
+            || start < previous_end
+            || start >= end
+        {
             return false;
         }
         previous_end = end;
@@ -370,6 +396,23 @@ mod tests {
         second.id = "progress-two".into();
         second.options["mode"] = serde_json::json!("date");
         assert!(valid_addons(&[first.clone(), second]));
+        first.options["ranges"][0]["days"] = serde_json::json!(["mon", "wed"]);
+        assert!(valid_addons(&[first.clone()]));
+        for invalid_days in [
+            serde_json::json!(["mon", "mon"]),
+            serde_json::json!(["monday"]),
+            serde_json::json!([1]),
+            serde_json::json!("mon"),
+        ] {
+            first.options["ranges"][0]["days"] = invalid_days;
+            assert!(!valid_addons(&[first.clone()]));
+        }
+        first.options["ranges"][0]["days"] = serde_json::json!([]);
+        assert!(valid_addons(&[first.clone()]));
+        first.options["ranges"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("days");
         first.options["ranges"][1]["start"] = serde_json::json!("09:30");
         assert!(!valid_addons(&[first.clone()]));
         first.options["ranges"][1]["start"] = serde_json::json!("10:00");

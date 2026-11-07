@@ -307,6 +307,29 @@ test('daily ranges have independent bars, finish pulse, final hide, and midnight
     assert.deepEqual(tomorrow.rows.map((row) => row.percent), [0, 0]);
 });
 
+test('weekday ranges show only scheduled bars and hide on unscheduled days', () => {
+    const options = {
+        mode: 'time', auto_hide: true,
+        ranges: [
+            { start: '09:00', end: '10:00', days: ['mon', 'wed'] },
+            { start: '11:00', end: '12:00', days: ['wed'] },
+        ],
+    };
+    const monday = progressDisplay(options, new Date(2026, 10, 2, 9, 30));
+    assert.equal(monday.hidden, false);
+    assert.deepEqual(monday.rows.map((item) => item.percent), [50]);
+    assert.equal(progressDisplay(options, new Date(2026, 10, 2, 10, 1)).hidden, true);
+    const tuesday = progressDisplay(options, new Date(2026, 10, 3, 9, 30));
+    assert.equal(tuesday.hidden, true);
+    assert.deepEqual(tuesday.rows, []);
+    options.auto_hide = false;
+    assert.equal(progressDisplay(options, new Date(2026, 10, 3, 9, 30)).hidden, true);
+    const wednesday = progressDisplay(options, new Date(2026, 10, 4, 11, 30));
+    assert.deepEqual(wednesday.rows.map((item) => item.percent), [100, 50]);
+    options.ranges[0].days = [];
+    assert.equal(progressDisplay(options, new Date(2026, 10, 3, 9, 30)).rows.length, 1);
+});
+
 test('new progress instances do not share ranges or dates', () => {
     const first = createAddon('progress');
     const second = createAddon('progress');
@@ -346,6 +369,13 @@ test('progress Settings edits preserve valid saved ranges and mode values', () =
     };
     app.addProgressRange(addon.id);
     assert.equal(addon.options.ranges.length, 2);
+    app.setProgressWeekday(addon.id, 0, 'mon');
+    app.setProgressWeekday(addon.id, 0, 'wed');
+    assert.deepEqual(addon.options.ranges[0].days, ['mon', 'wed']);
+    app.setProgressWeekday(addon.id, 0, 'mon');
+    assert.deepEqual(addon.options.ranges[0].days, ['wed']);
+    app.setProgressWeekday(addon.id, 0, null);
+    assert.equal(addon.options.ranges[0].days, undefined);
     const saved = saves;
     app.updateProgressRange(addon.id, 1, 'start', '10:00');
     assert.equal(saves, saved);

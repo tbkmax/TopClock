@@ -78,6 +78,13 @@
 .progress-settings .addon-instance-controls { margin-top:10px; }
 .progress-range-heading { margin:12px 0 7px; color:#faff69; font-size:10px; font-weight:700; }
 .progress-range { display:flex; align-items:end; gap:9px; margin:7px 0; flex-wrap:wrap; }
+.progress-range-card { padding:9px 10px; margin:7px 0; border:1px solid #353535; border-radius:8px; background:#202020; }
+.progress-range-card .progress-range { margin:0; }
+.progress-weekdays { display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-top:10px; }
+.progress-weekdays-title { width:100%; color:#aaa; font-size:10px; }
+.progress-weekday { min-width:30px; padding:5px 7px; border:1px solid #444; border-radius:6px; background:#292929; color:#bbb; font-size:10px; font-weight:600; }
+.progress-weekday.is-selected { border-color:#faff69; background:#34351d; color:#faff69; }
+.progress-weekday:hover,.progress-weekday:focus-visible { border-color:#faff69; }
 .progress-range label { display:flex; flex-direction:column; gap:4px; color:#aaa; font-size:10px; }
 .progress-range .action-button { padding:5px 10px; }
 .progress-add-range { margin-top:5px; }

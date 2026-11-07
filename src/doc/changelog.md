@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-11-06 - Weekday schedules for Progress time ranges
+
+- Each time range can run on one or several weekdays, selected from visible controls in Settings. A range with no selected weekdays runs every day, including existing saved ranges. The clock and preview hide bars on unscheduled days; auto-hide follows the last range scheduled that day. No settings migration is required. Live Windows layout and interaction checks remain open.
+
 ### 2026-10-30 - Independent Progress countdown bars
 
 - Each Progress instance can now run a countdown with its own Start/Pause and Reset controls and saved session. The bar fills from empty to full, pulses briefly at completion, and can be toggled by modifier-click on the clock. The numeric Timer is unchanged. Settings preview and desktop use the same progress, while percentages remain optional and off by default. Live Windows interaction verification remains open.

@@ -1,6 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { createAddon, timerElapsed } from './addons.js';
-import { nextLocalDateValue, timeMinutes, validDateValue } from './progress.js';
+import { nextLocalDateValue, PROGRESS_WEEKDAYS, timeMinutes, validDateValue } from './progress.js';
+import { weekdayText } from './i18n.js';
 
 const MAX_PROGRESS_RANGES = 8;
 
@@ -43,6 +44,26 @@ export function reorderAddons(addons, sourceId, targetId, placement, after = fal
 }
 
 export const addonMethods = {
+    progressWeekdays() { return PROGRESS_WEEKDAYS; },
+    progressWeekdayLabel(day) {
+        return weekdayText(new Date(2023, 0, 1 + PROGRESS_WEEKDAYS.indexOf(day)), this.language);
+    },
+    progressWeekdaySelected(range, day) { return range.days?.includes(day) === true; },
+    setProgressWeekday(id, index, day) {
+        const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
+        const range = addon?.options.ranges[index];
+        if (!range || (day !== null && !PROGRESS_WEEKDAYS.includes(day))) return;
+        if (day === null) {
+            delete range.days;
+        } else {
+            const selected = new Set(range.days || []);
+            if (selected.has(day)) selected.delete(day);
+            else selected.add(day);
+            if (selected.size) range.days = PROGRESS_WEEKDAYS.filter((value) => selected.has(value));
+            else delete range.days;
+        }
+        this.save();
+    },
     hasAddon(kind) { return (this.settings.addons || []).some((addon) => addon.kind === kind); },
 
     addAddon(kind) {
