@@ -2,6 +2,20 @@
 
 ## Added
 
+### 2026-11-06 - Unattended memory testing and reports
+
+- Added a [double-click launcher](../Test-TopClockLongRun.cmd) and [eight-hour test](../Test-TopClockLongRun.ps1) with early stop, exact build identification, and Windows event collection from the run start.
+- Added [HTML and ZIP report generation](../New-TopClockMemoryReport.ps1) with host/WebView memory trends, sampling gaps, coverage limits and recovery from a saved partial capture. Verified a short live 1.0.1 run and a separate controlled app exit in Windows PowerShell 5.1. Simulated eight-hour stable and rising traces exercised the analysis, along with interrupted and empty captures.
+
+### 2026-11-06 - Local memory and failure measurements
+
+- Added [Measure-TopClockMemory.ps1](../Measure-TopClockMemory.ps1) for bounded CSV sampling of one clock's host and descendant WebView2 private memory, process counts and host handles/threads.
+- Added [Collect-TopClockFailures.ps1](../Collect-TopClockFailures.ps1) for raw local crash/hang and resource-exhaustion event export. Both protect existing output files. See [usage and interpretation](architecture.md#runtime-diagnostics).
+- Verified both scripts in Windows PowerShell 5.1 and PowerShell 7, including refusal to overwrite previous exports. A local failure-event query returned zero matching records. Long Store-installed captures remain release acceptance work.
+- Two four-minute standalone 1.0.1 captures on a two-display PC completed without an unexpected exit. After 60 seconds of warmup, original host-plus-WebView2 private memory ranged from 295.96 to 311.21 MiB, and the patched run ranged from 291.24 to 299.68 MiB. The patched run also exercised Settings visibility. Attribution of Partner Center's memory failures remains open after these short, separate runs.
+
+## Added
+
 ### 2026-10-29 - Reproducible MSIX development build
 
 - Added [Build-Msix.ps1](../Build-Msix.ps1) to build a versioned executable and package it with an explicit MSIX identity, publisher, manifest, and Store logo assets. It produces an unsigned development artifact; a matching signature is required for installation. No existing direct-download build is changed.

@@ -1,5 +1,12 @@
 # Frontend backlog
 
+## Memory failure release acceptance
+
+- **Problem and outcome** — Partner Center reported uncategorized memory failures for 1.0.0.0. The hidden preview timer has been corrected, while the production failure cause remains open.
+- **Scope and acceptance** — Run the [memory sampler](../../scripts/Measure-TopClockMemory.ps1) for at least an hour per scenario with one/two displays, Settings closed/open, and representative add-ons. Compare baseline and patched builds under the same conditions and investigate sustained private-memory growth or process exits.
+- **Dependencies and verification** — Use a Store-installed candidate for package-specific behavior. Include minimize/restore, tray opening, Ctrl interactions, timer completion, display reconnects, persisted settings and positions. Short standalone tests supplement this coverage.
+- **Priority** — High before claiming the Store-reported memory failures are resolved.
+
 ## Context menu live Windows acceptance
 
 - **Problem and desired outcome:** Automated layout and mocked-native browser checks pass, but the actual WebView must show an unclipped shadow and dismiss on outside input without leaving click-through disabled or shifting saved positions.

@@ -55,8 +55,9 @@ pub fn run() {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
             let config = config_store::load_config(&settings_path);
             let state = Arc::new(ClockState::new(config, settings_path));
-            config_store::save_config(&state, &state.config.lock().unwrap())
-                .map_err(std::io::Error::other)?;
+            if let Err(error) = config_store::save_config(&state, &state.config.lock().unwrap()) {
+                eprintln!("Unable to persist startup settings: {error}");
+            }
             app.manage(state);
 
             // Create webviews only after their commands can read the managed settings.

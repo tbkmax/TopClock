@@ -1,5 +1,12 @@
 # Frontend changelog
 
+## Fixed
+
+### 2026-11-06 - Pause the hidden Settings preview
+
+- Settings uses native window visibility and minimization to suspend its periodic preview, including event-triggered rendering, and resumes immediately on restore. Duplicate visibility notifications share one timer and stale responses cannot restart it. Regression tests cover repeated visibility changes and asynchronous response ordering.
+- Verification passed with 24 frontend tests, the Vite production build, and three native WebView2 show/minimize/restore/close cycles. The original 1.0.1 hidden page continued updating; the patched hidden/minimized page held its preview stable and resumed on show. Full Store and prolonged-use acceptance remains in the backlog.
+
 ## Added
 
 ### 2026-11-06 - Weekday schedules for Progress time ranges

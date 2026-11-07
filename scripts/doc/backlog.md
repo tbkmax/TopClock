@@ -1,5 +1,13 @@
 # Scripts backlog
 
+## Store candidate memory soak
+
+- **Problem and outcome** — The new tools enable local measurement. Partner Center's 1.0.0.0 memory/crash signatures are still uncategorized.
+- **Scope and acceptance** — Capture hour-long baseline/candidate traces across one/two displays, hidden/open Settings, add-ons and sleep/resume. Collect failure XML after any unexpected exit. Use a Store-delivered candidate to check package-specific conditions.
+- **Dependencies and risks** — Requires the affected runtime/environment or a reproducible failure. Long-term Store reliability requires prolonged package testing.
+- **Verification** — The [long-run report](../Test-TopClockLongRun.ps1) automates the capture and summarizes host and WebView trends after warmup. Run the eight-hour test with the patched build; compare sustained growth and failure details against a baseline under the same workload. Production attribution still needs those results or a matching diagnostic from an affected PC.
+- **Priority** — High for release confidence.
+
 Use this file for verified unfinished work in [the Windows wrapper](../tauri-windows.cmd), [MSIX build](../Build-Msix.ps1), and [portable cleanup scripts](../Uninstall-TopClock.cmd). Follow [the backlog template](../../templates/doc/backlog.md) for scope, acceptance criteria, risks, verification and priority.
 
 ## Store-delivered installation validation

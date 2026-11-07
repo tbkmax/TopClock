@@ -292,7 +292,9 @@ pub(crate) fn reconcile_displays(
                 y: position.y - main.bounds.y,
             });
             config.position = None;
-            save_config(state, &config)?;
+            if let Err(error) = save_config(state, &config) {
+                eprintln!("Unable to persist migrated clock position: {error}");
+            }
         }
     }
     let selected_main_id = main_id.clone();

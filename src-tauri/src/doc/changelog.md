@@ -1,5 +1,12 @@
 # Rust application changelog
 
+## Fixed
+
+### 2026-11-06 - Allow startup after a settings write failure
+
+- Startup configuration and legacy position-migration writes log failures while retaining the usable in-memory state. A locked or unwritable settings file no longer aborts these startup paths. Other initialization failures keep their existing handling.
+- Verification passed with 25 Rust tests, a release build, and a native launch while an external read handle denied writes to the existing settings file. The running clock logged Windows error 32 and displayed its windows. Store-specific failure reproduction remains open.
+
 ## Added
 
 ### 2026-11-06 - Validate optional Progress weekdays

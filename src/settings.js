@@ -13,10 +13,12 @@ import { DEFAULT_SHORTCUTS, shortcutGroups, shortcutMethods } from './settings-s
 import { updateMethods } from './settings-updates.js';
 import { createSettingsPersistence } from './settings-persistence.js';
 import { nextSettingsTab } from './settings-tabs.js';
+import { createSettingsPreview } from './settings-preview.js';
 import './settings.css';
 import './progress.css';
 
 const settingsWindow = getCurrentWindow();
+let previewClock;
 window.Alpine = Alpine;
 
 Alpine.data('settingsApp', () => ({
@@ -83,6 +85,7 @@ Alpine.data('settingsApp', () => ({
     shortcutGroups,
 
     async init() {
+        previewClock = createSettingsPreview(settingsWindow, () => this.updatePreview());
         this.systemLocale = await invoke('get_system_locale').catch(() => navigator.language || 'en');
         this.settings = await invoke('get_settings');
         this.syncLanguage();
@@ -137,8 +140,6 @@ Alpine.data('settingsApp', () => ({
         } catch (error) {
             this.error = this.t('error.displays', { error });
         }
-        this.updatePreview();
-        setInterval(() => this.updatePreview(), 200);
         await listen('clock-settings-changed', (event) => {
             if (!this.saveController.hasPending()) {
                 this.settings = event.payload;
@@ -163,13 +164,25 @@ Alpine.data('settingsApp', () => ({
         });
         await settingsWindow.onFocusChanged(({ payload: focused }) => {
             if (focused) this.refreshStartupState();
+            this.syncPreviewTimer();
         });
+        await settingsWindow.onResized(() => this.syncPreviewTimer());
+        await this.syncPreviewTimer();
         if (!this.isPackaged && this.settings.auto_check_updates) {
             this.checkForUpdates(false);
         }
     },
 
+    async syncPreviewTimer() {
+        try {
+            await previewClock.refresh();
+        } catch (error) {
+            console.error('Could not check Settings window visibility:', error);
+        }
+    },
+
     updatePreview() {
+        if (!previewClock?.running) return;
         const now = new Date();
         const result = markChangedNumbers(
             timeParts(now, this.settings),
@@ -381,9 +394,9 @@ Alpine.data('settingsApp', () => ({
     async close() {
         this.stopRecording();
         if (this.saveController && !await this.saveController.flush()) return;
-        invoke('hide_settings').catch(console.error);
+        await invoke('hide_settings').then(() => this.syncPreviewTimer()).catch(console.error);
     },
-    minimize() { invoke('minimize_settings').catch(console.error); },
+    minimize() { return invoke('minimize_settings').then(() => this.syncPreviewTimer()).catch(console.error); },
 }));
 
 Alpine.start();

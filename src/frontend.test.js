@@ -10,6 +10,63 @@ import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './setti
 import { nextSettingsTab } from './settings-tabs.js';
 import { timeParts } from './time-format.js';
 import { clockWindowLayout, MENU_SHADOW_SPACE } from './menu-layout.js';
+import { createSettingsPreview } from './settings-preview.js';
+
+test('Settings preview pauses while hidden/minimized and resumes with exactly one timer', async () => {
+    let visible = false;
+    let minimized = false;
+    let renders = 0;
+    let scheduled = 0;
+    const timers = new Set();
+    const preview = createSettingsPreview({
+        isVisible: async () => visible,
+        isMinimized: async () => minimized,
+    }, () => { renders++; }, {
+        schedule: (_, delay) => {
+            assert.equal(delay, 200);
+            const id = ++scheduled;
+            timers.add(id);
+            return id;
+        },
+        cancel: (id) => timers.delete(id),
+    });
+    await preview.refresh();
+    assert.equal(preview.running, false);
+    assert.equal(renders, 0);
+    for (let cycle = 0; cycle < 3; cycle++) {
+        visible = true;
+        await preview.refresh();
+        await preview.refresh();
+        assert.equal(timers.size, 1);
+        assert.equal(renders, cycle * 2 + 1);
+        minimized = true;
+        await preview.refresh();
+        assert.equal(timers.size, 0);
+        minimized = false;
+        await preview.refresh();
+        assert.equal(renders, cycle * 2 + 2);
+        visible = false;
+        await preview.refresh();
+        assert.equal(timers.size, 0);
+    }
+});
+
+test('A late visibility response cannot restart a hidden Settings preview', async () => {
+    let finishOld;
+    let reads = 0;
+    const preview = createSettingsPreview({
+        isVisible: () => ++reads === 1 ? new Promise((resolve) => { finishOld = resolve; }) : Promise.resolve(false),
+        isMinimized: async () => false,
+    }, () => assert.fail('Hidden preview rendered'), {
+        schedule: () => assert.fail('Hidden preview scheduled'),
+        cancel: () => {},
+    });
+    const old = preview.refresh();
+    await preview.refresh();
+    finishOld(true);
+    await old;
+    assert.equal(preview.running, false);
+});
 
 test('menu layout reserves shadow space for small clocks, translations and timer rows', () => {
     for (const clock of [{ width: 42, height: 24 }, { width: 700, height: 300 }]) {

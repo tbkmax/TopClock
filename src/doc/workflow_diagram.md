@@ -1,5 +1,24 @@
 # Frontend workflows
 
+## Settings preview lifetime
+
+```mermaid
+sequenceDiagram
+    participant UI as settings.js
+    participant Preview as settings-preview.js
+    participant Native as Tauri window
+    UI->>Preview: refresh on init, focus, resize, hide or minimize
+    Preview->>Native: isVisible and isMinimized
+    Native-->>Preview: Window state
+    alt Latest request and visible/restored
+        Preview->>UI: Start one interval and render immediately
+    else Latest request and hidden/minimized
+        Preview->>Preview: Clear interval
+    end
+```
+
+[settings-preview.js](../settings-preview.js) rejects obsolete responses. Settings and timer events keep the component's state current while rendering is paused. Existing component relationships below still apply.
+
 ## Menu layout and dismissal
 
 ```mermaid

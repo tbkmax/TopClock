@@ -1,6 +1,27 @@
 # Script workflow
 
-This directory contains command scripts and one PowerShell cleanup script, but no classes, so a class diagram would not describe its structure. The build command flow is:
+## Runtime measurement
+
+The [long-run launcher](../Test-TopClockLongRun.ps1) creates a dated run directory and delegates sampling to the flow below. A `STOP` file ends sampling on the next iteration. On return or failure, it records the end state, requests local Windows events since startup of the test, and calls the [report generator](../New-TopClockMemoryReport.ps1). The generator reads completed CSV rows and metadata, flags coverage problems, estimates memory trends, then writes HTML, JSON and a ZIP. After a forced terminal close, the same generator reads the available rows from the saved directory; the previous `Running` state identifies an interrupted capture.
+
+```mermaid
+sequenceDiagram
+    participant Caller as PowerShell
+    participant Sampler as Measure-TopClockMemory.ps1
+    participant OS as Windows processes
+    participant CSV as Local diagnostic file
+    Caller->>Sampler: Duration, interval, optional PID, output path
+    Sampler->>OS: Attach to one TopClock process
+    loop Until duration expires or process exits
+        Sampler->>OS: Read host counters and discover WebView2 descendants
+        OS-->>Sampler: Private memory and process identity
+        Sampler->>CSV: Append timestamped sample
+    end
+```
+
+[Collect-TopClockFailures.ps1](../Collect-TopClockFailures.ps1) separately queries raw Windows event XML, retains events mentioning TopClock, and writes a new local XML file. Both tools fail visibly on unavailable data sources or an existing output path. See [diagnostic usage](architecture.md#runtime-diagnostics).
+
+This directory contains procedural build, cleanup, and diagnostic scripts. A class diagram would misrepresent their structure. The build command flow follows.
 
 ```mermaid
 sequenceDiagram

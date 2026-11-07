@@ -1,5 +1,12 @@
 # Rust application backlog
 
+## Identify production memory failure signatures
+
+- **Problem and outcome** — Partner Center lists uncategorized failures, so the faulting process/module and exception remain unknown. Obtain a matching Windows error event or dump before attributing the production incidents to a specific cause.
+- **Scope and acceptance** — Test a Store-installed candidate using the [diagnostic scripts](../../../scripts/doc/architecture.md#runtime-diagnostics), including prolonged use, display reconnects, startup, tray/settings interaction, and exit. Correlate failures with process memory and the exact binary version.
+- **Dependencies and verification** — Requires a reproduction or diagnostics from an affected device. Verify settings/position restore across an upgrade and temporarily unwritable storage.
+- **Priority** — High before asserting that the Store incidents are fixed.
+
 ## Context menu input acceptance
 
 The native dismissal observer and tests are implemented. Live verification of outside presses, focus changes, transparent padding, click-through restoration, tray actions and position persistence is tracked in the [frontend context-menu checklist](../../../src/doc/backlog.md#context-menu-live-windows-acceptance). This is high-priority release acceptance: a 30 ms poll can miss short nonactivating clicks, and mixed-DPI conversion/native focus timing require an interactive Windows desktop. See [solutions and residual risks](../../../doc/report/CONTEXT_MENU_FIX.md).

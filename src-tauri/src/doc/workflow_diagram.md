@@ -1,5 +1,23 @@
 # Rust workflows
 
+## Startup persistence failure
+
+```mermaid
+sequenceDiagram
+    participant App as lib.rs
+    participant Config as config_store.rs
+    participant Windows as Clock windows
+    App->>Config: Load and normalize settings
+    App->>Config: Save startup configuration
+    Config-->>App: Success or write error
+    opt Write error
+        App->>App: Log error and retain loaded settings
+    end
+    App->>Windows: Create windows and reconcile displays
+```
+
+[displays.rs](../displays.rs) also logs a failed legacy position-migration save and keeps the migrated in-memory position. User-triggered saves still report errors to their callers. See the [package architecture](../../doc/architecture.md) for startup dependencies.
+
 ## Per-clock menu input observation
 
 ```mermaid
