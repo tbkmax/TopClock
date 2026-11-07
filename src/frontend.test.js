@@ -369,17 +369,29 @@ test('progress Settings edits preserve valid saved ranges and mode values', () =
     };
     app.addProgressRange(addon.id);
     assert.equal(addon.options.ranges.length, 2);
+    assert.equal(app.progressWeekdaySelected(addon.options.ranges[0], 'mon'), true);
     app.setProgressWeekday(addon.id, 0, 'mon');
-    app.setProgressWeekday(addon.id, 0, 'wed');
-    assert.deepEqual(addon.options.ranges[0].days, ['mon', 'wed']);
+    assert.equal(app.progressWeekdaySelected(addon.options.ranges[0], 'mon'), false);
+    assert.equal(addon.options.ranges[0].days.length, 6);
     app.setProgressWeekday(addon.id, 0, 'mon');
-    assert.deepEqual(addon.options.ranges[0].days, ['wed']);
-    app.setProgressWeekday(addon.id, 0, null);
     assert.equal(addon.options.ranges[0].days, undefined);
+    addon.options.ranges[0].days = ['mon'];
+    addon.options.ranges[1].days = ['wed'];
+    assert.equal(app.updateProgressRangeTimes(addon.id, 1, '09:30', '10:30'), 1);
+    assert.equal(addon.options.ranges[1].start, '09:30');
+    const beforeOverlap = saves;
+    app.setProgressWeekday(addon.id, 1, 'mon');
+    assert.equal(saves, beforeOverlap);
+    assert.deepEqual(addon.options.ranges[1].days, ['wed']);
+    app.setProgressWeekday(addon.id, 1, 'wed');
+    assert.deepEqual(addon.options.ranges[1].days, ['wed']);
     const saved = saves;
-    app.updateProgressRange(addon.id, 1, 'start', '10:00');
+    assert.equal(app.updateProgressRangeTimes(addon.id, 1, '09:30', '09:30'), null);
     assert.equal(saves, saved);
-    assert.equal(addon.options.ranges[1].start, '17:00');
+    assert.equal(addon.options.ranges[1].end, '10:30');
+    assert.equal(app.error, 'addons.invalidProgressRange');
+    app.setProgressWeekday(addon.id, 0, null);
+    assert.deepEqual(addon.options.ranges[0].days, ['mon']);
     assert.equal(app.error, 'addons.invalidProgressRange');
     app.setProgressMode(addon.id, 'time');
     app.setProgressMode(addon.id, 'date');
@@ -393,6 +405,17 @@ test('progress Settings edits preserve valid saved ranges and mode values', () =
     assert.equal(saves, afterAppearance);
     app.updateProgressAppearance(addon.id, 'bar_length_percent', 90);
     assert.equal(addon.options.bar_length_percent, 90);
+});
+
+test('adding a period reuses an hour on weekdays where that hour is free', () => {
+    const addon = createAddon('progress');
+    addon.options.ranges = [{ start: '09:00', end: '10:00', days: ['mon'] }];
+    const app = { ...addonMethods, settings: { addons: [addon] }, save() {} };
+    assert.equal(app.addProgressRange(addon.id), 1);
+    assert.equal(addon.options.ranges[1].start, '09:00');
+    assert.equal(addon.options.ranges[1].end, '10:00');
+    assert.equal(app.progressWeekdaySelected(addon.options.ranges[1], 'mon'), false);
+    assert.equal(app.progressWeekdaySelected(addon.options.ranges[1], 'wed'), true);
 });
 
 test('Progress countdowns have independent elapsed bars and a completion pulse', () => {

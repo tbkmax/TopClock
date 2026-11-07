@@ -24,6 +24,10 @@
 
 ## Changed
 
+### 2026-11-06 - Allow Progress overlaps on separate weekdays
+
+- Native settings validation now accepts overlapping time periods when their weekday selections do not intersect. It still rejects overlaps on a shared day, treats missing weekday selections as every day, and requires periods sorted by start time. Existing settings need no migration.
+
 ### 2026-10-30 - Lock Progress minutes after first Start
 
 - A Progress countdown now remembers that it was started even after Pause or restart. Its duration stays fixed until it finishes or is reset. Older running or elapsed countdown sessions recover this lock when loaded; numeric Timer controls are unchanged.

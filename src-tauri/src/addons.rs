@@ -94,6 +94,37 @@ fn time_minutes(value: &str) -> Option<u16> {
     (hour < 24 && minute < 60).then_some(hour * 60 + minute)
 }
 
+fn progress_days_mask(range: &serde_json::Map<String, Value>) -> Option<u8> {
+    let Some(days) = range.get("days") else {
+        return Some(0x7f);
+    };
+    let days = days.as_array()?;
+    if days.is_empty() {
+        return Some(0x7f);
+    }
+    if days.len() > 7 {
+        return None;
+    }
+    let mut mask = 0u8;
+    for day in days {
+        let bit = match day.as_str()? {
+            "sun" => 1 << 0,
+            "mon" => 1 << 1,
+            "tue" => 1 << 2,
+            "wed" => 1 << 3,
+            "thu" => 1 << 4,
+            "fri" => 1 << 5,
+            "sat" => 1 << 6,
+            _ => return None,
+        };
+        if mask & bit != 0 {
+            return None;
+        }
+        mask |= bit;
+    }
+    Some(mask)
+}
+
 fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
     if !(5..=9).contains(&options.len())
         || !options.keys().all(|key| {
@@ -156,7 +187,8 @@ fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
     {
         return false;
     }
-    let mut previous_end = 0;
+    let mut previous_start = 0;
+    let mut validated_ranges = Vec::with_capacity(ranges.len());
     ranges.iter().all(|range| {
         let Some(range) = range.as_object() else {
             return false;
@@ -173,36 +205,26 @@ fn valid_progress_options(options: &serde_json::Map<String, Value>) -> bool {
         ) else {
             return false;
         };
+        let Some(days) = progress_days_mask(range) else {
+            return false;
+        };
         if !range
             .keys()
             .all(|key| matches!(key.as_str(), "start" | "end" | "days"))
             || range.len() < 2
             || range.len() > 3
-            || range.get("days").is_some_and(|value| {
-                !value.as_array().is_some_and(|days| {
-                    days.len() <= 7
-                        && days.iter().all(|day| {
-                            day.as_str().is_some_and(|name| {
-                                matches!(
-                                    name,
-                                    "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat"
-                                )
-                            })
-                        })
-                        && days
-                            .iter()
-                            .filter_map(Value::as_str)
-                            .collect::<HashSet<_>>()
-                            .len()
-                            == days.len()
-                })
-            })
-            || start < previous_end
+            || start < previous_start
             || start >= end
+            || validated_ranges
+                .iter()
+                .any(|(other_start, other_end, other_days)| {
+                    start < *other_end && *other_start < end && days & *other_days != 0
+                })
         {
             return false;
         }
-        previous_end = end;
+        previous_start = start;
+        validated_ranges.push((start, end, days));
         true
     })
 }
@@ -415,6 +437,19 @@ mod tests {
             .remove("days");
         first.options["ranges"][1]["start"] = serde_json::json!("09:30");
         assert!(!valid_addons(&[first.clone()]));
+        first.options["ranges"][0]["days"] = serde_json::json!(["mon"]);
+        first.options["ranges"][1]["days"] = serde_json::json!(["wed"]);
+        assert!(valid_addons(&[first.clone()]));
+        first.options["ranges"][1]["days"] = serde_json::json!(["mon", "wed"]);
+        assert!(!valid_addons(&[first.clone()]));
+        first.options["ranges"][0]
+            .as_object_mut()
+            .unwrap()
+            .remove("days");
+        first.options["ranges"][1]
+            .as_object_mut()
+            .unwrap()
+            .remove("days");
         first.options["ranges"][1]["start"] = serde_json::json!("10:00");
         first.options["end_date"] = serde_json::json!("2026-02-30");
         assert!(!valid_addons(&[first.clone()]));

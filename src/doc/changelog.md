@@ -24,6 +24,10 @@
 
 ## Changed
 
+### 2026-11-06 - Show Progress periods in a week grid
+
+- Settings now shows one compact row per time period and a weekday column for each day. Selecting a time row opens its time editor below the grid; day cells save directly. Adding a period chooses an available one-hour slot, and overlapping hours are allowed on separate weekdays. Existing saved periods stay valid. Native WebView layout and interaction checks remain open.
+
 ### 2026-10-30 - Drag add-ons around the clock block
 
 - Configured add-ons now have drag handles for ordering. A clock block separates above and below stacks, so dropping across it also changes placement. The handles support Up and Down arrow keys for keyboard ordering. The old Up, Down, and position controls are removed from Edit. Existing add-on settings require no migration; native drag behavior still needs a live Windows check.

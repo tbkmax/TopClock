@@ -13,9 +13,32 @@ function validRanges(ranges) {
     return ranges.length >= 1 && ranges.length <= MAX_PROGRESS_RANGES && ranges.every((range, index) => {
         const start = timeMinutes(range.start);
         const end = timeMinutes(range.end);
-        const previousEnd = index ? timeMinutes(ranges[index - 1].end) : 0;
-        return start !== null && end !== null && start < end && (index === 0 || start >= previousEnd);
+        if (start === null || end === null || start >= end || (index && start < timeMinutes(ranges[index - 1].start))) return false;
+        return ranges.slice(0, index).every((previous) => {
+            if (start >= timeMinutes(previous.end)) return true;
+            return PROGRESS_WEEKDAYS.every((day) => !rangeRunsOnDay(range, day) || !rangeRunsOnDay(previous, day));
+        });
     });
+}
+
+function rangeRunsOnDay(range, day) {
+    return !range.days?.length || range.days.includes(day);
+}
+
+function availableProgressRange(ranges) {
+    // Prefer a daytime hour, then an earlier hour, on each day where it is free.
+    const starts = [...Array.from({ length: 15 }, (_, hour) => (hour + 9) * 60),
+        ...Array.from({ length: 9 }, (_, hour) => hour * 60)];
+    for (const start of starts) {
+        const end = start + 60;
+        if (end > 1439) continue;
+        const days = PROGRESS_WEEKDAYS.filter((day) => ranges.every((range) =>
+            !rangeRunsOnDay(range, day) || end <= timeMinutes(range.start) || start >= timeMinutes(range.end)));
+        if (days.length) {
+            return { start: timeValue(start), end: timeValue(end), ...(days.length === 7 ? {} : { days }) };
+        }
+    }
+    return null;
 }
 
 export function reorderAddons(addons, sourceId, targetId, placement, after = false) {
@@ -44,24 +67,33 @@ export function reorderAddons(addons, sourceId, targetId, placement, after = fal
 }
 
 export const addonMethods = {
-    progressWeekdays() { return PROGRESS_WEEKDAYS; },
+    progressWeekdays() { return [...PROGRESS_WEEKDAYS.slice(1), PROGRESS_WEEKDAYS[0]]; },
     progressWeekdayLabel(day) {
         return weekdayText(new Date(2023, 0, 1 + PROGRESS_WEEKDAYS.indexOf(day)), this.language);
     },
-    progressWeekdaySelected(range, day) { return range.days?.includes(day) === true; },
+    progressWeekdaySelected(range, day) { return rangeRunsOnDay(range, day); },
     setProgressWeekday(id, index, day) {
         const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
         const range = addon?.options.ranges[index];
         if (!range || (day !== null && !PROGRESS_WEEKDAYS.includes(day))) return;
+        const next = { ...range };
         if (day === null) {
-            delete range.days;
+            delete next.days;
         } else {
-            const selected = new Set(range.days || []);
+            const selected = new Set(range.days?.length ? range.days : PROGRESS_WEEKDAYS);
             if (selected.has(day)) selected.delete(day);
             else selected.add(day);
-            if (selected.size) range.days = PROGRESS_WEEKDAYS.filter((value) => selected.has(value));
-            else delete range.days;
+            if (!selected.size) return;
+            if (selected.size === 7) delete next.days;
+            else next.days = PROGRESS_WEEKDAYS.filter((value) => selected.has(value));
         }
+        const ranges = addon.options.ranges.map((item, current) => current === index ? next : item);
+        if (!validRanges(ranges)) {
+            this.error = this.t('addons.invalidProgressRange');
+            return;
+        }
+        addon.options.ranges = ranges;
+        this.error = '';
         this.save();
     },
     hasAddon(kind) { return (this.settings.addons || []).some((addon) => addon.kind === kind); },
@@ -249,15 +281,17 @@ export const addonMethods = {
 
     canAddProgressRange(addon) {
         const ranges = addon.options.ranges;
-        return ranges.length < MAX_PROGRESS_RANGES && timeMinutes(ranges.at(-1).end) <= 1379;
+        return ranges.length < MAX_PROGRESS_RANGES && availableProgressRange(ranges) !== null;
     },
 
     addProgressRange(id) {
         const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
         if (!addon || !this.canAddProgressRange(addon)) return;
-        const start = timeMinutes(addon.options.ranges.at(-1).end);
-        addon.options.ranges.push({ start: timeValue(start), end: timeValue(start + 60) });
+        const range = availableProgressRange(addon.options.ranges);
+        addon.options.ranges.push(range);
+        addon.options.ranges.sort((a, b) => timeMinutes(a.start) - timeMinutes(b.start));
         this.save();
+        return addon.options.ranges.indexOf(range);
     },
 
     removeProgressRange(id, index) {
@@ -267,18 +301,22 @@ export const addonMethods = {
         this.save();
     },
 
-    updateProgressRange(id, index, field, value) {
+    updateProgressRangeTimes(id, index, start, end) {
         const addon = this.settings.addons.find((item) => item.id === id && item.kind === 'progress');
-        if (!addon || !['start', 'end'].includes(field) || !addon.options.ranges[index]) return;
+        if (!addon || !addon.options.ranges[index]) return null;
         const ranges = addon.options.ranges.map((range) => ({ ...range }));
-        ranges[index][field] = value;
+        const edited = ranges[index];
+        edited.start = start;
+        edited.end = end;
+        ranges.sort((a, b) => timeMinutes(a.start) - timeMinutes(b.start));
         if (!validRanges(ranges)) {
             this.error = this.t('addons.invalidProgressRange');
-            return;
+            return null;
         }
         addon.options.ranges = ranges;
         this.error = '';
         this.save();
+        return ranges.indexOf(edited);
     },
 
     timerChange(field, value) {
