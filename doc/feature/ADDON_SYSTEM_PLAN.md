@@ -41,8 +41,8 @@ The first implementation deliberately excludes third-party executable add-ons. S
 
 ## Adding another built-in add-on
 
-1. Add its catalog entry and display formatter to [addons.js](../../src/addons.js). The clock's above/below stack and Settings dashboard ordering, placement, size, enable and removal controls are shared, so they do not need a new layout path.
-2. Add one options validation branch in [addons.rs](../../src-tauri/src/addons.rs), plus a focused validation test. This keeps untrusted settings JSON at the native boundary and does not change `PersistedConfig` or window construction.
+1. Add its catalog entry and display formatter to [addons.js](../../src/addons/model.js). The clock's above/below stack and Settings dashboard ordering, placement, size, enable and removal controls are shared, so they do not need a new layout path.
+2. Add one options validation branch in [addons.rs](../../src-tauri/src/addons/mod.rs), plus a focused validation test. This keeps untrusted settings JSON at the native boundary and does not change `PersistedConfig` or window construction.
 3. Add only the new type-specific controls to [settings.html](../../settings.html) and their update method to [settings.js](../../src/settings.js). A display-only add-on needs no new Tauri command. An interactive add-on should use a narrowly scoped native command and, if it needs a system-wide action, an explicit shortcut registration entry.
 
 This extension path is for built-in code shipped with TopClock. The shared instance shape avoids a backend schema migration for another simple display add-on; its options still require native validation.

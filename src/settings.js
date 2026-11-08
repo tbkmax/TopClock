@@ -5,20 +5,19 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
-import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons.js';
+import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons/model.js';
 import { getAddonDefinition } from './addons/registry.js';
-import { createAddonState } from './addons/state.js';
-import { createAddonController } from './addons/controller.js';
-import { markCountdownCompletion, progressBarStyle } from './progress.js';
+import { createAddonHost } from './addons/host.js';
+import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
 import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
-import { addonMethods } from './settings-addons.js';
+import { addonMethods } from './addons/instance-editor.js';
 import { DEFAULT_SHORTCUTS, shortcutGroups, shortcutMethods } from './settings-shortcuts.js';
 import { updateMethods } from './settings-updates.js';
 import { createSettingsPersistence } from './settings-persistence.js';
 import { nextSettingsTab } from './settings-tabs.js';
 import { createSettingsPreview } from './settings-preview.js';
 import './settings.css';
-import './progress.css';
+import './addons/builtins/progress.css';
 
 const settingsWindow = getCurrentWindow();
 let previewClock;
@@ -62,10 +61,9 @@ Alpine.data('settingsApp', () => ({
     latestReleaseTag: '',
     previewParts: [],
     previewAddons: [],
-    timerSession: null,
-    progressTimerSessions: {},
-    addonState: null,
-    addonController: null,
+    addonHost: null,
+    get timerSession() { return this.addonHost?.snapshot.timerSession ?? null; },
+    get progressTimerSessions() { return this.addonHost?.snapshot.progressTimerSessions ?? {}; },
     progressPreviousPercent: {},
     progressCompletionUntil: {},
     pendingTimerChange: null,
@@ -122,25 +120,20 @@ Alpine.data('settingsApp', () => ({
                 if (!isCurrent()) return;
                 this.settings = settings;
                 this.syncLanguage();
-                this.addonState.setTimer(timerSession);
-                this.addonState.setProgress(progressTimerSessions);
+                this.addonHost.setTimer(timerSession);
+                this.addonHost.setProgress(progressTimerSessions);
                 this.updatePreview();
             },
             onError: (error) => { this.error = this.t('error.save', { error }); },
         });
         this.saveController.setCommitted(this.settings);
-        this.addonState = createAddonState({ onChange: ({ timerSession, progressTimerSessions }) => {
-            this.timerSession = timerSession;
-            this.progressTimerSessions = progressTimerSessions;
-            this.updatePreview();
-        } });
-        this.addonController = createAddonController({
+        this.addonHost = createAddonHost({
+            reactive: Alpine.reactive,
             getSettings: () => this.settings,
-            getState: () => this.addonState.snapshot,
-            dispatchNative: (addon, action) => this.addonState.dispatch(addon, action),
+            onChange: () => this.updatePreview(),
             beforeAction: () => this.saveController.flush(),
         });
-        await this.addonState.start();
+        await this.addonHost.start();
         this.hotkeyErrors = await invoke('get_hotkey_errors');
         this.appVersion = await getVersion().catch(() => '0.0.0');
         this.isPackaged = await invoke('is_packaged').catch((error) => {
@@ -180,14 +173,14 @@ Alpine.data('settingsApp', () => ({
         }
     },
 
-    destroy() { this.addonState?.dispose(); },
+    destroy() { this.addonHost?.dispose(); },
 
     addonActions(addon, role = 'settings-button') {
-        return this.addonController?.actionsFor(addon, role) || [];
+        return this.addonHost?.actionsFor(addon, role) || [];
     },
     async runAddonAction(addon, action) {
         try {
-            const result = await this.addonController.dispatch(addon.id, action.id, 'settings-button');
+            const result = await this.addonHost.dispatch(addon.id, action.id, 'settings-button');
             if (result) this.error = '';
         } catch (error) {
             this.error = this.t(addon.kind === 'progress' ? 'error.progressTimer' : 'error.timer', { error });

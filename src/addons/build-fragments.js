@@ -1,8 +1,8 @@
 import { readFileSync, realpathSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
-import { addonDefinitions } from '../src/addons/registry.js';
+import { addonDefinitions } from './registry.js';
 
-const viewRoot = realpathSync(resolve(import.meta.dirname, '../src/addons/views'));
+const viewRoot = realpathSync(resolve(import.meta.dirname, 'views'));
 const slots = new Set(['clock-row', 'settings-row', 'preview-row', 'clock-types', 'settings-types']);
 for (const definition of addonDefinitions) {
     if (definition.viewKey !== 'shared') slots.add(`clock-${definition.viewKey}`);

@@ -8,6 +8,10 @@
 
 ## Changed
 
+### 2026-11-08 - Keep Progress styling and session edits with its type
+
+- Moved `progress.css` beside Progress calculations and controls. Timer and Progress editors now reset draft sessions through the single reactive add-on host; the former top-level Progress import shim was removed. Saved options and native action behavior are unchanged.
+
 ### 2026-11-07 - Give each add-on its own behavior module
 
 - Defaults, descriptions, display formatting, Settings rules, and available actions now live with their add-on type. The existing options, display values, and saved settings format remain compatible; no user action is required.

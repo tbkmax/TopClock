@@ -1,18 +1,18 @@
 import { nativeAddonAdapter } from './native-adapter.js';
 
-export function createAddonState({ adapter = nativeAddonAdapter, onChange = () => {} } = {}) {
-    let timerSession = null;
-    let progressTimerSessions = {};
+export function createAddonState({ adapter = nativeAddonAdapter, onChange = () => {}, reactive } = {}) {
+    if (typeof reactive !== 'function') throw new Error('Add-on state requires a reactive store');
+    const snapshot = reactive({ timerSession: null, progressTimerSessions: {} });
     let timerRevision = 0;
     let progressRevision = 0;
     let started = false;
     let disposed = false;
     let unlisten = [];
-    const notify = () => onChange({ timerSession, progressTimerSessions });
-    const setTimer = (value) => { timerSession = value; timerRevision++; notify(); };
-    const setProgress = (value) => { progressTimerSessions = value; progressRevision++; notify(); };
+    const notify = () => onChange(snapshot);
+    const setTimer = (value) => { snapshot.timerSession = value; timerRevision++; notify(); };
+    const setProgress = (value) => { snapshot.progressTimerSessions = value; progressRevision++; notify(); };
     return {
-        get snapshot() { return { timerSession, progressTimerSessions }; },
+        get snapshot() { return snapshot; },
         setTimer,
         setProgress,
         async start() {
@@ -43,7 +43,7 @@ export function createAddonState({ adapter = nativeAddonAdapter, onChange = () =
             // as its returned snapshot, so do not overwrite it.
             if (addon.kind === 'timer' && timerRevision === revision) setTimer(session);
             if (addon.kind === 'progress' && progressRevision === revision) {
-                setProgress({ ...progressTimerSessions, [addon.id]: session });
+                setProgress({ ...snapshot.progressTimerSessions, [addon.id]: session });
             }
             return session;
         },

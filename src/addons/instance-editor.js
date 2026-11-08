@@ -1,4 +1,4 @@
-import { createAddon } from '../addons.js';
+import { createAddon } from './model.js';
 import { getAddonDefinition } from './registry.js';
 import { progressEditorMethods } from './builtins/progress.js';
 import { timerEditorMethods } from './builtins/timer.js';

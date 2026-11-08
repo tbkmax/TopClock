@@ -36,4 +36,4 @@ sequenceDiagram
     Clock->>Clock: Apply view-local animation history
 ```
 
-Definitions calculate display data without writes. Type edit methods validate changes before using the existing Settings save path. [The host workflow](../../doc/workflow_diagram.md) covers actions and persistence.
+Definitions calculate display data without writes. Timer and Progress editors read the host's shared reactive sessions and write draft resets through its setters before using the existing Settings save path. [The host workflow](../../doc/workflow_diagram.md) covers actions and persistence.

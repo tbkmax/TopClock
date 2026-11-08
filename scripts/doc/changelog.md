@@ -1,10 +1,16 @@
 # Scripts changelog
 
+## Changed
+
+### 2026-11-08 - Move add-on HTML composition to its owning folder
+
+- Moved the Vite fragment helper from `scripts/` to [build-fragments.js](../../src/addons/build-fragments.js). Vite still composes the same allowlisted local views in development and production; scripts now contain only Windows tooling, release, cleanup, and diagnostics.
+
 ## Added
 
 ### 2026-11-07 - Compose bundled add-on views during Vite builds
 
-- Added [addon-fragments.js](../addon-fragments.js) to insert allowlisted local add-on rows and Settings controls in development and production. Missing or unknown slots fail composition; no runtime HTML loading or settings migration is introduced. Frontend tests and the production build pass.
+- Added [addon-fragments.js](../../src/addons/build-fragments.js) to insert allowlisted local add-on rows and Settings controls in development and production. Missing or unknown slots fail composition; no runtime HTML loading or settings migration is introduced. Frontend tests and the production build pass.
 
 ### 2026-11-06 - Unattended memory testing and reports
 

@@ -129,8 +129,7 @@ export const progressEditorMethods = {
             ...this.progressTimerSessions,
             [id]: { running: false, elapsed_ms: 0, started_at_ms: null, finished: false, has_started: false },
         };
-        if (this.addonState) this.addonState.setProgress(nextSessions);
-        else this.progressTimerSessions = nextSessions;
+        this.addonHost.setProgress(nextSessions);
         this.save();
     },
 

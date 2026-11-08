@@ -9,7 +9,8 @@ This folder owns type-specific behavior for the four compiled add-ons. See the [
 | [timer.js](../timer.js) | Numeric countdown or stopwatch from the singleton session | Mode/duration confirmation and reset warning |
 | [progress.js](../progress.js) | Date, daily-range, or per-instance countdown bar | Range, weekday, appearance, mode, and duration rules |
 | [progress-display.js](../progress-display.js) | Pure local date, daily-range, countdown, phase, and completion calculations | No editor behavior |
+| [progress.css](../progress.css) | Clock and Settings Progress bar phases, fill, pulse, and reduced-motion styling | No editor behavior |
 
 Every definition has a stable kind, label, maximum instances, fresh `createOptions`, pure `display`, `describe`, an `editor`, view keys, and declared actions. Date and Region clock have no runtime actions. Timer and Progress countdown declare toggle/reset; only Timer Reset contributes to the clock menu. The host checks availability and Rust validates actions again.
 
-Display functions receive an explicit time and read-only context. Animation and completion history are separate in [main.js](../../../main.js) and [settings.js](../../../settings.js), so a preview cannot consume a clock animation. Progress calculations live in [progress-display.js](../progress-display.js); the old [progress.js](../../../progress.js) path re-exports them for existing imports. Type editors still use the Settings page's normal `save()` controller; they do not persist directly.
+Display functions receive an explicit time and read-only context. Animation and completion history are separate in [main.js](../../../main.js) and [settings.js](../../../settings.js), so a preview cannot consume a clock animation. Progress calculations and styles live beside its definition. Type editors read the shared [add-on host](../../host.js) sessions and use the Settings page's normal `save()` controller; they do not persist directly.

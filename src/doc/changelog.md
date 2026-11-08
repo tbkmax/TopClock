@@ -2,6 +2,10 @@
 
 ## Changed
 
+### 2026-11-08 - Consolidate add-on source and reactive state
+
+- Clock and Settings now use one add-on host per webview. Action descriptors, display calculations, and edit rules read the same reactive Timer and Progress sessions, removing duplicate page-side copies. Moved all add-on source, Progress styles, build composition, and add-on tests under `src/addons/`; deleted the old top-level import shims. Existing native commands, events, and saved settings require no migration.
+
 ### 2026-11-07 - Separate built-in add-on behavior and views
 
 - Date, Region clock, Timer, and Progress now own their defaults, formatting, Settings rules, and available actions in individual modules. A shared controller routes existing clock, Settings, and menu actions; bundled static fragments compose the clock and Settings rows before Alpine starts. Existing saved options, native commands, and user controls remain compatible. No migration or user action is required.
@@ -9,6 +13,10 @@
 - Added documentation for the new `addons/`, `addons/builtins/`, and `addons/views/` folders. Frontend tests and Vite build pass; native WebView input and layout checks remain in the backlog.
 
 ## Fixed
+
+### 2026-11-08 - Refresh Progress Start/Pause labels
+
+- Settings now reads reactive session fields when building Timer and Progress action labels. Starting or pausing one Progress countdown updates its own button immediately; the native action and saved session behavior are unchanged. A focused Alpine reactivity test covers separate Progress instances and native session events. No migration or user action is required.
 
 ### 2026-11-06 - Pause the hidden Settings preview
 

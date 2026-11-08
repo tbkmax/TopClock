@@ -1,6 +1,6 @@
 # Scripts backlog
 
-The new [add-on fragment helper](../addon-fragments.js) has no separate unfinished script work. Native rendering and development/production parity checks are tracked in the [view backlog](../../src/addons/views/doc/backlog.md).
+Add-on HTML composition and its remaining live checks are tracked in the [view backlog](../../src/addons/views/doc/backlog.md). This folder's unfinished work concerns Windows diagnostics and release tooling below.
 
 ## Store candidate memory soak
 

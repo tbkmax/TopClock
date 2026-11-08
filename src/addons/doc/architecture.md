@@ -6,13 +6,17 @@ This folder owns the fixed built-in registry and the shared add-on host. The [fr
 | --- | --- |
 | [registry.js](../registry.js) | Registers Date, Region clock, Timer, and Progress; validates definition shape and known actions; supplies catalog metadata |
 | [controller.js](../controller.js) | Resolves current instances, checks action role and enabled state, and composes clock-menu contributions |
-| [state.js](../state.js) | Holds per-webview native session snapshots, subscribes to both session events, rejects stale command responses, and disposes listeners |
+| [host.js](../host.js) | Constructs one reactive store and controller for each clock or Settings webview |
+| [state.js](../state.js) | Owns the reactive native session snapshot, subscribes to session events, rejects stale command responses, and disposes listeners |
 | [native-adapter.js](../native-adapter.js) | Maps typed actions to existing Tauri commands and events |
+| [model.js](../model.js) | Creates instances and delegates shared display results to type definitions |
 | [instance-editor.js](../instance-editor.js) | Adds, removes, and reorders instances around the clock block, and mixes type editors into Settings |
+| [build-fragments.js](../build-fragments.js) | Allowlisted Vite HTML composition from bundled views |
 | [contracts.json](../contracts.json) | Checked kind and action IDs shared by frontend and Rust tests |
+| [addons.test.js](../addons.test.js) | Add-on routing, state, view composition, editing, and display regression tests |
 
-The registry contains compiled definitions only. A definition supplies fresh options, a pure display result, Settings descriptions and rules, bundled view keys, and action descriptors. [addons.js](../../addons.js) retains the older exports while callers use the new host. The host does not own Settings persistence or clock pointer geometry. Each webview creates its own controller and state object; Rust remains authoritative for saved settings and sessions.
+The registry contains compiled definitions only. A definition supplies fresh options, a pure display result, Settings descriptions and rules, bundled view keys, and action descriptors. The clock and Settings pages each create one host, which gives the controller and page the same Alpine-reactive session object. The page's Timer and Progress getters derive from this object; neither page keeps another session copy. Rust remains authoritative for saved settings and sessions. The host does not own Settings persistence or clock pointer geometry.
 
-The controller checks actions before and after the Settings save flush. The adapter exposes only the existing `timer_action` and `progress_timer_action` commands, with their existing event names. Rust revalidates targets and persists before broadcasting. A command result cannot overwrite a session event received while that command was pending. `dispose()` removes the add-on event subscriptions when Alpine destroys the page.
+The controller checks actions before and after the Settings save flush. The adapter exposes only the existing `timer_action` and `progress_timer_action` commands, with their existing event names. Rust revalidates targets and persists before broadcasting. A command result cannot overwrite a session event received while that command was pending. The stable reactive snapshot makes Start/Pause labels update when either a command response or event changes a session. `dispose()` removes the add-on event subscriptions when Alpine destroys the page.
 
-All views are local files inserted by [the Vite helper](../../../scripts/addon-fragments.js) before Alpine starts. The host never renders settings, server responses, or arbitrary paths as HTML. Text values use Alpine text bindings; the native validator remains the final settings boundary. No package installer, remote code, account, credential, or network service is present.
+All views are local files inserted by [the Vite helper](../build-fragments.js) before Alpine starts. The host never renders settings, server responses, or arbitrary paths as HTML. Text values use Alpine text bindings; the native validator remains the final settings boundary. No package installer, remote code, account, credential, or network service is present.

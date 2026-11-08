@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
-import { addonFragmentsPlugin } from './scripts/addon-fragments.js';
+import { addonFragmentsPlugin } from './src/addons/build-fragments.js';
 
 export default defineConfig({
     plugins: [addonFragmentsPlugin()],

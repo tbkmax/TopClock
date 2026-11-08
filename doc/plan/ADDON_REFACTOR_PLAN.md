@@ -6,7 +6,11 @@ Scope: reorganize the four existing built-in add-ons while preserving their beha
 
 Implementation record (2026-11-07): The four built-ins now own their display, actions, option editors, and native validation in [frontend modules](../../src/addons/builtins/) and [native modules](../../src-tauri/src/addons/). Progress calculations live beside its definition in [progress-display.js](../../src/addons/builtins/progress-display.js); the old top-level path re-exports them for compatibility. The [controller](../../src/addons/controller.js) resolves current instances and action descriptors; the [state adapter](../../src/addons/state.js) owns native session subscriptions. Vite composes a shared [clock row](../../src/addons/views/clock-row.html) and distinct Settings controls from allowlisted local fragments. The legacy frontend command names, native events, serialized fields, and capabilities were retained. A future type with the same display shape can reuse the shared clock row; a special type can register a dedicated bundled view.
 
-Automated verification: 28 frontend tests, 27 Rust tests, and `npm run build` passed. The assembled clock and Settings HTML was also checked for balanced tags and single-root Alpine templates. `tauri:dev` launched the native process with a temporary identifier and wrote only to an isolated config directory; that test process and directory were removed. The first launch attempt hit a Vite watcher `EBUSY` error on generated Rust output, so [Vite configuration](../../vite.config.js) now ignores `src-tauri/target/` during development. Live interaction across the clock, Settings, tray, modifier and drag behavior, multi-window synchronization, persistence and position restore is still pending. MSIX upgrade verification is also pending. Static bundled fragments remove the proposed `x-html` rendering path; the existing `csp: null` remains a separate security limitation and requires a dedicated CSP design before connected or downloaded add-ons.
+Follow-up (2026-11-08): The owner chose one reactive add-on store per webview. [host.js](../../src/addons/host.js) now gives the controller and page the same session object, eliminating mirrored page session fields. The temporary top-level `src/addons.js`, `src/settings-addons.js`, and `src/progress.js` paths were removed after all imports migrated. Progress CSS, the Vite fragment helper, and add-on tests also live under `src/addons/`. Published binaries do not depend on these source paths; saved settings and native commands/events retain their existing format. All 30 frontend tests and the Vite build pass after this cleanup. Live WebView input and layout verification remains open.
+
+The 2026-11-08 isolated `tauri:dev` run compiled and launched the native process with a temporary identifier. It wrote only to its temporary config directory; the process and directory were removed after the startup check. The normal settings file was not changed by this check.
+
+Initial automated verification (2026-11-07): 28 frontend tests, 27 Rust tests, and `npm run build` passed. The assembled clock and Settings HTML was also checked for balanced tags and single-root Alpine templates. `tauri:dev` launched the native process with a temporary identifier and wrote only to an isolated config directory; that test process and directory were removed. The first launch attempt hit a Vite watcher `EBUSY` error on generated Rust output, so [Vite configuration](../../vite.config.js) now ignores `src-tauri/target/` during development. Live interaction across the clock, Settings, tray, modifier and drag behavior, multi-window synchronization, persistence and position restore is still pending. MSIX upgrade verification is also pending. Static bundled fragments remove the proposed `x-html` rendering path; the existing `csp: null` remains a separate security limitation and requires a dedicated CSP design before connected or downloaded add-ons.
 
 Read the [README](../../README.md), [frontend architecture](../../src/doc/architecture.md), and [native architecture](../../src-tauri/src/doc/architecture.md) for current behavior. The earlier [add-on system plan](../feature/ADDON_SYSTEM_PLAN.md) and [Progress plan](../feature/PROGRESS_ADDON_PLAN.md) provide history; source code takes precedence where those plans are stale.
 
@@ -24,8 +28,8 @@ No new menu actions, shortcuts, add-on types, or install/uninstall UI belong to 
 
 | Current code | What already works | Refactor target |
 | --- | --- | --- |
-| [addons.js](../../src/addons.js) | Catalog, defaults, shared instance shape, display formatting | Move type behavior into individual modules; retain one registry |
-| [settings-addons.js](../../src/settings-addons.js) | Shared ordering plus type-specific edits and actions | Keep ordering in the host; move type editors and rules to their modules |
+| [addons.js](../../src/addons/model.js) | Catalog, defaults, shared instance shape, display formatting | Move type behavior into individual modules; retain one registry |
+| [settings-addons.js](../../src/addons/instance-editor.js) | Shared ordering plus type-specific edits and actions | Keep ordering in the host; move type editors and rules to their modules |
 | [main.js](../../src/main.js), [settings.js](../../src/settings.js) | Shared formatting, native events, separate live and preview views | Share state subscription and action adapters; keep view-local animation state separate |
 | [index.html](../../index.html), [settings.html](../../settings.html) | Ordered stacks, dashboard, preview and menu | Replace type checks in common shells with registered, bundled views and action descriptors |
 | [addons.rs](../../src-tauri/src/addons/mod.rs) | Validated instances and TimerSession calculations | Separate common validation, type validators and session logic |
@@ -53,17 +57,21 @@ Preserve the JSON field names, optional-field defaults, legacy Timer migration, 
 
 Disabling, removing, changing mode, changing duration, and restarting have different cleanup behavior today. Capture those cases from the actual save/load/action code before extraction; do not introduce an automatic reset-on-disable rule. Existing unrelated defects should be recorded separately instead of silently changing behavior during extraction.
 
-## 4. Proposed module ownership
+## 4. Module ownership
 
 The implemented layout keeps individual type modules together without extra directory depth:
 
 ```text
 src/addons/
+  host.js                # one reactive state/controller boundary per webview
   registry.js            # fixed list of built-in definitions
   controller.js          # instance lookup, action routing, menu composition
-  state.js               # native session snapshots and event lifecycle
+  state.js               # reactive native sessions and event lifecycle
   native-adapter.js      # explicit existing Tauri command/event mappings
+  model.js               # common instance creation and display entry point
   instance-editor.js     # common add/remove/order/placement/size behavior
+  build-fragments.js     # allowlisted local Vite view composition
+  addons.test.js         # add-on regression checks
   contracts.json         # checked frontend/native kind and action names
   builtins/
     date.js
@@ -71,6 +79,7 @@ src/addons/
     timer.js
     progress.js          # definitions, formatting and type editor rules
     progress-display.js  # Progress date, range, countdown and pulse calculations
+    progress.css         # Progress display styling in both pages
   views/
     clock-row.html       # shared row and host-owned interaction boundary
     settings-row.html    # shared dashboard shell

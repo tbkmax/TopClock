@@ -17,7 +17,15 @@ classDiagram
       menuActions()
       dispatch()
     }
+    class AddonHost {
+      snapshot
+      actionsFor()
+      dispatch()
+    }
     class AddonState {
+      snapshot
+      setTimer()
+      setProgress()
       start()
       dispatch()
       dispose()
@@ -29,17 +37,19 @@ classDiagram
       onTimer()
       onProgress()
     }
+    AddonHost --> AddonController : owns
+    AddonHost --> AddonState : owns
     AddonController --> AddonDefinition : looks up
-    AddonController --> AddonState : dispatches through
+    AddonController --> AddonState : reads shared snapshot
     AddonState --> NativeAdapter : commands and events
 ```
 
-[registry.js](../registry.js) supplies definitions. [controller.js](../controller.js) uses the current settings and session snapshot; [state.js](../state.js) and [native-adapter.js](../native-adapter.js) bridge to Rust. These are local per-webview objects, while Rust owns durable state.
+[registry.js](../registry.js) supplies definitions. [host.js](../host.js) constructs one Alpine-reactive [state.js](../state.js) snapshot and passes that same object to [controller.js](../controller.js) and the page. The [native adapter](../native-adapter.js) bridges to Rust. Each webview has its own host; Rust owns durable state shared across windows.
 
 ```mermaid
 sequenceDiagram
     participant UI as Clock or Settings
-    participant Host as AddonController
+    participant Host as AddonHost and controller
     participant State as AddonState
     participant Rust as Existing Tauri commands
     UI->>Host: instance ID, action ID, role
@@ -51,7 +61,7 @@ sequenceDiagram
     Host->>State: Dispatch typed action
     State->>Rust: timer_action or progress_timer_action
     Rust-->>State: Saved session event and command result
-    State->>UI: Latest snapshot
+    State->>UI: Update shared reactive snapshot
 ```
 
-An unavailable action fails before native dispatch; Rust checks it again. Session events can arrive before command responses, so [state.js](../state.js) keeps the event snapshot. Subscription cleanup occurs on Alpine destruction. Settings drafts and display animation histories stay with their respective pages.
+An unavailable action fails before native dispatch; Rust checks it again. Session events can arrive before command responses, so [state.js](../state.js) keeps the newer event snapshot. The controller and Alpine templates read the same stable reactive object, so an action label tracks its instance without a separate page copy. Subscription cleanup occurs on Alpine destruction. Settings drafts and display animation histories stay with their respective pages.

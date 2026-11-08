@@ -6,4 +6,4 @@ This directory stores brand imagery and documentation assets for TopClock:
 - [banner.svg](../banner.svg): Vector master for the project banner.
 - [icon.svg](../icon.svg): Vector brand icon (512x512) with dark elevation cards, apex chevron, and electric yellow clock dial.
 
-Its parent is [src/assets](../../doc/architecture.md). See also the native icon master in [src-tauri/icons/](../../../src-tauri/icons/doc/architecture.md).
+Its parent is [src/assets](../../doc/architecture.md). See also the native icon master in [src-tauri/icons/](../../../../src-tauri/icons/doc/architecture.md).

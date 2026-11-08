@@ -10,5 +10,5 @@ See the [frontend backlog](../../doc/backlog.md) for the full native WebView and
 - **Scope:** [controller.js](../controller.js), [state.js](../state.js), [native-adapter.js](../native-adapter.js), and both Alpine pages.
 - **Acceptance criteria:** Modifier-click targets one instance; drag suppresses click; Settings actions flush drafts first; Timer Reset appears only when enabled; closing the menu restores click-through; restart restores sessions.
 - **Dependencies and risks:** Requires an interactive Windows desktop, a disposable settings profile, and a second display for cross-window coverage. Preserve current command and event names.
-- **Verification:** Run `npm run tauri:dev` and exercise the cases above, including a failed settings write and release/restart.
+- **Verification:** Run `npm run tauri:dev` and exercise the cases above, including immediate Start/Pause button updates, a failed settings write, and release/restart. The add-on host unit test covers independent reactive labels and native event updates; live WebView behavior remains open.
 - **Priority:** High before release because static tests cannot verify native input and event timing.

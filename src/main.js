@@ -6,13 +6,12 @@ import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { clockWindowLayout } from './menu-layout.js';
-import { displayAddon } from './addons.js';
-import { createAddonState } from './addons/state.js';
-import { createAddonController } from './addons/controller.js';
-import { markCountdownCompletion, progressBarStyle } from './progress.js';
+import { displayAddon } from './addons/model.js';
+import { createAddonHost } from './addons/host.js';
+import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
-import './progress.css';
+import './addons/builtins/progress.css';
 
 const appWindow = getCurrentWindow();
 let resizeQueue = Promise.resolve();
@@ -28,10 +27,9 @@ Alpine.data('clockApp', () => ({
     renderedAddons: [],
     addonPreviousNumbers: {},
     addonNumberActiveUntil: {},
-    timerSession: null,
-    progressTimerSessions: {},
-    addonState: null,
-    addonController: null,
+    addonHost: null,
+    get timerSession() { return this.addonHost?.snapshot.timerSession ?? null; },
+    get progressTimerSessions() { return this.addonHost?.snapshot.progressTimerSessions ?? {}; },
     progressPreviousPercent: {},
     progressCompletionUntil: {},
     previousNumbers: {},
@@ -54,22 +52,17 @@ Alpine.data('clockApp', () => ({
     resizeTimer: null,
 
     async init() {
-        this.addonState = createAddonState({ onChange: ({ timerSession, progressTimerSessions }) => {
-            this.timerSession = timerSession;
-            this.progressTimerSessions = progressTimerSessions;
-            this.updateClock();
-        } });
-        this.addonController = createAddonController({
+        this.addonHost = createAddonHost({
+            reactive: Alpine.reactive,
             getSettings: () => this.settings,
-            getState: () => this.addonState.snapshot,
-            dispatchNative: (addon, action) => this.addonState.dispatch(addon, action),
+            onChange: () => this.updateClock(),
         });
         this.systemLocale = await invoke('get_system_locale').catch(() => navigator.language || 'en');
         this.syncLanguage();
         this.updateClock();
         this.clockInterval = setInterval(() => this.updateClock(), 200);
         this.loadSettings();
-        this.addonState.start().catch(console.error);
+        this.addonHost.start().catch(console.error);
         this.$nextTick(() => {
             new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockContainer);
             this.scheduleResize();
@@ -124,7 +117,7 @@ Alpine.data('clockApp', () => ({
     },
 
     destroy() {
-        this.addonState?.dispose();
+        this.addonHost?.dispose();
         clearInterval(this.clockInterval);
     },
 
@@ -236,16 +229,16 @@ Alpine.data('clockApp', () => ({
         }).filter((addon) => !addon.hidden);
     },
 
-    addonActions(addon, role) { return this.addonController?.actionsFor(addon, role) || []; },
-    get addonMenuActions() { return this.addonController?.menuActions() || []; },
+    addonActions(addon, role) { return this.addonHost?.actionsFor(addon, role) || []; },
+    get addonMenuActions() { return this.addonHost?.menuActions() || []; },
     addonClick(addon) {
         if (this.dragStarted) { this.dragStarted = false; return; }
         if (!this.isCtrlHeld) return;
         const action = this.addonActions(addon, 'primary-click').find((item) => item.enabled);
-        if (action) this.addonController.dispatch(addon.id, action.id, 'primary-click').catch(console.error);
+        if (action) this.addonHost.dispatch(addon.id, action.id, 'primary-click').catch(console.error);
     },
     runAddonMenuAction(item) {
-        this.addonController.dispatch(item.instanceId, item.id, 'clock-menu').then((session) => {
+        this.addonHost.dispatch(item.instanceId, item.id, 'clock-menu').then((session) => {
             if (session && item.id === 'reset') this.closeMenu();
         }).catch(console.error);
     },

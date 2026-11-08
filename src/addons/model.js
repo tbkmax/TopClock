@@ -1,7 +1,7 @@
-import { translate } from './i18n.js';
-import { addonCatalog, getAddonDefinition } from './addons/registry.js';
-import { regionName, availableTimeZones } from './addons/builtins/region-clock.js';
-import { timerElapsed, timerText } from './addons/builtins/timer.js';
+import { translate } from '../i18n.js';
+import { addonCatalog, getAddonDefinition } from './registry.js';
+import { regionName, availableTimeZones } from './builtins/region-clock.js';
+import { timerElapsed, timerText } from './builtins/timer.js';
 
 export { addonCatalog, availableTimeZones, timerElapsed, timerText };
 

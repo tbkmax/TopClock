@@ -34,7 +34,7 @@ These scripts support the release acceptance work in the [backlog](backlog.md). 
 
 [tauri-windows.cmd](../tauri-windows.cmd) is the Windows wrapper for the Tauri CLI. [package.json](../../package.json) calls it from `tauri:dev` and `tauri:build`.
 
-[addon-fragments.js](../addon-fragments.js) is a Vite build-time HTML helper. [vite.config.js](../../vite.config.js) calls it for both clock and Settings entries. It reads view keys from the fixed [add-on registry](../../src/addons/registry.js), inserts only local files under [views/](../../src/addons/views/doc/architecture.md), and fails on unknown, missing, recursive, or escaping slots. It does not load settings, network data, or runtime HTML. The shared clock row displays the registered output shape; Settings type controls remain in their own fragments. See the [composition workflow](workflow_diagram.md#bundled-add-on-view-composition).
+Add-on HTML composition now belongs to [the add-on host](../../src/addons/doc/architecture.md). This scripts folder owns Windows toolchain, release, cleanup, and diagnostic commands.
 
 The wrapper finds the repository root, adds a local SDK and Cargo toolchain from `.tools/` to environment variables when present, calls Visual Studio's `vcvars64.bat` when present, and forwards arguments to `node_modules/.bin/tauri.cmd`. It returns that command's exit code. It does not own application state or persist user settings. See the [README](../../README.md) for build commands.
 

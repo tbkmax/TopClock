@@ -55,8 +55,7 @@ export const timerEditorMethods = {
         if (!timer) return;
         timer.options[field] = value;
         const session = { running: false, elapsed_ms: 0, started_at_ms: null, finished: false };
-        if (this.addonState) this.addonState.setTimer(session);
-        else this.timerSession = session;
+        this.addonHost.setTimer(session);
         this.save();
     },
 

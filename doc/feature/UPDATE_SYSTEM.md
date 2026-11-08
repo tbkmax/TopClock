@@ -2,7 +2,7 @@
 
 TopClock has two distinct update flows. The direct build uses a GitHub Releases reminder and opens a browser. The Store-installed MSIX checks Microsoft Store and can ask the Store to install a published update from inside Settings.
 
-The [Store-identity MSIX](../plan/MSIX_STORE_PLAN.md) is built locally and submitted separately through Partner Center. Package identity selects the Store flow; direct builds retain the GitHub flow. Store-signed installation, in-app update delivery, upgrade checks, and submission remain unverified.
+The [Store-identity MSIX](MSIX_STORE_PLAN.md) is built locally and submitted separately through Partner Center. Package identity selects the Store flow; direct builds retain the GitHub flow. Store-signed installation, in-app update delivery, upgrade checks, and submission remain unverified.
 
 ---
 
