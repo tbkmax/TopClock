@@ -5,7 +5,9 @@ param(
     [ValidateRange(1, 604800)][int]$DurationSeconds = 3600,
     [ValidateRange(1, 3600)][int]$IntervalSeconds = 15,
     [string]$OutputPath = "TopClock-memory-$(Get-Date -Format yyyyMMdd-HHmmss).csv",
-    [string]$StopFile
+    [string]$StopFile,
+    [ValidateRange(1, 3600)][int]$StatusIntervalSeconds = 300,
+    [string]$ProgressPath
 )
 
 $ErrorActionPreference = 'Stop'
@@ -25,6 +27,7 @@ Write-Host "Measuring PID $($clock.Id), $($clock.Path), version $clockVersion"
 
 $elapsed = [Diagnostics.Stopwatch]::StartNew()
 $firstSample = $true
+$nextStatusAt = 0.0
 while ($true) {
     if ($StopFile -and (Test-Path -LiteralPath $StopFile)) { break }
     $clock.Refresh()
@@ -74,6 +77,16 @@ while ($true) {
         Write-Host "Writing $OutputPath (Ctrl+C stops sampling)."
     } else {
         $sample | Export-Csv -LiteralPath $OutputPath -NoTypeInformation -Append
+    }
+    if ($status -eq 'Running' -and $elapsed.Elapsed.TotalSeconds -ge $nextStatusAt) {
+        $uptime = $elapsed.Elapsed
+        $line = '{0} | running {1}h {2}m | total {3:N1} MiB (clock {4:N1}, WebView2 {5:N1}, {6} processes)' -f
+            (Get-Date -Format 'yyyy-MM-dd HH:mm:ss'), [int][math]::Floor($uptime.TotalHours),
+            $uptime.Minutes, ($totalBytes / 1MB), ($hostBytes / 1MB),
+            ($webviewBytes / 1MB), $webviews.Count
+        Write-Host $line
+        if ($ProgressPath) { Add-Content -LiteralPath $ProgressPath -Value $line }
+        $nextStatusAt = $elapsed.Elapsed.TotalSeconds + $StatusIntervalSeconds
     }
     if ($status -eq 'Exited') { throw "TopClock exited during sampling (exit code $($clock.ExitCode)). See $OutputPath." }
     $remaining = $DurationSeconds - $elapsed.Elapsed.TotalSeconds
