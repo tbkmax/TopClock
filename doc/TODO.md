@@ -12,6 +12,7 @@
 ### TODO 5: Add-on tab (Partially archive in Completed)
 - [ ] Add-on 5: TODO list
 - [ ] every add-on will have `only display when pressing Interaction Modifier mode`, default is off, and is separate with different add-on
+- [ ] in add-on page let drag add-on can put one add-on on another add-on which means it will show add-on left and right (some add-on are not allow, for example progress bar), in that case the ratio of size will keep, that two will combine to one card which turn on and off is together, and both will still have edit menu but that combine card one time should only allow one of the to open edit bar, and it will have another new shared size use for adjust size, and the drag button will exist for left add-on and right add-on that it can use for switch left and right or drag out to let it go back to 2 separate card (in that case just delete shared size)
 
 ### TODO 6: Rename project, fix Readme, add icon (Completed)
 
@@ -22,4 +23,4 @@
 
 ### TODO9: code structure maintain (Completed)
 
-### TODO10: Publish
+### TODO10: Publish (Completed)

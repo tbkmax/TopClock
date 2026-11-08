@@ -88,6 +88,16 @@ Microsoft Store installations may use Windows' per-package AppData redirection. 
 
 ---
 
+## Updates & Releases
+
+Microsoft Store installations can check for updates from Settings and request an available Store update. Direct builds check GitHub Releases for newer versions and open the release page for the portable ZIP; TopClock does not install that download. Each new Store version must first be submitted and certified in Partner Center. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for both paths.
+
+## Uninstalling
+
+- **Portable ZIP:** Quit TopClock, then run `Uninstall-TopClock.cmd` from the same extracted folder as `TopClock.exe`. It removes that executable and its matching sign-in entry, then asks separately whether to erase shared settings and cache. Delete the remaining cleanup scripts and extracted folder afterward if they contain nothing else you need.
+
+---
+
 ## Building from Source
 
 ### Prerequisites
@@ -112,54 +122,8 @@ npm run test:frontend
 npm run build
 ```
 
-### Production Build
+### Production builds
 
-To build a standalone executable:
+See the [production build guide](doc/BUILDING.md) for standalone, NSIS, and Microsoft Store package commands and release details.
 
-```powershell
-npm run tauri:build -- --no-bundle
-```
-
-The compiled binary will be placed at:
-```
-src-tauri/target/release/top_clock.exe
-```
-
-To build a full Windows installer (NSIS setup):
-
-```powershell
-npm run tauri:build
-```
-
-### Microsoft Store package (maintainers)
-
-An unsigned MSIX can be built with the Windows SDK's MakeAppx:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Msix.ps1 -Version v1.0.0
-```
-
-For `-Version v1.0.0`, the output is `release-assets/TopClock_tbkmax.TopClock_1.0.0.0_x64.msix`.
-
-- **Identity:** The default manifest uses the Microsoft Store identity (`tbkmax.TopClock`, `CN=508EFCDF-2961-4370-827D-3736CE5AC66A`, publisher display name `tbkmax`). Override these values only for a separate development identity.
-- **Submission:** The package is unsigned for Partner Center submission. Direct local installation requires a matching trusted signature.
-- **Build path:** Build the Store package locally with this script; GitHub Actions publishes only the portable ZIP. Local NSIS builds remain available with `npm run tauri:build`.
-- **Testing:** Do not launch `TopClock.exe` from `release-assets/msix-stage-tbkmax.TopClock` to test Store updates. That directory is packaging input, and a direct executable launch uses the GitHub update path.
-
-See the [Store package plan](doc/feature/MSIX_STORE_PLAN.md) for packaging details and acceptance checks.
-
-The MSIX uses Evergreen WebView2. If the runtime is missing, TopClock shows a native message pointing to Microsoft's download page before exiting. The runtime is not bundled in the package.
-
----
-
-## Updates & Releases
-
-Microsoft Store installations can check for updates from Settings and request an available Store update. Direct builds check GitHub Releases for newer versions and open the release page for the portable ZIP; TopClock does not install that download. Each new Store version must first be submitted and certified in Partner Center. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for both paths.
-
-## Uninstalling
-
-- **NSIS installer (local or older GitHub build):** Quit TopClock, then use Windows **Settings > Apps > Installed apps > TopClock > Uninstall**. The NSIS uninstaller removes the installed application and its sign-in entry. Select **Delete the application data** in the uninstaller if you also want to erase TopClock settings and cache for this Windows user.
-- **Portable ZIP:** Quit TopClock, then run `Uninstall-TopClock.cmd` from the same extracted folder as `TopClock.exe`. It removes that executable and its matching sign-in entry, then asks separately whether to erase shared settings and cache. Delete the remaining cleanup scripts and extracted folder afterward if they contain nothing else you need.
-
-Installer and portable copies share the same TopClock user-data directories and sign-in entry. Deleting data affects both copies. The portable script does not remove other copies in different folders. If both types are present, uninstalling the installed copy also clears their shared sign-in entry; re-enable launch at sign-in from the remaining portable copy if needed. The NSIS data checkbox removes the current TopClock data directories; an older `%APPDATA%\com.maxtc.topclock` migration folder may remain.
 
