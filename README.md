@@ -8,12 +8,32 @@
 </p>
 
 <p align="center">
+  <a href="https://apps.microsoft.com/detail/9pmlg46pwjll?hl=en-US&amp;gl=US">
+    <img src="https://img.shields.io/badge/Download_on-Microsoft_Store-0078D4?style=for-the-badge&amp;logo=microsoftstore&amp;logoColor=white" alt="Download TopClock from Microsoft Store">
+  </a>
+</p>
+
+<p align="center">
+  <strong>Available now on Microsoft Store.</strong> Install TopClock on Windows and get updates through the Store.
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/Platform-Windows-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Platform" />
   <img src="https://img.shields.io/badge/Tauri-v2-24C8DB?style=flat-square&logo=tauri&logoColor=white" alt="Tauri" />
   <img src="https://img.shields.io/badge/Rust-2021-DEA584?style=flat-square&logo=rust&logoColor=white" alt="Rust" />
   <img src="https://img.shields.io/badge/Alpine.js-v3-8BC0D0?style=flat-square&logo=alpinedotjs&logoColor=white" alt="Alpine.js" />
   <img src="https://img.shields.io/badge/Network-100%25_Offline-success?style=flat-square" alt="Offline" />
 </p>
+
+---
+
+## Download
+
+**[Get TopClock from Microsoft Store →](https://apps.microsoft.com/detail/9pmlg46pwjll?hl=en-US&gl=US)**
+
+The Microsoft Store is the primary way to install TopClock on Windows. Open the listing, select **Get**, and launch TopClock from the Start menu. Hold <kbd>Ctrl</kbd> to move or interact with the clock; click its tray icon to open Settings.
+
+Prefer a portable copy? Download the ZIP from [GitHub Releases](https://github.com/tbkmax/TopClock/releases). Portable builds use a separate GitHub release reminder and are updated manually.
 
 ---
 
@@ -58,13 +78,13 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
 
 ## Configuration & Storage
 
-Current direct-download builds store your configuration locally in your Windows user profile:
+Direct-download builds store your configuration locally in your Windows user profile:
 
 - **Settings File**: `%APPDATA%\topclock\settings.json`
 - **Auto-Start**: Controlled via the current user's Windows Run registry key (`HKCU\Software\Microsoft\Windows\CurrentVersion\Run\TopClock`).
 
 Settings and desktop positions automatically persist across reboots and app launches.
-The MSIX development package may use Windows' per-package AppData redirection. Its installed location and upgrade persistence still need the [package acceptance checks](doc/feature/MSIX_STORE_PLAN.md).
+Microsoft Store installations may use Windows' per-package AppData redirection. Use **Open settings folder** in TopClock's Settings window to find the location used by your installation.
 
 ---
 
@@ -111,7 +131,7 @@ To build a full Windows installer (NSIS setup):
 npm run tauri:build
 ```
 
-### MSIX Store candidate
+### Microsoft Store package (maintainers)
 
 An unsigned MSIX can be built with the Windows SDK's MakeAppx:
 
@@ -119,7 +139,14 @@ An unsigned MSIX can be built with the Windows SDK's MakeAppx:
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Build-Msix.ps1 -Version v1.0.0
 ```
 
-The output is `release-assets/TopClock_tbkmax.TopClock_1.0.0.0_x64.msix`. The default manifest identity is the reserved Partner Center identity (`tbkmax.TopClock`, `CN=508EFCDF-2961-4370-827D-3736CE5AC66A`, publisher display name `tbkmax`). The package is unsigned for Partner Center submission; direct local installation requires a matching trusted signature. Override the three identity parameters only for a separate development identity. Build the Store package locally with this script; GitHub Actions does not build it. **Do not launch `TopClock.exe` from `release-assets/msix-stage-tbkmax.TopClock` to test Store updates:** that directory is packaging input, and a direct executable launch uses the GitHub update path. The tested development registration used a loose manifest, so the Store identity's installed behavior and upgrades still need the [package acceptance checks](doc/feature/MSIX_STORE_PLAN.md). GitHub tag releases provide only the portable ZIP; local NSIS builds remain available with `npm run tauri:build`.
+For `-Version v1.0.0`, the output is `release-assets/TopClock_tbkmax.TopClock_1.0.0.0_x64.msix`.
+
+- **Identity:** The default manifest uses the Microsoft Store identity (`tbkmax.TopClock`, `CN=508EFCDF-2961-4370-827D-3736CE5AC66A`, publisher display name `tbkmax`). Override these values only for a separate development identity.
+- **Submission:** The package is unsigned for Partner Center submission. Direct local installation requires a matching trusted signature.
+- **Build path:** Build the Store package locally with this script; GitHub Actions publishes only the portable ZIP. Local NSIS builds remain available with `npm run tauri:build`.
+- **Testing:** Do not launch `TopClock.exe` from `release-assets/msix-stage-tbkmax.TopClock` to test Store updates. That directory is packaging input, and a direct executable launch uses the GitHub update path.
+
+See the [Store package plan](doc/feature/MSIX_STORE_PLAN.md) for packaging details and acceptance checks.
 
 The MSIX uses Evergreen WebView2. If the runtime is missing, TopClock shows a native message pointing to Microsoft's download page before exiting. The runtime is not bundled in the package.
 
@@ -127,7 +154,7 @@ The MSIX uses Evergreen WebView2. If the runtime is missing, TopClock shows a na
 
 ## Updates & Releases
 
-Direct builds check GitHub Releases for newer versions and open the release page for the portable ZIP; TopClock does not install that download. Store-installed MSIX builds can check Microsoft Store from Settings and request an available update there. Each new Store version must first be submitted and certified in Partner Center. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for both paths.
+Microsoft Store installations can check for updates from Settings and request an available Store update. Direct builds check GitHub Releases for newer versions and open the release page for the portable ZIP; TopClock does not install that download. Each new Store version must first be submitted and certified in Partner Center. See the [release guide](doc/feature/UPDATE_SYSTEM.md) for both paths.
 
 ## Uninstalling
 
