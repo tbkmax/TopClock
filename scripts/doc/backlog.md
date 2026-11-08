@@ -1,5 +1,7 @@
 # Scripts backlog
 
+The new [add-on fragment helper](../addon-fragments.js) has no separate unfinished script work. Native rendering and development/production parity checks are tracked in the [view backlog](../../src/addons/views/doc/backlog.md).
+
 ## Store candidate memory soak
 
 - **Problem and outcome** — The new tools enable local measurement. Partner Center's 1.0.0.0 memory/crash signatures are still uncategorized.
@@ -15,7 +17,7 @@ Use this file for verified unfinished work in [the Windows wrapper](../tauri-win
 - **Title:** Validate Store-signed installation and upgrades.
 - **Problem or opportunity:** [Build-Msix.ps1](../Build-Msix.ps1) creates an unsigned package for Partner Center; a loose-registered development package does not prove Store installation or upgrade behavior.
 - **Desired outcome:** A Store-delivered candidate installs and upgrades while preserving settings and desktop positions.
-- **Scope:** The MSIX package and the [release plan](../../doc/plan/MSIX_STORE_PLAN.md).
+- **Scope:** The MSIX package and the [release plan](../../doc/feature/MSIX_STORE_PLAN.md).
 - **Acceptance criteria:** The Store identity and publisher match Partner Center; installation and upgrade of two increasing versions succeed; packaged sign-in and settings paths work after upgrade.
 - **Dependencies and risks:** Requires Store delivery and signing. The user declined self-signed certificate testing. Keep unsigned artifacts free of private keys.
 - **Verification:** Install a Store-delivered candidate on a clean Windows test profile, then run the package acceptance checks in the release plan.

@@ -11,6 +11,100 @@ import { nextSettingsTab } from './settings-tabs.js';
 import { timeParts } from './time-format.js';
 import { clockWindowLayout, MENU_SHADOW_SPACE } from './menu-layout.js';
 import { createSettingsPreview } from './settings-preview.js';
+import { addonDefinitions } from './addons/registry.js';
+import { createAddonController } from './addons/controller.js';
+import { createAddonState } from './addons/state.js';
+import { composeAddonFragments } from '../scripts/addon-fragments.js';
+import { readFileSync } from 'node:fs';
+
+test('bundled add-on views reject unknown slots and never use runtime HTML injection', () => {
+    for (const page of ['index.html', 'settings.html']) {
+        const html = composeAddonFragments(readFileSync(new URL(`../${page}`, import.meta.url), 'utf8'));
+        assert.doesNotMatch(html, /<!-- addon-view:/);
+        assert.doesNotMatch(html, /\bx-html\s*=/);
+        assert.match(html, /addon-instance|addon-line/);
+        if (page === 'settings.html') {
+            assert.equal((html.match(/class="addon-preview-clock"/g) || []).length, 1);
+            assert.equal((html.match(/previewAddons\.filter\(\(addon\) => addon\.placement === 'above'\)/g) || []).length, 1);
+            assert.equal((html.match(/previewAddons\.filter\(\(addon\) => addon\.placement === 'below'\)/g) || []).length, 1);
+            assert.ok(html.indexOf("addon.placement === 'above'") < html.indexOf('class="addon-preview-clock"'));
+            assert.ok(html.indexOf('class="addon-preview-clock"') < html.indexOf("addon.placement === 'below'"));
+        }
+    }
+    assert.throws(() => composeAddonFragments('<!-- addon-view:unknown -->'), /Invalid add-on view slot/);
+    assert.deepEqual(addonDefinitions.map(({ kind }) => kind), ['date', 'region_clock', 'timer', 'progress']);
+});
+
+test('bundled definitions keep the native kind and action fixture', () => {
+    const fixture = JSON.parse(readFileSync(new URL('./addons/contracts.json', import.meta.url), 'utf8'));
+    assert.deepEqual(addonDefinitions.map(({ kind }) => kind), Object.keys(fixture));
+    for (const definition of addonDefinitions) {
+        const addon = createAddon(definition.kind);
+        if (addon.kind === 'progress') addon.options.mode = 'countdown';
+        const actions = definition.actions(addon, { timerSession: null, progressTimerSessions: {} });
+        assert.deepEqual(actions.map(({ id }) => id), fixture[definition.kind]);
+    }
+});
+
+test('controller routes only declared actions to the current enabled instance', async () => {
+    const timer = createAddon('timer');
+    const first = createAddon('progress');
+    const second = createAddon('progress');
+    first.options.mode = 'countdown';
+    second.options.mode = 'countdown';
+    const settings = { addons: [timer, first, second] };
+    const calls = [];
+    const controller = createAddonController({
+        getSettings: () => settings,
+        getState: () => ({ timerSession: { running: false }, progressTimerSessions: {} }),
+        dispatchNative: async (addon, action) => { calls.push([addon.id, action]); return { running: true }; },
+    });
+    assert.deepEqual(controller.menuActions().map(({ instanceId, id }) => [instanceId, id]), [[timer.id, 'reset']]);
+    await controller.dispatch(second.id, 'toggle', 'primary-click');
+    assert.deepEqual(calls, [[second.id, 'toggle']]);
+    await assert.rejects(controller.dispatch(first.id, 'reset', 'clock-menu'), /unavailable/);
+    first.enabled = false;
+    await assert.rejects(controller.dispatch(first.id, 'toggle', 'settings-button'), /unavailable/);
+    settings.addons = settings.addons.filter((addon) => addon.id !== second.id);
+    await assert.rejects(controller.dispatch(second.id, 'toggle', 'primary-click'), /unavailable/);
+    assert.deepEqual(calls, [[second.id, 'toggle']]);
+});
+
+test('add-on state keeps newer broadcasts and disposes its native listeners', async () => {
+    let onTimer;
+    let onProgress;
+    let resolveTimer;
+    let resolveAction;
+    let stopped = 0;
+    const updates = [];
+    const state = createAddonState({
+        adapter: {
+            onTimer: async (callback) => { onTimer = callback; return () => { stopped++; }; },
+            onProgress: async (callback) => { onProgress = callback; return () => { stopped++; }; },
+            getTimer: () => new Promise((resolve) => { resolveTimer = resolve; }),
+            getProgress: async () => ({}),
+            action: () => new Promise((resolve) => { resolveAction = resolve; }),
+        },
+        onChange: (snapshot) => updates.push(snapshot),
+    });
+    const start = state.start();
+    await new Promise((resolve) => setImmediate(resolve));
+    onTimer({ elapsed_ms: 200 });
+    resolveTimer({ elapsed_ms: 100 });
+    await start;
+    assert.equal(state.snapshot.timerSession.elapsed_ms, 200);
+    const action = state.dispatch({ kind: 'timer' }, 'toggle');
+    onTimer({ elapsed_ms: 400 });
+    resolveAction({ elapsed_ms: 300 });
+    await action;
+    assert.equal(state.snapshot.timerSession.elapsed_ms, 400);
+    state.dispose();
+    onTimer({ elapsed_ms: 500 });
+    onProgress({});
+    assert.equal(state.snapshot.timerSession.elapsed_ms, 400);
+    assert.equal(stopped, 2);
+    assert.ok(updates.length >= 2);
+});
 
 test('Settings preview pauses while hidden/minimized and resumes with exactly one timer', async () => {
     let visible = false;

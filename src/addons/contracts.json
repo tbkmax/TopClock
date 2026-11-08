@@ -1,0 +1,6 @@
+{
+  "date": [],
+  "region_clock": [],
+  "timer": ["toggle", "reset"],
+  "progress": ["toggle", "reset"]
+}

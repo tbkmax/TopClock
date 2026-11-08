@@ -1,5 +1,12 @@
 # Rust application changelog
 
+## Changed
+
+### 2026-11-07 - Extract native add-on rules and actions
+
+- The four built-in validators, shared instance checks, Timer session calculations, and typed action routing now live in `addons/`. Existing Timer and Progress commands, global shortcuts, saved fields, events, and settings rollback keep their behavior. No migration or user action is required.
+- Added this new folder's architecture, workflow, changelog, and backlog documents. Rust tests pass; live action failure and cross-window checks remain open.
+
 ## Fixed
 
 ### 2026-11-06 - Allow startup after a settings write failure
@@ -100,7 +107,7 @@
 
 ### 2026-10-27 - Add-on persistence, Timer sessions and optional global shortcuts
 
-- Added a validated ordered add-on list for Date, multiple Region clocks and Timer in [addons.rs](../addons.rs) and [settings.rs](../settings.rs). Existing enabled Timer settings migrate to a Countdown instance; malformed add-on data can be discarded while preserving valid clock appearance.
+- Added a validated ordered add-on list for Date, multiple Region clocks and Timer in [addons.rs](../addons/mod.rs) and [settings.rs](../settings.rs). Existing enabled Timer settings migrate to a Countdown instance; malformed add-on data can be discarded while preserving valid clock appearance.
 - Added durable Timer Start/Pause, Reset, resume-after-restart and countdown completion state. Timer state is separate from add-on appearance and broadcasts `timer-state-changed`.
 - Added per-action enable switches, off by default, and system-wide Windows hotkey registration in [hotkeys.rs](../hotkeys.rs). Registration failures are shown in Settings. The configured interaction modifier remains active. The default Quit binding changes to `Ctrl+Alt+Q`; older `Ctrl+Q` defaults migrate. No operator action is required.
 

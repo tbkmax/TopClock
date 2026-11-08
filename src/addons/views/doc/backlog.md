@@ -1,0 +1,12 @@
+# Bundled view backlog
+
+## Native WebView layout check
+
+- **Title:** Inspect all extracted views in the running clock and Settings window.
+- **Problem or opportunity:** Vite and unit tests verify composition, but they cannot prove Alpine scope, focus, or pixel layout in WebView2.
+- **Desired outcome:** Date, Region clock, Timer, and Progress controls render and update in both stacks and the live preview without clipped content or duplicate IDs.
+- **Scope:** [clock-row.html](../clock-row.html), [settings-row.html](../settings-row.html), [preview-row.html](../preview-row.html), the four Settings type fragments, and [the Vite helper](../../../../scripts/addon-fragments.js).
+- **Acceptance criteria:** Check zero and 16 instances, every type, above/below placement, expanded Settings details, progress week grid, menu geometry, translated labels, and keyboard focus at the fixed Settings size. Confirm development and production builds show the same controls.
+- **Dependencies and risks:** Requires an interactive Windows WebView2 session and disposable settings. Multiple monitors and mixed DPI broaden the acceptance pass.
+- **Verification:** Run `npm run tauri:dev`; compare with a production build where available. Record screenshots and input behavior.
+- **Priority:** High before release because build success does not prove Alpine runtime scope.

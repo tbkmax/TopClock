@@ -1,5 +1,5 @@
 use crate::{
-    addons::{progress_countdown_options, timer_options, TimerSession},
+    addons::{reconcile_progress_settings, reconcile_timer_settings, TimerSession},
     config_store::save_config,
     settings::{valid_settings, ClockSettings},
     state::ClockState,
@@ -21,41 +21,27 @@ pub(crate) fn update_settings(
     if !valid_settings(&settings) {
         return Err("Invalid settings or add-on configuration".into());
     }
-    let mut timer_state_changed = false;
-    let mut progress_state_changed = false;
+    let timer_state_changed;
+    let progress_state_changed;
     let language_changed;
     {
         let mut config = state.config.lock().unwrap();
         let previous_session = config.timer_session.clone();
         let previous_progress_sessions = config.progress_timer_sessions.clone();
-        let old_timer = timer_options(&config.settings.addons);
-        let new_timer = timer_options(&settings.addons);
-        let old_progress = progress_countdown_options(&config.settings.addons);
-        let new_progress = progress_countdown_options(&settings.addons);
-        if old_progress.iter().any(|(id, duration)| {
-            new_progress.get(id) != Some(duration)
-                && new_progress.contains_key(id)
-                && config
-                    .progress_timer_sessions
-                    .get(id)
-                    .is_some_and(|session| session.progress_duration_locked())
-        }) {
-            return Err(
-                "Finish or reset the Progress countdown before changing its duration".into(),
-            );
-        }
-        if old_timer != new_timer {
-            if config.timer_session.running && new_timer.is_some() {
-                return Err("Pause the timer before changing its mode or duration".into());
-            }
-            config.timer_session = TimerSession::default();
-            timer_state_changed = true;
-        }
-        for (id, duration) in old_progress {
-            if new_progress.get(&id) != Some(&duration) {
-                progress_state_changed |= config.progress_timer_sessions.remove(&id).is_some();
-            }
-        }
+        let mut next_timer_session = previous_session.clone();
+        let mut next_progress_sessions = previous_progress_sessions.clone();
+        progress_state_changed = reconcile_progress_settings(
+            &config.settings.addons,
+            &settings.addons,
+            &mut next_progress_sessions,
+        )?;
+        timer_state_changed = reconcile_timer_settings(
+            &config.settings.addons,
+            &settings.addons,
+            &mut next_timer_session,
+        )?;
+        config.timer_session = next_timer_session;
+        config.progress_timer_sessions = next_progress_sessions;
         let previous = std::mem::replace(&mut config.settings, settings.clone());
         language_changed = previous.language != settings.language;
         if let Err(error) = save_config(&state, &config) {

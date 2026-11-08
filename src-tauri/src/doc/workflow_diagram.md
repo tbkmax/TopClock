@@ -70,7 +70,7 @@ sequenceDiagram
 sequenceDiagram
     participant Settings
     participant Command as settings_commands.rs
-    participant Validator as addons.rs
+    participant Validator as addons/ validators
     participant Store as config_store.rs
     participant Clocks as clockApp windows
     Settings->>Command: update_settings with Progress instances
@@ -83,12 +83,12 @@ sequenceDiagram
     end
 ```
 
-[addons.rs](../addons.rs) accepts multiple Progress instances within the shared 16-instance limit. It validates date, daily time, and countdown modes, their bounds, auto-hide, optional appearance fields, and optional per-range weekday arrays. Missing or empty weekday arrays mean every day, so older saved ranges remain valid. Time ranges stay ordered by start time; overlapping hours are valid only for disjoint weekday sets. Missing appearance fields from older saved instances remain valid. [settings_commands.rs](../settings_commands.rs) saves only validated settings, rejects duration changes after first Start until finish or Reset, prunes sessions when a countdown mode or duration is removed, and rolls back memory on write failure. Date and daily time bars derive from local time. Countdown sessions are stored by add-on ID in `PersistedConfig`, separate from the numeric Timer. `progress_timer_action` saves Start/Pause or Reset and emits `progress-timer-states-changed`; the monitor normalizes completed sessions. The diagram omits the Settings preview event and countdown action, described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
+[addons/](../addons/doc/architecture.md) accepts multiple Progress instances within the shared 16-instance limit. It validates date, daily time, and countdown modes, their bounds, auto-hide, optional appearance fields, and optional per-range weekday arrays. Missing or empty weekday arrays mean every day, so older saved ranges remain valid. Time ranges stay ordered by start time; overlapping hours are valid only for disjoint weekday sets. Missing appearance fields from older saved instances remain valid. [settings_commands.rs](../settings_commands.rs) saves only validated settings, rejects duration changes after first Start until finish or Reset, prunes sessions when a countdown mode or duration is removed, and rolls back memory on write failure. Date and daily time bars derive from local time. Countdown sessions are stored by add-on ID in `PersistedConfig`, separate from the numeric Timer. `progress_timer_action` saves Start/Pause or Reset and emits `progress-timer-states-changed`; the monitor normalizes completed sessions. Type-specific cleanup now runs in [progress.rs](../addons/progress.rs) through the same settings transaction. The diagram omits the Settings preview event and countdown action, described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
 
 ```mermaid
 sequenceDiagram
     participant UI as Settings or clock
-    participant Rust as timer.rs
+    participant Rust as timer.rs and addons/actions.rs
     participant File as settings.json
     UI->>Rust: progress_timer_action(id, toggle or reset)
     Rust->>File: Save session for id
@@ -245,8 +245,8 @@ classDiagram
     PersistedConfig --> DisplayPreference : by display identity
 ```
 
-Names and fields match [settings.rs](../settings.rs), [addons.rs](../addons.rs), and [state.rs](../state.rs). [config_store.rs](../config_store.rs) writes the config to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
-The `options` value contains `format` and optionally `show_weekday` for Date, or `time_zone` and optionally `show_label` for Region clock. [addons.rs](../addons.rs) accepts missing optional switches for older files, requires booleans when present, and validates sizes from 10% to 100% before the save flow below proceeds.
+Names and fields match [settings.rs](../settings.rs), [addons/](../addons/doc/architecture.md), and [state.rs](../state.rs). [config_store.rs](../config_store.rs) writes the config to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
+The `options` value contains `format` and optionally `show_weekday` for Date, or `time_zone` and optionally `show_label` for Region clock. [addons/](../addons/doc/architecture.md) accepts missing optional switches for older files, requires booleans when present, and validates sizes from 10% to 100% before the save flow below proceeds.
 
 ```mermaid
 sequenceDiagram
@@ -277,7 +277,7 @@ Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fon
 sequenceDiagram
     participant User
     participant Win as Windows hotkey service
-    participant Rust as hotkeys.rs and timer.rs
+    participant Rust as hotkeys.rs and addons/actions.rs
     participant File as settings.json
     participant Clock as Clock UI
     User->>Win: Press enabled Timer binding

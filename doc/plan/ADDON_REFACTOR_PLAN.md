@@ -1,10 +1,14 @@
 # Add-on structure refactor implementation plan
 
 Date: 2026-11-01  
-Status: proposed; implementation has not started.  
+Status: implemented in source; automated checks passed, live Windows and packaged checks remain open.  
 Scope: reorganize the four existing built-in add-ons while preserving their behavior.
 
-Read the [README](../README.md), [frontend architecture](../src/doc/architecture.md), and [native architecture](../src-tauri/src/doc/architecture.md) for current behavior. The earlier [add-on system plan](feature/ADDON_SYSTEM_PLAN.md) and [Progress plan](feature/PROGRESS_ADDON_PLAN.md) provide history; source code takes precedence where those plans are stale.
+Implementation record (2026-11-07): The four built-ins now own their display, actions, option editors, and native validation in [frontend modules](../../src/addons/builtins/) and [native modules](../../src-tauri/src/addons/). Progress calculations live beside its definition in [progress-display.js](../../src/addons/builtins/progress-display.js); the old top-level path re-exports them for compatibility. The [controller](../../src/addons/controller.js) resolves current instances and action descriptors; the [state adapter](../../src/addons/state.js) owns native session subscriptions. Vite composes a shared [clock row](../../src/addons/views/clock-row.html) and distinct Settings controls from allowlisted local fragments. The legacy frontend command names, native events, serialized fields, and capabilities were retained. A future type with the same display shape can reuse the shared clock row; a special type can register a dedicated bundled view.
+
+Automated verification: 28 frontend tests, 27 Rust tests, and `npm run build` passed. The assembled clock and Settings HTML was also checked for balanced tags and single-root Alpine templates. `tauri:dev` launched the native process with a temporary identifier and wrote only to an isolated config directory; that test process and directory were removed. The first launch attempt hit a Vite watcher `EBUSY` error on generated Rust output, so [Vite configuration](../../vite.config.js) now ignores `src-tauri/target/` during development. Live interaction across the clock, Settings, tray, modifier and drag behavior, multi-window synchronization, persistence and position restore is still pending. MSIX upgrade verification is also pending. Static bundled fragments remove the proposed `x-html` rendering path; the existing `csp: null` remains a separate security limitation and requires a dedicated CSP design before connected or downloaded add-ons.
+
+Read the [README](../../README.md), [frontend architecture](../../src/doc/architecture.md), and [native architecture](../../src-tauri/src/doc/architecture.md) for current behavior. The earlier [add-on system plan](../feature/ADDON_SYSTEM_PLAN.md) and [Progress plan](../feature/PROGRESS_ADDON_PLAN.md) provide history; source code takes precedence where those plans are stale.
 
 ## 1. Objective and scope
 
@@ -20,13 +24,13 @@ No new menu actions, shortcuts, add-on types, or install/uninstall UI belong to 
 
 | Current code | What already works | Refactor target |
 | --- | --- | --- |
-| [addons.js](../src/addons.js) | Catalog, defaults, shared instance shape, display formatting | Move type behavior into individual modules; retain one registry |
-| [settings-addons.js](../src/settings-addons.js) | Shared ordering plus type-specific edits and actions | Keep ordering in the host; move type editors and rules to their modules |
-| [main.js](../src/main.js), [settings.js](../src/settings.js) | Shared formatting, native events, separate live and preview views | Share state subscription and action adapters; keep view-local animation state separate |
-| [index.html](../index.html), [settings.html](../settings.html) | Ordered stacks, dashboard, preview and menu | Replace type checks in common shells with registered, bundled views and action descriptors |
-| [addons.rs](../src-tauri/src/addons.rs) | Validated instances and TimerSession calculations | Separate common validation, type validators and session logic |
-| [timer.rs](../src-tauri/src/timer.rs), [hotkeys.rs](../src-tauri/src/hotkeys.rs) | Durable timer commands and shortcut dispatch | Route existing entry points through shared native action services |
-| [settings_commands.rs](../src-tauri/src/settings_commands.rs), [config_store.rs](../src-tauri/src/config_store.rs) | Save validation, rollback, recovery and session cleanup | Preserve transaction ownership and delegate type rules through a small internal interface |
+| [addons.js](../../src/addons.js) | Catalog, defaults, shared instance shape, display formatting | Move type behavior into individual modules; retain one registry |
+| [settings-addons.js](../../src/settings-addons.js) | Shared ordering plus type-specific edits and actions | Keep ordering in the host; move type editors and rules to their modules |
+| [main.js](../../src/main.js), [settings.js](../../src/settings.js) | Shared formatting, native events, separate live and preview views | Share state subscription and action adapters; keep view-local animation state separate |
+| [index.html](../../index.html), [settings.html](../../settings.html) | Ordered stacks, dashboard, preview and menu | Replace type checks in common shells with registered, bundled views and action descriptors |
+| [addons.rs](../../src-tauri/src/addons/mod.rs) | Validated instances and TimerSession calculations | Separate common validation, type validators and session logic |
+| [timer.rs](../../src-tauri/src/timer.rs), [hotkeys.rs](../../src-tauri/src/hotkeys.rs) | Durable timer commands and shortcut dispatch | Route existing entry points through shared native action services |
+| [settings_commands.rs](../../src-tauri/src/settings_commands.rs), [config_store.rs](../../src-tauri/src/config_store.rs) | Save validation, rollback, recovery and session cleanup | Preserve transaction ownership and delegate type rules through a small internal interface |
 
 The current catalog is an extension point for compiled built-ins, not an installer or executable plugin loader. Timer and Progress already share the TimerSession representation, but use different persisted storage and command/event paths. Preserve those paths behind adapters before considering any later unification.
 
@@ -51,7 +55,7 @@ Disabling, removing, changing mode, changing duration, and restarting have diffe
 
 ## 4. Proposed module ownership
 
-The following paths are proposed; they do not exist yet. Keep individual type modules together initially to avoid unnecessary directory depth.
+The implemented layout keeps individual type modules together without extra directory depth:
 
 ```text
 src/addons/
@@ -60,14 +64,17 @@ src/addons/
   state.js               # native session snapshots and event lifecycle
   native-adapter.js      # explicit existing Tauri command/event mappings
   instance-editor.js     # common add/remove/order/placement/size behavior
+  contracts.json         # checked frontend/native kind and action names
   builtins/
     date.js
     region-clock.js
     timer.js
     progress.js          # definitions, formatting and type editor rules
+    progress-display.js  # Progress date, range, countdown and pulse calculations
   views/
     clock-row.html       # shared row and host-owned interaction boundary
     settings-row.html    # shared dashboard shell
+    preview-row.html     # shared preview row
     date.html
     region-clock.html
     timer.html
@@ -85,7 +92,7 @@ src-tauri/src/addons/
   progress.rs            # type validation and type-specific rules
 ```
 
-Every new maintained folder above must also have its own `doc/architecture.md`, `doc/workflow_diagram.md`, `doc/changelog.md`, and `doc/backlog.md`, following [the documentation templates](../templates/doc/). The listing omits those files for readability. Each document links to its parent and describes the actual folder. Update affected parent docs and preserve their history.
+Every new maintained folder above has its own `doc/architecture.md`, `doc/workflow_diagram.md`, `doc/changelog.md`, and `doc/backlog.md`, following [the documentation templates](../../templates/doc/). The listing omits those files for readability. Each document links to its parent and describes the actual folder. Parent docs were updated while preserving their history.
 
 Keep `main.js` responsible for the clock window, pointer input, resize and menu visibility. Keep `settings.js` responsible for the Settings page and save controller. The add-on controller receives narrow dependencies such as a settings getter, draft-edit callback and action adapter; it does not receive unrestricted access to either Alpine page object.
 
@@ -171,7 +178,7 @@ One native service should own future refresh/network work across all clock windo
 
 Owner-provided code still needs review for dependency, package and account compromise. Module separation itself provides organization, not a sandbox or per-add-on permission isolation. Tauri capabilities are not automatically individual permissions for modules sharing the same webview.
 
-The current [Tauri configuration](../src-tauri/tauri.conf.json) has `csp: null`, and the current [capability file](../src-tauri/capabilities/default.json) grants window/event permissions to the clock and Settings windows. Record this baseline. This refactor should not add remote content, credentials or broader capabilities. Before introducing network-connected or downloaded add-ons, review CSP/Alpine compatibility, webview origins, custom-command authorization, URL restrictions, credential storage, package integrity and uninstall handling together.
+The current [Tauri configuration](../../src-tauri/tauri.conf.json) has `csp: null`, and the current [capability file](../../src-tauri/capabilities/default.json) grants window/event permissions to the clock and Settings windows. Record this baseline. This refactor should not add remote content, credentials or broader capabilities. Before introducing network-connected or downloaded add-ons, review CSP/Alpine compatibility, webview origins, custom-command authorization, URL restrictions, credential storage, package integrity and uninstall handling together.
 
 Treat server responses as data. Do not expose privileged Tauri commands to a remote web app or execute a server response as local HTML/JavaScript. Restrict future native requests and redirect handling to the intended service, use authenticated encrypted transport, and define what clock data is sent and why. Revisit privacy disclosures when the feature exists; current local add-on behavior does not authorize transmitting data.
 
@@ -183,7 +190,7 @@ Before selecting a downloadable-code mechanism or shipping the connected add-on 
 
 Read affected folder docs and check `git status --short` before edits. Record the current commands/events/schema and a behavior matrix for every built-in, including disable/remove/mode changes and failed saves. Reuse existing tests and add focused fixtures where the compatibility contract lacks coverage. Run the existing suites/build before structural edits and record any pre-existing failure separately.
 
-Gate: a reviewer can identify expected behavior and existing verification gaps without relying on this proposal as proof that the app works. Existing [frontend live checks](../src/doc/backlog.md) remain open until actually exercised.
+Gate: a reviewer can identify expected behavior and existing verification gaps without relying on this proposal as proof that the app works. Existing [frontend live checks](../../src/doc/backlog.md) remain open until actually exercised.
 
 ### Phase 2 — Extract definitions and pure behavior
 

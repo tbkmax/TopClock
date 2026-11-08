@@ -7,6 +7,8 @@ import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { clockWindowLayout } from './menu-layout.js';
 import { displayAddon } from './addons.js';
+import { createAddonState } from './addons/state.js';
+import { createAddonController } from './addons/controller.js';
 import { markCountdownCompletion, progressBarStyle } from './progress.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
@@ -28,6 +30,8 @@ Alpine.data('clockApp', () => ({
     addonNumberActiveUntil: {},
     timerSession: null,
     progressTimerSessions: {},
+    addonState: null,
+    addonController: null,
     progressPreviousPercent: {},
     progressCompletionUntil: {},
     previousNumbers: {},
@@ -50,13 +54,22 @@ Alpine.data('clockApp', () => ({
     resizeTimer: null,
 
     async init() {
+        this.addonState = createAddonState({ onChange: ({ timerSession, progressTimerSessions }) => {
+            this.timerSession = timerSession;
+            this.progressTimerSessions = progressTimerSessions;
+            this.updateClock();
+        } });
+        this.addonController = createAddonController({
+            getSettings: () => this.settings,
+            getState: () => this.addonState.snapshot,
+            dispatchNative: (addon, action) => this.addonState.dispatch(addon, action),
+        });
         this.systemLocale = await invoke('get_system_locale').catch(() => navigator.language || 'en');
         this.syncLanguage();
         this.updateClock();
-        setInterval(() => this.updateClock(), 200);
+        this.clockInterval = setInterval(() => this.updateClock(), 200);
         this.loadSettings();
-        invoke('get_timer_state').then((session) => { this.timerSession = session; this.updateClock(); }).catch(console.error);
-        invoke('get_progress_timer_states').then((sessions) => { this.progressTimerSessions = sessions; this.updateClock(); }).catch(console.error);
+        this.addonState.start().catch(console.error);
         this.$nextTick(() => {
             new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockContainer);
             this.scheduleResize();
@@ -86,14 +99,6 @@ Alpine.data('clockApp', () => ({
                 this.applySettings(event.payload);
                 this.updateClock();
             }),
-            listen('timer-state-changed', (event) => {
-                this.timerSession = event.payload;
-                this.updateClock();
-            }),
-            listen('progress-timer-states-changed', (event) => {
-                this.progressTimerSessions = event.payload;
-                this.updateClock();
-            }),
         ]);
 
         window.addEventListener('keydown', (event) => {
@@ -116,6 +121,11 @@ Alpine.data('clockApp', () => ({
         window.addEventListener('mousemove', (event) => this.handleMouseMove(event));
         window.addEventListener('mouseup', () => this.handleMouseUp());
 
+    },
+
+    destroy() {
+        this.addonState?.dispose();
+        clearInterval(this.clockInterval);
     },
 
     async loadSettings() {
@@ -226,27 +236,17 @@ Alpine.data('clockApp', () => ({
         }).filter((addon) => !addon.hidden);
     },
 
-    get timerEnabled() { return (this.settings?.addons || []).some((addon) => addon.kind === 'timer' && addon.enabled); },
-
-    timerClick() {
+    addonActions(addon, role) { return this.addonController?.actionsFor(addon, role) || []; },
+    get addonMenuActions() { return this.addonController?.menuActions() || []; },
+    addonClick(addon) {
         if (this.dragStarted) { this.dragStarted = false; return; }
-        if (this.isCtrlHeld && this.timerEnabled) this.timerAction('toggle');
+        if (!this.isCtrlHeld) return;
+        const action = this.addonActions(addon, 'primary-click').find((item) => item.enabled);
+        if (action) this.addonController.dispatch(addon.id, action.id, 'primary-click').catch(console.error);
     },
-
-    timerAction(action) {
-        invoke('timer_action', { action }).then((session) => {
-            this.timerSession = session;
-            this.updateClock();
-            if (action === 'reset') this.closeMenu();
-        }).catch(console.error);
-    },
-
-    progressCountdownClick(addon) {
-        if (this.dragStarted) { this.dragStarted = false; return; }
-        if (!this.isCtrlHeld || addon.kind !== 'progress' || addon.options.mode !== 'countdown') return;
-        invoke('progress_timer_action', { id: addon.id, action: 'toggle' }).then((session) => {
-            this.progressTimerSessions = { ...this.progressTimerSessions, [addon.id]: session };
-            this.updateClock();
+    runAddonMenuAction(item) {
+        this.addonController.dispatch(item.instanceId, item.id, 'clock-menu').then((session) => {
+            if (session && item.id === 'reset') this.closeMenu();
         }).catch(console.error);
     },
 

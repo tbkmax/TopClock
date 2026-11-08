@@ -1,5 +1,13 @@
 # Frontend changelog
 
+## Changed
+
+### 2026-11-07 - Separate built-in add-on behavior and views
+
+- Date, Region clock, Timer, and Progress now own their defaults, formatting, Settings rules, and available actions in individual modules. A shared controller routes existing clock, Settings, and menu actions; bundled static fragments compose the clock and Settings rows before Alpine starts. Existing saved options, native commands, and user controls remain compatible. No migration or user action is required.
+- Progress calculations now live beside its definition in `addons/builtins/progress-display.js`, with `progress.js` retaining the previous import path.
+- Added documentation for the new `addons/`, `addons/builtins/`, and `addons/views/` folders. Frontend tests and Vite build pass; native WebView input and layout checks remain in the backlog.
+
 ## Fixed
 
 ### 2026-11-06 - Pause the hidden Settings preview

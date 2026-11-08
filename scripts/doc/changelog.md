@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-11-07 - Compose bundled add-on views during Vite builds
+
+- Added [addon-fragments.js](../addon-fragments.js) to insert allowlisted local add-on rows and Settings controls in development and production. Missing or unknown slots fail composition; no runtime HTML loading or settings migration is introduced. Frontend tests and the production build pass.
+
 ### 2026-11-06 - Unattended memory testing and reports
 
 - Added a [double-click launcher](../Test-TopClockLongRun.cmd) and [eight-hour test](../Test-TopClockLongRun.ps1) with early stop, exact build identification, and Windows event collection from the run start.

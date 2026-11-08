@@ -1,5 +1,27 @@
 # Script workflow
 
+## Bundled add-on view composition
+
+The [Vite helper](../addon-fragments.js) runs on both development and production page transforms. These are procedural file transforms, so a class diagram would misrepresent the helper.
+
+```mermaid
+sequenceDiagram
+    participant Vite as vite.config.js
+    participant Helper as addon-fragments.js
+    participant Registry as src/addons/registry.js
+    participant Views as src/addons/views/
+    Vite->>Helper: transformIndexHtml for clock or Settings
+    Helper->>Registry: Read compiled view keys
+    Helper->>Views: Resolve allowlisted local slots
+    alt Missing or invalid slot
+        Helper-->>Vite: Build error
+    else Valid slots
+        Helper-->>Vite: Composed static HTML
+    end
+```
+
+Alpine initializes after composition. The helper never inserts settings or server-provided markup; see the [view architecture](../../src/addons/views/doc/architecture.md).
+
 ## Runtime measurement
 
 The [long-run launcher](../Test-TopClockLongRun.ps1) creates a dated run directory and delegates sampling to the flow below. A `STOP` file ends sampling on the next iteration. On return or failure, it records the end state, requests local Windows events since startup of the test, and calls the [report generator](../New-TopClockMemoryReport.ps1). The generator reads completed CSV rows and metadata, flags coverage problems, estimates memory trends, then writes HTML, JSON and a ZIP. After a forced terminal close, the same generator reads the available rows from the saved directory; the previous `Running` state identifies an interrupted capture.

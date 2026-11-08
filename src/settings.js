@@ -6,6 +6,9 @@ import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons.js';
+import { getAddonDefinition } from './addons/registry.js';
+import { createAddonState } from './addons/state.js';
+import { createAddonController } from './addons/controller.js';
 import { markCountdownCompletion, progressBarStyle } from './progress.js';
 import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
 import { addonMethods } from './settings-addons.js';
@@ -61,6 +64,8 @@ Alpine.data('settingsApp', () => ({
     previewAddons: [],
     timerSession: null,
     progressTimerSessions: {},
+    addonState: null,
+    addonController: null,
     progressPreviousPercent: {},
     progressCompletionUntil: {},
     pendingTimerChange: null,
@@ -117,15 +122,25 @@ Alpine.data('settingsApp', () => ({
                 if (!isCurrent()) return;
                 this.settings = settings;
                 this.syncLanguage();
-                this.timerSession = timerSession;
-                this.progressTimerSessions = progressTimerSessions;
+                this.addonState.setTimer(timerSession);
+                this.addonState.setProgress(progressTimerSessions);
                 this.updatePreview();
             },
             onError: (error) => { this.error = this.t('error.save', { error }); },
         });
         this.saveController.setCommitted(this.settings);
-        this.timerSession = await invoke('get_timer_state');
-        this.progressTimerSessions = await invoke('get_progress_timer_states');
+        this.addonState = createAddonState({ onChange: ({ timerSession, progressTimerSessions }) => {
+            this.timerSession = timerSession;
+            this.progressTimerSessions = progressTimerSessions;
+            this.updatePreview();
+        } });
+        this.addonController = createAddonController({
+            getSettings: () => this.settings,
+            getState: () => this.addonState.snapshot,
+            dispatchNative: (addon, action) => this.addonState.dispatch(addon, action),
+            beforeAction: () => this.saveController.flush(),
+        });
+        await this.addonState.start();
         this.hotkeyErrors = await invoke('get_hotkey_errors');
         this.appVersion = await getVersion().catch(() => '0.0.0');
         this.isPackaged = await invoke('is_packaged').catch((error) => {
@@ -148,14 +163,6 @@ Alpine.data('settingsApp', () => ({
                 this.updatePreview();
             }
         });
-        await listen('timer-state-changed', (event) => {
-            this.timerSession = event.payload;
-            this.updatePreview();
-        });
-        await listen('progress-timer-states-changed', (event) => {
-            this.progressTimerSessions = event.payload;
-            this.updatePreview();
-        });
         await listen('hotkey-errors-changed', (event) => { this.hotkeyErrors = event.payload; });
         await listen('displays-changed', (event) => { this.displays = event.payload; });
         await settingsWindow.onCloseRequested((event) => {
@@ -171,6 +178,28 @@ Alpine.data('settingsApp', () => ({
         if (!this.isPackaged && this.settings.auto_check_updates) {
             this.checkForUpdates(false);
         }
+    },
+
+    destroy() { this.addonState?.dispose(); },
+
+    addonActions(addon, role = 'settings-button') {
+        return this.addonController?.actionsFor(addon, role) || [];
+    },
+    async runAddonAction(addon, action) {
+        try {
+            const result = await this.addonController.dispatch(addon.id, action.id, 'settings-button');
+            if (result) this.error = '';
+        } catch (error) {
+            this.error = this.t(addon.kind === 'progress' ? 'error.progressTimer' : 'error.timer', { error });
+        }
+    },
+    addonDescription(addon) {
+        return getAddonDefinition(addon.kind)?.describe(addon, {
+            t: (key, vars) => this.t(key, vars), settings: this.settings,
+        }).subtitle || '';
+    },
+    editAddonOption(addon, field, value) {
+        if (getAddonDefinition(addon.kind)?.editor.setOption?.(addon, field, value)) this.save();
     },
 
     async syncPreviewTimer() {
@@ -265,11 +294,10 @@ Alpine.data('settingsApp', () => ({
     get updateStatusText() { return this.t(this.updateStatusKey, this.updateStatusVars); },
 
     localizedAddonName(addon) {
-        if (addon.kind === 'progress') {
-            const count = this.settings.addons.filter((item) => item.kind === 'progress').findIndex((item) => item.id === addon.id) + 1;
-            return this.t('addons.progressInstance', { count });
-        }
-        return addon.kind === 'region_clock' ? addonName(addon) : this.t(`addons.${addon.kind}`);
+        return getAddonDefinition(addon.kind)?.describe(addon, {
+            t: (key, vars) => this.t(key, vars), settings: this.settings,
+        }).name
+            || addonName(addon);
     },
 
     shortcutActionKey(key) {

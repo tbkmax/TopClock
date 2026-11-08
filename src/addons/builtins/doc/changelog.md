@@ -1,0 +1,14 @@
+# Built-in definitions changelog
+
+## Added
+
+### 2026-11-07 - Create this folder's documentation
+
+- Added architecture, workflow, changelog, and backlog documents for the four built-in definitions.
+
+## Changed
+
+### 2026-11-07 - Give each add-on its own behavior module
+
+- Defaults, descriptions, display formatting, Settings rules, and available actions now live with their add-on type. The existing options, display values, and saved settings format remain compatible; no user action is required.
+- Moved Progress date, range, countdown, and pulse calculations into `progress-display.js`; the prior top-level import path remains a re-export.

@@ -1,0 +1,19 @@
+<div class="addon-instance-controls" x-show="addon.kind === 'date'">
+    <label>Date format
+        <select class="select-control" :value="addon.options.format"
+            @change="editAddonOption(addon, 'format', $event.target.value)" aria-label="Date format">
+            <option value="ymd">Year-Month-Day</option>
+            <option value="md">Month-Day</option>
+            <option value="d">Day only</option>
+        </select>
+    </label>
+    <label class="addon-option-switch">Show weekday
+        <button type="button" class="switch" role="switch"
+            :aria-checked="addon.options.show_weekday === true"
+            :class="{ on: addon.options.show_weekday === true }"
+            aria-label="Show weekday after date"
+            @click="editAddonOption(addon, 'show_weekday', addon.options.show_weekday !== true)">
+            <span></span>
+        </button>
+    </label>
+</div>

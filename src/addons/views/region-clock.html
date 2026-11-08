@@ -1,0 +1,19 @@
+<div class="addon-instance-controls" x-show="addon.kind === 'region_clock'">
+    <label>Region
+        <select class="select-control" :value="addon.options.time_zone"
+            @change="editAddonOption(addon, 'time_zone', $event.target.value)" aria-label="Region time zone">
+            <template x-for="zone in timeZones" :key="zone">
+                <option :value="zone" x-text="zone.replaceAll('_', ' ')"></option>
+            </template>
+        </select>
+    </label>
+    <label class="addon-option-switch">Show region name
+        <button type="button" class="switch" role="switch"
+            :aria-checked="addon.options.show_label !== false"
+            :class="{ on: addon.options.show_label !== false }"
+            aria-label="Show region name on clock"
+            @click="editAddonOption(addon, 'show_label', addon.options.show_label === false)">
+            <span></span>
+        </button>
+    </label>
+</div>

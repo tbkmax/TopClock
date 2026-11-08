@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
+import { addonFragmentsPlugin } from './scripts/addon-fragments.js';
 
 export default defineConfig({
+    plugins: [addonFragmentsPlugin()],
+    server: { watch: { ignored: ['**/src-tauri/target/**'] } },
     build: {
         rollupOptions: {
             input: {

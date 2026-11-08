@@ -1,0 +1,17 @@
+<div class="addon-preview-line" :class="{ 'addon-preview-progress': Boolean(item.progress) }" :style="addonPreviewStyle(item)">
+    <span class="addon-preview-label" x-show="item.showLabel" x-text="item.label"></span>
+    <span x-show="!item.progress" x-text="item.text || (item.parts || []).map((part) => part.text).join('')"></span>
+    <span class="addon-preview-weekday" x-show="item.weekday" x-text="item.weekday"></span>
+    <template x-if="item.progress">
+        <div class="progress-rows" :style="progressStyle(item)">
+            <template x-for="(row, index) in item.progress.rows" :key="index">
+                <div class="progress-row" :class="[`progress-${row.phase}`, { 'progress-celebrate': row.celebrating }]">
+                    <div class="progress-track" role="progressbar" :aria-label="row.label" :aria-valuenow="Math.round(row.percent)" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-fill" :style="`width:${row.percent}%`"></div>
+                    </div>
+                    <span class="progress-percent" x-show="item.options.show_percentage === true" x-text="row.percentText"></span>
+                </div>
+            </template>
+        </div>
+    </template>
+</div>

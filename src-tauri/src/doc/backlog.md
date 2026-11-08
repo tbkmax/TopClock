@@ -1,5 +1,7 @@
 # Rust application backlog
 
+The add-on extraction passes unit tests, while a controlled native action write failure remains in the [native add-on backlog](../addons/doc/backlog.md). Existing live smoke verification below also covers the refactor.
+
 ## Identify production memory failure signatures
 
 - **Problem and outcome** — Partner Center lists uncategorized failures, so the faulting process/module and exception remain unknown. Obtain a matching Windows error event or dump before attributing the production incidents to a specific cause.
@@ -72,7 +74,7 @@ The runtime module extraction is complete; [main.rs](../main.rs) remains a small
 - **Title:** Detect wall-clock jumps in a running Timer session.
 - **Problem or opportunity:** Resume-after-restart uses a saved Unix start time. A manual clock change or time synchronization can change apparent elapsed time.
 - **Desired outcome:** A running in-process Timer uses a monotonic clock; restart reconciliation explains or bounds an unexpected wall-clock jump.
-- **Scope:** [addons.rs](../addons.rs), [timer.rs](../timer.rs), [config_store.rs](../config_store.rs), and Timer state tests.
+- **Scope:** [addons/](../addons/doc/architecture.md), [timer.rs](../timer.rs), [config_store.rs](../config_store.rs), and Timer state tests.
 - **Acceptance criteria:** Forward and backward system clock changes do not cause an in-process timer to jump; restart behavior is defined and tested.
 - **Dependencies and risks:** Keep the persisted session format backward compatible and preserve countdown completion at zero.
 - **Verification:** Simulate clock jumps in focused Timer tests and check a real Windows session.
