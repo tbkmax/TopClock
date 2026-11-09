@@ -1,5 +1,9 @@
 # Frontend workflows
 
+## Add-on Details layout
+
+The catalog and configured Progress instances open the same registered detail fragment. Settings places that fragment above a dedicated modal action footer. Preset chips and the input form wrap within the modal, and the modal scrolls when needed. Catalog cards keep Add on the left and Details on the right.
+
 ## Progress menu preset
 
 The clock menu filters enabled Progress countdowns and reads their Start/Pause labels from the shared add-on host. Set expands the shared preset list within the selected row. A preset with recorded progress opens an inline confirmation unless the warning was dismissed; the native command checks again before it changes the saved duration and session together. A successful command broadcasts both `clock-settings-changed` and `progress-timer-states-changed`, so every clock and Settings refreshes its duration and action label. The Add-ons catalog and each countdown detail panel open the same shared editor; edits use the ordinary Settings save controller. The dialog's warning checkbox can re-enable a previously dismissed confirmation.

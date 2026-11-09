@@ -156,7 +156,7 @@
                                 <h2 id="timer-reset-title">Reset timer to switch?</h2>
                                 <p>Changing the timer mode or duration will clear the current session.</p>
                                 <label><input type="checkbox" x-model="suppressResetPrompt"> Don't show this again</label>
-                                <div><button type="button" class="action-button" x-ref="timerResetCancel" @click="cancelTimerChange()">Cancel</button><button type="button" class="action-button primary-action" @click="confirmTimerChange()">Reset and change</button></div>
+                                <div class="addon-modal-actions"><button type="button" class="action-button" x-ref="timerResetCancel" @click="cancelTimerChange()">Cancel</button><button type="button" class="action-button primary-action" @click="confirmTimerChange()">Reset and change</button></div>
                             </div>
                         </div>
                     </template>
@@ -164,7 +164,7 @@
                         <div class="addon-modal-backdrop" role="presentation" @keydown.escape.window="closeAddonDetails()">
                             <div class="addon-modal" x-ref="addonDetails" role="dialog" aria-modal="true" aria-labelledby="addon-details-title">
                                 <!-- addon-view:details-types -->
-                                <div><button type="button" class="action-button primary-action" @click="closeAddonDetails()" x-text="t('addons.hideSettings')"></button></div>
+                                <div class="addon-modal-actions"><button type="button" class="action-button primary-action" @click="closeAddonDetails()" x-text="t('addons.hideSettings')"></button></div>
                             </div>
                         </div>
                     </template>

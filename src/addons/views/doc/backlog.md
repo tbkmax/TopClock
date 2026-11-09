@@ -1,6 +1,6 @@
 # Bundled view backlog
 
-Check the catalog Add/Details alignment and Progress detail dialog at the fixed Settings size in each supported language, including keyboard focus and an empty preset list.
+The catalog Add/Details alignment and Progress dialog layout passed a native 760 × 650 WebView visual check. Verify translated labels, keyboard focus, and an empty preset list in the broader acceptance pass.
 
 
 Verify that the Progress details entry button opens the same preset dialog as the catalog card at the fixed Settings window size and in every supported language. This is part of the [frontend preset live acceptance](../../../doc/backlog.md#progress-preset-menu-live-acceptance).

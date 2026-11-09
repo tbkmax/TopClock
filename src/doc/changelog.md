@@ -1,6 +1,12 @@
 # Frontend changelog
 ## Latest update
 
+### 2026-11-08 - Repair the Add-ons Details layout
+
+- Scoped modal button-row styling to the action footer, allowed Details content to stack and scroll, and placed catalog Add at the left edge with Details at the right. Native WebView screenshots confirm the repaired modal and card alignment.
+
+## Earlier updates
+
 ### 2026-11-08 - Separate the clock menu and add generic Details
 
 - Added a separate menu webview with display-edge fitting. The clock now sizes only to its own content through renamed `clock-layout.js`; menu actions, presets and confirmation live in `menu.js`. Progress names use white text and primary, secondary and preset controls have distinct styles. The Add-ons catalog and instance views use generic Details entry points for the shared Progress editor.

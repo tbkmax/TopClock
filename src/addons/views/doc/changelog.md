@@ -1,6 +1,12 @@
 # Bundled view changelog
 ## Latest update
 
+### 2026-11-08 - Keep Progress Details inside its modal
+
+- The Progress detail fragment has its own content block; the shared footer no longer lays that block out horizontally. Catalog cards place Add left and Details right.
+
+## Earlier updates
+
 ### 2026-11-08 - Add a shared Progress Details fragment
 
 - The Progress instance and catalog use Details buttons to open one registered fragment for presets and warning preference. The catalog reserves the detail slot on every card to align Add buttons.
