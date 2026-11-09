@@ -113,3 +113,14 @@ TODO 2's Ctrl + right-click dropdown menu item for opening the Settings window a
 - **Dependencies and risks:** Preserve the clock anchor and native click-through while fitting content; do not silently remove an add-on or reintroduce position clamping. See the [edge-spacing report](../../doc/report/fix3_top_space_and_bounce_back.md).
 - **Verification:** Test small and mixed-DPI monitors with above and below stacks, including the balanced gap around the main clock, dragging, menu opening and position restore.
 - **Priority:** Medium because dense custom layouts can clip on small displays even though normal rows never overlap.
+
+## Combined add-on live acceptance
+
+- **Title:** Verify pair drag and display behavior in Windows WebView2.
+- **Problem or opportunity:** Unit tests and the Vite build cannot prove pointer capture, card hit zones, Alpine scopes, or clock resize after grouping.
+- **Desired outcome:** Two eligible add-ons combine, swap, split, move across the clock, and enable together while retaining their individual editors and size ratio.
+- **Scope:** [Settings](../../settings.html), [clock](../../index.html), [layout helper](../addons/layout.js), and native settings persistence.
+- **Acceptance criteria:** Confirm paired Settings panels and their editors remain left/right without clipping at 760 × 650, then exercise mouse and keyboard movement, one open editor per pair, Progress rejection, disabled pairs, auto-hidden items, multiple displays, Ctrl interactions, tray menu, restart, position restore, and an older build opening then saving the paired settings file. Old builds should show two ordinary add-ons and a later new build should retain both instances after the pair metadata is lost.
+- **Dependencies and risks:** Use a disposable settings profile for the downgrade check. Preserve click-through and timer sessions.
+- **Verification:** Run `npm run tauri:dev` on Windows, compare the Settings preview with the desktop clock, and restart after saving.
+- **Priority:** High before release because this layout and drag behavior depends on native WebView input.

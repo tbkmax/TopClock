@@ -6,6 +6,7 @@ import { getVersion } from '@tauri-apps/api/app';
 import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
 import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
 import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons/model.js';
+import { displayLayout } from './addons/layout.js';
 import { getAddonDefinition } from './addons/registry.js';
 import { createAddonHost } from './addons/host.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
@@ -43,6 +44,7 @@ Alpine.data('settingsApp', () => ({
         auto_check_updates: true,
         shortcuts: { ...DEFAULT_SHORTCUTS },
         addons: [],
+        addon_pairs: [],
         timer_reset_warning_dismissed: false,
         progress_countdown_presets: [10, 30, 60],
         progress_preset_warning_dismissed: false,
@@ -75,7 +77,9 @@ Alpine.data('settingsApp', () => ({
     draggedAddonId: null,
     addonPointer: null,
     addonDragOffsetY: 0,
+    addonDragOffsetX: 0,
     addonDropTarget: null,
+    dragWholePair: false,
     addonCatalog,
     addonName,
     timeZones: availableTimeZones(),
@@ -236,6 +240,7 @@ Alpine.data('settingsApp', () => ({
             })
             .filter((addon) => !addon.hidden);
     },
+    previewLayout() { return displayLayout(this.previewAddons, this.settings.addon_pairs); },
 
     previewStyle() {
         return {
@@ -250,7 +255,7 @@ Alpine.data('settingsApp', () => ({
     addonPreviewStyle(addon) {
         return {
             color: this.settings.font_color,
-            fontSize: `${Math.min(this.settings.font_size, 64) * addon.size_percent / 100}px`,
+            fontSize: `${Math.min(this.settings.font_size, 64) * (addon.effective_size_percent ?? addon.size_percent) / 100}px`,
             fontFamily: clockFontStack(this.settings.font_family),
             WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
         };

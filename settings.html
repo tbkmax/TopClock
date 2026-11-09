@@ -115,14 +115,24 @@
                     <p class="section-description">Place useful details around your clock. Add-ons share one layout so they never overlap.</p>
                     <div class="addon-dashboard-heading"><div class="addon-section-title"><span x-text="t('addons.yours')"></span> <span class="addon-count" x-text="settings.addons.length"></span></div><button type="button" class="addon-add-shortcut" @click="catalogOpen = true; $nextTick(() => $refs.addonCatalogToggle.scrollIntoView({ behavior: 'smooth', block: 'start' }))" x-text="'+ ' + t('addons.addButton')" :aria-label="t('addons.add')"></button></div>
                     <p class="addon-empty" x-show="settings.addons.length === 0" x-text="t('addons.empty')"></p>
-                    <template x-for="addon in addonDashboardRows()" :key="addon.id">
+                    <p class="addon-pair-hint" x-show="settings.addons.length > 1" x-text="t('addons.pairHint')"></p>
+                    <template x-for="row in addonDashboardRows()" :key="row.id">
                         <div class="addon-dashboard-row">
-                        <template x-if="addon.kind === 'clock'"><div class="addon-clock-block" :class="{ 'drop-above': addonDropTarget?.placement === 'above', 'drop-below': addonDropTarget?.placement === 'below' }">
+                        <template x-if="row.kind === 'clock'"><div class="addon-clock-block" :class="{ 'drop-above': addonDropTarget?.placement === 'above', 'drop-below': addonDropTarget?.placement === 'below' }">
                             <span class="addon-clock-side" x-text="t('addons.above')"></span>
                             <div class="addon-clock-center"><span x-text="t('addons.clockBlock')"></span><strong x-text="previewParts.map((part) => part.text).join('')"></strong></div>
                             <span class="addon-clock-side" x-text="t('addons.below')"></span>
                         </div></template>
-                        <!-- addon-view:settings-row -->
+                        <template x-if="row.kind !== 'clock'"><div class="addon-instance" x-data="{ expandedId: null }" :class="{ 'is-expanded': expandedId !== null, 'is-dragging': dragWholePair && draggedAddonId === row.items[0].id }" :style="dragWholePair && draggedAddonId === row.items[0].id ? `transform: translate(${addonDragOffsetX}px, ${addonDragOffsetY}px)` : ''">
+                            <template x-if="row.pair"><div class="addon-pair-controls">
+                                <button type="button" class="addon-drag-handle" @pointerdown="startAddonPointer($event, row.items[0].id, true)" @pointermove="moveAddonPointer($event)" @pointerup="finishAddonPointer($event)" @pointercancel="endAddonDrag()" @keydown.arrow-up.prevent="nudgeAddon(row.items[0].id, -1, true)" @keydown.arrow-down.prevent="nudgeAddon(row.items[0].id, 1, true)" :aria-label="t('addons.movePair')" :title="t('addons.movePair')">⠿</button>
+                                <strong x-text="t('addons.combined')"></strong>
+                                <label><span x-text="t('addons.sharedSize')"></span> <span x-text="`${row.pair.size_percent}%`"></span><input class="size-range" type="range" min="10" max="100" step="5" x-model.number="row.pair.size_percent" :style="rangeStyle(row.pair.size_percent, 10, 100)" @input="save()" :aria-label="t('addons.sharedSize')"></label>
+                                <button type="button" class="action-button" @click="splitAddonPair(row.items[0].id)" x-text="t('addons.split')"></button>
+                                <button type="button" class="switch" role="switch" :aria-checked="row.items[0].enabled" :class="{ on: row.items[0].enabled }" :aria-label="t('addons.enable', { name: t('addons.combined') })" @click="toggleAddonPair(row.items[0].id)"><span></span></button>
+                            </div></template>
+                            <div class="addon-pair-members" :class="{ 'is-pair': row.pair }"><template x-for="addon in row.items" :key="addon.id"><!-- addon-view:settings-row --></template></div>
+                        </div></template>
                         </div>
                     </template>
                     <div class="addon-catalog-section">
@@ -140,12 +150,12 @@
                         <button type="button" class="addon-section-toggle" :aria-expanded="expanded" aria-controls="addon-preview-content" @click="expanded = !expanded"><span x-text="t('addons.desktopLayout')"></span><span class="addon-section-toggle-end"><span class="preview-live"><i></i> LIVE</span><span class="addon-chevron" :class="{ expanded }">⌄</span></span></button>
                         <div id="addon-preview-content" x-show="expanded" x-transition.opacity.duration.150ms x-cloak>
                             <div class="addon-preview-stack">
-                                <template x-for="item in previewAddons.filter((addon) => addon.placement === 'above')" :key="item.id">
-                                    <!-- addon-view:preview-row -->
+                                <template x-for="row in previewLayout().filter((item) => item.placement === 'above')" :key="row.id">
+                                    <div class="addon-preview-layout-row" :class="{ 'is-pair': row.pair }"><template x-for="item in row.items" :key="item.id"><!-- addon-view:preview-row --></template></div>
                                 </template>
                                 <div class="addon-preview-clock" :style="previewStyle()" x-text="previewParts.map((part) => part.text).join('')"></div>
-                                <template x-for="item in previewAddons.filter((addon) => addon.placement === 'below')" :key="item.id">
-                                    <!-- addon-view:preview-row -->
+                                <template x-for="row in previewLayout().filter((item) => item.placement === 'below')" :key="row.id">
+                                    <div class="addon-preview-layout-row" :class="{ 'is-pair': row.pair }"><template x-for="item in row.items" :key="item.id"><!-- addon-view:preview-row --></template></div>
                                 </template>
                             </div>
                         </div>

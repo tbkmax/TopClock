@@ -8,7 +8,7 @@ mod session;
 mod timer;
 
 pub(crate) use actions::{apply_action, apply_progress_preset, ActionTarget};
-pub(crate) use instance::{valid_addons, AddonInstance};
+pub(crate) use instance::{valid_addons, valid_pairs, AddonInstance, AddonPair};
 pub(crate) use progress::progress_countdown_options;
 pub(crate) use progress::reconcile_settings as reconcile_progress_settings;
 pub(crate) use session::TimerSession;
@@ -36,6 +36,32 @@ mod tests {
         addons.pop();
         addons[0].options = serde_json::json!({"mode":"countdown","duration_seconds":0});
         assert!(!valid_addons(&addons));
+    }
+
+    #[test]
+    fn validates_pairs_without_changing_flat_instances() {
+        let left = legacy_timer();
+        let mut right = left.clone();
+        right.id = "date-1".into();
+        right.kind = "date".into();
+        right.options = serde_json::json!({"format":"md"});
+        let addons = vec![left, right];
+        let pair = AddonPair {
+            left_id: "timer".into(),
+            right_id: "date-1".into(),
+            size_percent: 100,
+        };
+        assert!(valid_pairs(&addons, &[pair.clone()]));
+        assert!(!valid_pairs(&addons, &[pair.clone(), pair.clone()]));
+        let mut wrong = pair.clone();
+        wrong.size_percent = 0;
+        assert!(!valid_pairs(&addons, &[wrong]));
+        let mut separated = addons.clone();
+        separated[1].placement = "above".into();
+        assert!(!valid_pairs(&separated, &[pair.clone()]));
+        separated[1].placement = "below".into();
+        separated[1].enabled = false;
+        assert!(!valid_pairs(&separated, &[pair]));
     }
 
     #[test]

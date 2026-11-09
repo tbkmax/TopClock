@@ -1,6 +1,11 @@
 # Bundled view changelog
 ## Latest update
 
+### 2026-11-09 - Show combined cards and rows
+
+- Settings shows two member editors inside one card with a shared size and switch. The desktop clock and live preview show the members side by side at their retained size ratio. No dynamic HTML or new type fragment was added.
+- The Settings card now also presents the two members and their individual editors in left/right columns, with compact controls and a vertical divider.
+
 ### 2026-11-08 - Keep Progress Details inside its modal
 
 - The Progress detail fragment has its own content block; the shared footer no longer lays that block out horizontally. Catalog cards place Add left and Details right.

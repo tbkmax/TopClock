@@ -1,6 +1,11 @@
 # Frontend add-on host changelog
 ## Latest update
 
+### 2026-11-09 - Derive and edit two-member add-on rows
+
+- Added reusable pair layout and editing operations while retaining stable instance IDs and type-specific behavior. Group movement preserves both members; dragging one member out dissolves the pair and removes its shared scale.
+- Pointer hit testing now supports left/right member panels and requires a substantial move before splitting on empty space.
+
 ### 2026-11-08 - Centralize add-on menu and detail contributions
 
 - Definitions can contribute grouped menu choices and an optional Details fragment. The controller validates menu choices against current instances; the native adapter keeps the preset command mapping in one place.

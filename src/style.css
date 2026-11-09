@@ -116,6 +116,7 @@ html, body {
     margin: 2px 0;
 }
 .addon-stack-above { margin-bottom: -2px; }
+.addon-layout-row { display:flex; align-items:baseline; justify-content:center; gap:8px; width:max-content; max-width:100%; }
 .addon-line {
     display: flex;
     align-items: baseline;

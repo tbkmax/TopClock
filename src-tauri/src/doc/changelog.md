@@ -1,6 +1,10 @@
 # Rust application changelog
 ## Latest update
 
+### 2026-11-09 - Persist optional add-on pair links
+
+- Added validated `addon_pairs` alongside flat add-on instances. Older settings files default to no pairs. Stale pair links are dropped on load without dropping their members; an older build can display paired members separately. No user migration is required, though saving in an older build removes the pairing.
+
 ### 2026-11-08 - Fit menu window independently of clocks
 
 - Added menu request commands and physical display fitting. The input monitor dismisses outside the menu HWND and leaves clock click-through tied to the modifier. Rust fitting tests cover screen edges and negative origins.

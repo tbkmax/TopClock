@@ -124,6 +124,6 @@ npm run build
 
 ### Production builds
 
-See the [production build guide](doc/BUILDING.md) for standalone, NSIS, and Microsoft Store package commands and release details.
+See the [production build guide](doc/cmd/BUILDING.md) for standalone, NSIS, and Microsoft Store package commands and release details.
 
 

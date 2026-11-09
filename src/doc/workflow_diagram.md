@@ -1,5 +1,23 @@
 # Frontend workflows
 
+## Combined add-on layout
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Settings as settings.js
+    participant Layout as addons/layout.js
+    participant Rust as update_settings
+    participant Clock as main.js
+    User->>Settings: Drag eligible instance onto another
+    Settings->>Layout: Combine flat instances and pair IDs
+    Settings->>Rust: Save addons and addon_pairs
+    Rust-->>Clock: clock-settings-changed
+    Clock->>Layout: Derive side-by-side display row
+```
+
+The [instance editor](../addons/instance-editor.js) also swaps members, moves a whole pair, splits a dragged member, and mirrors the pair switch. Pointer targeting measures both axes so dragging between the left and right panels swaps members; a short movement within one panel does not split it. [settings.html](../../settings.html) and [index.html](../../index.html) render the same derived grouping. Rust validates adjacency, placement, enable state and eligible kinds before saving; see the [native add-on workflow](../../src-tauri/src/addons/doc/workflow_diagram.md). The diagram omits the existing debounced preview and save rollback, which still apply.
+
 ## Add-on Details layout
 
 The catalog and configured Progress instances open the same registered detail fragment. Settings places that fragment above a dedicated modal action footer. Preset chips and the input form wrap within the modal, and the modal scrolls when needed. Catalog cards keep Add on the left and Details on the right.

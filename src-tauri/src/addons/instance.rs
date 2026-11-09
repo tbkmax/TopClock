@@ -13,6 +13,36 @@ pub(crate) struct AddonInstance {
     pub(crate) options: Value,
 }
 
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
+pub(crate) struct AddonPair {
+    pub(crate) left_id: String,
+    pub(crate) right_id: String,
+    pub(crate) size_percent: u8,
+}
+
+pub(crate) fn valid_pairs(addons: &[AddonInstance], pairs: &[AddonPair]) -> bool {
+    let mut paired = HashSet::new();
+    pairs.iter().all(|pair| {
+        let Some(index) = addons.iter().position(|addon| addon.id == pair.left_id) else {
+            return false;
+        };
+        let Some(left) = addons.get(index) else {
+            return false;
+        };
+        let Some(right) = addons.get(index + 1) else {
+            return false;
+        };
+        right.id == pair.right_id
+            && left.kind != "progress"
+            && right.kind != "progress"
+            && left.placement == right.placement
+            && left.enabled == right.enabled
+            && (10..=100).contains(&pair.size_percent)
+            && paired.insert(left.id.as_str())
+            && paired.insert(right.id.as_str())
+    })
+}
+
 pub(crate) fn valid_addons(addons: &[AddonInstance]) -> bool {
     if addons.len() > 16 {
         return false;

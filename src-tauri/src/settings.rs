@@ -126,12 +126,24 @@ pub(crate) struct ClockSettings {
     pub(crate) timer_addon_enabled: bool,
     #[serde(default)]
     pub(crate) addons: Vec<AddonInstance>,
+    #[serde(default, deserialize_with = "deserialize_addon_pairs")]
+    pub(crate) addon_pairs: Vec<crate::addons::AddonPair>,
     #[serde(default)]
     pub(crate) timer_reset_warning_dismissed: bool,
     #[serde(default = "default_progress_presets")]
     pub(crate) progress_countdown_presets: Vec<u16>,
     #[serde(default)]
     pub(crate) progress_preset_warning_dismissed: bool,
+}
+
+fn deserialize_addon_pairs<'de, D>(
+    deserializer: D,
+) -> Result<Vec<crate::addons::AddonPair>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let value = serde_json::Value::deserialize(deserializer)?;
+    Ok(serde_json::from_value(value).unwrap_or_default())
 }
 
 impl Default for ClockSettings {
@@ -152,6 +164,7 @@ impl Default for ClockSettings {
             shortcuts: ShortcutSettings::default(),
             timer_addon_enabled: false,
             addons: Vec::new(),
+            addon_pairs: Vec::new(),
             timer_reset_warning_dismissed: false,
             progress_countdown_presets: default_progress_presets(),
             progress_preset_warning_dismissed: false,
@@ -217,6 +230,7 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
         && valid_shortcut_string(&settings.shortcuts.timer_reset)
         && valid_progress_presets(&settings.progress_countdown_presets)
         && valid_addons(&settings.addons)
+        && crate::addons::valid_pairs(&settings.addons, &settings.addon_pairs)
 }
 
 #[cfg(test)]
@@ -256,6 +270,18 @@ mod tests {
         assert_eq!(loaded.settings.shortcuts.open_settings, "Ctrl+,");
         assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
+    }
+
+    #[test]
+    fn malformed_pair_metadata_does_not_discard_existing_addons() {
+        let mut settings = ClockSettings::default();
+        settings.addons.push(crate::addons::legacy_timer());
+        let mut raw = serde_json::to_value(&settings).unwrap();
+        raw["addon_pairs"] = serde_json::json!([{"left_id":"timer"}]);
+        let restored: ClockSettings = serde_json::from_value(raw).unwrap();
+        assert_eq!(restored.addons.len(), 1);
+        assert!(restored.addon_pairs.is_empty());
+        assert!(valid_settings(&restored));
     }
 
     #[test]

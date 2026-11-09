@@ -7,6 +7,7 @@ import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { clockWindowLayout } from './clock-layout.js';
 import { displayAddon } from './addons/model.js';
+import { displayLayout } from './addons/layout.js';
 import { createAddonHost } from './addons/host.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
@@ -204,6 +205,7 @@ Alpine.data('clockApp', () => ({
         }).filter((addon) => !addon.hidden);
     },
 
+    renderedLayout() { return displayLayout(this.renderedAddons, this.settings?.addon_pairs); },
     addonActions(addon, role) { return this.addonHost?.actionsFor(addon, role) || []; },
     addonClick(addon) {
         if (this.dragStarted) { this.dragStarted = false; return; }

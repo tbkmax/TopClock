@@ -1,5 +1,32 @@
 # Native add-on workflows
 
+## Pair validation
+
+```mermaid
+classDiagram
+    class ClockSettings {
+      addons
+      addon_pairs
+    }
+    class AddonInstance {
+      id
+      kind
+      enabled
+      placement
+      size_percent
+    }
+    class AddonPair {
+      left_id
+      right_id
+      size_percent
+    }
+    ClockSettings --> AddonInstance : ordered flat list
+    ClockSettings --> AddonPair : optional pair links
+    AddonPair --> AddonInstance : two adjacent IDs
+```
+
+[instance.rs](../instance.rs) validates pair references, eligibility, placement, enabled state, scale, and uniqueness before a settings save. [config_store.rs](../../config_store.rs) keeps valid flat instances when pair links are stale after loading. Pair metadata is durable; row rendering is derived in the frontend.
+
 The Progress preset action reads the selected instance and shared preset list under one config lock, checks whether an existing session needs confirmation, then writes its option duration and new running session together. On write failure it restores the prior settings and session and emits nothing. On success it broadcasts the settings snapshot and all Progress sessions; the frontend's single reactive host updates Start/Pause labels by instance ID.
 
 ```mermaid

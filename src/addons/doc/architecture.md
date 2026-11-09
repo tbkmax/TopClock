@@ -1,5 +1,7 @@
 # Frontend add-on host architecture
 
+The shared [layout helper](../layout.js) turns flat instances and optional `addon_pairs` into single or two-member rows. It owns combine, swap, split-by-move, whole-pair move, and effective size calculations. [instance-editor.js](../instance-editor.js) applies those pure operations to the Settings draft and saves through the existing controller. Its pointer targeting uses both axes for the Settings card's left/right members; a short movement does not split a pair. Type definitions, action routing, and Timer/Progress sessions still address stable instance IDs. Progress cannot enter a pair.
+
 The add-on controller composes menu entries for the separate menu webview. Definitions may declare a grouped menu with choices; Progress supplies per-instance Start/Pause and Reset actions plus the shared duration choices. `dispatchMenuChoice` rechecks the current instance before the native adapter invokes the atomic preset transaction. Definitions may also declare a `detailsViewKey`; the catalog and instance Details buttons use the same Settings method and allowlisted view fragment. Progress currently provides the shared preset editor. This keeps future compiled add-on menu and details contributions in the registry/controller path.
 
 This folder owns the fixed built-in registry and the shared add-on host. The [frontend architecture](../../doc/architecture.md) covers the three Alpine pages; [built-in definitions](../builtins/doc/architecture.md) own type behavior, and [bundled views](../views/doc/architecture.md) own markup.
@@ -7,6 +9,7 @@ This folder owns the fixed built-in registry and the shared add-on host. The [fr
 | File | Responsibility |
 | --- | --- |
 | [registry.js](../registry.js) | Registers Date, Region clock, Timer, and Progress; validates definition shape and known actions; supplies catalog metadata |
+| [layout.js](../layout.js) | Derives single and paired rows, scales child display sizes, and performs pure pair/order operations |
 | [controller.js](../controller.js) | Resolves current instances, checks action role and enabled state, and composes clock-menu contributions |
 | [host.js](../host.js) | Constructs one reactive store and controller for each clock or Settings webview |
 | [state.js](../state.js) | Owns the reactive native session snapshot, subscribes to session events, rejects stale command responses, and disposes listeners |

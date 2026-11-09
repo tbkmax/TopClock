@@ -1,4 +1,4 @@
-                    <div class="addon-line" :class="{ 'addon-finished': addon.finished, 'addon-interactive': addonActions(addon, 'primary-click').some((action) => action.enabled), 'addon-progress': Boolean(addon.progress) }" :style="`font-size:${(settings?.font_size || 42) * addon.size_percent / 100}px`" @click.stop="addonClick(addon)">
+                    <div class="addon-line" :class="{ 'addon-finished': addon.finished, 'addon-interactive': addonActions(addon, 'primary-click').some((action) => action.enabled), 'addon-progress': Boolean(addon.progress) }" :style="`font-size:${(settings?.font_size || 42) * (addon.effective_size_percent ?? addon.size_percent) / 100}px`" @click.stop="addonClick(addon)">
                         <span class="addon-label" x-show="addon.viewKey === 'shared' && addon.showLabel" x-text="addon.label"></span>
                         <span class="addon-text" x-show="addon.viewKey === 'shared' && !addon.progress && !addon.parts" x-text="addon.text"></span>
                         <span class="addon-weekday" x-show="addon.viewKey === 'shared' && addon.weekday" x-text="addon.weekday"></span>

@@ -1,18 +1,18 @@
-                        <template x-if="addon.kind !== 'clock'"><div class="addon-instance" :id="`addon-card-${addon.id}`" :data-addon-id="addon.id" x-data="{ expanded: false }" :style="draggedAddonId === addon.id ? `transform: translateY(${addonDragOffsetY}px)` : ''" :class="{ 'is-expanded': expanded, 'is-dragging': draggedAddonId === addon.id, 'drop-before': addonDropTarget?.id === addon.id && !addonDropTarget.after, 'drop-after': addonDropTarget?.id === addon.id && addonDropTarget.after }">
-                            <div class="addon-instance-head">
-                                <button type="button" class="addon-drag-handle" @pointerdown="startAddonPointer($event, addon.id)" @pointermove="moveAddonPointer($event)" @pointerup="finishAddonPointer($event)" @pointercancel="endAddonDrag()" @keydown.arrow-up.prevent="nudgeAddon(addon.id, -1)" @keydown.arrow-down.prevent="nudgeAddon(addon.id, 1)" :aria-label="t('addons.dragHandle', { name: localizedAddonName(addon) })" :title="t('addons.dragHint')">⠿</button>
-                                <div class="addon-instance-identity"><strong x-text="localizedAddonName(addon)"></strong><small x-text="addonDescription(addon)"></small><small class="addon-instance-meta" x-text="`${addon.size_percent}%`"></small></div>
-                                <button type="button" class="addon-edit-button" :aria-expanded="expanded" :aria-controls="`addon-details-${addon.id}`" :aria-label="`${expanded ? t('addons.hideSettings') : t('addons.editSettings')} · ${localizedAddonName(addon)}`" @click="expanded = !expanded"><span x-text="t(expanded ? 'addons.hideSettings' : 'addons.editSettings')"></span><span class="addon-chevron" :class="{ expanded }">⌄</span></button>
-                                <button type="button" class="switch" role="switch" :aria-checked="addon.enabled" :class="{ on: addon.enabled }" :aria-label="t('addons.enable', { name: localizedAddonName(addon) })" @click="addon.enabled = !addon.enabled; save()"><span></span></button>
-                            </div>
-                            <div class="addon-instance-details" :id="`addon-details-${addon.id}`" x-show="expanded" x-transition.opacity.duration.150ms x-cloak>
-                            <div class="addon-instance-controls">
-                                <label><span x-text="t('addons.textSize')"></span> <span x-text="`${addon.size_percent}%`"></span><input class="size-range" type="range" min="10" max="100" step="5" x-model.number="addon.size_percent" :style="rangeStyle(addon.size_percent, 10, 100)" @input="save()" :aria-label="t('addons.textSizeFor', { name: localizedAddonName(addon) })"></label>
-                            </div>
-                            <!-- addon-view:settings-types -->
-                            <div class="addon-instance-actions">
-                                <template x-if="addonActions(addon).length"><span class="addon-timer-actions"><template x-for="action in addonActions(addon)" :key="action.id"><button type="button" class="action-button" :class="{ 'primary-action': action.primary }" :disabled="!action.enabled" @click="runAddonAction(addon, action)" x-text="t(action.labelKey)"></button></template></span></template>
-                                <button type="button" class="action-button addon-remove" @click="removeAddon(addon.id)" :aria-label="t('addons.removeName', { name: localizedAddonName(addon) })">Remove</button>
-                            </div>
-                            </div>
-                        </div></template>
+<div class="addon-member" :id="`addon-card-${addon.id}`" :data-addon-id="addon.id" :style="draggedAddonId === addon.id && !dragWholePair ? `transform: translate(${addonDragOffsetX}px, ${addonDragOffsetY}px)` : ''" :class="{ 'is-dragging': draggedAddonId === addon.id && !dragWholePair, 'drop-before': addonDropTarget?.id === addon.id && !addonDropTarget.after && !addonDropTarget.combine, 'drop-after': addonDropTarget?.id === addon.id && addonDropTarget.after && !addonDropTarget.combine, 'drop-combine': addonDropTarget?.id === addon.id && addonDropTarget.combine, 'drop-swap': addonDropTarget?.id === addon.id && addonDropTarget.swap }">
+    <div class="addon-instance-head">
+        <button type="button" class="addon-drag-handle" @pointerdown="startAddonPointer($event, addon.id)" @pointermove="moveAddonPointer($event)" @pointerup="finishAddonPointer($event)" @pointercancel="endAddonDrag()" @keydown.arrow-up.prevent="nudgeAddon(addon.id, -1)" @keydown.arrow-down.prevent="nudgeAddon(addon.id, 1)" @keydown.arrow-left.prevent="swapAddonPair(addon.id)" @keydown.arrow-right.prevent="swapAddonPair(addon.id)" :aria-label="t('addons.dragHandle', { name: localizedAddonName(addon) })" :title="t('addons.dragHint')">⠿</button>
+        <div class="addon-instance-identity"><strong x-text="localizedAddonName(addon)"></strong><small x-text="addonDescription(addon)"></small><small class="addon-instance-meta" x-text="`${addon.size_percent}%`"></small></div>
+        <button type="button" class="addon-edit-button" :aria-expanded="expandedId === addon.id" :aria-controls="`addon-details-${addon.id}`" :aria-label="`${expandedId === addon.id ? t('addons.hideSettings') : t('addons.editSettings')} · ${localizedAddonName(addon)}`" @click="expandedId = expandedId === addon.id ? null : addon.id"><span x-text="t(expandedId === addon.id ? 'addons.hideSettings' : 'addons.editSettings')"></span><span class="addon-chevron" :class="{ expanded: expandedId === addon.id }">⌄</span></button>
+        <button x-show="!row.pair" type="button" class="switch" role="switch" :aria-checked="addon.enabled" :class="{ on: addon.enabled }" :aria-label="t('addons.enable', { name: localizedAddonName(addon) })" @click="addon.enabled = !addon.enabled; save()"><span></span></button>
+    </div>
+    <div class="addon-instance-details" :id="`addon-details-${addon.id}`" x-show="expandedId === addon.id" x-transition.opacity.duration.150ms x-cloak>
+        <div class="addon-instance-controls">
+            <label><span x-text="t('addons.textSize')"></span> <span x-text="`${addon.size_percent}%`"></span><input class="size-range" type="range" min="10" max="100" step="5" x-model.number="addon.size_percent" :style="rangeStyle(addon.size_percent, 10, 100)" @input="save()" :aria-label="t('addons.textSizeFor', { name: localizedAddonName(addon) })"></label>
+        </div>
+        <!-- addon-view:settings-types -->
+        <div class="addon-instance-actions">
+            <template x-if="addonActions(addon).length"><span class="addon-timer-actions"><template x-for="action in addonActions(addon)" :key="action.id"><button type="button" class="action-button" :class="{ 'primary-action': action.primary }" :disabled="!action.enabled" @click="runAddonAction(addon, action)" x-text="t(action.labelKey)"></button></template></span></template>
+            <button type="button" class="action-button addon-remove" @click="removeAddon(addon.id)" :aria-label="t('addons.removeName', { name: localizedAddonName(addon) })">Remove</button>
+        </div>
+    </div>
+</div>

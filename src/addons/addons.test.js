@@ -5,6 +5,7 @@ import { createAddon, displayAddon } from './model.js';
 import { timerText } from './builtins/timer.js';
 import { markCountdownCompletion, progressBarStyle, progressDisplay, validDateValue } from './builtins/progress-display.js';
 import { addonMethods, reorderAddons } from './instance-editor.js';
+import { addonLayout, canPair, combineAddons, displayLayout, moveAddonLayout, swapPair } from './layout.js';
 import { translate, weekdayText } from '../i18n.js';
 import { addonDefinitions } from './registry.js';
 import { createAddonController } from './controller.js';
@@ -20,10 +21,10 @@ test('bundled add-on views reject unknown slots and never use runtime HTML injec
         assert.match(html, /addon-instance|addon-line/);
         if (page === 'settings.html') {
             assert.equal((html.match(/class="addon-preview-clock"/g) || []).length, 1);
-            assert.equal((html.match(/previewAddons\.filter\(\(addon\) => addon\.placement === 'above'\)/g) || []).length, 1);
-            assert.equal((html.match(/previewAddons\.filter\(\(addon\) => addon\.placement === 'below'\)/g) || []).length, 1);
-            assert.ok(html.indexOf("addon.placement === 'above'") < html.indexOf('class="addon-preview-clock"'));
-            assert.ok(html.indexOf('class="addon-preview-clock"') < html.indexOf("addon.placement === 'below'"));
+            assert.equal((html.match(/previewLayout\(\)\.filter\(\(item\) => item\.placement === 'above'\)/g) || []).length, 1);
+            assert.equal((html.match(/previewLayout\(\)\.filter\(\(item\) => item\.placement === 'below'\)/g) || []).length, 1);
+            assert.ok(html.indexOf("item.placement === 'above'") < html.indexOf('class="addon-preview-clock"'));
+            assert.ok(html.indexOf('class="addon-preview-clock"') < html.indexOf("item.placement === 'below'"));
         }
     }
     assert.throws(() => composeAddonFragments('<!-- addon-view:unknown -->'), /Invalid add-on view slot/);
@@ -209,6 +210,47 @@ test('drag ordering moves add-ons within a stack and across the clock', () => {
     assert.deepEqual(addons.map((addon) => addon.id), ['a', 'b', 'c', 'd']);
 });
 
+test('a pair retains both instance sizes and can swap, move, or split', () => {
+    const timer = { id: 'timer', kind: 'timer', placement: 'below', enabled: true, size_percent: 60 };
+    const date = { id: 'date', kind: 'date', placement: 'below', enabled: true, size_percent: 30 };
+    const progress = { id: 'progress', kind: 'progress', placement: 'below', enabled: true, size_percent: 30 };
+    assert.equal(canPair([timer, progress], [], 'timer', 'progress'), false);
+    const combined = combineAddons([timer, date, progress], [], 'date', 'timer');
+    assert.deepEqual(combined.addons.map((addon) => addon.id), ['timer', 'date', 'progress']);
+    assert.deepEqual(combined.pairs, [{ left_id: 'timer', right_id: 'date', size_percent: 100 }]);
+    combined.pairs[0].size_percent = 50;
+    assert.deepEqual(displayLayout(combined.addons, combined.pairs)[0].items.map((addon) => addon.effective_size_percent), [30, 15]);
+    const swapped = swapPair(combined.addons, combined.pairs, 'timer');
+    assert.deepEqual(swapped.addons.map((addon) => addon.id), ['date', 'timer', 'progress']);
+    assert.deepEqual(swapped.pairs[0], { left_id: 'date', right_id: 'timer', size_percent: 50 });
+    const moved = moveAddonLayout(swapped.addons, swapped.pairs, 'date', null, 'above', false, true);
+    assert.deepEqual(moved.addons.map((addon) => [addon.id, addon.placement]),
+        [['date', 'above'], ['timer', 'above'], ['progress', 'below']]);
+    assert.equal(addonLayout(moved.addons, moved.pairs)[0].items.length, 2);
+    const split = moveAddonLayout(moved.addons, moved.pairs, 'timer', 'progress', 'below');
+    assert.deepEqual(split.pairs, []);
+    assert.deepEqual(split.addons.map((addon) => addon.id), ['date', 'timer', 'progress']);
+    assert.equal(split.addons[1].size_percent, 60);
+});
+
+test('combined switch and removal keep pair metadata consistent', () => {
+    const addons = [
+        { id: 'date', kind: 'date', placement: 'below', enabled: true },
+        { id: 'region', kind: 'region_clock', placement: 'below', enabled: true },
+    ];
+    const app = {
+        ...addonMethods,
+        settings: { addons, addon_pairs: [{ left_id: 'date', right_id: 'region', size_percent: 100 }] },
+        saves: 0, save() { this.saves++; },
+    };
+    app.toggleAddonPair('date');
+    assert.deepEqual(app.settings.addons.map((addon) => addon.enabled), [false, false]);
+    app.removeAddon('region');
+    assert.deepEqual(app.settings.addon_pairs, []);
+    assert.deepEqual(app.settings.addons.map((addon) => addon.id), ['date']);
+    assert.equal(app.saves, 2);
+});
+
 test('pointer drag moves the card and commits its new placement on release', () => {
     const above = { id: 'a', placement: 'above' };
     const below = { id: 'b', placement: 'below' };
@@ -257,6 +299,48 @@ test('pointer drag moves the card and commits its new placement on release', () 
         app.finishAddonPointer({ pointerId: 2, clientX: 100, clientY: 180 });
         assert.deepEqual(app.settings.addons.map((addon) => [addon.id, addon.placement]), [['b', 'above'], ['a', 'below']]);
         assert.equal(saves, 2);
+    } finally {
+        globalThis.document = originalDocument;
+    }
+});
+
+test('horizontal drag swaps paired members without splitting on a small movement', () => {
+    const member = (id, left, right) => ({
+        dataset: { addonId: id },
+        getBoundingClientRect: () => ({ left, right, top: 80, bottom: 140 }),
+        classList: { contains: () => false },
+        querySelector: () => ({ getBoundingClientRect: () => ({ left, width: right - left, top: 80, height: 60 }) }),
+    });
+    const panel = {
+        scrollTop: 0,
+        getBoundingClientRect: () => ({ left: 0, right: 500, top: 0, bottom: 400 }),
+        querySelectorAll: () => [member('date', 100, 220), member('region', 240, 360)],
+    };
+    const originalDocument = globalThis.document;
+    globalThis.document = { getElementById: () => panel };
+    try {
+        const app = {
+            ...addonMethods,
+            settings: { addons: [
+                { id: 'date', kind: 'date', placement: 'below', enabled: true },
+                { id: 'region', kind: 'region_clock', placement: 'below', enabled: true },
+            ], addon_pairs: [{ left_id: 'date', right_id: 'region', size_percent: 100 }] },
+            draggedAddonId: null, addonDragOffsetX: 0, addonDragOffsetY: 0,
+            addonDropTarget: null, addonPointer: null, dragWholePair: false,
+            saves: 0, save() { this.saves++; }, $nextTick() {},
+        };
+        const handle = { focus() {}, setPointerCapture() {} };
+        app.startAddonPointer({ button: 0, isPrimary: true, pointerId: 1, clientX: 300, clientY: 100, currentTarget: handle, preventDefault() {} }, 'region');
+        app.finishAddonPointer({ pointerId: 1, clientX: 300, clientY: 110 });
+        assert.equal(app.saves, 0);
+        assert.equal(app.settings.addon_pairs[0].left_id, 'date');
+        app.startAddonPointer({ button: 0, isPrimary: true, pointerId: 2, clientX: 300, clientY: 100, currentTarget: handle, preventDefault() {} }, 'region');
+        app.moveAddonPointer({ pointerId: 2, clientX: 160, clientY: 100 });
+        assert.equal(app.addonDropTarget.swap, true);
+        app.finishAddonPointer({ pointerId: 2, clientX: 160, clientY: 100 });
+        assert.deepEqual(app.settings.addons.map((addon) => addon.id), ['region', 'date']);
+        assert.equal(app.settings.addon_pairs[0].left_id, 'region');
+        assert.equal(app.saves, 1);
     } finally {
         globalThis.document = originalDocument;
     }

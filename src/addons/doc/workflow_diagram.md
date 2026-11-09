@@ -1,5 +1,34 @@
 # Frontend add-on host workflows
 
+## Pair layout and editing
+
+```mermaid
+classDiagram
+    class AddonInstance {
+      id
+      kind
+      enabled
+      placement
+      size_percent
+    }
+    class AddonPair {
+      left_id
+      right_id
+      size_percent
+    }
+    class LayoutRow {
+      id
+      placement
+      items
+      pair
+    }
+    AddonPair --> AddonInstance : references two IDs
+    LayoutRow --> AddonInstance : displays one or two
+    LayoutRow --> AddonPair : optional scale
+```
+
+[layout.js](../layout.js) derives rows without moving type options into the pair. [instance-editor.js](../instance-editor.js) updates the flat list and pair metadata together; pointer hit testing includes horizontal distance for the two side-by-side Settings members. The Rust validator enforces two adjacent eligible members with shared placement and enabled state. A group switch mirrors both flags; removing a member removes its pair record. These are JavaScript records and a native serialized record, not inheritance.
+
 For the separate menu webview, `menuEntries()` combines enabled action descriptors and optional grouped choices from each compiled definition. Progress supplies its own preset choices and confirmation metadata. `dispatchMenuChoice()` revalidates the chosen ID, then the native adapter invokes `progress_timer_set_preset`; Rust atomically saves only the selected countdown. Settings and each clock observe its broadcasts. The registry also declares optional Details fragments for the catalog and instance buttons.
 
 The diagram represents JavaScript objects and their contracts, not inheritance.

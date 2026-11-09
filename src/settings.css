@@ -42,11 +42,28 @@
 .addon-catalog-card p { font-size:10px; color:#999; line-height:1.4; margin-top:4px; }
 .addon-catalog-card .action-button { padding:6px 10px; }
 .addon-empty { font-size:12px; color:#888; border:1px dashed #3a3a3a; border-radius:8px; padding:15px; }
+.addon-pair-hint { color:#aaa; font-size:10px; line-height:1.4; margin:0 0 10px; }
 .addon-instance { background:#1a1a1a; border:1px solid #303030; border-radius:10px; padding:11px 13px; margin-bottom:7px; }
 .addon-instance.is-expanded { border-color:#666; }
 .addon-instance.is-dragging { position:relative; z-index:5; border-color:#faff69; background:#28291f; box-shadow:0 10px 28px #000a; opacity:.94; }
 .addon-instance.drop-before { box-shadow:0 -3px 0 #faff69; }
 .addon-instance.drop-after { box-shadow:0 3px 0 #faff69; }
+.addon-pair-controls { display:flex; align-items:center; flex-wrap:wrap; gap:10px; padding-bottom:10px; border-bottom:1px solid #3b3b3b; margin-bottom:5px; }
+.addon-pair-controls strong { color:#faff69; font-size:10px; text-transform:uppercase; letter-spacing:.08em; }
+.addon-pair-controls label { display:flex; align-items:center; gap:7px; color:#aaa; font-size:10px; }
+.addon-pair-controls .size-range { width:100px; }
+.addon-pair-controls .switch { margin-left:auto; }
+.addon-pair-members.is-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:start; }
+.addon-pair-members.is-pair .addon-member { min-width:0; }
+.addon-pair-members.is-pair .addon-member + .addon-member { border-left:1px solid #3b3b3b; padding-left:12px; }
+.addon-pair-members.is-pair .addon-instance-head { gap:6px; }
+.addon-pair-members.is-pair .addon-instance-identity { overflow-wrap:anywhere; }
+.addon-pair-members.is-pair .addon-instance-actions { flex-wrap:wrap; }
+.addon-member.is-dragging { position:relative; z-index:6; background:#28291f; box-shadow:0 8px 22px #000a; }
+.addon-member.drop-before { box-shadow:0 -3px 0 #faff69; }
+.addon-member.drop-after { box-shadow:0 3px 0 #faff69; }
+.addon-member.drop-combine,.addon-member.drop-swap { outline:2px solid #faff69; outline-offset:3px; border-radius:5px; }
+.addon-preview-layout-row { display:flex; align-items:baseline; justify-content:center; gap:8px; }
 .addon-instance-head { display:flex; justify-content:space-between; align-items:center; gap:12px; }
 .addon-drag-handle { flex:none; align-self:stretch; width:27px; border:1px solid #404040; border-radius:7px; background:#242424; color:#aaa; font-size:19px; line-height:1; cursor:grab; touch-action:none; user-select:none; }
 .addon-drag-handle:hover,.addon-drag-handle:focus-visible { border-color:#faff69; color:#faff69; }

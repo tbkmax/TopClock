@@ -23,8 +23,8 @@
             :title="t('app.moveHint', { modifier: settings?.shortcuts?.interaction_modifier || 'Ctrl' })"
         >
             <div class="addon-stack addon-stack-above" x-show="renderedAddons.some((item) => item.placement === 'above')" x-cloak>
-                <template x-for="addon in renderedAddons.filter((item) => item.placement === 'above')" :key="addon.id">
-                    <!-- addon-view:clock-row -->
+                <template x-for="row in renderedLayout().filter((item) => item.placement === 'above')" :key="row.id">
+                    <div class="addon-layout-row" :class="{ 'addon-layout-pair': row.pair }"><template x-for="addon in row.items" :key="addon.id"><!-- addon-view:clock-row --></template></div>
                 </template>
             </div>
             <div class="clock-digits" x-ref="clockDigits" :class="[`colon-${settings?.colon_animation || 'pulse'}`, `number-${settings?.number_animation || 'tick'}`]">
@@ -33,8 +33,8 @@
                 </template>
             </div>
             <div class="addon-stack" x-show="renderedAddons.some((item) => item.placement === 'below')" x-cloak>
-                <template x-for="addon in renderedAddons.filter((item) => item.placement === 'below')" :key="addon.id">
-                    <!-- addon-view:clock-row -->
+                <template x-for="row in renderedLayout().filter((item) => item.placement === 'below')" :key="row.id">
+                    <div class="addon-layout-row" :class="{ 'addon-layout-pair': row.pair }"><template x-for="addon in row.items" :key="addon.id"><!-- addon-view:clock-row --></template></div>
                 </template>
             </div>
         </div>

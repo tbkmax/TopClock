@@ -1,5 +1,7 @@
 # Bundled add-on views
 
+The [Settings row](../settings-row.html) now renders one member inside a single or combined card. [settings.html](../../../../settings.html) owns the paired card's shared switch, scale, and Split control; [settings.css](../../../settings.css) places its two member panels in equal left/right columns. The `expandedId` allows only one member editor to open at once, within its own column. [clock-row.html](../clock-row.html) and [preview-row.html](../preview-row.html) are repeated in a side-by-side layout row derived by [layout.js](../../layout.js). These static fragments still receive only text-bound runtime values.
+
 [progress.html](../progress.html) adds a Details button for each Progress instance. The catalog card in [settings.html](../../../../settings.html) offers Details at the far right of a reserved action slot, while Add stays at the left edge of every card. Both entries call the generic Settings detail method. [progress-details.html](../progress-details.html) contains the shared preset editor and warning preference; values are text-bound and neither entry owns another copy.
 
 These fragments contain static Alpine markup for the clock and Settings. See the [host architecture](../../doc/architecture.md) and [frontend architecture](../../../doc/architecture.md) for their data sources.

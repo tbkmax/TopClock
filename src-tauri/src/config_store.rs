@@ -49,9 +49,24 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
         .unwrap_or_default();
     if !addons::valid_addons(&config.settings.addons) {
         config.settings.addons.clear();
+        config.settings.addon_pairs.clear();
         config.timer_session = TimerSession::default();
         config.progress_timer_sessions.clear();
     }
+    // A downgraded build can edit the flat instances without knowing about pairs.
+    // Keep those instances and dissolve only links that no longer describe a pair.
+    config
+        .settings
+        .addon_pairs
+        .retain(|pair| addons::valid_pairs(&config.settings.addons, std::slice::from_ref(pair)));
+    let mut retained = Vec::new();
+    for pair in config.settings.addon_pairs.drain(..) {
+        retained.push(pair);
+        if !addons::valid_pairs(&config.settings.addons, &retained) {
+            retained.pop();
+        }
+    }
+    config.settings.addon_pairs = retained;
     if !valid_settings(&config.settings) {
         config.settings = ClockSettings::default();
     }

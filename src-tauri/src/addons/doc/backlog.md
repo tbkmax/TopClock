@@ -1,5 +1,7 @@
 # Native add-on backlog
 
+Live upgrade and downgrade acceptance for pair links is tracked in the [frontend combined add-on checklist](../../../../src/doc/backlog.md#combined-add-on-live-acceptance). Native tests cover validation, while a real older binary must confirm that saving removes only the pairing.
+
 Verify a Progress preset restart with two running countdowns in live Windows WebViews, including save failure and a stale unconfirmed request. The shared [frontend preset checklist](../../../../src/doc/backlog.md#progress-preset-menu-live-acceptance) covers menu and cross-window behavior.
 
 ## Failed action write verification

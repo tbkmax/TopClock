@@ -1,5 +1,25 @@
 # Rust workflows
 
+## Paired add-on settings
+
+```mermaid
+sequenceDiagram
+    participant UI as Settings webview
+    participant Save as settings_commands.rs
+    participant Validator as addons/instance.rs
+    participant Disk as settings.json
+    UI->>Save: update_settings(addons, addon_pairs)
+    Save->>Validator: Validate instances and adjacent pair links
+    alt Invalid draft
+        Validator-->>UI: Error; retain saved settings
+    else Valid draft
+        Save->>Disk: Persist settings and sessions
+        Save-->>UI: clock-settings-changed
+    end
+```
+
+At startup, [config_store.rs](../config_store.rs) removes invalid pair links after loading and keeps valid flat instances. A malformed pair field defaults to an empty list. This protects the downgrade path without changing command or session names. The existing save rollback still applies to a write failure.
+
 For `progress_timer_set_preset(id, minutes, confirmed_reset, dont_show_again)`, Rust holds the config lock, verifies membership in the shared preset list and an enabled countdown with that ID, and rejects replacement of a running or elapsed session without confirmation unless the warning is already dismissed. It updates only that add-on's duration and session, starts from zero, optionally persists warning dismissal, and writes once. Failure restores prior settings and session. Success emits `clock-settings-changed` and `progress-timer-states-changed` to all webviews, so Settings and all clock menus redraw from the same saved state.
 
 ## Startup persistence failure

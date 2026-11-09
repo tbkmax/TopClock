@@ -1,6 +1,11 @@
 # Frontend changelog
 ## Latest update
 
+### 2026-11-09 - Combine two add-ons in one row
+
+- Date, Region clock and Timer cards can be paired, swapped, split, moved and switched together. Each member keeps its editor and size; a shared size scales the pair in the desktop clock and Settings preview. Progress bars remain separate. Existing add-ons need no migration.
+- The combined Settings card places its two member panels left and right, matching the desktop layout. Horizontal drag targeting supports swapping the panels without accidental splits from short movements.
+
 ### 2026-11-09 - Size the clock menu to its actions
 
 - Settings/Quit and other action-only menus now shrink to their visible labels and enabled shortcut badges. Progress rows and preset confirmation retain the wider layout; the native menu window follows the measured width. No settings migration or user action is required.

@@ -1,5 +1,7 @@
 # Bundled view composition
 
+The same registered member fragments are composed inside either a single card or a two-member card. Each `x-for` has one element root; the paired wrapper controls shared settings and presents its members in two equal columns. Opening an editor expands only that member's column. A member remains the action and editor target by its stable ID. See the [layout workflow](../../doc/workflow_diagram.md#pair-layout-and-editing).
+
 A Progress instance and the catalog card call `openAddonDetails(kind)` on the Settings Alpine component. The compiled definition selects the allowlisted `progress-details.html` fragment. The dialog edits shared presets through the ordinary Settings save controller; the view fragment does not invoke native commands. Its content stays in a vertical block above a separately styled modal action footer.
 
 These are static HTML fragments and a build process, so a class diagram would imply runtime objects that do not exist. The sequence below shows the actual ownership boundary.

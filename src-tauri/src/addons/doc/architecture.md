@@ -1,5 +1,7 @@
 # Native add-on architecture
 
+The serialized [AddonPair](../instance.rs) holds two adjacent instance IDs and a shared size percentage; it does not own type options, sessions, or actions. `valid_pairs` requires Date, Region clock, or Timer members, identical placement and enabled state, and unique membership. The parent [settings loader](../../config_store.rs) can dissolve stale links while keeping both flat instances; normal settings saves reject invalid links.
+
 [actions.rs](../actions.rs) now owns the atomic Progress preset restart in addition to toggle/reset. It accepts only an enabled countdown ID and a value from shared `ClockSettings.progress_countdown_presets`, requires confirmation when a session is running or has elapsed time unless warnings are dismissed, resets and starts that one session, and saves the duration and optional dismissal in the same config write. A write failure restores prior settings and the selected session; success emits settings and Progress-session events. Other IDs and the numeric Timer are unaffected.
 
 This folder contains compiled add-on validation, session calculations, and the shared native action service. The [Rust application architecture](../../doc/architecture.md) owns startup, settings persistence, commands, and Win32 behavior.
@@ -8,7 +10,7 @@ This folder contains compiled add-on validation, session calculations, and the s
 | --- | --- |
 | [mod.rs](../mod.rs) | Internal compatibility re-exports and tests |
 | [registry.rs](../registry.rs) | Static known-kind lookup, instance limits, and validator selection |
-| [instance.rs](../instance.rs) | Serialized `AddonInstance`, IDs, order-independent common constraints, total limit |
+| [instance.rs](../instance.rs) | Serialized `AddonInstance` and optional `AddonPair`, IDs, common constraints, pair invariants, total limit |
 | [date.rs](../date.rs), [region_clock.rs](../region_clock.rs) | Type options validation |
 | [timer.rs](../timer.rs), [progress.rs](../progress.rs) | Type options, action application, and type-specific settings cleanup |
 | [session.rs](../session.rs) | Existing `TimerSession` calculations and Progress duration lock |

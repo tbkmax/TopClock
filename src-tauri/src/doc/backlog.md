@@ -1,5 +1,7 @@
 # Rust application backlog
 
+Verify pair persistence and downgrade behavior with a disposable native settings profile as part of the [frontend combined add-on acceptance](../../../src/doc/backlog.md#combined-add-on-live-acceptance). Unit tests cover native pair validation and malformed metadata; a running WebView and an older binary are still needed for the full check.
+
 Physical outside presses, focus changes, mixed-DPI anchors, monitor reconnects and clock position restore still need interactive Windows acceptance. The isolated WebView smoke verified one right-edge case and Rust tests cover fitting arithmetic.
 
 
