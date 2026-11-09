@@ -1,0 +1,15 @@
+<template x-if="activeAddonDetailsKind === 'progress'">
+    <div>
+        <h2 id="addon-details-title" x-text="t('addons.countdownPresets')"></h2>
+        <p x-text="t('addons.presetsHint')"></p>
+        <div class="progress-preset-list">
+            <template x-for="minutes in settings.progress_countdown_presets" :key="minutes"><span class="progress-preset-chip"><span x-text="t('addons.presetMinutes', { minutes })"></span><button type="button" @click="removeProgressPreset(minutes)" :aria-label="t('addons.removePreset', { minutes })">×</button></span></template>
+            <span x-show="!settings.progress_countdown_presets.length" x-text="t('addons.noPresets')"></span>
+        </div>
+        <form class="progress-preset-form" @submit.prevent="addProgressPreset()">
+            <label><span x-text="t('addons.countdownMinutes')"></span><input data-detail-initial-focus class="addon-number" type="number" min="1" max="5999" step="1" x-model="presetInput"></label>
+            <button type="submit" class="action-button" :disabled="settings.progress_countdown_presets.length >= 8" x-text="t('addons.addButton')"></button>
+        </form>
+        <label class="progress-preset-warning"><input type="checkbox" :checked="!settings.progress_preset_warning_dismissed" @change="setProgressPresetWarning($event.target.checked)"><span x-text="t('addons.warnBeforePresetReset')"></span></label>
+    </div>
+</template>

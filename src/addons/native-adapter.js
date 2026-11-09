@@ -12,4 +12,14 @@ export const nativeAddonAdapter = {
         if (addon.kind === 'progress') return invoke('progress_timer_action', { id: addon.id, action });
         return Promise.reject(new Error('Add-on has no native actions'));
     },
+    menuChoice(addon, choice, confirmation) {
+        if (addon.kind === 'progress' && choice.id === `preset-${choice.value}`) {
+            return invoke('progress_timer_set_preset', {
+                id: addon.id, minutes: choice.value,
+                confirmedReset: Boolean(confirmation.confirmedReset),
+                dontShowAgain: Boolean(confirmation.dontShowAgain),
+            });
+        }
+        return Promise.reject(new Error('Add-on menu choice is unavailable'));
+    },
 };

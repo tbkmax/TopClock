@@ -10,6 +10,7 @@ export default defineConfig({
             input: {
                 main: resolve(import.meta.dirname, 'index.html'),
                 settings: resolve(import.meta.dirname, 'settings.html'),
+                menu: resolve(import.meta.dirname, 'menu.html'),
             },
         },
     },

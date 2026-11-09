@@ -1,5 +1,8 @@
 # Frontend add-on host backlog
 
+The separate menu host still needs physical pointer and multi-display acceptance for action dispatch and live label updates. See the [frontend checklist](../../doc/backlog.md#separate-menu-live-acceptance).
+
+
 See the [frontend backlog](../../doc/backlog.md) for the full native WebView and multi-display acceptance checks.
 
 The Progress preset menu needs the same live cross-window synchronization check: restart one of two countdowns from a preset while Settings is open and verify both instance buttons, the other session, and every clock. See [frontend preset acceptance](../../doc/backlog.md#progress-preset-menu-live-acceptance).

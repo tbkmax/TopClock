@@ -1,4 +1,10 @@
 # Bundled view changelog
+## Latest update
+
+### 2026-11-08 - Add a shared Progress Details fragment
+
+- The Progress instance and catalog use Details buttons to open one registered fragment for presets and warning preference. The catalog reserves the detail slot on every card to align Add buttons.
+
 
 ## Added
 

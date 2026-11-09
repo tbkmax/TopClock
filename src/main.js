@@ -5,10 +5,9 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
-import { clockWindowLayout } from './menu-layout.js';
+import { clockWindowLayout } from './clock-layout.js';
 import { displayAddon } from './addons/model.js';
 import { createAddonHost } from './addons/host.js';
-import { getAddonDefinition } from './addons/registry.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
@@ -16,7 +15,6 @@ import './addons/builtins/progress.css';
 
 const appWindow = getCurrentWindow();
 let resizeQueue = Promise.resolve();
-let menuStateQueue = Promise.resolve();
 let isFirstResize = true;
 let lastMainRightOffset = 0;
 let lastMainTopOffset = 0;
@@ -40,15 +38,6 @@ Alpine.data('clockApp', () => ({
     language: 'en',
     isCtrlHeld: false,
     isNear: false,
-    menuOpen: false,
-    menuReady: false,
-    menuX: 0,
-    menuY: 0,
-    expandedPresetId: null,
-    pendingPreset: null,
-    presetDontShowAgain: false,
-    presetSaving: false,
-    menuError: '',
     dragStart: null,
     dragStarted: false,
     isDragging: false,
@@ -71,7 +60,6 @@ Alpine.data('clockApp', () => ({
         this.addonHost.start().catch(console.error);
         this.$nextTick(() => {
             new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockContainer);
-            new ResizeObserver(() => { if (this.menuOpen) this.scheduleResize(); }).observe(this.$refs.dropdownMenu);
             this.scheduleResize();
         });
 
@@ -81,15 +69,6 @@ Alpine.data('clockApp', () => ({
             }),
             listen('proximity', (event) => {
                 this.isNear = event.payload;
-            }),
-            listen('dismiss-menu', () => this.closeMenu()),
-            listen('menu-pointer-down', ({ payload: [x, y] }) => {
-                if (!this.menuOpen || !this.menuReady) return;
-                const rect = this.$refs.dropdownMenu.getBoundingClientRect();
-                if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) this.closeMenu();
-            }),
-            appWindow.onFocusChanged(({ payload: focused }) => {
-                if (!focused) this.closeMenu();
             }),
             listen('clock-settings-changed', (event) => {
                 this.applySettings(event.payload);
@@ -106,7 +85,6 @@ Alpine.data('clockApp', () => ({
             const expectedKey = modifierKey === 'Ctrl' ? 'Control' : modifierKey;
             if (event.key === expectedKey) this.isCtrlHeld = true;
 
-            if (event.key === 'Escape' && this.menuOpen) this.closeMenu();
         });
 
         window.addEventListener('keyup', (event) => {
@@ -115,9 +93,6 @@ Alpine.data('clockApp', () => ({
             if (event.key === expectedKey) this.isCtrlHeld = false;
         });
         window.addEventListener('contextmenu', (event) => event.preventDefault());
-        window.addEventListener('pointerdown', (event) => {
-            if (this.menuOpen && !this.$refs.dropdownMenu.contains(event.target)) this.closeMenu();
-        }, true);
         window.addEventListener('mousemove', (event) => this.handleMouseMove(event));
         window.addEventListener('mouseup', () => this.handleMouseUp());
 
@@ -174,16 +149,10 @@ Alpine.data('clockApp', () => ({
             if (!this.$refs.clockContainer) return;
             resizeQueue = resizeQueue.then(async () => {
                 // Measure inside the queue, after Alpine has applied the latest state.
-                // offset sizes exclude the clock's pressed transform and menu animation.
+                // Offset sizes exclude the clock's pressed transform.
                 const container = this.$refs.clockContainer;
-                const menu = this.menuOpen ? this.$refs.dropdownMenu : null;
-                const layout = clockWindowLayout(container.offsetWidth, container.offsetHeight,
-                    menu ? { x: this.menuX, width: menu.offsetWidth, height: menu.offsetHeight } : null);
+                const layout = clockWindowLayout(container.offsetWidth, container.offsetHeight);
                 const { width, height } = layout;
-                if (menu) {
-                    this.menuX = layout.x;
-                    this.menuY = layout.y;
-                }
                 const oldSize = await appWindow.outerSize();
                 const scale = await appWindow.scaleFactor();
                 const oldPosition = await appWindow.outerPosition();
@@ -207,7 +176,6 @@ Alpine.data('clockApp', () => ({
                 lastMainRightOffset = mainRight;
                 lastMainTopOffset = mainTop;
                 await appWindow.setPosition(new PhysicalPosition(newX, newY));
-                if (menu && this.menuOpen) this.menuReady = true;
             }).catch(console.error);
         }, 40);
     },
@@ -237,73 +205,11 @@ Alpine.data('clockApp', () => ({
     },
 
     addonActions(addon, role) { return this.addonHost?.actionsFor(addon, role) || []; },
-    get addonMenuActions() { return this.addonHost?.menuActions() || []; },
-    get otherMenuActions() {
-        return this.addonMenuActions.filter((item) =>
-            this.settings?.addons?.find((addon) => addon.id === item.instanceId)?.kind !== 'progress');
-    },
-    get progressMenuGroups() {
-        return (this.settings?.addons || []).filter((addon) => addon.kind === 'progress'
-            && addon.enabled && addon.options.mode === 'countdown').map((addon) => ({
-            addon,
-            name: getAddonDefinition('progress').describe(addon, {
-                t: (key, vars) => this.t(key, vars), settings: this.settings,
-            }).name,
-            actions: this.addonActions(addon, 'clock-menu'),
-        }));
-    },
     addonClick(addon) {
         if (this.dragStarted) { this.dragStarted = false; return; }
         if (!this.isCtrlHeld) return;
         const action = this.addonActions(addon, 'primary-click').find((item) => item.enabled);
         if (action) this.addonHost.dispatch(addon.id, action.id, 'primary-click').catch(console.error);
-    },
-    runAddonMenuAction(item) {
-        this.addonHost.dispatch(item.instanceId, item.id, 'clock-menu').then((session) => {
-            if (session) this.closeMenu();
-        }).catch((error) => { this.menuError = String(error); });
-    },
-    togglePresetList(id) {
-        this.expandedPresetId = this.expandedPresetId === id ? null : id;
-        this.$nextTick(() => this.scheduleResize());
-    },
-    chooseProgressPreset(id, minutes) {
-        if (this.presetSaving) return;
-        const session = this.progressTimerSessions[id];
-        const elapsed = (session?.elapsed_ms || 0) + (session?.running
-            ? Math.max(0, Date.now() - (session.started_at_ms ?? Date.now())) : 0);
-        if ((session?.running || elapsed > 0) && !this.settings?.progress_preset_warning_dismissed) {
-            this.pendingPreset = { id, minutes };
-            this.presetDontShowAgain = false;
-            this.$nextTick(() => { this.$refs.presetCancel?.focus(); this.scheduleResize(); });
-            return;
-        }
-        this.applyProgressPreset(id, minutes, Boolean(this.settings?.progress_preset_warning_dismissed), false);
-    },
-    async applyProgressPreset(id, minutes, confirmedReset, dontShowAgain) {
-        if (this.presetSaving) return;
-        this.presetSaving = true;
-        this.menuError = '';
-        try {
-            await invoke('progress_timer_set_preset', { id, minutes, confirmedReset, dontShowAgain });
-            this.closeMenu();
-        } catch (error) {
-            if (String(error).includes('requires confirmation')) {
-                this.pendingPreset = { id, minutes };
-                this.presetDontShowAgain = false;
-                this.$nextTick(() => this.$refs.presetCancel?.focus());
-            } else {
-                this.menuError = String(error);
-            }
-            this.$nextTick(() => this.scheduleResize());
-        } finally {
-            this.presetSaving = false;
-        }
-    },
-    confirmProgressPreset() {
-        if (!this.pendingPreset) return;
-        const { id, minutes } = this.pendingPreset;
-        this.applyProgressPreset(id, minutes, true, this.presetDontShowAgain);
     },
 
     toggleFormat() {
@@ -319,7 +225,6 @@ Alpine.data('clockApp', () => ({
     },
 
     async handleMouseDown(event) {
-        if (this.$refs.dropdownMenu.contains(event.target)) return;
         this.dragStarted = false;
         if (event.button === 0 && this.isCtrlHeld) {
             const pos = await appWindow.outerPosition();
@@ -381,44 +286,7 @@ Alpine.data('clockApp', () => ({
     handleContextMenu(event) {
         event.preventDefault();
         if (!this.isCtrlHeld) return;
-        if (this.$refs.dropdownMenu.contains(event.target)) return;
-        this.menuX = event.clientX;
-        this.openMenu();
-    },
-
-    openMenu() {
-        this.menuReady = false;
-        this.expandedPresetId = null;
-        this.pendingPreset = null;
-        this.menuError = '';
-        this.presetSaving = false;
-        this.menuOpen = true;
-        this.syncMenuState(true);
-        this.$nextTick(() => this.scheduleResize());
-    },
-
-    closeMenu() {
-        if (!this.menuOpen) return;
-        this.menuReady = false;
-        this.menuOpen = false;
-        this.expandedPresetId = null;
-        this.pendingPreset = null;
-        this.syncMenuState(false);
-        this.$nextTick(() => this.scheduleResize());
-    },
-
-    syncMenuState(open) {
-        // Preserve open/close order across asynchronous native commands.
-        menuStateQueue = menuStateQueue.then(() => invoke('set_menu_open', { open })).catch(console.error);
-    },
-
-    openSettings() {
-        this.closeMenu();
-        invoke('open_settings').catch(console.error);
-    },
-
-    quitApp() {
-        invoke('quit').catch(console.error);
+        invoke('open_clock_menu', { clientX: event.clientX, clientY: event.clientY }).catch(console.error);
     },
 }));
 

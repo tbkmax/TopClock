@@ -6,7 +6,8 @@ import { localDateValue, nextLocalDateValue, progressDisplay } from './progress-
 export const progressAddon = {
     kind: 'progress', label: 'Progress', labelKey: 'addons.progress',
     description: 'Track a date, daily time ranges, or a countdown.', maxInstances: 16,
-    viewKey: 'shared', settingsViewKey: 'progress',
+    viewKey: 'shared', settingsViewKey: 'progress', detailsViewKey: 'progress-details',
+    detailsInit(settingsPage) { settingsPage.presetInput = ''; },
     createOptions({ now = new Date() } = {}) {
         return {
             mode: 'date', start_date: localDateValue(now), end_date: nextLocalDateValue(now),
@@ -36,6 +37,24 @@ export const progressAddon = {
             { id: 'toggle', labelKey: session?.running ? 'addons.pause' : 'addons.start', roles: ['primary-click', 'settings-button', 'clock-menu'], primary: true, enabled: addon.enabled },
             { id: 'reset', labelKey: 'addons.reset', roles: ['settings-button', 'clock-menu'], primary: false, enabled: addon.enabled },
         ];
+    },
+    menu: {
+        grouped: true,
+        choices(addon, { settings, state, nowMs }) {
+            const session = state.progressTimerSessions?.[addon.id];
+            const elapsed = (session?.elapsed_ms || 0) + (session?.running
+                ? Math.max(0, nowMs - (session.started_at_ms ?? nowMs)) : 0);
+            return (settings.progress_countdown_presets || []).map((minutes) => ({
+                id: `preset-${minutes}`, value: minutes,
+                labelKey: 'addons.presetMinutes', labelVars: { minutes },
+                confirm: {
+                    required: (session?.running || elapsed > 0) && !settings.progress_preset_warning_dismissed,
+                    titleKey: 'addons.presetResetTitle',
+                    bodyKey: 'addons.presetResetWarning', bodyVars: { minutes },
+                    acceptKey: 'addons.resetAndStart', allowDismiss: true,
+                },
+            }));
+        },
     },
 };
 
@@ -77,6 +96,26 @@ function availableProgressRange(ranges) {
 }
 
 export const progressEditorMethods = {
+    addProgressPreset() {
+        const minutes = Number(this.presetInput);
+        const presets = this.settings.progress_countdown_presets;
+        if (!Number.isInteger(minutes) || minutes < 1 || minutes > 5999 || presets.includes(minutes) || presets.length >= 8) {
+            this.error = this.t('addons.invalidPreset');
+            return;
+        }
+        this.settings.progress_countdown_presets = [...presets, minutes].sort((a, b) => a - b);
+        this.presetInput = '';
+        this.error = '';
+        this.save();
+    },
+    removeProgressPreset(minutes) {
+        this.settings.progress_countdown_presets = this.settings.progress_countdown_presets.filter((value) => value !== minutes);
+        this.save();
+    },
+    setProgressPresetWarning(enabled) {
+        this.settings.progress_preset_warning_dismissed = !enabled;
+        this.save();
+    },
     progressWeekdays() { return [...PROGRESS_WEEKDAYS.slice(1), PROGRESS_WEEKDAYS[0]]; },
     progressWeekdayLabel(day) {
         return weekdayText(new Date(2023, 0, 1 + PROGRESS_WEEKDAYS.indexOf(day)), this.language);

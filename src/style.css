@@ -72,9 +72,8 @@ html, body {
     pointer-events: none; /* Clicks pass through to windows beneath */
 }
 
-/* When Ctrl is held or Menu is open: enable pointer events */
-#app.ctrl-active,
-#app.menu-active {
+/* When Ctrl is held, enable pointer events. */
+#app.ctrl-active {
     pointer-events: auto;
 }
 
@@ -94,7 +93,7 @@ html, body {
 
 /* Clock Container */
 .clock-container {
-    /* Keep the clock fixed when the native window grows to fit its menu. */
+    /* Keep the digits' position stable while clock add-ons change size. */
     margin-left: 2px;
     display: inline-flex;
     flex-direction: column;
@@ -141,8 +140,7 @@ html, body {
 .addon-time { display: inline-flex; align-items: baseline; }
 #app.ctrl-active .addon-interactive { pointer-events: auto; cursor: pointer; }
 
-#app.ctrl-active .clock-container,
-#app.menu-active .clock-container {
+#app.ctrl-active .clock-container {
     pointer-events: auto;
     cursor: pointer;
 }
@@ -233,105 +231,6 @@ html, body {
     -webkit-text-stroke: var(--clock-outline-width) var(--clock-outline-color);
     letter-spacing: 0.5px;
 }
-
-/* Dropdown Menu (Right click menu) */
-.dropdown-menu {
-    position: absolute;
-    width: max-content;
-    min-width: 130px;
-    background-color: var(--color-surface-card);
-    border: 1px solid var(--color-hairline-strong);
-    border-radius: var(--radius-md);
-    padding: 4px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.6);
-    z-index: 1000;
-    overflow: hidden;
-    white-space: nowrap;
-    pointer-events: auto; /* Menu items must be clickable */
-}
-
-.menu-item {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 7px 10px;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-sm);
-    color: var(--color-ink);
-    font-family: inherit;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background-color 0.15s ease, color 0.15s ease;
-    text-align: left;
-    pointer-events: auto;
-}
-
-.menu-item-left {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-}
-
-.menu-icon {
-    width: 13px;
-    height: 13px;
-    stroke: currentColor;
-    transition: transform 0.15s ease;
-}
-
-.menu-icon.quit-icon {
-    color: var(--color-rose);
-}
-
-.menu-icon.settings-icon {
-    color: var(--color-body);
-}
-
-.menu-divider {
-    height: 1px;
-    background-color: var(--color-hairline);
-    margin: 3px 0;
-}
-
-.menu-shortcut {
-    font-size: 9px;
-    color: var(--color-muted);
-    background: var(--color-surface-elevated);
-    padding: 1px 4px;
-    border-radius: var(--radius-xs);
-    border: 1px solid var(--color-hairline);
-    font-family: "JetBrains Mono", monospace;
-}
-
-.menu-item:hover {
-    background-color: var(--color-surface-elevated);
-    color: var(--color-primary);
-}
-
-.menu-item:hover .menu-icon {
-    transform: translateX(1px);
-}
-
-.menu-item:active {
-    background-color: var(--color-hairline);
-}
-
-.menu-progress-group { border-top:1px solid var(--color-hairline); padding:4px 5px; }
-.menu-progress-row,.menu-preset-list { display:flex; align-items:center; gap:4px; }
-.menu-progress-name { min-width:75px; max-width:100px; overflow:hidden; text-overflow:ellipsis; font-size:11px; font-weight:600; }
-.menu-compact-button { border:1px solid var(--color-hairline-strong); border-radius:var(--radius-sm); background:var(--color-surface-elevated); color:var(--color-ink); font:inherit; font-size:10px; padding:5px 7px; cursor:pointer; }
-.menu-compact-button:hover,.menu-compact-button:focus-visible { color:var(--color-primary); border-color:var(--color-primary); }
-.menu-compact-button:disabled { opacity:.5; cursor:wait; }
-.menu-preset-list { flex-wrap:wrap; padding:5px 0 2px 79px; max-width:340px; }
-.menu-preset-confirm { max-width:260px; padding:8px; font-size:11px; white-space:normal; }
-.menu-preset-confirm p { color:var(--color-body); line-height:1.4; }
-.menu-preset-confirm label { display:flex; align-items:center; gap:5px; }
-.menu-preset-confirm-actions { display:flex; justify-content:flex-end; gap:6px; margin-top:10px; }
-.menu-confirm-primary { background:var(--color-primary); color:var(--color-on-primary); }
-.menu-error { color:var(--color-rose); max-width:260px; white-space:normal; font-size:10px; padding:4px 8px; }
 
 @media (prefers-reduced-motion: reduce) {
     .clock-colon, .clock-segment.number-changing { animation: none !important; }

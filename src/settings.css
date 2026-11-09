@@ -103,7 +103,9 @@
 .addon-preview-progress { display:block; -webkit-text-stroke:0!important; }
 .addon-instance-actions { display:flex; gap:7px; margin-top:13px; }
 .addon-instance-actions .action-button { padding:6px 9px; font-size:10px; }
-.addon-catalog-actions { display:flex; gap:6px; flex:none; }
+.addon-catalog-actions { display:flex; align-items:center; justify-content:flex-end; gap:6px; width:100%; }
+.addon-catalog-detail-slot { display:inline-flex; width:56px; justify-content:flex-end; }
+.addon-catalog-detail { padding:6px 7px!important; color:#faff69; background:transparent; }
 .progress-preset-entry { margin-left:auto; }
 .progress-preset-list { display:flex; flex-wrap:wrap; align-items:center; gap:6px; min-height:28px; color:#aaa; font-size:11px; }
 .progress-preset-chip { display:inline-flex; align-items:center; gap:5px; border:1px solid #444; border-radius:6px; padding:3px 5px 3px 8px; color:#fff; }

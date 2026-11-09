@@ -1,5 +1,8 @@
 # Rust application backlog
 
+Physical outside presses, focus changes, mixed-DPI anchors, monitor reconnects and clock position restore still need interactive Windows acceptance. The isolated WebView smoke verified one right-edge case and Rust tests cover fitting arithmetic.
+
+
 Live acceptance of `progress_timer_set_preset` remains in the [frontend preset checklist](../../../src/doc/backlog.md#progress-preset-menu-live-acceptance): confirm per-ID restart, native menu click-through, synchronized Settings and second-display state, persistence after restart, and rollback/error display when storage fails. The new command's list defaults and validation pass unit tests.
 
 An isolated Windows WebView smoke check verified a per-ID restart and Settings synchronization through the native command. Physical input, a second display, restart persistence, and controlled write-failure behavior remain open.

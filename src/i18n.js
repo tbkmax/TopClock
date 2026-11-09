@@ -84,6 +84,7 @@ const messages = {
     'addons.progressDescription': ['Track a date, daily time ranges, or a countdown.', '跟踪日期、每日时段或倒计时。', '追蹤日期、每日時段或倒數計時。', '日付、毎日の時間帯、またはカウントダウンの進捗を表示します。'],
     'addons.progressCountdownSubtitle': ['{minutes} minute countdown', '{minutes} 分钟倒计时', '{minutes} 分鐘倒數計時', '{minutes} 分のカウントダウン'],
     'addons.countdownPresets': ['Countdown presets', '倒计时预设', '倒數計時預設', 'カウントダウンのプリセット'],
+    'addons.details': ['Details', '详情', '詳細資料', '詳細'],
     'addons.presetsHint': ['Shared by all Progress countdowns. Add up to eight durations.', '所有进度倒计时共用。最多添加八个时长。', '所有進度倒數計時共用。最多新增八個時長。', 'すべての進捗カウントダウンで共通です。最大8件まで追加できます。'],
     'addons.presetMinutes': ['{minutes} min', '{minutes} 分钟', '{minutes} 分鐘', '{minutes} 分'],
     'addons.removePreset': ['Remove {minutes} minute preset', '移除 {minutes} 分钟预设', '移除 {minutes} 分鐘預設', '{minutes} 分のプリセットを削除'],

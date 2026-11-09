@@ -1,6 +1,6 @@
 # Built-in add-on definitions
 
-[progress.js](../progress.js) now declares `toggle` and `reset` for the clock menu as well as its existing Settings and click roles. It still derives Start/Pause from the shared per-instance session. The preset list is an app-wide setting edited by [the Settings page](../../../doc/architecture.md); a preset restart uses a dedicated native command because it changes both an option and session. No custom Progress naming field was added; menu rows use the existing localized instance numbers.
+[progress.js](../progress.js) now declares `toggle` and `reset` for the clock menu as well as its existing Settings and click roles. It still derives Start/Pause from the shared per-instance session. The definition declares an optional `menu` contribution and `detailsViewKey`. The menu contribution supplies shared preset choices and reset-confirmation metadata; the Details fragment edits that app-wide list in Settings. A preset restart uses a dedicated native command because it changes both an option and session. No custom Progress naming field was added; menu rows use the existing localized instance numbers.
 
 This folder owns type-specific behavior for the four compiled add-ons. See the [host architecture](../../doc/architecture.md) for registry, state, and action routing.
 

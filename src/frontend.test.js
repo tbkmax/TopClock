@@ -6,7 +6,7 @@ import { createSettingsPersistence } from './settings-persistence.js';
 import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './settings-shortcuts.js';
 import { nextSettingsTab } from './settings-tabs.js';
 import { timeParts } from './time-format.js';
-import { clockWindowLayout, MENU_SHADOW_SPACE } from './menu-layout.js';
+import { clockWindowLayout } from './clock-layout.js';
 import { createSettingsPreview } from './settings-preview.js';
 
 test('Settings preview pauses while hidden/minimized and resumes with exactly one timer', async () => {
@@ -65,22 +65,9 @@ test('A late visibility response cannot restart a hidden Settings preview', asyn
     assert.equal(preview.running, false);
 });
 
-test('menu layout reserves shadow space for small clocks, translations and timer rows', () => {
-    for (const clock of [{ width: 42, height: 24 }, { width: 700, height: 300 }]) {
-        for (const menu of [{ width: 130, height: 76 }, { width: 340, height: 110 }]) {
-            for (const x of [0, 10, 600]) {
-                const layout = clockWindowLayout(clock.width, clock.height, { ...menu, x });
-                assert.ok(layout.x >= MENU_SHADOW_SPACE);
-                assert.ok(layout.y >= MENU_SHADOW_SPACE);
-                assert.ok(layout.y >= clock.height);
-                assert.ok(layout.width - layout.x - menu.width >= MENU_SHADOW_SPACE);
-                assert.ok(layout.height - layout.y - menu.height >= MENU_SHADOW_SPACE);
-                assert.ok(layout.width >= clock.width + 4);
-                assert.ok(layout.height >= clock.height + 2);
-            }
-        }
-    }
+test('clock sizing does not depend on menu space', () => {
     assert.deepEqual(clockWindowLayout(130, 80), { width: 134, height: 82 });
+    assert.deepEqual(clockWindowLayout(42, 24), { width: 60, height: 26 });
 });
 
 test('settings saves a snapshot and commits it in order', async () => {

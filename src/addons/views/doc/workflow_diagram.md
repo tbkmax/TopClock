@@ -1,6 +1,6 @@
 # Bundled view composition
 
-When a Progress detail panel is in countdown mode, its Presets button calls `openProgressPresets()` on the Settings Alpine component. The catalog card uses that same method. The dialog edits the shared saved list through the ordinary Settings save controller; the view fragment does not invoke native commands.
+A Progress instance and the catalog card call `openAddonDetails(kind)` on the Settings Alpine component. The compiled definition selects the allowlisted `progress-details.html` fragment. The dialog edits shared presets through the ordinary Settings save controller; the view fragment does not invoke native commands.
 
 These are static HTML fragments and a build process, so a class diagram would imply runtime objects that do not exist. The sequence below shows the actual ownership boundary.
 

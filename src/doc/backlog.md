@@ -1,8 +1,13 @@
 # Frontend backlog
 
+## Separate menu live acceptance
+
+- Verify physical Ctrl-right-click, outside presses, Escape, Alt-Tab, tray actions, settings persistence and position restore with the menu at each display edge and on mixed-DPI displays. An isolated Windows WebView smoke check confirmed a right-edge menu fits, expansion and warning resize, the clock coordinates stay fixed, and Details opens; physical pointer and multi-display checks remain.
+
+
 ## Progress preset menu live acceptance
 
-- Verify two enabled countdown rows and a disabled/date-mode Progress in the native clock menu. Exercise Start/Pause, Reset, each preset, confirmation and dismissal, an empty preset list, and reopening the warning in Settings. Confirm both preset editor entry buttons, language layouts, menu resizing, click-through after close, tray actions, persistence, and position restore. Check a second display and a clock near screen edges; the existing physical display-edge limitation applies. Automated tests and Vite build do not establish native pointer or window behavior.
+- Verify two enabled countdown rows and a disabled/date-mode Progress in the native clock menu. Exercise Start/Pause, Reset, each preset, confirmation and dismissal, an empty preset list, and reopening the warning in Settings. Confirm both preset editor entry buttons, language layouts, menu resizing, click-through after close, tray actions, persistence, and position restore. Check a second display, mixed DPI, and a clock near screen edges; the separate menu should fit its display. Automated tests and Vite build do not establish native pointer or window behavior.
 - An isolated Windows WebView smoke check passed for two countdown rows, both dialog entry buttons, menu resize, per-ID preset restart, Settings label synchronization, confirmation dismissal, and re-enabling the warning. It used programmatic WebView interaction; physical mouse, tray, multiple displays, and restart checks remain open.
 
 ## Memory failure release acceptance
@@ -15,7 +20,7 @@
 ## Context menu live Windows acceptance
 
 - **Problem and desired outcome:** Automated layout and mocked-native browser checks pass, but the actual WebView must show an unclipped shadow and dismiss on outside input without leaving click-through disabled or shifting saved positions.
-- **Scope:** [main.js](../main.js), [menu-layout.js](../menu-layout.js), [style.css](../style.css), [index.html](../../index.html), and [interaction.rs](../../src-tauri/src/interaction.rs).
+- **Scope:** [main.js](../main.js), [clock-layout.js](../clock-layout.js), [style.css](../style.css), [index.html](../../index.html), and [interaction.rs](../../src-tauri/src/interaction.rs).
 - **Acceptance criteria:** Complete the [five-step native checklist](../../doc/report/CONTEXT_MENU_FIX.md#residual-risks-and-verification), including menu actions, tray, all mouse buttons, modifier hold/release, Escape, Alt-Tab, settings persistence and restart, and mixed-DPI/negative-origin displays. Distinguish off-screen placement from WebView clipping.
 - **Dependencies and risks:** Requires an interactive Windows desktop; 30 ms polling can miss short nonactivating clicks and samples pointer location after the exact press. The enlarged menu surface and native resize timing need live checks. Physical display-edge fitting remains a separate limitation.
 - **Verification:** Run `npm run tauri:dev`; record results against the report. Browser rendering alone cannot verify Windows input delivery.

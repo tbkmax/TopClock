@@ -1,5 +1,8 @@
 # Tauri package backlog
 
+Check the separate menu window on mixed-DPI displays and after monitor reconnects; the Rust geometry test covers arithmetic but not WebView focus or physical pointer behavior.
+
+
 TODO 4's display windows and Windows identity binding are implemented. Physical multi-monitor verification remains in the [frontend backlog](../../src/doc/backlog.md).
 
 Use this file for unfinished package-wide work. Describe the problem, desired outcome, scope, acceptance criteria, dependencies, risks, verification and priority as requested by [the template](../../templates/doc/backlog.md).

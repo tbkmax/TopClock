@@ -1,6 +1,6 @@
 # Frontend add-on host workflows
 
-For the Progress menu, `actionsFor(addon, 'clock-menu')` supplies reactive Start/Pause and Reset descriptors for each enabled countdown. The clock passes the selected instance ID to the existing dispatch path. Set sends the ID and chosen shared preset to `progress_timer_set_preset`; Rust validates the target and saves its new duration and restarted session atomically, then emits settings and session events. Settings and every clock observe those events through their existing listeners.
+For the separate menu webview, `menuEntries()` combines enabled action descriptors and optional grouped choices from each compiled definition. Progress supplies its own preset choices and confirmation metadata. `dispatchMenuChoice()` revalidates the chosen ID, then the native adapter invokes `progress_timer_set_preset`; Rust atomically saves only the selected countdown. Settings and each clock observe its broadcasts. The registry also declares optional Details fragments for the catalog and instance buttons.
 
 The diagram represents JavaScript objects and their contracts, not inheritance.
 

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TopClock Menu</title>
+</head>
+<body>
+    <main id="menu-app" x-data="clockMenu" @contextmenu.prevent>
+        <div class="menu-surface" x-ref="surface" x-show="request" x-cloak>
+            <template x-if="!pendingChoice">
+                <div>
+                    <button class="menu-command" type="button" @click="openSettings()">
+                        <span x-text="t('app.settings')"></span>
+                        <span class="menu-shortcut" x-show="settings?.shortcuts?.open_settings_enabled" x-text="settings?.shortcuts?.open_settings"></span>
+                    </button>
+                    <template x-for="entry in menuEntries" :key="`${entry.instanceId}-${entry.type}-${entry.action?.id || ''}`">
+                        <div>
+                            <template x-if="entry.type === 'action'">
+                                <button class="menu-command" type="button" @click="runAction(entry)">
+                                    <span x-text="t(entry.action.menuLabelKey || entry.action.labelKey)"></span>
+                                    <span class="menu-shortcut" x-show="entry.action.shortcutKey && settings?.shortcuts?.[`${entry.action.shortcutKey}_enabled`]" x-text="settings?.shortcuts?.[entry.action.shortcutKey]"></span>
+                                </button>
+                            </template>
+                            <template x-if="entry.type === 'group'">
+                                <section class="menu-group">
+                                    <div class="menu-group-head">
+                                        <span class="menu-group-name" :title="entry.name" x-text="entry.name"></span>
+                                        <div class="menu-actions">
+                                            <template x-for="action in entry.actions" :key="action.id">
+                                                <button type="button" :class="action.primary ? 'menu-action-primary' : 'menu-action-subtle'" @click="runAction({ instanceId: entry.instanceId, action })" x-text="t(action.labelKey)"></button>
+                                            </template>
+                                            <button type="button" class="menu-action-disclosure" x-show="entry.choices.length" :aria-expanded="expandedId === entry.instanceId" @click="toggleChoices(entry.instanceId)" x-text="t('addons.setPreset') + (expandedId === entry.instanceId ? ' ▴' : ' ▾')"></button>
+                                        </div>
+                                    </div>
+                                    <div class="menu-choices" x-show="expandedId === entry.instanceId" x-cloak>
+                                        <template x-for="choice in entry.choices" :key="choice.id">
+                                            <button type="button" class="menu-choice" :disabled="busy" @click="choose(entry, choice)" x-text="t(choice.labelKey, choice.labelVars)"></button>
+                                        </template>
+                                    </div>
+                                </section>
+                            </template>
+                        </div>
+                    </template>
+                    <div class="menu-divider"></div>
+                    <button class="menu-command menu-quit" type="button" @click="quitApp()">
+                        <span x-text="t('app.quit')"></span>
+                        <span class="menu-shortcut" x-show="settings?.shortcuts?.quit_enabled" x-text="settings?.shortcuts?.quit"></span>
+                    </button>
+                </div>
+            </template>
+            <div class="menu-confirm" x-show="pendingChoice" x-cloak>
+                <strong x-text="t(pendingChoice?.choice.confirm.titleKey)"></strong>
+                <p x-text="t(pendingChoice?.choice.confirm.bodyKey, pendingChoice?.choice.confirm.bodyVars)"></p>
+                <label x-show="pendingChoice?.choice.confirm.allowDismiss"><input type="checkbox" x-model="dontShowAgain"><span x-text="t('addons.dontShowAgain')"></span></label>
+                <div class="menu-confirm-actions">
+                    <button type="button" class="menu-action-subtle" :disabled="busy" @click="pendingChoice = null; resizeMenu()" x-text="t('addons.cancel')"></button>
+                    <button type="button" class="menu-action-primary" :disabled="busy" @click="confirmChoice()" x-text="t(pendingChoice?.choice.confirm.acceptKey)"></button>
+                </div>
+            </div>
+            <p class="menu-error" x-show="error" x-text="error"></p>
+        </div>
+    </main>
+    <script type="module" src="/src/menu.js"></script>
+</body>
+</html>

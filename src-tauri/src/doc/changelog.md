@@ -1,4 +1,10 @@
 # Rust application changelog
+## Latest update
+
+### 2026-11-08 - Fit menu window independently of clocks
+
+- Added menu request commands and physical display fitting. The input monitor dismisses outside the menu HWND and leaves clock click-through tied to the modifier. Rust fitting tests cover screen edges and negative origins.
+
 
 ## Changed
 

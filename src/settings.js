@@ -70,7 +70,7 @@ Alpine.data('settingsApp', () => ({
     progressCompletionUntil: {},
     pendingTimerChange: null,
     suppressResetPrompt: false,
-    presetDialogOpen: false,
+    activeAddonDetailsKind: null,
     presetInput: '',
     draggedAddonId: null,
     addonPointer: null,
@@ -198,32 +198,15 @@ Alpine.data('settingsApp', () => ({
     editAddonOption(addon, field, value) {
         if (getAddonDefinition(addon.kind)?.editor.setOption?.(addon, field, value)) this.save();
     },
-    openProgressPresets() {
-        this.presetInput = '';
-        this.presetDialogOpen = true;
-        this.$nextTick(() => this.$refs.presetInput?.focus());
+    addonHasDetails(kind) { return Boolean(getAddonDefinition(kind)?.detailsViewKey); },
+    openAddonDetails(kind) {
+        const definition = getAddonDefinition(kind);
+        if (!definition?.detailsViewKey) return;
+        definition.detailsInit?.(this);
+        this.activeAddonDetailsKind = kind;
+        this.$nextTick(() => this.$refs.addonDetails?.querySelector('[data-detail-initial-focus]')?.focus());
     },
-    closeProgressPresets() { this.presetDialogOpen = false; },
-    addProgressPreset() {
-        const minutes = Number(this.presetInput);
-        const presets = this.settings.progress_countdown_presets;
-        if (!Number.isInteger(minutes) || minutes < 1 || minutes > 5999 || presets.includes(minutes) || presets.length >= 8) {
-            this.error = this.t('addons.invalidPreset');
-            return;
-        }
-        this.settings.progress_countdown_presets = [...presets, minutes].sort((a, b) => a - b);
-        this.presetInput = '';
-        this.error = '';
-        this.save();
-    },
-    removeProgressPreset(minutes) {
-        this.settings.progress_countdown_presets = this.settings.progress_countdown_presets.filter((value) => value !== minutes);
-        this.save();
-    },
-    setProgressPresetWarning(enabled) {
-        this.settings.progress_preset_warning_dismissed = !enabled;
-        this.save();
-    },
+    closeAddonDetails() { this.activeAddonDetailsKind = null; },
 
     async syncPreviewTimer() {
         try {

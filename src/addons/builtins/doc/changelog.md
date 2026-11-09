@@ -1,4 +1,10 @@
 # Built-in definitions changelog
+## Latest update
+
+### 2026-11-08 - Declare Progress menu choices and Details
+
+- Progress now declares shared preset choices, reset warning metadata, and its details view key alongside its existing action descriptors.
+
 
 ## Added
 

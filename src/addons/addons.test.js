@@ -72,6 +72,36 @@ test('controller routes only declared actions to the current enabled instance', 
     assert.deepEqual(calls, [[second.id, 'toggle'], [first.id, 'reset']]);
 });
 
+test('menu choices come from the definition and revalidate the selected instance', async () => {
+    const first = createAddon('progress');
+    const second = createAddon('progress');
+    first.options.mode = second.options.mode = 'countdown';
+    const settings = { addons: [first, second], progress_countdown_presets: [10, 30], progress_preset_warning_dismissed: false };
+    const state = { progressTimerSessions: { [first.id]: { running: true, elapsed_ms: 500 } } };
+    const calls = [];
+    const controller = createAddonController({
+        getSettings: () => settings,
+        getState: () => state,
+        dispatchNative: async () => ({}),
+        dispatchMenuChoiceNative: async (addon, choice, confirmation) => {
+            calls.push([addon.id, choice.value, confirmation]);
+            return {};
+        },
+    });
+    const groups = controller.menuEntries((key, vars) => translate('en', key, vars), 1000);
+    assert.deepEqual(groups.map((entry) => entry.type), ['group', 'group']);
+    assert.deepEqual(groups[0].choices.map((choice) => choice.value), [10, 30]);
+    assert.equal(groups[0].choices[0].confirm.required, true);
+    assert.equal(groups[1].choices[0].confirm.required, false);
+    await controller.dispatchMenuChoice(first.id, 'preset-10', { confirmedReset: true });
+    assert.deepEqual(calls, [[first.id, 10, { confirmedReset: true }]]);
+    settings.progress_countdown_presets = [30];
+    await assert.rejects(controller.dispatchMenuChoice(first.id, 'preset-10'), /unavailable/);
+    second.enabled = false;
+    await assert.rejects(controller.dispatchMenuChoice(second.id, 'preset-30'), /unavailable/);
+    assert.equal(addonDefinitions.find((definition) => definition.kind === 'progress').detailsViewKey, 'progress-details');
+});
+
 test('add-on host labels read one reactive native session store', async () => {
     const previous = {
         MutationObserver: globalThis.MutationObserver,

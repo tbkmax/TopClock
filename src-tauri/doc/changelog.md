@@ -1,4 +1,10 @@
 # Tauri package changelog
+## Latest update
+
+### 2026-11-08 - Configure a separate menu webview
+
+- Added a hidden transparent `menu` window in Tauri configuration; clock windows retain their existing free placement.
+
 
 ## Added
 

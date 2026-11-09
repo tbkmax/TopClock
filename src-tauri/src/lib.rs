@@ -6,6 +6,7 @@ mod fonts;
 mod hotkeys;
 mod interaction;
 mod locale;
+mod menu_window;
 mod settings;
 mod settings_commands;
 mod startup;
@@ -26,7 +27,10 @@ pub fn run() {
     std::env::set_var("WEBVIEW2_DEFAULT_BACKGROUND_COLOR", "0");
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            window_commands::set_menu_open,
+            menu_window::open_clock_menu,
+            menu_window::get_clock_menu_request,
+            menu_window::show_clock_menu,
+            menu_window::close_clock_menu,
             window_commands::open_settings,
             window_commands::open_settings_folder,
             window_commands::hide_settings,

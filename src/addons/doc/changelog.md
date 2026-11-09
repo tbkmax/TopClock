@@ -1,4 +1,10 @@
 # Frontend add-on host changelog
+## Latest update
+
+### 2026-11-08 - Centralize add-on menu and detail contributions
+
+- Definitions can contribute grouped menu choices and an optional Details fragment. The controller validates menu choices against current instances; the native adapter keeps the preset command mapping in one place.
+
 
 ## Added
 

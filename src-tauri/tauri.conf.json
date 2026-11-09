@@ -27,6 +27,23 @@
         "shadow": false
       },
       {
+        "label": "menu",
+        "create": false,
+        "title": "TopClock Menu",
+        "url": "menu.html",
+        "width": 320,
+        "height": 360,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "shadow": false
+      },
+      {
         "label": "settings",
         "create": false,
         "title": "TopClock Settings",

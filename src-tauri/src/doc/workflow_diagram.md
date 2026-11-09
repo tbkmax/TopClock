@@ -20,28 +20,23 @@ sequenceDiagram
 
 [displays.rs](../displays.rs) also logs a failed legacy position-migration save and keeps the migrated in-memory position. User-triggered saves still report errors to their callers. See the [package architecture](../../doc/architecture.md) for startup dependencies.
 
-## Per-clock menu input observation
+## Separate menu window and input observation
 
 ```mermaid
-classDiagram
-    class MenuDismissal {
-      buttons: u8
-      was_open: bool
-      foreground: isize
-      update()
-    }
-    class ClockState {
-      menu_open: Mutex~HashSet_String~
-    }
-    class WebviewWindow {
-      label()
-      emit_to()
-    }
-    MenuDismissal ..> ClockState : observes own menu flag
-    MenuDismissal ..> WebviewWindow : monitor emits dismissal decision
+sequenceDiagram
+    participant Clock as Clock webview
+    participant Native as menu_window.rs
+    participant Menu as Menu webview
+    participant Monitor as interaction.rs
+    Clock->>Native: open_clock_menu(client anchor)
+    Native->>Menu: clock-menu-open(request ID and screen anchor)
+    Menu->>Native: show_clock_menu(request ID and content size)
+    Native->>Native: Fit menu inside nearest display
+    Monitor->>Menu: dismiss-menu on outside press or focus change
+    Menu->>Native: close_clock_menu(request ID)
 ```
 
-[interaction.rs](../interaction.rs) owns one `MenuDismissal` per monitor thread; it is discarded with that window. On each visible poll, new button-down edges outside the physical window and changes to another non-null foreground window can request `dismiss-menu`. Inside-window presses send logical `menu-pointer-down` coordinates so [main.js](../../../src/main.js) can reject clicks in transparent padding. These events target the owning clock and do not consume input. Hidden polls reset the observation state. After hiding the menu, the frontend sends `set_menu_open(false)`; normal modifier/menu reconciliation restores click-through. Focus-loss events also dismiss from the frontend. No durable state or settings schema is added; the [report](../../../doc/report/CONTEXT_MENU_FIX.md) describes polling and display-edge limitations.
+`ClockState` stores the current menu request and owning clock in memory. The native input monitor compares pointer presses against the separate menu HWND, while each clock remains click-through unless the modifier is held. A visible menu temporarily prevents that clock's topmost refresh from covering it. Stale request IDs cannot close a newer menu. The monitor samples every 30 ms, so a very short nonactivating click can still be missed. [menu_window.rs](../menu_window.rs) tests fitting against negative-origin and edge displays.
 
 ## Clock topmost recovery
 
@@ -272,7 +267,7 @@ sequenceDiagram
     end
 ```
 
-Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. [settings_commands.rs](../settings_commands.rs) validates changes and calls [config_store.rs](../config_store.rs) to save. Window-position saves in [displays.rs](../displays.rs) use the same file. The background monitor in [interaction.rs](../interaction.rs) polls Windows input and window geometry every 30 ms. Its first poll after the main window is shown reconciles click-through with the current modifier and menu state. On later state changes, `set_click_through` changes `WS_EX_TRANSPARENT` while retaining `WS_EX_LAYERED` and refreshes the native frame; the monitor also emits state and proximity events. It calls [timer.rs](../timer.rs) to normalize a completed Timer on the main window.
+Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. [settings_commands.rs](../settings_commands.rs) validates changes and calls [config_store.rs](../config_store.rs) to save. Window-position saves in [displays.rs](../displays.rs) use the same file. The background monitor in [interaction.rs](../interaction.rs) polls Windows input and window geometry every 30 ms. Its first poll after the main window is shown reconciles click-through with the current modifier. On later state changes, `set_click_through` changes `WS_EX_TRANSPARENT` while retaining `WS_EX_LAYERED` and refreshes the native frame; the monitor also emits state and proximity events. It calls [timer.rs](../timer.rs) to normalize a completed Timer on the main window.
 
 
 ```mermaid

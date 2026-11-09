@@ -1,4 +1,10 @@
 # Capabilities changelog
+## Latest update
+
+### 2026-11-08 - Allow the menu webview
+
+- The default capability includes the new `menu` window so its Tauri command and event calls are permitted.
+
 
 ## Added
 

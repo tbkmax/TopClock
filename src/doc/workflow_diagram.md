@@ -29,21 +29,20 @@ sequenceDiagram
 sequenceDiagram
     participant User
     participant Clock as clockApp
-    participant Native as Tauri window and input monitor
+    participant Native as menu_window.rs
+    participant Menu as menu.js
     User->>Clock: Ctrl-right-click
-    Clock->>Native: Serialized set_menu_open(true)
-    Clock->>Clock: Measure menu and reserve shadow space
-    Clock->>Native: Resize while preserving clock anchor
-    Native-->>Clock: Resize completed
-    Clock->>Clock: Reveal menu
-    User->>Native: Click elsewhere or change foreground window
-    Native-->>Clock: dismiss-menu or menu-pointer-down
-    Clock->>Clock: Hit-test pointer if needed, hide menu
-    Clock->>Native: Serialized set_menu_open(false), shrink window
-    Native->>Native: Restore click-through when modifier is up
+    Clock->>Native: open_clock_menu(client coordinates)
+    Native->>Menu: clock-menu-open with screen anchor
+    Menu->>Menu: Render registered actions and measure content
+    Menu->>Native: show_clock_menu(request ID, size)
+    Native->>Native: Fit only menu window inside nearest display
+    User->>Native: Outside press or foreground change
+    Native->>Menu: dismiss-menu
+    Menu->>Native: close_clock_menu(request ID)
 ```
 
-[main.js](../main.js) also handles DOM outside pointer-down, Escape and native window blur. The menu is hidden immediately on close, avoiding a leave animation clipped by shrinking. [menu-layout.js](../menu-layout.js) measures the menu box plus shadow space; layout offsets and a fixed clock inset keep menu growth from moving the clock. A resize failure is logged and does not reveal the pending menu. Native events are targeted to one clock; [native polling limitations](../../doc/report/CONTEXT_MENU_FIX.md) still apply. The class diagram below describes the owning Alpine component and command boundary.
+[main.js](../main.js) keeps the clock window sized to its own content and does not clamp its saved position. [menu.js](../menu.js) handles Set expansion, preset confirmation, Escape, and action dispatch through the add-on host. The menu window scrolls when its content exceeds a display. The 30 ms native pointer observer can miss very short nonactivating clicks; see the [native workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
 ## Progress add-on settings and display
 
@@ -227,7 +226,7 @@ sequenceDiagram
     end
 ```
 
-On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings-persistence.js](../settings-persistence.js) after a control changes. The save controller snapshots each draft, debounces it, and serializes writes. It rolls back only when the latest draft fails, so an earlier failed write cannot erase a newer draft. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the whole clock group and menu, and resizes the native window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings-persistence.js](../settings-persistence.js) after a control changes. The save controller snapshots each draft, debounces it, and serializes writes. It rolls back only when the latest draft fails, so an earlier failed write cannot erase a newer draft. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the clock group and resizes only the clock window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
 The Settings navigation in [settings.html](../../settings.html) exposes four tab buttons and four mounted panels. [settings-tabs.js](../settings-tabs.js) maps Arrow, Home, and End keys to the next selected tab; the selected tab receives focus and its panel remains available to keyboard users. The Shortcuts tab draws the core and Timer actions from one metadata list in [settings-shortcuts.js](../settings-shortcuts.js).
 

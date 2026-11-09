@@ -1,6 +1,6 @@
 use crate::{displays::save_current_position, startup, state::ClockState};
 use std::{fs, sync::Arc};
-use tauri::{Manager, WebviewWindow};
+use tauri::Manager;
 
 pub(crate) fn show_settings(app: &tauri::AppHandle) {
     if let Some(window) = app.get_webview_window("settings") {
@@ -58,19 +58,6 @@ pub(crate) fn open_release_page(url: Option<String>) {
                 .args(["/c", "start", "", &target])
                 .spawn();
         }
-    }
-}
-#[tauri::command]
-pub(crate) fn set_menu_open(
-    open: bool,
-    window: WebviewWindow,
-    state: tauri::State<'_, Arc<ClockState>>,
-) {
-    let mut menus = state.menu_open.lock().unwrap();
-    if open {
-        menus.insert(window.label().to_string());
-    } else {
-        menus.remove(window.label());
     }
 }
 #[tauri::command]

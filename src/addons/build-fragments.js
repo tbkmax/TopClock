@@ -3,27 +3,31 @@ import { resolve, sep } from 'node:path';
 import { addonDefinitions } from './registry.js';
 
 const viewRoot = realpathSync(resolve(import.meta.dirname, 'views'));
-const slots = new Set(['clock-row', 'settings-row', 'preview-row', 'clock-types', 'settings-types']);
+const slots = new Set(['clock-row', 'settings-row', 'preview-row', 'clock-types', 'settings-types', 'details-types']);
 for (const definition of addonDefinitions) {
     if (definition.viewKey !== 'shared') slots.add(`clock-${definition.viewKey}`);
     slots.add(`settings-${definition.settingsViewKey}`);
+    if (definition.detailsViewKey) slots.add(`details-${definition.detailsViewKey}`);
 }
 const marker = /<!-- addon-view:([a-z-]+) -->/g;
 
 export function composeAddonFragments(html, chain = []) {
     return html.replace(marker, (_match, key) => {
         if (!slots.has(key) || chain.includes(key)) throw new Error(`Invalid add-on view slot: ${key}`);
-        if (key === 'clock-types' || key === 'settings-types') {
-            const type = key === 'clock-types' ? 'clock' : 'settings';
+        if (key === 'clock-types' || key === 'settings-types' || key === 'details-types') {
+            const type = key.split('-')[0];
             const views = type === 'clock'
                 ? [...new Set(addonDefinitions.map((definition) => definition.viewKey).filter((view) => view !== 'shared'))]
-                : [...new Set(addonDefinitions.map((definition) => definition.settingsViewKey))];
+                : type === 'settings'
+                    ? [...new Set(addonDefinitions.map((definition) => definition.settingsViewKey))]
+                    : [...new Set(addonDefinitions.map((definition) => definition.detailsViewKey).filter(Boolean))];
             return views.map((view) => {
                 return composeAddonFragments(`<!-- addon-view:${type}-${view} -->`, [...chain, key]);
             }).join('\n');
         }
         const file = key.startsWith('settings-') && key !== 'settings-row'
-            ? `${key.slice('settings-'.length)}.html` : `${key}.html`;
+            ? `${key.slice('settings-'.length)}.html`
+            : key.startsWith('details-') ? `${key.slice('details-'.length)}.html` : `${key}.html`;
         const path = realpathSync(resolve(viewRoot, file));
         if (!path.startsWith(viewRoot + sep)) throw new Error(`Add-on view escapes its bundle: ${key}`);
         return composeAddonFragments(readFileSync(path, 'utf8'), [...chain, key]);

@@ -37,12 +37,14 @@ impl MenuDismissal {
         outside: bool,
         foreground: isize,
         clock: isize,
+        menu: isize,
     ) -> bool {
         let pressed = buttons & !self.buttons != 0;
         let focus_left = self.was_open
             && foreground != 0
             && foreground != self.foreground
-            && foreground != clock;
+            && foreground != clock
+            && foreground != menu;
         self.buttons = buttons;
         self.was_open = open;
         self.foreground = foreground;
@@ -132,12 +134,22 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
             timer::normalize_finished_timer(&window, &state);
             timer::normalize_finished_progress_timers(&window, &state);
             if !window.is_visible().unwrap_or(false) {
-                menu_dismissal.update(false, mouse_buttons(), false, 0, hwnd_raw);
+                menu_dismissal.update(false, mouse_buttons(), false, 0, hwnd_raw, 0);
                 last_topmost_refresh = None;
                 thread::sleep(Duration::from_millis(30));
                 continue;
             }
-            if last_topmost_refresh.is_none_or(|last| last.elapsed() >= topmost::REFRESH_INTERVAL) {
+            let menu_open = state.menu_open.lock().unwrap().contains(window.label());
+            let menu_window = menu_open
+                .then(|| window.app_handle().get_webview_window("menu"))
+                .flatten();
+            let menu_visible = menu_window
+                .as_ref()
+                .is_some_and(|menu| menu.is_visible().unwrap_or(false));
+            if !menu_visible
+                && last_topmost_refresh
+                    .is_none_or(|last| last.elapsed() >= topmost::REFRESH_INTERVAL)
+            {
                 // Refresh even if WS_EX_TOPMOST is still set: another topmost
                 // window can be above us within the same Z-order band.
                 last_topmost_refresh = Some(Instant::now());
@@ -146,32 +158,33 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
                 }
             }
             let ctrl = unsafe { GetAsyncKeyState(modifier_vk) as u16 & 0x8000 != 0 };
-            let menu_open = state.menu_open.lock().unwrap().contains(window.label());
             let buttons = mouse_buttons();
             let foreground = unsafe { GetForegroundWindow() } as isize;
             let mut cursor = POINT { x: 0, y: 0 };
             let cursor_valid = unsafe { GetCursorPos(&mut cursor) } != 0;
             let geometry = window.outer_position().ok().zip(window.outer_size().ok());
+            let menu_geometry = menu_window
+                .as_ref()
+                .and_then(|menu| menu.outer_position().ok().zip(menu.outer_size().ok()));
+            let menu_hwnd = menu_window
+                .as_ref()
+                .and_then(|menu| menu.hwnd().ok())
+                .map_or(0, |handle| handle.0 as isize);
             let outside = cursor_valid
-                && geometry.is_some_and(|(position, size)| outside_window(cursor, position, size));
-            if menu_open && buttons & !menu_dismissal.buttons != 0 && cursor_valid && !outside {
-                if let (Some((position, _)), Ok(scale)) = (geometry, window.scale_factor()) {
-                    // Transparent padding can pass through without a DOM event.
-                    // Let the frontend hit-test the actual menu, not the whole HWND.
-                    let point = (
-                        (f64::from(cursor.x) - f64::from(position.x)) / scale,
-                        (f64::from(cursor.y) - f64::from(position.y)) / scale,
-                    );
-                    let _ = window.emit_to(window.label(), "menu-pointer-down", point);
-                }
+                && menu_geometry
+                    .is_some_and(|(position, size)| outside_window(cursor, position, size));
+            if menu_dismissal.update(
+                menu_visible,
+                buttons,
+                outside,
+                foreground,
+                hwnd_raw,
+                menu_hwnd,
+            ) {
+                // The separate menu owns its own surface; outside input only requests close.
+                let _ = window.emit_to("menu", "dismiss-menu", ());
             }
-            if menu_dismissal.update(menu_open, buttons, outside, foreground, hwnd_raw) {
-                // Request dismissal only for this clock. The frontend closes the menu
-                // and acknowledges through set_menu_open, preserving state ordering.
-                // Observation does not capture or swallow the other app's click.
-                let _ = window.emit_to(window.label(), "dismiss-menu", ());
-            }
-            let ignore = !ctrl && !menu_open;
+            let ignore = !ctrl;
 
             if last_ignore != Some(ignore) {
                 set_click_through(hwnd, ignore);
@@ -248,31 +261,30 @@ mod tests {
     #[test]
     fn menu_dismissal_observes_new_outside_presses_without_replaying_held_buttons() {
         let mut monitor = MenuDismissal::default();
-        assert!(!monitor.update(false, 2, false, 10, 10)); // Opening right press.
-        assert!(!monitor.update(true, 2, true, 10, 10)); // Held while moving outside.
-        assert!(!monitor.update(true, 0, true, 10, 10)); // Release is not a click.
-        assert!(monitor.update(true, 1, true, 10, 10));
-        assert!(!monitor.update(true, 1, true, 10, 10)); // No repeated dismissal.
-        assert!(monitor.update(true, 3, true, 10, 10)); // Right while left held.
-        assert!(!monitor.update(false, 0, true, 20, 10));
-        assert!(!monitor.update(true, 0, false, 10, 10)); // Reopen.
-        assert!(!monitor.update(true, 1, false, 10, 10)); // Menu item press.
+        assert!(!monitor.update(false, 2, false, 10, 10, 20)); // Opening right press.
+        assert!(!monitor.update(true, 2, true, 10, 10, 20)); // Held while moving outside.
+        assert!(!monitor.update(true, 0, true, 10, 10, 20)); // Release is not a click.
+        assert!(monitor.update(true, 1, true, 10, 10, 20));
+        assert!(!monitor.update(true, 1, true, 10, 10, 20)); // No repeated dismissal.
+        assert!(monitor.update(true, 3, true, 10, 10, 20)); // Right while left held.
+        assert!(!monitor.update(false, 0, true, 20, 10, 20));
+        assert!(!monitor.update(true, 0, false, 10, 10, 20)); // Reopen.
+        assert!(!monitor.update(true, 1, false, 10, 10, 20)); // Menu item press.
         for button in [2, 4, 8, 16] {
-            monitor.update(true, 0, true, 10, 10);
-            assert!(monitor.update(true, button, true, 10, 10));
+            monitor.update(true, 0, true, 10, 10, 20);
+            assert!(monitor.update(true, button, true, 10, 10, 20));
         }
     }
 
     #[test]
     fn menu_dismissal_handles_focus_changes_without_requiring_initial_focus() {
         let mut monitor = MenuDismissal::default();
-        assert!(!monitor.update(true, 0, false, 20, 10));
-        assert!(!monitor.update(true, 0, false, 20, 10));
-        assert!(!monitor.update(true, 0, false, 10, 10)); // Clock gains focus.
-        assert!(monitor.update(true, 0, false, 20, 10)); // Alt-tab or short click.
-        assert!(!monitor.update(false, 0, false, 30, 10));
-        assert!(!monitor.update(true, 0, false, 30, 10));
-        assert!(!monitor.update(true, 0, false, 0, 10)); // Transient null foreground.
+        assert!(!monitor.update(true, 0, false, 10, 10, 20));
+        assert!(!monitor.update(true, 0, false, 20, 10, 20)); // Menu gains focus.
+        assert!(monitor.update(true, 0, false, 30, 10, 20)); // Alt-tab or short click.
+        assert!(!monitor.update(false, 0, false, 30, 10, 20));
+        assert!(!monitor.update(true, 0, false, 30, 10, 20));
+        assert!(!monitor.update(true, 0, false, 0, 10, 20)); // Transient null foreground.
     }
 
     #[test]

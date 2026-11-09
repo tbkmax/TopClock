@@ -13,12 +13,12 @@
         @mousemove="handleMouseMove($event)"
         @mouseup="handleMouseUp()"
         @contextmenu="handleContextMenu($event)"
-        :class="{ 'ctrl-active': isCtrlHeld, 'menu-active': menuOpen }"
+        :class="{ 'ctrl-active': isCtrlHeld }"
     >
         <!-- The Clock itself (fades out when mouse approaches without Ctrl) -->
         <div 
             class="clock-container" x-ref="clockContainer"
-            :class="{ 'faded': isNear && !isCtrlHeld && !menuOpen }"
+            :class="{ 'faded': isNear && !isCtrlHeld }"
             @click="toggleFormat" 
             :title="t('app.moveHint', { modifier: settings?.shortcuts?.interaction_modifier || 'Ctrl' })"
         >
@@ -39,57 +39,6 @@
             </div>
         </div>
 
-        <!-- Dropdown Menu (Ctrl + Right-Click) -->
-        <div 
-            x-ref="dropdownMenu"
-            x-show="menuOpen"
-            class="dropdown-menu"
-            :style="`left: ${menuX}px; top: ${menuY}px; visibility: ${menuReady ? 'visible' : 'hidden'};`"
-            x-cloak
-        >
-            <div x-show="!pendingPreset"><button class="menu-item" @click="openSettings()" :title="t('app.settings')">
-                <span class="menu-item-left">
-                    <svg class="menu-icon settings-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="3"></circle>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                    </svg>
-                    <span x-text="t('app.settings')"></span>
-                </span>
-                <template x-if="settings?.shortcuts?.open_settings_enabled && settings?.shortcuts?.open_settings">
-                    <span class="menu-shortcut" x-text="settings.shortcuts.open_settings"></span>
-                </template>
-            </button>
-            <template x-for="item in otherMenuActions" :key="`${item.instanceId}-${item.id}`"><button class="menu-item" @click="runAddonMenuAction(item)" :title="t(item.menuLabelKey || item.labelKey)"><span class="menu-item-left"><span x-text="t(item.menuLabelKey || item.labelKey)"></span></span><template x-if="item.shortcutKey && settings?.shortcuts?.[`${item.shortcutKey}_enabled`] && settings?.shortcuts?.[item.shortcutKey]"><span class="menu-shortcut" x-text="settings.shortcuts[item.shortcutKey]"></span></template></button></template>
-            <template x-for="group in progressMenuGroups" :key="group.addon.id">
-                <div class="menu-progress-group">
-                    <div class="menu-progress-row">
-                        <span class="menu-progress-name" :title="group.name" x-text="group.name"></span>
-                        <template x-for="action in group.actions" :key="action.id"><button type="button" class="menu-compact-button" @click="runAddonMenuAction({ ...action, instanceId: group.addon.id })" x-text="t(action.labelKey)"></button></template>
-                        <button type="button" class="menu-compact-button" x-show="settings?.progress_countdown_presets?.length" :aria-expanded="expandedPresetId === group.addon.id" @click="togglePresetList(group.addon.id)" x-text="t('addons.setPreset') + ' ▾'"></button>
-                    </div>
-                    <div class="menu-preset-list" x-show="expandedPresetId === group.addon.id" x-cloak>
-                        <template x-for="minutes in settings?.progress_countdown_presets || []" :key="minutes"><button type="button" class="menu-compact-button" :disabled="presetSaving" @click="chooseProgressPreset(group.addon.id, minutes)" x-text="t('addons.presetMinutes', { minutes })"></button></template>
-                    </div>
-                </div>
-            </template>
-            <div class="menu-divider"></div>
-            <button class="menu-item" @click="quitApp" :title="t('app.quit')">
-                <span class="menu-item-left">
-                    <svg class="menu-icon quit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
-                    <span x-text="t('app.quit')"></span>
-                </span>
-                <template x-if="settings?.shortcuts?.quit_enabled && settings?.shortcuts?.quit">
-                    <span class="menu-shortcut" x-text="settings.shortcuts.quit"></span>
-                </template>
-            </button>
-            </div>
-            <div class="menu-preset-confirm" x-show="pendingPreset" x-cloak><strong x-text="t('addons.presetResetTitle')"></strong><p x-text="t('addons.presetResetWarning', { minutes: pendingPreset?.minutes ?? 0 })"></p><label><input type="checkbox" x-model="presetDontShowAgain"><span x-text="t('addons.dontShowAgain')"></span></label><div class="menu-preset-confirm-actions"><button type="button" class="menu-compact-button" x-ref="presetCancel" :disabled="presetSaving" @click="pendingPreset = null; $nextTick(() => scheduleResize())" x-text="t('addons.cancel')"></button><button type="button" class="menu-compact-button menu-confirm-primary" :disabled="presetSaving" @click="confirmProgressPreset()" x-text="t('addons.resetAndStart')"></button></div></div>
-            <p class="menu-error" x-show="menuError" x-text="menuError"></p>
-        </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>

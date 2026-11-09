@@ -47,6 +47,14 @@ export function createAddonState({ adapter = nativeAddonAdapter, onChange = () =
             }
             return session;
         },
+        async dispatchMenuChoice(addon, choice, confirmation) {
+            const revision = progressRevision;
+            const session = await adapter.menuChoice(addon, choice, confirmation);
+            if (!disposed && addon.kind === 'progress' && progressRevision === revision) {
+                setProgress({ ...snapshot.progressTimerSessions, [addon.id]: session });
+            }
+            return session;
+        },
         dispose() {
             disposed = true;
             unlisten.forEach((stop) => stop());

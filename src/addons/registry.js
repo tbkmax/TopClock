@@ -4,7 +4,7 @@ import { timerAddon } from './builtins/timer.js';
 import { progressAddon } from './builtins/progress.js';
 
 /** @typedef {{kind:string, label:string, labelKey:string, description:string, maxInstances:number,
- * viewKey:string, settingsViewKey:string, createOptions:function, describe:function,
+ * viewKey:string, settingsViewKey:string, detailsViewKey?:string, createOptions:function, describe:function,
  * display:function, actions:function, editor:object}} AddonDefinition */
 const definitions = [dateAddon, regionClockAddon, timerAddon, progressAddon];
 const knownActions = new Set(['toggle', 'reset']);
@@ -25,6 +25,7 @@ for (const definition of definitions) {
 export const addonDefinitions = Object.freeze(definitions);
 export const addonCatalog = definitions.map((definition) => ({
     kind: definition.kind, label: definition.label, description: definition.description,
+    hasDetails: Boolean(definition.detailsViewKey),
     options: definition.createOptions({ now: new Date() }),
 }));
 export function getAddonDefinition(kind) {
