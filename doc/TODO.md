@@ -28,7 +28,9 @@
 ### TODO10: Publish (Completed)
 
 ### TODO 11: Pages
-- [ ] create github pages for a home page and include tutorial/guide of how to use, follow doc/DESIGN.md, write into pages folder, search for reference of Alpine.js example to apply the design and animation.
+- [ ] create github pages for a home page and (and home page should have access point direct to microsoft store download page) a tab for tutorial/guide of how to use, follow doc/DESIGN.md, write into pages folder, search for reference of Alpine.js example to apply the design and animation.
+- [ ] create svg or screenshot if needed, or use any exist assets
 - [ ] have tab for specific how to use for each add-on (home page is for general how to use like ctrl + drag to move clock and how to reset position, how to adjust setting)
+- [ ] have tab for specific detail about what update in each versions
 - [ ] use github pages publish it
-- [ ] update microsoft store side description to include this 
+- [ ] update microsoft store side description to include this

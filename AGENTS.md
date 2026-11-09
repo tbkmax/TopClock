@@ -24,6 +24,7 @@ Before editing a code folder, read its `doc/` files and the parent code folder's
 
 ## Work and verification
 
+- DO NOT use commit, let user do that
 - Preserve unrelated local edits. Check `git status --short` before modifying files.
 - Use `npm run build` for frontend changes and `cargo test --manifest-path src-tauri/Cargo.toml` for Rust changes. Use `npm run tauri:dev` for interactive Windows behavior when needed.
 - Check the clock, settings window, tray actions, Ctrl interactions, settings persistence, and position restore when changing their shared behavior.
