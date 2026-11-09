@@ -1,5 +1,9 @@
 # Rust application backlog
 
+Live acceptance of `progress_timer_set_preset` remains in the [frontend preset checklist](../../../src/doc/backlog.md#progress-preset-menu-live-acceptance): confirm per-ID restart, native menu click-through, synchronized Settings and second-display state, persistence after restart, and rollback/error display when storage fails. The new command's list defaults and validation pass unit tests.
+
+An isolated Windows WebView smoke check verified a per-ID restart and Settings synchronization through the native command. Physical input, a second display, restart persistence, and controlled write-failure behavior remain open.
+
 The add-on extraction passes unit tests, while a controlled native action write failure remains in the [native add-on backlog](../addons/doc/backlog.md). Existing live smoke verification below also covers the refactor.
 
 ## Identify production memory failure signatures

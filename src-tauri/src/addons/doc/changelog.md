@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-11-08 - Restart one Progress countdown from a shared preset
+
+- Added a native action that validates the target and preset, asks for confirmation through the caller when progress would be cleared, and atomically persists the selected instance's new duration and running session. Settings and session events refresh all windows.
+
 ### 2026-11-07 - Create this folder's documentation
 
 - Added architecture, workflow, changelog, and backlog documents for native add-on modules.

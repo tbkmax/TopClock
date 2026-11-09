@@ -1,5 +1,7 @@
 # Built-in definition workflow
 
+For an enabled countdown, `progressAddon.actions` returns Start/Pause and Reset for the clock menu using the same per-ID session state as the Settings buttons. The menu's Set control reads shared presets outside the type definition; its native action emits a new session map, and the definition's next action calculation changes only the selected row's Start/Pause label. The other Progress modes return no actions.
+
 The class diagram shows the shared object contract, rather than JavaScript inheritance.
 
 ```mermaid

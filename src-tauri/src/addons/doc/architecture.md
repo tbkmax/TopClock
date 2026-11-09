@@ -1,5 +1,7 @@
 # Native add-on architecture
 
+[actions.rs](../actions.rs) now owns the atomic Progress preset restart in addition to toggle/reset. It accepts only an enabled countdown ID and a value from shared `ClockSettings.progress_countdown_presets`, requires confirmation when a session is running or has elapsed time unless warnings are dismissed, resets and starts that one session, and saves the duration and optional dismissal in the same config write. A write failure restores prior settings and the selected session; success emits settings and Progress-session events. Other IDs and the numeric Timer are unaffected.
+
 This folder contains compiled add-on validation, session calculations, and the shared native action service. The [Rust application architecture](../../doc/architecture.md) owns startup, settings persistence, commands, and Win32 behavior.
 
 | Module | Responsibility |

@@ -54,15 +54,22 @@ test('controller routes only declared actions to the current enabled instance', 
         getState: () => ({ timerSession: { running: false }, progressTimerSessions: {} }),
         dispatchNative: async (addon, action) => { calls.push([addon.id, action]); return { running: true }; },
     });
-    assert.deepEqual(controller.menuActions().map(({ instanceId, id }) => [instanceId, id]), [[timer.id, 'reset']]);
+    assert.deepEqual(controller.menuActions().map(({ instanceId, id }) => [instanceId, id]), [
+        [timer.id, 'reset'], [first.id, 'toggle'], [first.id, 'reset'],
+        [second.id, 'toggle'], [second.id, 'reset'],
+    ]);
     await controller.dispatch(second.id, 'toggle', 'primary-click');
     assert.deepEqual(calls, [[second.id, 'toggle']]);
-    await assert.rejects(controller.dispatch(first.id, 'reset', 'clock-menu'), /unavailable/);
+    await controller.dispatch(first.id, 'reset', 'clock-menu');
+    assert.deepEqual(calls, [[second.id, 'toggle'], [first.id, 'reset']]);
     first.enabled = false;
+    assert.deepEqual(controller.menuActions().map(({ instanceId, id }) => [instanceId, id]), [
+        [timer.id, 'reset'], [second.id, 'toggle'], [second.id, 'reset'],
+    ]);
     await assert.rejects(controller.dispatch(first.id, 'toggle', 'settings-button'), /unavailable/);
     settings.addons = settings.addons.filter((addon) => addon.id !== second.id);
     await assert.rejects(controller.dispatch(second.id, 'toggle', 'primary-click'), /unavailable/);
-    assert.deepEqual(calls, [[second.id, 'toggle']]);
+    assert.deepEqual(calls, [[second.id, 'toggle'], [first.id, 'reset']]);
 });
 
 test('add-on host labels read one reactive native session store', async () => {

@@ -1,5 +1,7 @@
 # Bundled view backlog
 
+Verify that the Progress details entry button opens the same preset dialog as the catalog card at the fixed Settings window size and in every supported language. This is part of the [frontend preset live acceptance](../../../doc/backlog.md#progress-preset-menu-live-acceptance).
+
 ## Native WebView layout check
 
 - **Title:** Inspect all extracted views in the running clock and Settings window.

@@ -33,8 +33,8 @@ export const progressAddon = {
         if (addon.options.mode !== 'countdown') return [];
         const session = state.progressTimerSessions?.[addon.id];
         return [
-            { id: 'toggle', labelKey: session?.running ? 'addons.pause' : 'addons.start', roles: ['primary-click', 'settings-button'], primary: true, enabled: addon.enabled },
-            { id: 'reset', labelKey: 'addons.reset', roles: ['settings-button'], primary: false, enabled: addon.enabled },
+            { id: 'toggle', labelKey: session?.running ? 'addons.pause' : 'addons.start', roles: ['primary-click', 'settings-button', 'clock-menu'], primary: true, enabled: addon.enabled },
+            { id: 'reset', labelKey: 'addons.reset', roles: ['settings-button', 'clock-menu'], primary: false, enabled: addon.enabled },
         ];
     },
 };

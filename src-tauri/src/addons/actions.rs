@@ -1,5 +1,7 @@
 use super::{progress, progress_countdown_options, timer, timer_options, TimerSession};
-use crate::{config_store::save_config, state::ClockState, timer::epoch_ms};
+use crate::{
+    config_store::save_config, settings::PersistedConfig, state::ClockState, timer::epoch_ms,
+};
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
 
@@ -89,4 +91,152 @@ pub(crate) fn apply_progress_action(
     drop(config);
     let _ = app.emit("progress-timer-states-changed", all);
     Ok(snapshot)
+}
+
+pub(crate) fn apply_progress_preset(
+    app: &tauri::AppHandle,
+    id: &str,
+    minutes: u16,
+    confirmed_reset: bool,
+    dont_show_again: bool,
+) -> Result<TimerSession, String> {
+    let state = app.state::<Arc<ClockState>>();
+    let mut config = state.config.lock().unwrap();
+    let previous_settings = config.settings.clone();
+    let previous_session = config.progress_timer_sessions.get(id).cloned();
+    let session = update_progress_preset(
+        &mut config,
+        id,
+        minutes,
+        confirmed_reset,
+        dont_show_again,
+        epoch_ms(),
+    )?;
+    if let Err(error) = save_config(&state, &config) {
+        config.settings = previous_settings;
+        if let Some(previous) = previous_session {
+            config
+                .progress_timer_sessions
+                .insert(id.to_owned(), previous);
+        } else {
+            config.progress_timer_sessions.remove(id);
+        }
+        return Err(error);
+    }
+    let settings = config.settings.clone();
+    let sessions = config.progress_timer_sessions.clone();
+    drop(config);
+    let _ = app.emit("clock-settings-changed", settings);
+    let _ = app.emit("progress-timer-states-changed", sessions);
+    Ok(session)
+}
+
+fn update_progress_preset(
+    config: &mut PersistedConfig,
+    id: &str,
+    minutes: u16,
+    confirmed_reset: bool,
+    dont_show_again: bool,
+    now_ms: u64,
+) -> Result<TimerSession, String> {
+    if !config
+        .settings
+        .progress_countdown_presets
+        .contains(&minutes)
+    {
+        return Err("Progress preset is unavailable".into());
+    }
+    let addon_index = config
+        .settings
+        .addons
+        .iter()
+        .position(|addon| {
+            addon.id == id
+                && addon.kind == "progress"
+                && addon.enabled
+                && addon
+                    .options
+                    .get("mode")
+                    .and_then(serde_json::Value::as_str)
+                    == Some("countdown")
+        })
+        .ok_or("Progress countdown is unavailable")?;
+    let current = config
+        .progress_timer_sessions
+        .get(id)
+        .cloned()
+        .unwrap_or_default();
+    if (current.running || current.elapsed(now_ms) > 0)
+        && !confirmed_reset
+        && !config.settings.progress_preset_warning_dismissed
+    {
+        return Err("Progress preset reset requires confirmation".into());
+    }
+    config.settings.addons[addon_index].options["countdown_seconds"] =
+        serde_json::json!(u64::from(minutes) * 60);
+    let mut session = TimerSession::default();
+    session.toggle_progress(now_ms, u64::from(minutes) * 60);
+    config
+        .progress_timer_sessions
+        .insert(id.to_owned(), session.clone());
+    if dont_show_again && confirmed_reset {
+        config.settings.progress_preset_warning_dismissed = true;
+    }
+    Ok(session)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::addons::legacy_timer;
+
+    #[test]
+    fn preset_restart_targets_one_countdown_and_requires_confirmation() {
+        let mut config = PersistedConfig::default();
+        let mut first = legacy_timer();
+        first.id = "progress-one".into();
+        first.kind = "progress".into();
+        first.options = serde_json::json!({"mode":"countdown","countdown_seconds":300});
+        let mut second = first.clone();
+        second.id = "progress-two".into();
+        config.settings.addons = vec![first, second];
+        config.progress_timer_sessions.insert(
+            "progress-one".into(),
+            TimerSession {
+                running: false,
+                elapsed_ms: 2_000,
+                started_at_ms: None,
+                finished: false,
+                has_started: true,
+            },
+        );
+        config.progress_timer_sessions.insert(
+            "progress-two".into(),
+            TimerSession {
+                running: true,
+                elapsed_ms: 0,
+                started_at_ms: Some(1_000),
+                finished: false,
+                has_started: true,
+            },
+        );
+        assert!(
+            update_progress_preset(&mut config, "progress-one", 10, false, false, 5_000).is_err()
+        );
+        assert_eq!(config.settings.addons[0].options["countdown_seconds"], 300);
+        assert!(
+            update_progress_preset(&mut config, "progress-one", 99, true, false, 5_000).is_err()
+        );
+        let session =
+            update_progress_preset(&mut config, "progress-one", 10, true, true, 5_000).unwrap();
+        assert!(session.running);
+        assert_eq!(session.elapsed(5_000), 0);
+        assert_eq!(config.settings.addons[0].options["countdown_seconds"], 600);
+        assert_eq!(config.settings.addons[1].options["countdown_seconds"], 300);
+        assert_eq!(
+            config.progress_timer_sessions["progress-two"].started_at_ms,
+            Some(1_000)
+        );
+        assert!(config.settings.progress_preset_warning_dismissed);
+    }
 }

@@ -1,5 +1,7 @@
 # Bundled add-on views
 
+[progress.html](../progress.html) adds a Countdown presets button beside the mode selector when that instance is in countdown mode. It calls the Settings page's shared dialog method; the Progress catalog card in [settings.html](../../../../settings.html) calls the same method. Preset values are text-bound, and neither button owns a separate copy of the list.
+
 These fragments contain static Alpine markup for the clock and Settings. See the [host architecture](../../doc/architecture.md) and [frontend architecture](../../../doc/architecture.md) for their data sources.
 
 [clock-row.html](../clock-row.html) owns the shared clock row and its click boundary. All four current add-ons return text, time parts, or progress data that this row can display. A later compiled type can register a special clock view without changing the row. [settings-row.html](../settings-row.html) owns the configured row, size, drag handle, enable switch, and action buttons. [preview-row.html](../preview-row.html) is reused above and below the preview clock. [date.html](../date.html), [region-clock.html](../region-clock.html), [timer.html](../timer.html), and [progress.html](../progress.html) contain the type-specific Settings controls. The type slots expand from the fixed [registry](../../registry.js).

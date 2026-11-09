@@ -2,6 +2,10 @@
 
 ## Changed
 
+### 2026-11-08 - Save Progress countdown presets and atomic restarts
+
+- Added a backward-compatible shared minute-preset list and warning preference. The new per-ID command validates an enabled Progress countdown and selected preset, requires confirmation before discarding recorded progress, saves duration and restarted session together, and broadcasts settings and session changes. Unit tests cover defaults and list validation.
+
 ### 2026-11-07 - Extract native add-on rules and actions
 
 - The four built-in validators, shared instance checks, Timer session calculations, and typed action routing now live in `addons/`. Existing Timer and Progress commands, global shortcuts, saved fields, events, and settings rollback keep their behavior. No migration or user action is required.

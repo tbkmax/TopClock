@@ -1,5 +1,7 @@
 # Frontend add-on host architecture
 
+Progress's `toggle` and `reset` actions now include the clock-menu role. The controller still validates the current enabled instance before dispatch; the clock menu places those descriptors in a row per enabled countdown. Preset selection is a separate native transaction because it changes both shared settings and one durable session. The two Settings entry buttons call one dialog method and edit one global preset list, so there are no duplicate persistence paths.
+
 This folder owns the fixed built-in registry and the shared add-on host. The [frontend architecture](../../doc/architecture.md) covers the two Alpine pages; [built-in definitions](../builtins/doc/architecture.md) own type behavior, and [bundled views](../views/doc/architecture.md) own markup.
 
 | File | Responsibility |

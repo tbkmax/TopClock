@@ -1,5 +1,8 @@
 use crate::{
-    addons::{apply_action, progress_countdown_options, timer_options, ActionTarget, TimerSession},
+    addons::{
+        apply_action, apply_progress_preset, progress_countdown_options, timer_options,
+        ActionTarget, TimerSession,
+    },
     config_store::save_config,
     state::ClockState,
 };
@@ -35,6 +38,17 @@ pub(crate) fn progress_timer_action(
     action: String,
 ) -> Result<TimerSession, String> {
     apply_action(&app, ActionTarget::Progress(&id), &action)
+}
+
+#[tauri::command]
+pub(crate) fn progress_timer_set_preset(
+    app: tauri::AppHandle,
+    id: String,
+    minutes: u16,
+    confirmed_reset: bool,
+    dont_show_again: bool,
+) -> Result<TimerSession, String> {
+    apply_progress_preset(&app, &id, minutes, confirmed_reset, dont_show_again)
 }
 
 pub(crate) fn apply_timer_action(

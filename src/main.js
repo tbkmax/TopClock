@@ -8,6 +8,7 @@ import { markChangedNumbers } from './clock-animations.js';
 import { clockWindowLayout } from './menu-layout.js';
 import { displayAddon } from './addons/model.js';
 import { createAddonHost } from './addons/host.js';
+import { getAddonDefinition } from './addons/registry.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
@@ -43,6 +44,11 @@ Alpine.data('clockApp', () => ({
     menuReady: false,
     menuX: 0,
     menuY: 0,
+    expandedPresetId: null,
+    pendingPreset: null,
+    presetDontShowAgain: false,
+    presetSaving: false,
+    menuError: '',
     dragStart: null,
     dragStarted: false,
     isDragging: false,
@@ -65,6 +71,7 @@ Alpine.data('clockApp', () => ({
         this.addonHost.start().catch(console.error);
         this.$nextTick(() => {
             new ResizeObserver(() => this.scheduleResize()).observe(this.$refs.clockContainer);
+            new ResizeObserver(() => { if (this.menuOpen) this.scheduleResize(); }).observe(this.$refs.dropdownMenu);
             this.scheduleResize();
         });
 
@@ -231,6 +238,20 @@ Alpine.data('clockApp', () => ({
 
     addonActions(addon, role) { return this.addonHost?.actionsFor(addon, role) || []; },
     get addonMenuActions() { return this.addonHost?.menuActions() || []; },
+    get otherMenuActions() {
+        return this.addonMenuActions.filter((item) =>
+            this.settings?.addons?.find((addon) => addon.id === item.instanceId)?.kind !== 'progress');
+    },
+    get progressMenuGroups() {
+        return (this.settings?.addons || []).filter((addon) => addon.kind === 'progress'
+            && addon.enabled && addon.options.mode === 'countdown').map((addon) => ({
+            addon,
+            name: getAddonDefinition('progress').describe(addon, {
+                t: (key, vars) => this.t(key, vars), settings: this.settings,
+            }).name,
+            actions: this.addonActions(addon, 'clock-menu'),
+        }));
+    },
     addonClick(addon) {
         if (this.dragStarted) { this.dragStarted = false; return; }
         if (!this.isCtrlHeld) return;
@@ -239,8 +260,50 @@ Alpine.data('clockApp', () => ({
     },
     runAddonMenuAction(item) {
         this.addonHost.dispatch(item.instanceId, item.id, 'clock-menu').then((session) => {
-            if (session && item.id === 'reset') this.closeMenu();
-        }).catch(console.error);
+            if (session) this.closeMenu();
+        }).catch((error) => { this.menuError = String(error); });
+    },
+    togglePresetList(id) {
+        this.expandedPresetId = this.expandedPresetId === id ? null : id;
+        this.$nextTick(() => this.scheduleResize());
+    },
+    chooseProgressPreset(id, minutes) {
+        if (this.presetSaving) return;
+        const session = this.progressTimerSessions[id];
+        const elapsed = (session?.elapsed_ms || 0) + (session?.running
+            ? Math.max(0, Date.now() - (session.started_at_ms ?? Date.now())) : 0);
+        if ((session?.running || elapsed > 0) && !this.settings?.progress_preset_warning_dismissed) {
+            this.pendingPreset = { id, minutes };
+            this.presetDontShowAgain = false;
+            this.$nextTick(() => { this.$refs.presetCancel?.focus(); this.scheduleResize(); });
+            return;
+        }
+        this.applyProgressPreset(id, minutes, Boolean(this.settings?.progress_preset_warning_dismissed), false);
+    },
+    async applyProgressPreset(id, minutes, confirmedReset, dontShowAgain) {
+        if (this.presetSaving) return;
+        this.presetSaving = true;
+        this.menuError = '';
+        try {
+            await invoke('progress_timer_set_preset', { id, minutes, confirmedReset, dontShowAgain });
+            this.closeMenu();
+        } catch (error) {
+            if (String(error).includes('requires confirmation')) {
+                this.pendingPreset = { id, minutes };
+                this.presetDontShowAgain = false;
+                this.$nextTick(() => this.$refs.presetCancel?.focus());
+            } else {
+                this.menuError = String(error);
+            }
+            this.$nextTick(() => this.scheduleResize());
+        } finally {
+            this.presetSaving = false;
+        }
+    },
+    confirmProgressPreset() {
+        if (!this.pendingPreset) return;
+        const { id, minutes } = this.pendingPreset;
+        this.applyProgressPreset(id, minutes, true, this.presetDontShowAgain);
     },
 
     toggleFormat() {
@@ -325,6 +388,10 @@ Alpine.data('clockApp', () => ({
 
     openMenu() {
         this.menuReady = false;
+        this.expandedPresetId = null;
+        this.pendingPreset = null;
+        this.menuError = '';
+        this.presetSaving = false;
         this.menuOpen = true;
         this.syncMenuState(true);
         this.$nextTick(() => this.scheduleResize());
@@ -334,6 +401,8 @@ Alpine.data('clockApp', () => ({
         if (!this.menuOpen) return;
         this.menuReady = false;
         this.menuOpen = false;
+        this.expandedPresetId = null;
+        this.pendingPreset = null;
         this.syncMenuState(false);
         this.$nextTick(() => this.scheduleResize());
     },

@@ -1,5 +1,7 @@
 # Native add-on backlog
 
+Verify a Progress preset restart with two running countdowns in live Windows WebViews, including save failure and a stale unconfirmed request. The shared [frontend preset checklist](../../../../src/doc/backlog.md#progress-preset-menu-live-acceptance) covers menu and cross-window behavior.
+
 ## Failed action write verification
 
 - **Title:** Exercise native action rollback on a controlled write failure.

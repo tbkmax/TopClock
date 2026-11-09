@@ -40,6 +40,7 @@ pub fn run() {
             timer::timer_action,
             timer::get_progress_timer_states,
             timer::progress_timer_action,
+            timer::progress_timer_set_preset,
             settings_commands::get_hotkey_errors,
             displays::get_displays,
             displays::reset_clock_positions,

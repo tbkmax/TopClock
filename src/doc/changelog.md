@@ -2,6 +2,10 @@
 
 ## Changed
 
+### 2026-11-08 - Add Progress countdown clock-menu controls
+
+- Enabled Progress countdown Start/Pause and Reset in compact per-instance menu rows. Set expands editable shared minute presets; selecting one resets and starts that instance, with a confirmation when progress exists and a saved dismissal that can be reversed in Settings. The existing clock anchor and click-through menu state remain in use.
+
 ### 2026-11-08 - Consolidate add-on source and reactive state
 
 - Clock and Settings now use one add-on host per webview. Action descriptors, display calculations, and edit rules read the same reactive Timer and Progress sessions, removing duplicate page-side copies. Moved all add-on source, Progress styles, build composition, and add-on tests under `src/addons/`; deleted the old top-level import shims. Existing native commands, events, and saved settings require no migration.

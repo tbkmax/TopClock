@@ -1,5 +1,7 @@
 # Rust workflows
 
+For `progress_timer_set_preset(id, minutes, confirmed_reset, dont_show_again)`, Rust holds the config lock, verifies membership in the shared preset list and an enabled countdown with that ID, and rejects replacement of a running or elapsed session without confirmation unless the warning is already dismissed. It updates only that add-on's duration and session, starts from zero, optionally persists warning dismissal, and writes once. Failure restores prior settings and session. Success emits `clock-settings-changed` and `progress-timer-states-changed` to all webviews, so Settings and all clock menus redraw from the same saved state.
+
 ## Startup persistence failure
 
 ```mermaid

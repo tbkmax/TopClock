@@ -8,6 +8,10 @@
 
 ## Changed
 
+### 2026-11-08 - Expose Progress actions in the clock menu
+
+- Progress countdown action descriptors now provide Start/Pause and Reset to the clock menu for each enabled instance. Existing host dispatch and reactive session updates remain the source of those labels.
+
 ### 2026-11-08 - Give each webview one reactive add-on host
 
 - `host.js` now constructs the controller and one reactive Timer/Progress session store. The clock, Settings, and action descriptors read that same store, removing page-side session copies that left Start/Pause labels stale.

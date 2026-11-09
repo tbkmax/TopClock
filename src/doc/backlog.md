@@ -1,5 +1,10 @@
 # Frontend backlog
 
+## Progress preset menu live acceptance
+
+- Verify two enabled countdown rows and a disabled/date-mode Progress in the native clock menu. Exercise Start/Pause, Reset, each preset, confirmation and dismissal, an empty preset list, and reopening the warning in Settings. Confirm both preset editor entry buttons, language layouts, menu resizing, click-through after close, tray actions, persistence, and position restore. Check a second display and a clock near screen edges; the existing physical display-edge limitation applies. Automated tests and Vite build do not establish native pointer or window behavior.
+- An isolated Windows WebView smoke check passed for two countdown rows, both dialog entry buttons, menu resize, per-ID preset restart, Settings label synchronization, confirmation dismissal, and re-enabling the warning. It used programmatic WebView interaction; physical mouse, tray, multiple displays, and restart checks remain open.
+
 ## Memory failure release acceptance
 
 - **Problem and outcome** — Partner Center reported uncategorized memory failures for 1.0.0.0. The hidden preview timer has been corrected, while the production failure cause remains open.

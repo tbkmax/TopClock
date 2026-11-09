@@ -7,7 +7,7 @@ mod registry;
 mod session;
 mod timer;
 
-pub(crate) use actions::{apply_action, ActionTarget};
+pub(crate) use actions::{apply_action, apply_progress_preset, ActionTarget};
 pub(crate) use instance::{valid_addons, AddonInstance};
 pub(crate) use progress::progress_countdown_options;
 pub(crate) use progress::reconcile_settings as reconcile_progress_settings;

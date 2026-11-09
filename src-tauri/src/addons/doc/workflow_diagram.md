@@ -1,5 +1,7 @@
 # Native add-on workflows
 
+The Progress preset action reads the selected instance and shared preset list under one config lock, checks whether an existing session needs confirmation, then writes its option duration and new running session together. On write failure it restores the prior settings and session and emits nothing. On success it broadcasts the settings snapshot and all Progress sessions; the frontend's single reactive host updates Start/Pause labels by instance ID.
+
 ```mermaid
 classDiagram
     class AddonInstance {
