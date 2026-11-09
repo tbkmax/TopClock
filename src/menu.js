@@ -68,9 +68,9 @@ Alpine.data('clockMenu', () => ({
         this.resizeTimer = setTimeout(async () => {
             if (!this.request || !this.$refs.surface) return;
             const id = this.request.id;
-            // Measure the content, not the current viewport: a viewport-based width
-            // shrinks again after the native window is resized.
-            const width = 320;
+            // Measure the surface, not the viewport, so compact menus can grow again
+            // when an add-on or a longer localized label appears.
+            const width = Math.ceil(this.$refs.surface.offsetWidth) + 12;
             const height = Math.ceil(this.$refs.surface.offsetHeight) + 12;
             try { await invoke('show_clock_menu', { requestId: id, width, height }); }
             catch (error) { if (this.request?.id === id) this.error = String(error); }

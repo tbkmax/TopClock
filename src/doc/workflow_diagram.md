@@ -38,7 +38,7 @@ sequenceDiagram
     User->>Clock: Ctrl-right-click
     Clock->>Native: open_clock_menu(client coordinates)
     Native->>Menu: clock-menu-open with screen anchor
-    Menu->>Menu: Render registered actions and measure content
+    Menu->>Menu: Render actions and measure compact or Progress surface
     Menu->>Native: show_clock_menu(request ID, size)
     Native->>Native: Fit only menu window inside nearest display
     User->>Native: Outside press or foreground change
@@ -46,7 +46,7 @@ sequenceDiagram
     Menu->>Native: close_clock_menu(request ID)
 ```
 
-[main.js](../main.js) keeps the clock window sized to its own content and does not clamp its saved position. [menu.js](../menu.js) handles Set expansion, preset confirmation, Escape, and action dispatch through the add-on host. The menu window scrolls when its content exceeds a display. The 30 ms native pointer observer can miss very short nonactivating clicks; see the [native workflow](../../src-tauri/src/doc/workflow_diagram.md).
+[main.js](../main.js) keeps the clock window sized to its own content and does not clamp its saved position. [menu.css](../menu.css) lets an action-only menu fit its labels and shortcut badges, while Progress groups and confirmation use the existing wider layout. [menu.js](../menu.js) measures the surface width plus shadow space before asking Rust to position the window; it also handles Set expansion, preset confirmation, Escape, and action dispatch through the add-on host. The menu window scrolls when its content exceeds a display. The 30 ms native pointer observer can miss very short nonactivating clicks; see the [native workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
 ## Progress add-on settings and display
 

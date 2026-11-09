@@ -7,7 +7,7 @@
 </head>
 <body>
     <main id="menu-app" x-data="clockMenu" @contextmenu.prevent>
-        <div class="menu-surface" x-ref="surface" x-show="request" x-cloak>
+        <div class="menu-surface" :class="{ 'menu-surface-wide': pendingChoice || menuEntries.some(entry => entry.type === 'group') }" x-ref="surface" x-show="request" x-cloak>
             <template x-if="!pendingChoice">
                 <div>
                     <button class="menu-command" type="button" @click="openSettings()">

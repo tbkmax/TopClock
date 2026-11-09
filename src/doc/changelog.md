@@ -1,6 +1,10 @@
 # Frontend changelog
 ## Latest update
 
+### 2026-11-09 - Size the clock menu to its actions
+
+- Settings/Quit and other action-only menus now shrink to their visible labels and enabled shortcut badges. Progress rows and preset confirmation retain the wider layout; the native menu window follows the measured width. No settings migration or user action is required.
+
 ### 2026-11-08 - Repair the Add-ons Details layout
 
 - Scoped modal button-row styling to the action footer, allowed Details content to stack and scroll, and placed catalog Add at the left edge with Details at the right. Native WebView screenshots confirm the repaired modal and card alignment.

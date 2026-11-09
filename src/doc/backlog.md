@@ -4,7 +4,7 @@ The Details modal and catalog button alignment were visually checked in a 760 ×
 
 ## Separate menu live acceptance
 
-- Verify physical Ctrl-right-click, outside presses, Escape, Alt-Tab, tray actions, settings persistence and position restore with the menu at each display edge and on mixed-DPI displays. An isolated Windows WebView smoke check confirmed a right-edge menu fits, expansion and warning resize, the clock coordinates stay fixed, and Details opens; physical pointer and multi-display checks remain.
+- Verify physical Ctrl-right-click, outside presses, Escape, Alt-Tab, tray actions, settings persistence and position restore with the menu at each display edge and on mixed-DPI displays. Check that Settings/Quit shrinks, enabled shortcut badges and translated labels can widen it, and a Progress row or confirmation uses the full width without clipping. An isolated Windows WebView smoke check confirmed a right-edge menu fits, expansion and warning resize, the clock coordinates stay fixed, and Details opens; physical pointer and multi-display checks remain.
 
 
 ## Progress preset menu live acceptance
