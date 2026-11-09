@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0a0a">
+  <meta name="description" content="TopClock is a transparent, always-on-top Windows clock. Download it from Microsoft Store and learn its controls, settings, and add-ons.">
+  <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
+  <title>TopClock — time, right where you need it</title>
+  <script type="module" src="./site.js"></script>
+</head>
+<body x-data="site" x-cloak>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="shell header-inner">
+      <a class="brand" href="#home" @click="navigate('home', $event)" aria-label="TopClock home">
+        <img src="./assets/icon.svg" width="34" height="34" alt="">
+        <span>TOPCLOCK<span class="brand-dot">.</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#home" :aria-current="page === 'home' ? 'page' : null" @click="navigate('home', $event)">Home</a>
+        <a href="#guide" :aria-current="page === 'guide' ? 'page' : null" @click="navigate('guide', $event)">Guide</a>
+        <a href="#addons" :aria-current="page === 'addons' ? 'page' : null" @click="navigate('addons', $event)">Add-ons</a>
+        <a href="#versions" :aria-current="page === 'versions' ? 'page' : null" @click="navigate('versions', $event)">Versions</a>
+      </nav>
+      <a class="button button-primary header-download" href="https://apps.microsoft.com/detail/9pmlg46pwjll?hl=en-US&amp;gl=US" target="_blank" rel="noopener noreferrer">Get TopClock <span aria-hidden="true">↗</span></a>
+    </div>
+  </header>
+
+  <main id="main">
+    <div x-show="page === 'home'" x-transition.opacity.duration.180ms>
+      <section class="hero shell">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="pulse-dot"></span> FOR WINDOWS 10 &amp; 11</div>
+          <h1>Time, always<br><span class="accent">in sight.</span><br>Never in the way.</h1>
+          <p class="hero-lead">A transparent desktop clock that stays above your work and lets every click pass through. Hold an interaction key when you want to move or control it.</p>
+          <div class="hero-actions">
+            <a class="button button-primary button-large" href="https://apps.microsoft.com/detail/9pmlg46pwjll?hl=en-US&amp;gl=US" target="_blank" rel="noopener noreferrer">Download from Microsoft Store <span aria-hidden="true">↗</span></a>
+            <a class="button button-secondary button-large" href="#guide" @click="navigate('guide', $event)">Learn how it works <span aria-hidden="true">→</span></a>
+          </div>
+          <p class="hero-note">Windows desktop app · Local settings · No account needed</p>
+        </div>
+        <div class="hero-visual" aria-label="Illustration of TopClock floating above a desktop window">
+          <div class="window-chrome"><span></span><span></span><span></span><i>YOUR DESKTOP</i></div>
+          <div class="window-content">
+            <div class="mock-sidebar"><div></div><div></div><div></div><div></div></div>
+            <div class="mock-document"><div class="mock-line short"></div><div class="mock-line"></div><div class="mock-line medium"></div><div class="mock-panel"></div><div class="mock-line"></div><div class="mock-line short"></div></div>
+          </div>
+          <div class="floating-clock"><span class="clock-tag">TOPCLOCK / LIVE EXAMPLE</span><strong x-text="demoTime">10:08:32</strong><small>always on top · click-through</small></div>
+          <div class="visual-caption">NO FRAME. NO INTERRUPTION.</div>
+        </div>
+      </section>
+
+      <section class="feature-band">
+        <div class="shell feature-band-grid">
+          <div><span class="feature-number">01</span><h2>Always visible</h2><p>Keep time above windows while you work, play, or watch.</p></div>
+          <div><span class="feature-number">02</span><h2>Click-through by default</h2><p>Use the app underneath without moving the clock first.</p></div>
+          <div><span class="feature-number">03</span><h2>Control on demand</h2><p>Hold Ctrl by default to drag, click, or open the clock menu.</p></div>
+        </div>
+      </section>
+
+      <section class="section shell home-start">
+        <div class="section-heading"><div><span class="kicker">GET STARTED / 01</span><h2>On your desktop<br>in three steps<span class="accent">.</span></h2></div><p>TopClock starts with a transparent clock and settings you can change while it runs.</p></div>
+        <div class="steps-grid">
+          <article class="step-card"><span>01 / INSTALL</span><h3>Get the app</h3><p>Install TopClock from Microsoft Store and launch it from the Start menu.</p></article>
+          <article class="step-card"><span>02 / POSITION</span><h3>Place your clock</h3><p>Hold Ctrl and drag the clock to the part of the screen you prefer.</p></article>
+          <article class="step-card"><span>03 / PERSONALIZE</span><h3>Make it yours</h3><p>Click the tray icon to change the face, add-ons, shortcuts, and displays.</p></article>
+        </div>
+        <a class="text-link" href="#guide" @click="navigate('guide', $event)">Read the full guide <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <section class="section shell image-section">
+        <div class="image-card"><img src="./assets/banner.svg" alt="TopClock branding and a preview of the clock over a desktop window" loading="lazy"></div>
+        <div class="image-copy"><span class="kicker">BUILT AROUND YOUR WORK</span><h2>A little more<br>than a clock<span class="accent">.</span></h2><p>Add a local date, another region's time, a numeric timer, or progress bars. Place them above or below the clock and adjust their size and order.</p><a class="button button-secondary" href="#addons" @click="navigate('addons', $event)">Explore add-ons <span aria-hidden="true">→</span></a></div>
+      </section>
+      <section class="section shell"><div class="cta-panel"><div><span class="kicker">READY WHEN YOU ARE</span><h2>Put time in view.</h2><p>Download TopClock for Windows from Microsoft Store.</p></div><a class="button button-dark" href="https://apps.microsoft.com/detail/9pmlg46pwjll?hl=en-US&amp;gl=US" target="_blank" rel="noopener noreferrer">Open Microsoft Store <span aria-hidden="true">↗</span></a></div></section>
+    </div>
+
+    <div x-show="page === 'guide'" x-transition.opacity.duration.180ms>
+      <div class="page-hero shell"><span class="kicker">USER GUIDE / 01</span><h1>Make the clock<br>work for you<span class="accent">.</span></h1><p>Start with the tray icon. The clock itself passes input through until you hold the interaction modifier.</p></div>
+      <div class="guide-layout shell">
+        <nav class="section-nav" aria-label="Guide topics"><strong>ON THIS PAGE</strong><a href="#guide-install" @click="scrollToSection('guide-install', $event)">Install &amp; open</a><a href="#guide-controls" @click="scrollToSection('guide-controls', $event)">Clock controls</a><a href="#guide-settings" @click="scrollToSection('guide-settings', $event)">Settings</a><a href="#guide-displays" @click="scrollToSection('guide-displays', $event)">Displays &amp; position</a><a href="#guide-updates" @click="scrollToSection('guide-updates', $event)">Updates</a></nav>
+        <div class="guide-content">
+          <section id="guide-install" class="guide-section"><span class="section-index">01 / INSTALL &amp; OPEN</span><h2>Start with the tray.</h2><p>Install from <a href="https://apps.microsoft.com/detail/9pmlg46pwjll?hl=en-US&amp;gl=US" target="_blank" rel="noopener noreferrer">Microsoft Store</a>, then launch TopClock from the Start menu. The clock appears on connected displays by default. Left-click the TopClock icon in the Windows notification area to open Settings; right-click it for Quit.</p><div class="callout"><strong>Can't see the tray icon?</strong><span>Open the hidden icons arrow in the Windows notification area.</span></div></section>
+          <section id="guide-controls" class="guide-section"><span class="section-index">02 / CLOCK CONTROLS</span><h2>Hold Ctrl to interact.</h2><p>The default interaction modifier is <kbd>Ctrl</kbd>. You can change it to Alt or Shift in Settings → Shortcuts. The controls below use Ctrl as the default example.</p><div class="control-list"><div><span><kbd>Ctrl</kbd> + drag</span><p>Move the clock on that display.</p></div><div><span><kbd>Ctrl</kbd> + left-click</span><p>Switch between 12-hour and 24-hour time.</p></div><div><span><kbd>Ctrl</kbd> + right-click</span><p>Open the clock menu for Settings, Quit, and available add-on actions.</p></div></div><p>Release the modifier and the clock returns to click-through behavior. Moving the pointer near it also fades it to reduce visual obstruction.</p></section>
+          <section id="guide-settings" class="guide-section"><span class="section-index">03 / SETTINGS</span><h2>Shape your display.</h2><p>In <strong>Clock</strong>, adjust font, color, outline, size, time layout, 12/24-hour display, and animations. Changes preview on the desktop clock. <strong>Add-ons</strong> contains the dashboard and catalog. <strong>Shortcuts</strong> changes the interaction modifier and optional system-wide actions. <strong>General</strong> contains language, display switches, sign-in launch, settings files, and update controls.</p><div class="callout"><strong>Shortcuts start off.</strong><span>Enable each system-wide action separately in Shortcuts. The interaction modifier remains active.</span></div></section>
+          <section id="guide-displays" class="guide-section"><span class="section-index">04 / DISPLAYS &amp; POSITION</span><h2>One clock per display.</h2><p>TopClock shows the clock on all connected displays by default. In Settings → General, switch individual displays on or off. Each visible display keeps its own dragged position; appearance and add-ons are shared.</p><p>If a clock is out of reach, open Settings → Clock and select <strong>Reset positions</strong>. This centers clocks currently visible on connected displays and saves those positions. A display switched off in General keeps its saved position.</p></section>
+          <section id="guide-updates" class="guide-section"><span class="section-index">05 / UPDATES</span><h2>Stay current.</h2><p>Microsoft Store installations can check for an available Store update in Settings → General. Store updates are delivered through Microsoft Store. Portable copies use GitHub Releases reminders and are updated manually.</p><a class="text-link" href="#versions" @click="navigate('versions', $event)">See version notes <span aria-hidden="true">→</span></a></section>
+        </div>
+      </div>
+    </div>
+
+    <div x-show="page === 'addons'" x-transition.opacity.duration.180ms>
+      <div class="page-hero shell"><span class="kicker">ADD-ON GUIDE / 02</span><h1>More around<br>the clock<span class="accent">.</span></h1><p>Add useful details above or below the time. Each add-on has its own settings, and the dashboard controls their order and relative size.</p></div>
+      <div class="shell addon-intro"><div><span class="section-index">FIRST, OPEN THE CATALOG</span><h2>Settings → Add-ons</h2><p>Select <strong>Add</strong> on a catalog card. Your new add-on appears in the dashboard, where you can enable it, move it, choose above or below, and set its relative size. Remove an add-on from its dashboard card.</p></div><div class="addon-stack" aria-label="Illustration of add-ons above and below the clock"><span>SUN, NOV 08</span><strong>10:08:32</strong><div class="sample-progress"><i></i></div><small>Illustrative layout</small></div></div>
+      <nav class="shell addon-jump" aria-label="Add-on guides"><a href="#addons-date" :aria-current="addonTab === 'date' ? 'page' : null" @click="scrollToSection('addons-date', $event)">Date <span>↗</span></a><a href="#addons-region" :aria-current="addonTab === 'region' ? 'page' : null" @click="scrollToSection('addons-region', $event)">Region clock <span>↗</span></a><a href="#addons-timer" :aria-current="addonTab === 'timer' ? 'page' : null" @click="scrollToSection('addons-timer', $event)">Timer <span>↗</span></a><a href="#addons-progress" :aria-current="addonTab === 'progress' ? 'page' : null" @click="scrollToSection('addons-progress', $event)">Progress <span>↗</span></a></nav>
+      <div class="shell addon-guides">
+        <section id="addons-date" class="addon-guide" x-show="addonTab === 'date'" x-cloak><div class="addon-guide-number">01 / DATE</div><div><h2>Keep the date close.</h2><p>Choose <strong>Date</strong> in the Add-ons catalog. On its dashboard card, select Year–Month–Day, Month–Day, or Day only. Turn on <strong>Show weekday</strong> to add a short weekday after the date. The weekday follows your language choice in General.</p></div><div class="addon-example">2026-11-08 <span>SUN</span></div></section>
+        <section id="addons-region" class="addon-guide" x-show="addonTab === 'region'" x-cloak><div class="addon-guide-number">02 / REGION CLOCK</div><div><h2>See another time zone.</h2><p>Add a <strong>Region clock</strong>, then choose its time zone in the dashboard. You can add multiple region clocks. Switch <strong>Show region name</strong> on or off; the time face follows your main clock's styling and format.</p></div><div class="addon-example">TOKYO <span>19:08</span></div></section>
+        <section id="addons-timer" class="addon-guide" x-show="addonTab === 'timer'" x-cloak><div class="addon-guide-number">03 / TIMER</div><div><h2>Count down or count up.</h2><p>Add <strong>Timer</strong> and choose Countdown or Stopwatch. For Countdown, set the number of minutes. Use Start/Pause and Reset in Settings, or hold the interaction modifier and click the desktop timer to start or pause it. The clock's modifier + right-click menu includes Reset when Timer is enabled. Pause before changing mode or duration.</p></div><div class="addon-example">25:00 <span>COUNTDOWN</span></div></section>
+        <section id="addons-progress" class="addon-guide" x-show="addonTab === 'progress'" x-cloak><div class="addon-guide-number">04 / PROGRESS</div><div><h2>See progress at a glance.</h2><p>Add one or more <strong>Progress</strong> bars. Choose Date progress for a start and end date, Daily time progress for time ranges and weekdays, or Countdown for a timed bar. Each bar has adjustable length and thickness and an optional percentage. Progress bars have no visible captions on the desktop clock.</p><p>For Daily time, add up to eight ranges; ranges may overlap on different weekdays. <strong>Hide after all ranges finish</strong> keeps the bars visible briefly after the last scheduled range. For Countdown, Start/Pause/Reset is available in Settings and the clock menu. The menu's Set presets are shared across Progress countdowns; change them with <strong>Details</strong> in the Add-ons catalog.</p></div><div class="addon-example"><div class="sample-progress"><i></i></div><span>68%</span></div></section>
+      </div>
+    </div>
+
+    <div x-show="page === 'versions'" x-transition.opacity.duration.180ms>
+      <div class="page-hero shell"><span class="kicker">VERSION NOTES / 03</span><h1>What's new<br>in TopClock<span class="accent">.</span></h1><p>A concise record of the repository's tagged versions. For complete release files and downloads, visit GitHub Releases.</p><a class="button button-secondary" href="https://github.com/tbkmax/TopClock/releases" target="_blank" rel="noopener noreferrer">GitHub Releases <span aria-hidden="true">↗</span></a></div>
+      <div class="shell version-layout"><div class="version-aside"><span class="kicker">RELEASE HISTORY</span><p>Version notes summarize changes present at each tag, based on the repository history.</p></div><div class="version-list">
+        <article class="version-card"><div class="version-meta"><span class="version-badge">LATEST TAG</span><time datetime="2026-11-08">NOV 8, 2026</time></div><h2>v1.0.2</h2><p>Microsoft Store access was added to the project README. The preceding work on this tag also reorganized add-on code, improved Settings preview reliability, and added a long-run verification script.</p><a href="https://github.com/tbkmax/TopClock/releases/tag/v1.0.2" target="_blank" rel="noopener noreferrer">View release ↗</a></article>
+        <article class="version-card"><div class="version-meta"><span>MAINTENANCE</span><time datetime="2026-11-06">NOV 6, 2026</time></div><h2>v1.0.1</h2><p>Improved the Progress daily time-range editor and weekday scheduling. Also corrected the clock menu and strengthened always-on-top recovery.</p><a href="https://github.com/tbkmax/TopClock/releases/tag/v1.0.1" target="_blank" rel="noopener noreferrer">View release ↗</a></article>
+        <article class="version-card"><div class="version-meta"><span>FEATURES</span><time datetime="2026-10-30">OCT 30, 2026</time></div><h2>v1.0.0</h2><p>Redesigned the Add-ons page and introduced Progress bars for dates, daily time ranges, and independent countdowns. Added language choices and Microsoft Store package/update support.</p><a href="https://github.com/tbkmax/TopClock/releases/tag/v1.0.0" target="_blank" rel="noopener noreferrer">View release ↗</a></article>
+        <article class="version-card"><div class="version-meta"><span>FOUNDATION</span><time datetime="2026-10-29">OCT 29, 2026</time></div><h2>v0.0.3</h2><p>Added multiple-display clocks with independent saved positions, a Reset positions button, and a Settings files shortcut. Split frontend and backend responsibilities for maintainability.</p><a href="https://github.com/tbkmax/TopClock/releases/tag/v0.0.3" target="_blank" rel="noopener noreferrer">View release ↗</a></article>
+        <article class="version-card"><div class="version-meta"><span>FOUNDATION</span><time datetime="2026-10-27">OCT 27, 2026</time></div><h2>v0.0.2</h2><p>Introduced built-in add-ons and the Shortcuts page, improved the clock's context menu and click-through behavior, and updated portable build packaging.</p><a href="https://github.com/tbkmax/TopClock/releases/tag/v0.0.2" target="_blank" rel="noopener noreferrer">View release ↗</a></article>
+        <article class="version-card"><div class="version-meta"><span>FIRST TAG</span><time datetime="2026-10-25">OCT 25, 2026</time></div><h2>v0.0.1</h2><p>Established the transparent clock and Settings window with clock styling and animations. Added the lightweight GitHub release reminder for direct downloads.</p><a href="https://github.com/tbkmax/TopClock/releases/tag/v0.0.1" target="_blank" rel="noopener noreferrer">View release ↗</a></article>
+      </div></div>
+    </div>
+  </main>
+
+  <footer class="site-footer"><div class="shell footer-inner"><div><a class="footer-brand" href="#home" @click="navigate('home', $event)">TOPCLOCK<span class="accent">.</span></a><p>A clearer view of your time.</p></div><div class="footer-links"><a href="#guide" @click="navigate('guide', $event)">Guide</a><a href="#addons" @click="navigate('addons', $event)">Add-ons</a><a href="#versions" @click="navigate('versions', $event)">Versions</a><a href="https://github.com/tbkmax/TopClock" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div><div class="footer-bottom">Windows desktop · © <span x-text="new Date().getFullYear()"></span> TopClock</div></div></footer>
+</body>
+</html>

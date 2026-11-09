@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:pages": "vite build --config pages/vite.config.js",
+    "preview:pages": "vite preview --config pages/vite.config.js",
     "test:frontend": "node src/frontend.test.js && node src/addons/addons.test.js",
     "preview": "vite preview",
     "tauri:dev": "scripts\\tauri-windows.cmd dev",
