@@ -1,6 +1,10 @@
 # Bundled view changelog
 ## Latest update
 
+### 2026-11-09 - Share combined-card Edit and fix divider
+
+- A paired card now has one Edit/Done button for both detail panels. Stretching the grid members prevents the center line from ending early when the left editor is taller. Single cards retain their own Edit/Done control.
+
 ### 2026-11-09 - Show combined cards and rows
 
 - Settings shows two member editors inside one card with a shared size and switch. The desktop clock and live preview show the members side by side at their retained size ratio. No dynamic HTML or new type fragment was added.

@@ -1,6 +1,6 @@
 # Bundled view backlog
 
-Check combined-card left/right columns, expanded editor fit, drag cues, focus, translated labels, and narrow-window wrapping in the [frontend combined add-on acceptance](../../../doc/backlog.md#combined-add-on-live-acceptance).
+Check combined-card left/right columns, shared Edit/Done focus and toggle behavior, divider height, expanded editor fit, drag cues, translated labels, and narrow-window wrapping in the [frontend combined add-on acceptance](../../../doc/backlog.md#combined-add-on-live-acceptance).
 
 The catalog Add/Details alignment and Progress dialog layout passed a native 760 × 650 WebView visual check. Verify translated labels, keyboard focus, and an empty preset list in the broader acceptance pass.
 

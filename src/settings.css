@@ -53,7 +53,8 @@
 .addon-pair-controls label { display:flex; align-items:center; gap:7px; color:#aaa; font-size:10px; }
 .addon-pair-controls .size-range { width:100px; }
 .addon-pair-controls .switch { margin-left:auto; }
-.addon-pair-members.is-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:start; }
+.addon-pair-actions { display:flex; align-items:center; gap:7px; margin-left:auto; }
+.addon-pair-members.is-pair { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; align-items:stretch; }
 .addon-pair-members.is-pair .addon-member { min-width:0; }
 .addon-pair-members.is-pair .addon-member + .addon-member { border-left:1px solid #3b3b3b; padding-left:12px; }
 .addon-pair-members.is-pair .addon-instance-head { gap:6px; }

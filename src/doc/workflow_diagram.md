@@ -16,7 +16,7 @@ sequenceDiagram
     Clock->>Layout: Derive side-by-side display row
 ```
 
-The [instance editor](../addons/instance-editor.js) also swaps members, moves a whole pair, splits a dragged member, and mirrors the pair switch. Pointer targeting measures both axes so dragging between the left and right panels swaps members; a short movement within one panel does not split it. [settings.html](../../settings.html) and [index.html](../../index.html) render the same derived grouping. Rust validates adjacency, placement, enable state and eligible kinds before saving; see the [native add-on workflow](../../src-tauri/src/addons/doc/workflow_diagram.md). The diagram omits the existing debounced preview and save rollback, which still apply.
+The [instance editor](../addons/instance-editor.js) also swaps members, moves a whole pair, splits a dragged member, and mirrors the pair switch. Pointer targeting measures both axes so dragging between the left and right panels swaps members; a short movement within one panel does not split it. The paired Settings card uses one local `expanded` flag to open both member editors; single cards keep their own Edit/Done button. [settings.html](../../settings.html) and [index.html](../../index.html) render the same derived grouping. Rust validates adjacency, placement, enable state and eligible kinds before saving; see the [native add-on workflow](../../src-tauri/src/addons/doc/workflow_diagram.md). The diagram omits the existing debounced preview and save rollback, which still apply.
 
 ## Add-on Details layout
 

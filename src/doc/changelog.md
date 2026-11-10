@@ -1,6 +1,10 @@
 # Frontend changelog
 ## Latest update
 
+### 2026-11-09 - Repair combined add-on editor layout
+
+- A combined card now uses one Edit/Done button to show both member editors. The center divider stretches to the bottom of the taller editor, so opening either side leaves a continuous separator. No settings migration or user action is required.
+
 ### 2026-11-09 - Combine two add-ons in one row
 
 - Date, Region clock and Timer cards can be paired, swapped, split, moved and switched together. Each member keeps its editor and size; a shared size scales the pair in the desktop clock and Settings preview. Progress bars remain separate. Existing add-ons need no migration.

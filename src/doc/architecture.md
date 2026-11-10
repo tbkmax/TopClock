@@ -1,6 +1,6 @@
 # Frontend architecture
 
-The Add-ons dashboard can combine two Date, Region clock, or Timer instances into one card with left and right member panels and one side-by-side clock row. [layout.js](../addons/layout.js) derives rows from the flat saved instances and optional pair records for both the desktop clock and live preview. Each member retains its own options and text size; the pair's shared size multiplies both sizes. A paired card has one enable switch and one open editor at a time. Progress remains a standalone row. The clock's existing click, resize, and click-through paths operate on the resulting normal document flow.
+The Add-ons dashboard can combine two Date, Region clock, or Timer instances into one card with left and right member panels and one side-by-side clock row. [layout.js](../addons/layout.js) derives rows from the flat saved instances and optional pair records for both the desktop clock and live preview. Each member retains its own options and text size; the pair's shared size multiplies both sizes. A paired card has one enable switch and one Edit/Done button that shows or hides both member editors together. Progress remains a standalone row. The clock's existing click, resize, and click-through paths operate on the resulting normal document flow.
 
 The Add-ons catalog keeps Add at the left edge of every card and optional Details at the right. The shared Details dialog uses a dedicated action footer so its type fragment stays vertical; the modal scrolls when content exceeds the Settings viewport.
 
