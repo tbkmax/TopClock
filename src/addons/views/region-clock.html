@@ -1,12 +1,31 @@
-<div class="addon-instance-controls" x-show="addon.kind === 'region_clock'">
-    <label>Region
-        <select class="select-control" :value="addon.options.time_zone"
-            @change="editAddonOption(addon, 'time_zone', $event.target.value)" aria-label="Region time zone">
-            <template x-for="zone in timeZones" :key="zone">
-                <option :value="zone" x-text="zone.replaceAll('_', ' ')"></option>
-            </template>
-        </select>
-    </label>
+<template x-if="addon.kind === 'region_clock'">
+<div class="addon-instance-controls">
+    <div class="region-zone-field" x-data="regionZonePicker(addon, timeZoneOptions)" x-effect="options = timeZoneOptions" @click.outside="closePicker()">
+        <label :for="`region-zone-${addon.id}`" x-text="t('addons.region')"></label>
+        <input class="region-zone-input" type="text" x-model="query" autocomplete="off" spellcheck="false"
+            :id="`region-zone-${addon.id}`" :aria-label="t('addons.regionTimeZone')"
+            :aria-controls="`region-zone-options-${addon.id}`" :aria-expanded="open"
+            :aria-activedescendant="open && matches.length ? `region-zone-option-${addon.id}-${activeIndex}` : null"
+            :placeholder="t('addons.searchRegion')" role="combobox" aria-autocomplete="list"
+            @focus="openPicker()" @click="openPicker()" @input="open = true; activeIndex = 0"
+            @keydown.arrow-down.prevent="move(1)" @keydown.arrow-up.prevent="move(-1)"
+            @keydown.enter.prevent="if (open && matches.length) editAddonOption(addon, 'time_zone', choose(matches[activeIndex].id))"
+            @keydown.escape.stop.prevent="closePicker()" @blur="closePicker()"
+            x-effect="if (!open) query = selectedLabel()" />
+        <template x-if="open">
+            <div class="region-zone-options" :id="`region-zone-options-${addon.id}`" role="listbox" x-ref="options">
+                <template x-for="(option, index) in matches" :key="option.id">
+                    <div class="region-zone-option" role="option" :id="`region-zone-option-${addon.id}-${index}`"
+                        :aria-selected="activeIndex === index" @mouseenter="activeIndex = index"
+                        @mousedown.prevent="void 0" @click="editAddonOption(addon, 'time_zone', choose(option.id))">
+                        <span x-text="optionLabel(option)"></span>
+                        <small x-text="option.id"></small>
+                    </div>
+                </template>
+                <div class="region-zone-empty" x-show="!matches.length" x-text="t('addons.noRegions')"></div>
+            </div>
+        </template>
+    </div>
     <label class="addon-option-switch">Show region name
         <button type="button" class="switch" role="switch"
             :aria-checked="addon.options.show_label !== false"
@@ -17,3 +36,4 @@
         </button>
     </label>
 </div>
+</template>

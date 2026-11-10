@@ -4,6 +4,8 @@
 
 This folder owns type-specific behavior for the four compiled add-ons. See the [host architecture](../../doc/architecture.md) for registry, state, and action routing.
 
+[region-picker.js](../region-picker.js) builds search records and per-editor Alpine picker state only in Settings. [zone-country-codes.js](../zone-country-codes.js) is a bundled, public-domain country map generated from IANA tzdb 2026e `zone.tab`, including ICU-resolved aliases. `zone.tab` provides one country code per row and country-specific zone aliases; the map needs refreshing when the bundled tzdb snapshot is updated. `Intl.DisplayNames` supplies both the selected Settings language and English country names. The filter matches country names/codes, city, or full IANA ID, ranks exact-country matches first, and returns exact IDs for selection. No query is written to `options.time_zone`; the clock/menu's [Region definition](../region-clock.js) does not load the country index, and the application makes no runtime network request.
+
 | Definition | Options and display | Settings behavior |
 | --- | --- | --- |
 | [date.js](../date.js) | Local date and optional localized weekday | Date format and weekday switch |

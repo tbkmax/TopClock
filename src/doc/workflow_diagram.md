@@ -1,5 +1,22 @@
 # Frontend workflows
 
+## Region time zone search
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Picker as Region Alpine picker
+    participant Editor as editAddonOption
+    participant Save as Settings save controller
+    User->>Picker: Type city, country, or time zone
+    Picker-->>User: Show matching city, country, and zone ID
+    User->>Picker: Click result or press Enter
+    Picker->>Editor: Select exact IANA zone ID
+    Editor->>Save: Save updated add-on options
+```
+
+[region-clock.html](../addons/views/region-clock.html) keeps the query and active result local to each editor. [region-picker.js](../addons/builtins/region-picker.js) indexes zone IDs and country names from the bundled [IANA map](../addons/builtins/zone-country-codes.js); changing Settings language rebuilds the visible names. Escape or leaving the field restores the selected label without writing. The normal Settings save controller handles persistence and preview updates after selection.
+
 ## Combined add-on layout
 
 ```mermaid

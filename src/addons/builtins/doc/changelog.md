@@ -1,6 +1,14 @@
 # Built-in definitions changelog
 ## Latest update
 
+### 2026-11-09 - Bundle IANA country associations
+
+- Added a versioned IANA zone-to-country map and indexed localized/English country names alongside cities and IDs. Tests cover country queries and map coverage for every zone reported by the test runtime.
+
+### 2026-11-09 - Add Region city search state
+
+- Added city/full-ID filtering and local keyboard selection state for the Region picker. Selecting a result still stores the exact IANA zone ID; an unselected query is discarded.
+
 ### 2026-11-08 - Declare Progress menu choices and Details
 
 - Progress now declares shared preset choices, reset warning metadata, and its details view key alongside its existing action descriptors.

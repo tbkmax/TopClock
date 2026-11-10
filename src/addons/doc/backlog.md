@@ -1,5 +1,7 @@
 # Frontend add-on host backlog
 
+The Region city/country search and exact-ID selection have a focused unit test, including country coverage for every zone reported by the test runtime. Pointer, keyboard, language switching, paired-card, and saved-value behavior still need the [live Add-ons dashboard check](../../doc/backlog.md#add-on-dashboard-live-verification).
+
 Pair operations and a horizontal swap have regression tests. Physical pointer capture, combined-card focus, the two-column Settings layout, and two-display synchronization remain in the [frontend combined add-on acceptance](../../doc/backlog.md#combined-add-on-live-acceptance).
 
 The separate menu host still needs physical pointer and multi-display acceptance for action dispatch and live label updates. See the [frontend checklist](../../doc/backlog.md#separate-menu-live-acceptance).

@@ -142,6 +142,8 @@ const messages = {
     'addons.showWeekdayAfter': ['Show weekday after date', '在日期后显示星期', '在日期後顯示星期', '日付の後に曜日を表示'],
     'addons.region': ['Region', '地区', '地區', '地域'],
     'addons.regionTimeZone': ['Region time zone', '地区时区', '地區時區', '地域のタイムゾーン'],
+    'addons.searchRegion': ['Search city, country, or time zone', '搜索城市、国家或时区', '搜尋城市、國家或時區', '都市名、国名、タイムゾーンを検索'],
+    'addons.noRegions': ['No matching regions', '没有匹配的地区', '沒有相符的地區', '一致する地域がありません'],
     'addons.showRegion': ['Show region name', '显示地区名称', '顯示地區名稱', '地域名を表示'],
     'addons.showRegionOnClock': ['Show region name on clock', '在时钟上显示地区名称', '在時鐘上顯示地區名稱', '時計に地域名を表示'],
     'addons.mode': ['Mode', '模式', '模式', 'モード'],

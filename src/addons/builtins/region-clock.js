@@ -9,9 +9,10 @@ export function availableTimeZones() {
     try {
         return ['Etc/UTC', ...Intl.supportedValuesOf('timeZone').filter((zone) => zone !== 'Etc/UTC')];
     } catch {
-        return ['Etc/UTC', 'America/Los_Angeles', 'America/New_York', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo'];
+        return ['Etc/UTC', 'America/Los_Angeles', 'America/New_York', 'Europe/London', 'Europe/Paris', 'Asia/Taipei', 'Asia/Tokyo'];
     }
 }
+
 export const regionClockAddon = {
     kind: 'region_clock', label: 'Region clock', labelKey: 'addons.region_clock',
     description: 'Show time in another region.', maxInstances: 12,

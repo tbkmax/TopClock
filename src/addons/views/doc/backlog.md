@@ -1,5 +1,7 @@
 # Bundled view backlog
 
+Check the Region search list with country, city, and ID queries; keyboard selection and dismissal; localized country labels; no-match text; and single/paired card layout in the running 760 × 650 Settings window. Confirm a selected zone persists after reopening; see the [frontend dashboard checklist](../../../doc/backlog.md#add-on-dashboard-live-verification).
+
 Check combined-card left/right columns, shared Edit/Done focus and toggle behavior, divider height, expanded editor fit, drag cues, translated labels, and narrow-window wrapping in the [frontend combined add-on acceptance](../../../doc/backlog.md#combined-add-on-live-acceptance).
 
 The catalog Add/Details alignment and Progress dialog layout passed a native 760 × 650 WebView visual check. Verify translated labels, keyboard focus, and an empty preset list in the broader acceptance pass.

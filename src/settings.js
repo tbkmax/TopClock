@@ -10,6 +10,7 @@ import { displayLayout } from './addons/layout.js';
 import { getAddonDefinition } from './addons/registry.js';
 import { createAddonHost } from './addons/host.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
+import { createTimeZoneOptions, regionZonePicker } from './addons/builtins/region-picker.js';
 import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
 import { addonMethods } from './addons/instance-editor.js';
 import { DEFAULT_SHORTCUTS, shortcutGroups, shortcutMethods } from './settings-shortcuts.js';
@@ -21,9 +22,11 @@ import './settings.css';
 import './addons/builtins/progress.css';
 
 const settingsWindow = getCurrentWindow();
+const timeZones = availableTimeZones();
 let previewClock;
 window.Alpine = Alpine;
 
+Alpine.data('regionZonePicker', regionZonePicker);
 Alpine.data('settingsApp', () => ({
     tab: 'clock',
     systemLocale: 'en',
@@ -82,7 +85,8 @@ Alpine.data('settingsApp', () => ({
     dragWholePair: false,
     addonCatalog,
     addonName,
-    timeZones: availableTimeZones(),
+    timeZones,
+    timeZoneOptions: createTimeZoneOptions(timeZones),
     previousPreviewNumbers: {},
     previewNumberActiveUntil: {},
     layouts: timeLayouts,
@@ -290,7 +294,9 @@ Alpine.data('settingsApp', () => ({
     },
 
     syncLanguage() {
-        this.language = resolveLanguage(this.settings.language, this.systemLocale);
+        const language = resolveLanguage(this.settings.language, this.systemLocale);
+        if (this.language !== language) this.timeZoneOptions = createTimeZoneOptions(this.timeZones, language);
+        this.language = language;
         document.documentElement.lang = this.language;
         localizeDocument(this.language);
     },

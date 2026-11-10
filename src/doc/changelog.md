@@ -1,6 +1,14 @@
 # Frontend changelog
 ## Latest update
 
+### 2026-11-09 - Search Region clocks by country
+
+- Region search now covers country names and ISO country codes across the bundled IANA zone map, including `Japan`, `China`, and `Taiwan`; English and the selected Settings language both work. Results show city, country, and the IANA ID. Search data is local, and saved zone IDs do not change.
+
+### 2026-11-09 - Search Region clocks by city
+
+- Region clock editors now filter time zones while typing, so `taipei` finds `Asia/Taipei`. Arrow keys, Enter, Escape, and pointer selection work in the bounded results list. Saved zone IDs and the existing preview/save flow are unchanged.
+
 ### 2026-11-09 - Repair combined add-on editor layout
 
 - A combined card now uses one Edit/Done button to show both member editors. The center divider stretches to the bottom of the taller editor, so opening either side leaves a continuous separator. No settings migration or user action is required.

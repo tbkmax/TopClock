@@ -1,6 +1,14 @@
 # Frontend add-on host changelog
 ## Latest update
 
+### 2026-11-09 - Index Region countries for search
+
+- Region editing now matches country names in English and the selected language, city names, and full IANA IDs. The option editor still receives only a selected zone ID; add-on storage and action routing are unchanged.
+
+### 2026-11-09 - Filter Region time zones in Settings
+
+- The Region editor now searches by city or full zone ID while preserving the exact selected `time_zone` value and normal add-on save path. A focused regression test covers `taipei` and exact-ID selection.
+
 ### 2026-11-09 - Derive and edit two-member add-on rows
 
 - Added reusable pair layout and editing operations while retaining stable instance IDs and type-specific behavior. Group movement preserves both members; dragging one member out dissolves the pair and removes its shared scale.

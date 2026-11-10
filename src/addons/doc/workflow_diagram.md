@@ -1,5 +1,9 @@
 # Frontend add-on host workflows
 
+## Region editor selection
+
+The [Region view](../views/region-clock.html) filters indexed city, country, and ID terms from the [Settings picker module](../builtins/region-picker.js) on input. The country terms come from the bundled [IANA map](../builtins/zone-country-codes.js), not saved add-on data. Clicking a result or pressing Enter sends its exact ID to `editAddonOption` in [instance-editor.js](../instance-editor.js), which follows the existing save and preview route. Closing without a choice restores the current display label and makes no settings change. Search state does not enter the host session or serialized add-on options.
+
 ## Pair layout and editing
 
 ```mermaid

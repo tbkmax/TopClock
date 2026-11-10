@@ -1,6 +1,14 @@
 # Bundled view changelog
 ## Latest update
 
+### 2026-11-09 - Show countries in Region results
+
+- Region results now show city and localized country above the exact zone ID. Country-name queries work without changing the saved IANA ID, and non-Region rows no longer mount the picker.
+
+### 2026-11-09 - Add searchable Region menu
+
+- Replaced the Region clock's full-ID select with a city-search combobox and scrollable results. Pointer and keyboard selection use the existing option editor and preserve saved IANA IDs.
+
 ### 2026-11-09 - Share combined-card Edit and fix divider
 
 - A paired card now has one Edit/Done button for both detail panels. Stretching the grid members prevents the center line from ending early when the left editor is taller. Single cards retain their own Edit/Done control.
