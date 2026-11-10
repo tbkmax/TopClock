@@ -1,6 +1,10 @@
 # Built-in definitions changelog
 ## Latest update
 
+### 2026-11-10 - Add Timer modes and independent presets
+
+- Timer now declares Mode and countdown Set choices, its own preset editor, and Start/Pause in the clock menu. Shared preset helpers keep list bounds and confirmation behavior aligned with Progress without sharing saved lists.
+
 ### 2026-11-09 - Bundle IANA country associations
 
 - Added a versioned IANA zone-to-country map and indexed localized/English country names alongside cities and IDs. Tests cover country queries and map coverage for every zone reported by the test runtime.

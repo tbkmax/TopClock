@@ -1,5 +1,7 @@
 # Native add-on workflows
 
+For a Timer mode or preset choice, [actions.rs](../actions.rs) rechecks the enabled Timer and session under the config lock, then requires confirmation if a running or elapsed session would be discarded unless that choice's warning was dismissed. A mode choice writes the new mode and an idle session; a preset choice writes its duration and a running session. If saving fails, prior settings and Timer session are restored with no event. Success emits both settings and Timer session events. Progress continues using its per-ID transaction and session map.
+
 ## Pair validation
 
 ```mermaid

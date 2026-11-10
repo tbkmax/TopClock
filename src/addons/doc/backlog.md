@@ -1,5 +1,7 @@
 # Frontend add-on host backlog
 
+Timer mode and preset routing pass frontend tests; verify its event ordering and cross-window labels in the [Timer menu live Windows checklist](../../doc/backlog.md#timer-menu-live-windows-acceptance). A physical menu and write-failure profile are still needed.
+
 The Region city/country search and exact-ID selection have a focused unit test, including country coverage for every zone reported by the test runtime. Pointer, keyboard, language switching, paired-card, and saved-value behavior still need the [live Add-ons dashboard check](../../doc/backlog.md#add-on-dashboard-live-verification).
 
 Pair operations and a horizontal swap have regression tests. Physical pointer capture, combined-card focus, the two-column Settings layout, and two-display synchronization remain in the [frontend combined add-on acceptance](../../doc/backlog.md#combined-add-on-live-acceptance).

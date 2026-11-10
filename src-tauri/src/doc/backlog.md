@@ -1,5 +1,7 @@
 # Rust application backlog
 
+Verify the new Timer mode and preset commands with a disposable native settings profile, including restart, save failure rollback, and settings plus session events across windows. The [frontend Timer checklist](../../../src/doc/backlog.md#timer-menu-live-windows-acceptance) includes Ctrl menu, tray, shortcut, click-through, and position restore checks.
+
 Verify pair persistence and downgrade behavior with a disposable native settings profile as part of the [frontend combined add-on acceptance](../../../src/doc/backlog.md#combined-add-on-live-acceptance). Unit tests cover native pair validation and malformed metadata; a running WebView and an older binary are still needed for the full check.
 
 Physical outside presses, focus changes, mixed-DPI anchors, monitor reconnects and clock position restore still need interactive Windows acceptance. The isolated WebView smoke verified one right-edge case and Rust tests cover fitting arithmetic.

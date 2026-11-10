@@ -1,5 +1,12 @@
 # Frontend backlog
 
+## Timer menu live Windows acceptance
+
+- **Problem and desired outcome:** Automated tests cover Timer menu choice routing and native validation, but physical menu and cross-window behavior need a Windows session. Confirm Mode and Set disclosures, immediate running-mode reset after confirmation, “don't show again,” countdown preset restart, and Start/Pause/Reset in both modes.
+- **Scope and acceptance:** Check clock Ctrl-right-click, Settings Timer selector and Details editor, tray Settings/Quit, global Timer shortcuts, and a second display. Settings and all clocks should show the saved mode, duration, and session after each action; Progress presets and other sessions should not change. Dismissal must restore click-through, and Ctrl drag plus clock position restore must still work.
+- **Failure and compatibility:** With a disposable settings profile, test cancellation, a stale choice, an unwritable settings file, restart persistence, and loading an older settings file without Timer preset fields. Failed saves must leave the prior session and settings visible and recover on retry.
+- **Verification and priority:** Run `npm run tauri:dev` on an interactive Windows desktop and record outcomes before release. This is high priority because native window focus, physical input, and persistence cannot be proven by unit tests alone.
+
 The Details modal and catalog button alignment were visually checked in a 760 × 650 native Settings WebView. Check translated labels and keyboard traversal in the broader Settings acceptance pass.
 
 ## Separate menu live acceptance

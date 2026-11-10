@@ -1,7 +1,7 @@
 use crate::{
     addons::{
-        apply_action, apply_progress_preset, progress_countdown_options, timer_options,
-        ActionTarget, TimerSession,
+        apply_action, apply_progress_preset, apply_timer_menu_change, progress_countdown_options,
+        timer_options, ActionTarget, TimerMenuChange, TimerSession,
     },
     config_store::save_config,
     state::ClockState,
@@ -61,6 +61,36 @@ pub(crate) fn apply_timer_action(
 #[tauri::command]
 pub(crate) fn timer_action(app: tauri::AppHandle, action: String) -> Result<TimerSession, String> {
     apply_timer_action(&app, &action)
+}
+
+#[tauri::command]
+pub(crate) fn timer_set_mode(
+    app: tauri::AppHandle,
+    mode: String,
+    confirmed_reset: bool,
+    dont_show_again: bool,
+) -> Result<TimerSession, String> {
+    apply_timer_menu_change(
+        &app,
+        TimerMenuChange::Mode(&mode),
+        confirmed_reset,
+        dont_show_again,
+    )
+}
+
+#[tauri::command]
+pub(crate) fn timer_set_preset(
+    app: tauri::AppHandle,
+    minutes: u16,
+    confirmed_reset: bool,
+    dont_show_again: bool,
+) -> Result<TimerSession, String> {
+    apply_timer_menu_change(
+        &app,
+        TimerMenuChange::Preset(minutes),
+        confirmed_reset,
+        dont_show_again,
+    )
 }
 pub(crate) fn normalize_finished_timer(window: &WebviewWindow, state: &Arc<ClockState>) {
     if window.label() != "main" {

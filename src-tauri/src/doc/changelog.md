@@ -1,6 +1,10 @@
 # Rust application changelog
 ## Latest update
 
+### 2026-11-10 - Persist Timer menu changes atomically
+
+- Added separate Timer preset and warning fields with defaults for existing settings files. Native mode and preset commands save the chosen option and reset session together, roll back on write failure, and notify every webview. No upgrade action is required; saving settings in an older build drops the new Timer preset fields.
+
 ### 2026-11-09 - Persist optional add-on pair links
 
 - Added validated `addon_pairs` alongside flat add-on instances. Older settings files default to no pairs. Stale pair links are dropped on load without dropping their members; an older build can display paired members separately. No user migration is required, though saving in an older build removes the pairing.

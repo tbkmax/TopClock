@@ -42,6 +42,8 @@ pub fn run() {
             settings_commands::update_settings,
             timer::get_timer_state,
             timer::timer_action,
+            timer::timer_set_mode,
+            timer::timer_set_preset,
             timer::get_progress_timer_states,
             timer::progress_timer_action,
             timer::progress_timer_set_preset,

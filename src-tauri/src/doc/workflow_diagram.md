@@ -1,5 +1,9 @@
 # Rust workflows
 
+## Timer menu transactions
+
+`timer_set_mode` and `timer_set_preset` enter the shared action service in [addons/actions.rs](../addons/actions.rs). Under the config lock it verifies an enabled Timer, validates the mode or Timer-only preset, and requires confirmation when a running or elapsed session would be cleared unless that choice's warning was dismissed. Mode changes reset to an idle session; presets set the duration and start from zero. It saves once, restores the previous settings and session on failure, and emits `clock-settings-changed` plus `timer-state-changed` only after success. Settings mode changes use the same command. The two warning preferences remain independent; [frontend workflow](../../../src/doc/workflow_diagram.md#timer-menu-mode-and-preset) covers the confirmation UI.
+
 ## Paired add-on settings
 
 ```mermaid

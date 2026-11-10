@@ -2,6 +2,10 @@
 
 ## Added
 
+### 2026-11-10 - Validate and save Timer menu choices
+
+- A running Timer can change mode after confirmation and reset to idle; a countdown preset resets and starts it. Both commands validate current state under the config lock, save once, and emit settings and Timer events only after success. Timer and Progress preset lists remain separate.
+
 ### 2026-11-09 - Validate optional two-member layout links
 
 - Pair records reference existing adjacent eligible instances, preserve the original add-on schema, and enforce one shared switch state. Old files need no migration; stale links are dissolved without removing their members.

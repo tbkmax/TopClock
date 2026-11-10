@@ -1,5 +1,7 @@
 # Frontend add-on host workflows
 
+Timer and Progress definitions contribute grouped menu entries. The controller asks for named sections, flattens the choices for current-instance revalidation, then the adapter invokes the matching native command. Timer Mode choices remain available in both modes; Timer Set choices exist only in countdown mode. The host updates its reactive Timer session from the command result only if a newer `timer-state-changed` event has not arrived. See the [Timer definition](../builtins/timer.js), [menu](../../menu.js), and [native workflow](../../../src-tauri/src/addons/doc/workflow_diagram.md).
+
 ## Region editor selection
 
 The [Region view](../views/region-clock.html) filters indexed city, country, and ID terms from the [Settings picker module](../builtins/region-picker.js) on input. The country terms come from the bundled [IANA map](../builtins/zone-country-codes.js), not saved add-on data. Clicking a result or pressing Enter sends its exact ID to `editAddonOption` in [instance-editor.js](../instance-editor.js), which follows the existing save and preview route. Closing without a choice restores the current display label and makes no settings change. Search state does not enter the host session or serialized add-on options.
@@ -33,7 +35,7 @@ classDiagram
 
 [layout.js](../layout.js) derives rows without moving type options into the pair. [instance-editor.js](../instance-editor.js) updates the flat list and pair metadata together; pointer hit testing includes horizontal distance for the two side-by-side Settings members. The Rust validator enforces two adjacent eligible members with shared placement and enabled state. A group switch mirrors both flags; removing a member removes its pair record. These are JavaScript records and a native serialized record, not inheritance.
 
-For the separate menu webview, `menuEntries()` combines enabled action descriptors and optional grouped choices from each compiled definition. Progress supplies its own preset choices and confirmation metadata. `dispatchMenuChoice()` revalidates the chosen ID, then the native adapter invokes `progress_timer_set_preset`; Rust atomically saves only the selected countdown. Settings and each clock observe its broadcasts. The registry also declares optional Details fragments for the catalog and instance buttons.
+For the separate menu webview, `menuEntries()` combines enabled action descriptors and optional grouped sections from each compiled definition. Timer supplies Mode and countdown Set choices, while Progress supplies its own preset choices and confirmation metadata. `dispatchMenuChoice()` revalidates the chosen ID, then the native adapter invokes the corresponding Timer or Progress command; Rust atomically saves settings and the affected session. Settings and each clock observe its broadcasts. The registry also declares optional Details fragments for the catalog and instance buttons.
 
 The diagram represents JavaScript objects and their contracts, not inheritance.
 

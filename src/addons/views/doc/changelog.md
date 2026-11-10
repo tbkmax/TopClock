@@ -1,6 +1,10 @@
 # Bundled view changelog
 ## Latest update
 
+### 2026-11-10 - Add Timer preset details
+
+- The Timer editor opens a countdown preset Details dialog and permits mode selection while running. The Settings confirmation and menu disclosures let users reset through a deliberate choice; static fragments and text bindings remain in use.
+
 ### 2026-11-09 - Show countries in Region results
 
 - Region results now show city and localized country above the exact zone ID. Country-name queries work without changing the saved IANA ID, and non-Region rows no longer mount the picker.

@@ -30,14 +30,18 @@
                                             <template x-for="action in entry.actions" :key="action.id">
                                                 <button type="button" :class="action.primary ? 'menu-action-primary' : 'menu-action-subtle'" @click="runAction({ instanceId: entry.instanceId, action })" x-text="t(action.labelKey)"></button>
                                             </template>
-                                            <button type="button" class="menu-action-disclosure" x-show="entry.choices.length" :aria-expanded="expandedId === entry.instanceId" @click="toggleChoices(entry.instanceId)" x-text="t('addons.setPreset') + (expandedId === entry.instanceId ? ' ▴' : ' ▾')"></button>
+                                            <template x-for="section in entry.sections" :key="section.id">
+                                                <button type="button" class="menu-action-disclosure" x-show="section.choices.length" :aria-expanded="expandedId === `${entry.instanceId}-${section.id}`" @click="toggleChoices(`${entry.instanceId}-${section.id}`)" x-text="t(section.labelKey) + (expandedId === `${entry.instanceId}-${section.id}` ? ' ▴' : ' ▾')"></button>
+                                            </template>
                                         </div>
                                     </div>
-                                    <div class="menu-choices" x-show="expandedId === entry.instanceId" x-cloak>
-                                        <template x-for="choice in entry.choices" :key="choice.id">
-                                            <button type="button" class="menu-choice" :disabled="busy" @click="choose(entry, choice)" x-text="t(choice.labelKey, choice.labelVars)"></button>
-                                        </template>
-                                    </div>
+                                    <template x-for="section in entry.sections" :key="section.id"><div>
+                                        <div class="menu-choices" x-show="expandedId === `${entry.instanceId}-${section.id}`" x-cloak>
+                                            <template x-for="choice in section.choices" :key="choice.id">
+                                                <button type="button" class="menu-choice" :disabled="busy || choice.selected" :aria-current="choice.selected ? 'true' : null" @click="choose(entry, choice)" x-text="t(choice.labelKey, choice.labelVars)"></button>
+                                            </template>
+                                        </div>
+                                    </div></template>
                                 </section>
                             </template>
                         </div>

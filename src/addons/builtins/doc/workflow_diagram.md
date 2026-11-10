@@ -1,5 +1,7 @@
 # Built-in definition workflow
 
+The Timer definition builds Mode choices for both modes and Set choices only in countdown mode. [countdown-presets.js](../countdown-presets.js) supplies the same elapsed-session confirmation metadata and bounded sorted-list editing to Timer and Progress. Timer's Settings selector dispatches the same mode choice as the clock menu; a running or elapsed session can be reset after confirmation. Native validation is authoritative if another window changes state while confirmation is open. See [the host workflow](../../doc/workflow_diagram.md).
+
 For Region clock editing, [region-picker.js](../region-picker.js) joins browser-supported time zones with the bundled [IANA country map](../zone-country-codes.js), then derives localized and English names with `Intl.DisplayNames`. The [view](../../views/region-clock.html) filters those records from a transient query and sends only a chosen ID to the existing option editor. A Settings language change rebuilds the records; Escape and blur reset the query to the current selected label. The [display formatter](../region-clock.js) continues using the saved zone ID.
 
 For an enabled countdown, `progressAddon.actions` returns Start/Pause and Reset for the clock menu using the same per-ID session state as the Settings buttons. The menu's Set control renders choices supplied by `progressAddon.menu.choices`; its native action emits a new session map, and the definition's next action calculation changes only the selected row's Start/Pause label. The other Progress modes return no actions.

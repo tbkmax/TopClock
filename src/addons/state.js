@@ -48,9 +48,11 @@ export function createAddonState({ adapter = nativeAddonAdapter, onChange = () =
             return session;
         },
         async dispatchMenuChoice(addon, choice, confirmation) {
-            const revision = progressRevision;
+            const timerBefore = timerRevision;
+            const progressBefore = progressRevision;
             const session = await adapter.menuChoice(addon, choice, confirmation);
-            if (!disposed && addon.kind === 'progress' && progressRevision === revision) {
+            if (!disposed && addon.kind === 'timer' && timerRevision === timerBefore) setTimer(session);
+            if (!disposed && addon.kind === 'progress' && progressRevision === progressBefore) {
                 setProgress({ ...snapshot.progressTimerSessions, [addon.id]: session });
             }
             return session;

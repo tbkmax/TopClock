@@ -25,11 +25,15 @@ export function createAddonController({ getSettings, getState, dispatchNative, d
                 if (!definition.menu?.grouped) {
                     return actions.map((action) => ({ type: 'action', instanceId: addon.id, action }));
                 }
+                const context = { settings, state: getState(), nowMs };
+                const sections = definition.menu.sections?.(addon, context)
+                    || [{ id: 'set', labelKey: 'addons.setPreset', choices: definition.menu.choices?.(addon, context) || [] }];
                 return [{
                     type: 'group', instanceId: addon.id,
                     name: definition.describe(addon, { t, settings }).name,
                     actions,
-                    choices: definition.menu.choices?.(addon, { settings, state: getState(), nowMs }) || [],
+                    sections,
+                    choices: sections.flatMap((section) => section.choices),
                 }];
             });
         },

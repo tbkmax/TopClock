@@ -81,7 +81,7 @@ test('controller routes only declared actions to the current enabled instance', 
         dispatchNative: async (addon, action) => { calls.push([addon.id, action]); return { running: true }; },
     });
     assert.deepEqual(controller.menuActions().map(({ instanceId, id }) => [instanceId, id]), [
-        [timer.id, 'reset'], [first.id, 'toggle'], [first.id, 'reset'],
+        [timer.id, 'toggle'], [timer.id, 'reset'], [first.id, 'toggle'], [first.id, 'reset'],
         [second.id, 'toggle'], [second.id, 'reset'],
     ]);
     await controller.dispatch(second.id, 'toggle', 'primary-click');
@@ -90,7 +90,7 @@ test('controller routes only declared actions to the current enabled instance', 
     assert.deepEqual(calls, [[second.id, 'toggle'], [first.id, 'reset']]);
     first.enabled = false;
     assert.deepEqual(controller.menuActions().map(({ instanceId, id }) => [instanceId, id]), [
-        [timer.id, 'reset'], [second.id, 'toggle'], [second.id, 'reset'],
+        [timer.id, 'toggle'], [timer.id, 'reset'], [second.id, 'toggle'], [second.id, 'reset'],
     ]);
     await assert.rejects(controller.dispatch(first.id, 'toggle', 'settings-button'), /unavailable/);
     settings.addons = settings.addons.filter((addon) => addon.id !== second.id);
@@ -126,6 +126,36 @@ test('menu choices come from the definition and revalidate the selected instance
     second.enabled = false;
     await assert.rejects(controller.dispatchMenuChoice(second.id, 'preset-30'), /unavailable/);
     assert.equal(addonDefinitions.find((definition) => definition.kind === 'progress').detailsViewKey, 'progress-details');
+});
+
+test('Timer menu separates mode and own presets with reset confirmation', async () => {
+    const timer = createAddon('timer');
+    const settings = { addons: [timer], timer_countdown_presets: [5, 15], timer_reset_warning_dismissed: false, timer_preset_warning_dismissed: false };
+    const state = { timerSession: { running: true, elapsed_ms: 1000, started_at_ms: 0 } };
+    const calls = [];
+    const controller = createAddonController({
+        getSettings: () => settings,
+        getState: () => state,
+        dispatchNative: async () => ({}),
+        dispatchMenuChoiceNative: async (_addon, choice, confirmation) => {
+            calls.push([choice.id, confirmation]);
+            return { running: false };
+        },
+    });
+    let entry = controller.menuEntries((key) => key, 2000)[0];
+    assert.deepEqual(entry.sections.map((section) => section.id), ['mode', 'set']);
+    assert.equal(entry.sections[0].choices[0].selected, true);
+    assert.equal(entry.sections[0].choices[1].confirm.required, true);
+    assert.deepEqual(entry.sections[1].choices.map((choice) => choice.value), [5, 15]);
+    assert.equal(entry.sections[1].choices[0].confirm.required, true);
+    await controller.dispatchMenuChoice(timer.id, 'mode-stopwatch', { confirmedReset: true, dontShowAgain: true });
+    assert.deepEqual(calls, [['mode-stopwatch', { confirmedReset: true, dontShowAgain: true }]]);
+    timer.options.mode = 'stopwatch';
+    entry = controller.menuEntries((key) => key, 2000)[0];
+    assert.deepEqual(entry.sections.map((section) => section.id), ['mode']);
+    await assert.rejects(controller.dispatchMenuChoice(timer.id, 'preset-5'), /unavailable/);
+    timer.enabled = false;
+    assert.deepEqual(controller.menuEntries((key) => key), []);
 });
 
 test('add-on host labels read one reactive native session store', async () => {

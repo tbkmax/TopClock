@@ -1,6 +1,10 @@
 # Frontend changelog
 ## Latest update
 
+### 2026-11-10 - Control Timer from the clock menu
+
+- Enabled Timer Start/Pause, Reset, Mode, and countdown Set controls in the clock menu. Mode changes can reset a running session after confirmation; Timer presets have their own Settings Details editor and warning preference. Settings and clocks refresh from native events. Older settings files receive default Timer presets without user action; an older build discards those new fields if it saves settings.
+
 ### 2026-11-09 - Search Region clocks by country
 
 - Region search now covers country names and ISO country codes across the bundled IANA zone map, including `Japan`, `China`, and `Taiwan`; English and the selected Settings language both work. Results show city, country, and the IANA ID. Search data is local, and saved zone IDs do not change.

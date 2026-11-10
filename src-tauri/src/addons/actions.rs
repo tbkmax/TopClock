@@ -10,6 +10,100 @@ pub(crate) enum ActionTarget<'a> {
     Progress(&'a str),
 }
 
+#[derive(Clone, Copy)]
+pub(crate) enum TimerMenuChange<'a> {
+    Mode(&'a str),
+    Preset(u16),
+}
+
+pub(crate) fn apply_timer_menu_change(
+    app: &tauri::AppHandle,
+    change: TimerMenuChange<'_>,
+    confirmed_reset: bool,
+    dont_show_again: bool,
+) -> Result<TimerSession, String> {
+    let state = app.state::<Arc<ClockState>>();
+    let mut config = state.config.lock().unwrap();
+    let previous_settings = config.settings.clone();
+    let previous_session = config.timer_session.clone();
+    let session = update_timer_menu_change(
+        &mut config,
+        change,
+        confirmed_reset,
+        dont_show_again,
+        epoch_ms(),
+    )?;
+    if let Err(error) = save_config(&state, &config) {
+        config.settings = previous_settings;
+        config.timer_session = previous_session;
+        return Err(error);
+    }
+    let settings = config.settings.clone();
+    drop(config);
+    let _ = app.emit("clock-settings-changed", settings);
+    let _ = app.emit("timer-state-changed", &session);
+    Ok(session)
+}
+
+fn update_timer_menu_change(
+    config: &mut PersistedConfig,
+    change: TimerMenuChange<'_>,
+    confirmed_reset: bool,
+    dont_show_again: bool,
+    now_ms: u64,
+) -> Result<TimerSession, String> {
+    let index = config
+        .settings
+        .addons
+        .iter()
+        .position(|addon| addon.kind == "timer" && addon.enabled)
+        .ok_or("Timer add-on is not enabled")?;
+    let warning_dismissed = match change {
+        TimerMenuChange::Mode(mode) => {
+            if !matches!(mode, "countdown" | "stopwatch") {
+                return Err("Unknown timer mode".into());
+            }
+            if config.settings.addons[index].options["mode"] == mode {
+                return Err("Timer mode is already selected".into());
+            }
+            config.settings.timer_reset_warning_dismissed
+        }
+        TimerMenuChange::Preset(minutes) => {
+            if config.settings.addons[index].options["mode"] != "countdown" {
+                return Err("Timer countdown is unavailable".into());
+            }
+            if !config.settings.timer_countdown_presets.contains(&minutes) {
+                return Err("Timer preset is unavailable".into());
+            }
+            config.settings.timer_preset_warning_dismissed
+        }
+    };
+    if (config.timer_session.running || config.timer_session.elapsed(now_ms) > 0)
+        && !confirmed_reset
+        && !warning_dismissed
+    {
+        return Err("Timer reset requires confirmation".into());
+    }
+    config.timer_session = TimerSession::default();
+    match change {
+        TimerMenuChange::Mode(mode) => {
+            config.settings.addons[index].options["mode"] = serde_json::json!(mode);
+            if dont_show_again && confirmed_reset {
+                config.settings.timer_reset_warning_dismissed = true;
+            }
+        }
+        TimerMenuChange::Preset(minutes) => {
+            let seconds = u64::from(minutes) * 60;
+            config.settings.addons[index].options["duration_seconds"] = serde_json::json!(seconds);
+            config.timer_session.toggle(now_ms, "countdown", seconds);
+            if dont_show_again && confirmed_reset {
+                config.settings.timer_preset_warning_dismissed = true;
+            }
+        }
+    }
+    Ok(config.timer_session.clone())
+}
+
 pub(crate) fn apply_action(
     app: &tauri::AppHandle,
     target: ActionTarget<'_>,
@@ -189,6 +283,90 @@ fn update_progress_preset(
 mod tests {
     use super::*;
     use crate::addons::legacy_timer;
+
+    #[test]
+    fn timer_menu_changes_confirm_and_keep_progress_independent() {
+        let mut config = PersistedConfig::default();
+        config.settings.addons.push(legacy_timer());
+        config.timer_session = TimerSession {
+            running: true,
+            elapsed_ms: 0,
+            started_at_ms: Some(1_000),
+            finished: false,
+            has_started: true,
+        };
+        assert!(update_timer_menu_change(
+            &mut config,
+            TimerMenuChange::Mode("stopwatch"),
+            false,
+            false,
+            5_000
+        )
+        .is_err());
+        assert_eq!(config.settings.addons[0].options["mode"], "countdown");
+        let session = update_timer_menu_change(
+            &mut config,
+            TimerMenuChange::Mode("stopwatch"),
+            true,
+            true,
+            5_000,
+        )
+        .unwrap();
+        assert!(!session.running);
+        assert_eq!(session.elapsed_ms, 0);
+        assert!(config.settings.timer_reset_warning_dismissed);
+        assert!(update_timer_menu_change(
+            &mut config,
+            TimerMenuChange::Preset(10),
+            true,
+            false,
+            5_000
+        )
+        .is_err());
+        update_timer_menu_change(
+            &mut config,
+            TimerMenuChange::Mode("countdown"),
+            false,
+            false,
+            5_000,
+        )
+        .unwrap();
+        assert!(update_timer_menu_change(
+            &mut config,
+            TimerMenuChange::Preset(99),
+            true,
+            false,
+            5_000
+        )
+        .is_err());
+        let session = update_timer_menu_change(
+            &mut config,
+            TimerMenuChange::Preset(10),
+            false,
+            false,
+            5_000,
+        )
+        .unwrap();
+        assert!(session.running);
+        assert_eq!(config.settings.addons[0].options["duration_seconds"], 600);
+        assert_eq!(config.settings.progress_countdown_presets, vec![10, 30, 60]);
+        assert!(update_timer_menu_change(
+            &mut config,
+            TimerMenuChange::Preset(30),
+            false,
+            false,
+            6_000
+        )
+        .is_err());
+        assert_eq!(config.settings.addons[0].options["duration_seconds"], 600);
+        let session =
+            update_timer_menu_change(&mut config, TimerMenuChange::Preset(30), true, true, 6_000)
+                .unwrap();
+        assert!(session.running);
+        assert_eq!(config.settings.addons[0].options["duration_seconds"], 1800);
+        assert!(config.settings.timer_preset_warning_dismissed);
+        assert!(config.settings.timer_reset_warning_dismissed);
+    }
 
     #[test]
     fn preset_restart_targets_one_countdown_and_requires_confirmation() {

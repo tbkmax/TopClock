@@ -1,5 +1,7 @@
 # Built-in definitions backlog
 
+Confirm Timer preset edits stay independent of Progress and that stopwatch hides Set while both modes retain Mode, Start/Pause, and Reset in the [live Timer checklist](../../../doc/backlog.md#timer-menu-live-windows-acceptance). Frontend choice tests cover the definition path; native WebView interaction remains open.
+
 Region country/city matching and test-runtime zone coverage are unit-tested. Refresh the bundled [IANA country map](../zone-country-codes.js) when updating tzdb/ICU data. Verify the [Settings-only picker](../region-picker.js) keyboard navigation, focus, localized labels, and list scrolling in the running Windows WebView as part of the [frontend dashboard acceptance](../../../doc/backlog.md#add-on-dashboard-live-verification).
 
 Verify Progress preset choices and warning behavior in a native multi-display session, including a changed preset list while the menu is open. See the [frontend checklist](../../../doc/backlog.md#separate-menu-live-acceptance).

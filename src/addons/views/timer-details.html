@@ -1,0 +1,16 @@
+<template x-if="activeAddonDetailsKind === 'timer'">
+    <div class="addon-detail-content">
+        <h2 id="addon-details-title" x-text="t('addons.timerCountdownPresets')"></h2>
+        <p x-text="t('addons.timerPresetsHint')"></p>
+        <div class="progress-preset-list">
+            <template x-for="minutes in settings.timer_countdown_presets" :key="minutes"><span class="progress-preset-chip"><span x-text="t('addons.presetMinutes', { minutes })"></span><button type="button" @click="removeTimerPreset(minutes)" :aria-label="t('addons.removePreset', { minutes })">×</button></span></template>
+            <span x-show="!settings.timer_countdown_presets.length" x-text="t('addons.noPresets')"></span>
+        </div>
+        <form class="progress-preset-form" @submit.prevent="addTimerPreset()">
+            <label><span x-text="t('addons.countdownMinutes')"></span><input data-detail-initial-focus class="addon-number" type="number" min="1" max="5999" step="1" x-model="presetInput"></label>
+            <button type="submit" class="action-button" :disabled="settings.timer_countdown_presets.length >= 8" x-text="t('addons.addButton')"></button>
+        </form>
+        <label class="progress-preset-warning"><input type="checkbox" :checked="!settings.timer_preset_warning_dismissed" @change="setTimerPresetWarning($event.target.checked)"><span x-text="t('addons.warnBeforeTimerPresetReset')"></span></label>
+        <label class="progress-preset-warning"><input type="checkbox" :checked="!settings.timer_reset_warning_dismissed" @change="setTimerModeWarning($event.target.checked)"><span x-text="t('addons.warnBeforeTimerModeReset')"></span></label>
+    </div>
+</template>

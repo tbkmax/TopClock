@@ -130,7 +130,11 @@ pub(crate) struct ClockSettings {
     pub(crate) addon_pairs: Vec<crate::addons::AddonPair>,
     #[serde(default)]
     pub(crate) timer_reset_warning_dismissed: bool,
-    #[serde(default = "default_progress_presets")]
+    #[serde(default = "default_countdown_presets")]
+    pub(crate) timer_countdown_presets: Vec<u16>,
+    #[serde(default)]
+    pub(crate) timer_preset_warning_dismissed: bool,
+    #[serde(default = "default_countdown_presets")]
     pub(crate) progress_countdown_presets: Vec<u16>,
     #[serde(default)]
     pub(crate) progress_preset_warning_dismissed: bool,
@@ -166,7 +170,9 @@ impl Default for ClockSettings {
             addons: Vec::new(),
             addon_pairs: Vec::new(),
             timer_reset_warning_dismissed: false,
-            progress_countdown_presets: default_progress_presets(),
+            timer_countdown_presets: default_countdown_presets(),
+            timer_preset_warning_dismissed: false,
+            progress_countdown_presets: default_countdown_presets(),
             progress_preset_warning_dismissed: false,
         }
     }
@@ -176,11 +182,11 @@ fn default_language() -> String {
     "system".into()
 }
 
-fn default_progress_presets() -> Vec<u16> {
+fn default_countdown_presets() -> Vec<u16> {
     vec![10, 30, 60]
 }
 
-pub(crate) fn valid_progress_presets(presets: &[u16]) -> bool {
+pub(crate) fn valid_countdown_presets(presets: &[u16]) -> bool {
     presets.len() <= 8
         && presets.iter().all(|minutes| (1..=5999).contains(minutes))
         && presets.windows(2).all(|pair| pair[0] < pair[1])
@@ -228,7 +234,8 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
         && valid_shortcut_string(&settings.shortcuts.quit)
         && valid_shortcut_string(&settings.shortcuts.timer_toggle)
         && valid_shortcut_string(&settings.shortcuts.timer_reset)
-        && valid_progress_presets(&settings.progress_countdown_presets)
+        && valid_countdown_presets(&settings.timer_countdown_presets)
+        && valid_countdown_presets(&settings.progress_countdown_presets)
         && valid_addons(&settings.addons)
         && crate::addons::valid_pairs(&settings.addons, &settings.addon_pairs)
 }
@@ -401,8 +408,14 @@ mod tests {
     }
 
     #[test]
-    fn progress_presets_default_for_legacy_settings_and_reject_invalid_lists() {
+    fn countdown_presets_default_for_legacy_settings_and_reject_invalid_lists() {
         let mut raw = serde_json::to_value(ClockSettings::default()).unwrap();
+        raw.as_object_mut()
+            .unwrap()
+            .remove("timer_countdown_presets");
+        raw.as_object_mut()
+            .unwrap()
+            .remove("timer_preset_warning_dismissed");
         raw.as_object_mut()
             .unwrap()
             .remove("progress_countdown_presets");
@@ -410,6 +423,15 @@ mod tests {
             .unwrap()
             .remove("progress_preset_warning_dismissed");
         let mut settings: ClockSettings = serde_json::from_value(raw).unwrap();
+        assert_eq!(settings.timer_countdown_presets, vec![10, 30, 60]);
+        assert!(!settings.timer_preset_warning_dismissed);
+        settings.timer_countdown_presets = vec![5, 15];
+        assert!(valid_settings(&settings));
+        settings.timer_countdown_presets = vec![15, 5];
+        assert!(!valid_settings(&settings));
+        settings.timer_countdown_presets = vec![10, 10];
+        assert!(!valid_settings(&settings));
+        settings.timer_countdown_presets = vec![10, 30, 60];
         assert_eq!(settings.progress_countdown_presets, vec![10, 30, 60]);
         assert!(!settings.progress_preset_warning_dismissed);
         settings.progress_countdown_presets.clear();

@@ -49,6 +49,8 @@ Alpine.data('settingsApp', () => ({
         addons: [],
         addon_pairs: [],
         timer_reset_warning_dismissed: false,
+        timer_countdown_presets: [10, 30, 60],
+        timer_preset_warning_dismissed: false,
         progress_countdown_presets: [10, 30, 60],
         progress_preset_warning_dismissed: false,
     },

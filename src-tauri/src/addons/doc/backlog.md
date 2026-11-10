@@ -1,5 +1,7 @@
 # Native add-on backlog
 
+Exercise Timer mode and preset transactions through the live WebView with a running session, confirmation dismissal, and a controlled write failure. Unit tests cover validation and session reset; the [frontend Timer checklist](../../../../src/doc/backlog.md#timer-menu-live-windows-acceptance) tracks physical input and cross-window state.
+
 Live upgrade and downgrade acceptance for pair links is tracked in the [frontend combined add-on checklist](../../../../src/doc/backlog.md#combined-add-on-live-acceptance). Native tests cover validation, while a real older binary must confirm that saving removes only the pairing.
 
 Verify a Progress preset restart with two running countdowns in live Windows WebViews, including save failure and a stale unconfirmed request. The shared [frontend preset checklist](../../../../src/doc/backlog.md#progress-preset-menu-live-acceptance) covers menu and cross-window behavior.

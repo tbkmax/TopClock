@@ -1,5 +1,9 @@
 # Frontend workflows
 
+## Timer menu mode and preset
+
+An enabled Timer contributes Start/Pause, Reset, and a Mode disclosure. Countdown adds a Set disclosure using Timer's own saved preset list. A running or elapsed Timer opens the inline confirmation before a mode switch or preset restart unless that operation's warning is dismissed. The menu rechecks its current choice before calling `timer_set_mode` or `timer_set_preset`; Rust revalidates and emits settings and Timer session events after one save. Settings observes those events, and its mode selector uses the same native mode command. The Settings Details dialog edits only Timer presets and their warning preference through the normal settings save flow. See [Timer definition](../addons/builtins/timer.js) and [native transaction](../../src-tauri/src/addons/doc/workflow_diagram.md).
+
 ## Region time zone search
 
 ```mermaid
@@ -81,7 +85,7 @@ sequenceDiagram
     Menu->>Native: close_clock_menu(request ID)
 ```
 
-[main.js](../main.js) keeps the clock window sized to its own content and does not clamp its saved position. [menu.css](../menu.css) lets an action-only menu fit its labels and shortcut badges, while Progress groups and confirmation use the existing wider layout. [menu.js](../menu.js) measures the surface width plus shadow space before asking Rust to position the window; it also handles Set expansion, preset confirmation, Escape, and action dispatch through the add-on host. The menu window scrolls when its content exceeds a display. The 30 ms native pointer observer can miss very short nonactivating clicks; see the [native workflow](../../src-tauri/src/doc/workflow_diagram.md).
+[main.js](../main.js) keeps the clock window sized to its own content and does not clamp its saved position. [menu.css](../menu.css) lets an action-only menu fit its labels and shortcut badges, while Timer and Progress groups and confirmation use the wider layout. [menu.js](../menu.js) measures the surface width plus shadow space before asking Rust to position the window; it handles section expansion, confirmation, Escape, and action dispatch through the add-on host. The menu window scrolls when its content exceeds a display. The 30 ms native pointer observer can miss very short nonactivating clicks; see the [native workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
 ## Progress add-on settings and display
 

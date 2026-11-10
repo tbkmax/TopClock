@@ -1,5 +1,7 @@
 # Bundled view backlog
 
+Check Timer Details and mode confirmation with mouse, keyboard, all supported languages, and combined add-on cards in the [live Timer checklist](../../../doc/backlog.md#timer-menu-live-windows-acceptance). The bundled fragment build check passes; a running WebView is still needed for focus and layout acceptance.
+
 Check the Region search list with country, city, and ID queries; keyboard selection and dismissal; localized country labels; no-match text; and single/paired card layout in the running 760 × 650 Settings window. Confirm a selected zone persists after reopening; see the [frontend dashboard checklist](../../../doc/backlog.md#add-on-dashboard-live-verification).
 
 Check combined-card left/right columns, shared Edit/Done focus and toggle behavior, divider height, expanded editor fit, drag cues, translated labels, and narrow-window wrapping in the [frontend combined add-on acceptance](../../../doc/backlog.md#combined-add-on-live-acceptance).

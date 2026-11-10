@@ -1,10 +1,10 @@
 <div class="addon-instance-controls" x-show="addon.kind === 'timer'">
-    <label>Mode
+    <label><span x-text="t('addons.timerMode')"></span>
         <select class="select-control" :value="addon.options.mode"
             @change="timerChange('mode', $event.target.value); $event.target.value = addon.options.mode"
-            :disabled="timerSession?.running" aria-label="Timer mode">
-            <option value="countdown">Countdown</option>
-            <option value="stopwatch">Stopwatch</option>
+            :aria-label="t('addons.timerMode')">
+            <option value="countdown" x-text="t('addons.countdown')"></option>
+            <option value="stopwatch" x-text="t('addons.stopwatch')"></option>
         </select>
     </label>
     <label x-show="addon.options.mode === 'countdown'">
@@ -12,7 +12,8 @@
         <input class="addon-number" type="number" min="1" max="5999"
             :value="Math.round(addon.options.duration_seconds / 60)"
             @change="timerChange('duration_seconds', Math.max(60, Math.min(359940, Math.round(Number($event.target.value) || 1) * 60))); $event.target.value = Math.round(addon.options.duration_seconds / 60)"
-            :disabled="timerSession?.running" :aria-label="t('addons.countdownMinutes')">
+            :disabled="addon.enabled && timerSession?.running" :aria-label="t('addons.countdownMinutes')">
     </label>
-    <small x-show="timerSession?.running">Pause the timer before changing its mode or duration.</small>
+    <button type="button" class="action-button progress-preset-entry" x-show="addon.options.mode === 'countdown'" @click="openAddonDetails(addon.kind)" x-text="t('addons.details')"></button>
+    <small x-show="addon.enabled && timerSession?.running && addon.options.mode === 'countdown'" x-text="t('addons.pauseBeforeDurationChange')"></small>
 </div>

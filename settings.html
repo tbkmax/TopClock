@@ -163,10 +163,10 @@
                     <template x-if="pendingTimerChange">
                         <div class="addon-modal-backdrop" role="presentation" @keydown.escape.window="cancelTimerChange()">
                             <div class="addon-modal" role="dialog" aria-modal="true" aria-labelledby="timer-reset-title" x-init="$nextTick(() => $refs.timerResetCancel.focus())">
-                                <h2 id="timer-reset-title">Reset timer to switch?</h2>
-                                <p>Changing the timer mode or duration will clear the current session.</p>
-                                <label><input type="checkbox" x-model="suppressResetPrompt"> Don't show this again</label>
-                                <div class="addon-modal-actions"><button type="button" class="action-button" x-ref="timerResetCancel" @click="cancelTimerChange()">Cancel</button><button type="button" class="action-button primary-action" @click="confirmTimerChange()">Reset and change</button></div>
+                                <h2 id="timer-reset-title" x-text="t('addons.timerModeResetTitle')"></h2>
+                                <p x-text="t('addons.timerModeResetWarning')"></p>
+                                <label><input type="checkbox" x-model="suppressResetPrompt"><span x-text="t('addons.dontShowAgain')"></span></label>
+                                <div class="addon-modal-actions"><button type="button" class="action-button" x-ref="timerResetCancel" @click="cancelTimerChange()" x-text="t('addons.cancel')"></button><button type="button" class="action-button primary-action" @click="confirmTimerChange()" x-text="t('addons.resetAndChange')"></button></div>
                             </div>
                         </div>
                     </template>

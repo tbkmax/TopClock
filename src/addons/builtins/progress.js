@@ -1,5 +1,6 @@
 import { PROGRESS_WEEKDAYS, timeMinutes, validDateValue } from './progress-display.js';
 import { weekdayText } from '../../i18n.js';
+import { addPreset, removePreset, presetChoices } from './countdown-presets.js';
 
 import { localDateValue, nextLocalDateValue, progressDisplay } from './progress-display.js';
 
@@ -42,18 +43,11 @@ export const progressAddon = {
         grouped: true,
         choices(addon, { settings, state, nowMs }) {
             const session = state.progressTimerSessions?.[addon.id];
-            const elapsed = (session?.elapsed_ms || 0) + (session?.running
-                ? Math.max(0, nowMs - (session.started_at_ms ?? nowMs)) : 0);
-            return (settings.progress_countdown_presets || []).map((minutes) => ({
-                id: `preset-${minutes}`, value: minutes,
-                labelKey: 'addons.presetMinutes', labelVars: { minutes },
-                confirm: {
-                    required: (session?.running || elapsed > 0) && !settings.progress_preset_warning_dismissed,
+            return presetChoices(settings.progress_countdown_presets, session,
+                settings.progress_preset_warning_dismissed, nowMs, {
                     titleKey: 'addons.presetResetTitle',
-                    bodyKey: 'addons.presetResetWarning', bodyVars: { minutes },
-                    acceptKey: 'addons.resetAndStart', allowDismiss: true,
-                },
-            }));
+                    bodyKey: 'addons.presetResetWarning', acceptKey: 'addons.resetAndStart',
+                });
         },
     },
 };
@@ -97,19 +91,16 @@ function availableProgressRange(ranges) {
 
 export const progressEditorMethods = {
     addProgressPreset() {
-        const minutes = Number(this.presetInput);
-        const presets = this.settings.progress_countdown_presets;
-        if (!Number.isInteger(minutes) || minutes < 1 || minutes > 5999 || presets.includes(minutes) || presets.length >= 8) {
+        if (!addPreset(this.settings, 'progress_countdown_presets', this.presetInput)) {
             this.error = this.t('addons.invalidPreset');
             return;
         }
-        this.settings.progress_countdown_presets = [...presets, minutes].sort((a, b) => a - b);
         this.presetInput = '';
         this.error = '';
         this.save();
     },
     removeProgressPreset(minutes) {
-        this.settings.progress_countdown_presets = this.settings.progress_countdown_presets.filter((value) => value !== minutes);
+        removePreset(this.settings, 'progress_countdown_presets', minutes);
         this.save();
     },
     setProgressPresetWarning(enabled) {

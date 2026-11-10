@@ -1,6 +1,10 @@
 # Frontend add-on host changelog
 ## Latest update
 
+### 2026-11-10 - Route Timer menu sections through the host
+
+- Grouped add-ons can expose named menu sections. Timer Mode and Set choices use the same current-instance checks and reactive session store as Progress; native command results cannot replace newer session events.
+
 ### 2026-11-09 - Index Region countries for search
 
 - Region editing now matches country names in English and the selected language, city names, and full IANA IDs. The option editor still receives only a selected zone ID; add-on storage and action routing are unchanged.
