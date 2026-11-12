@@ -1,6 +1,10 @@
 # Frontend changelog
 ## Latest update
 
+### 2026-11-12 - Restore Progress preset clicks in the clock menu
+
+- Progress countdown times under Set are clickable again after the Timer submenu change. The Timer's selected Mode choice remains disabled. No settings migration or user action is required.
+
 ### 2026-11-10 - Control Timer from the clock menu
 
 - Enabled Timer Start/Pause, Reset, Mode, and countdown Set controls in the clock menu. Mode changes can reset a running session after confirmation; Timer presets have their own Settings Details editor and warning preference. Settings and clocks refresh from native events. Older settings files receive default Timer presets without user action; an older build discards those new fields if it saves settings.

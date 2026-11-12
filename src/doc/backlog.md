@@ -18,6 +18,7 @@ The Details modal and catalog button alignment were visually checked in a 760 ×
 
 - Verify two enabled countdown rows and a disabled/date-mode Progress in the native clock menu. Exercise Start/Pause, Reset, each preset, confirmation and dismissal, an empty preset list, and reopening the warning in Settings. Confirm both preset editor entry buttons, language layouts, menu resizing, click-through after close, tray actions, persistence, and position restore. Check a second display, mixed DPI, and a clock near screen edges; the separate menu should fit its display. Automated tests and Vite build do not establish native pointer or window behavior.
 - An isolated Windows WebView smoke check passed for two countdown rows, both dialog entry buttons, menu resize, per-ID preset restart, Settings label synchronization, confirmation dismissal, and re-enabling the warning. It used programmatic WebView interaction; physical mouse, tray, multiple displays, and restart checks remain open.
+- The 2026-11-12 frontend fix converts the optional choice selection state to a boolean before disabling buttons. A local browser reproduction confirmed the previously disabled Progress time buttons become enabled and receive clicks. Confirm physical clicks in the native menu during this acceptance pass.
 
 ## Memory failure release acceptance
 

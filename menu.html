@@ -38,7 +38,7 @@
                                     <template x-for="section in entry.sections" :key="section.id"><div>
                                         <div class="menu-choices" x-show="expandedId === `${entry.instanceId}-${section.id}`" x-cloak>
                                             <template x-for="choice in section.choices" :key="choice.id">
-                                                <button type="button" class="menu-choice" :disabled="busy || choice.selected" :aria-current="choice.selected ? 'true' : null" @click="choose(entry, choice)" x-text="t(choice.labelKey, choice.labelVars)"></button>
+                                                <button type="button" class="menu-choice" :disabled="busy || Boolean(choice.selected)" :aria-current="choice.selected ? 'true' : null" @click="choose(entry, choice)" x-text="t(choice.labelKey, choice.labelVars)"></button>
                                             </template>
                                         </div>
                                     </div></template>
