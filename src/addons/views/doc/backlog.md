@@ -1,5 +1,8 @@
 # Bundled view backlog
 
+Check the Counter buttons, Reset dialog focus and Escape dismissal, spoken signed state, and menu fit in the fixed-size Settings and native clock windows. Include all supported languages and the 100-hour display transition in the [frontend Counter checklist](../../../doc/backlog.md#counter-live-windows-acceptance).
+
+
 Check Timer Details and mode confirmation with mouse, keyboard, all supported languages, and combined add-on cards in the [live Timer checklist](../../../doc/backlog.md#timer-menu-live-windows-acceptance). The bundled fragment build check passes; a running WebView is still needed for focus and layout acceptance.
 
 Check the Region search list with country, city, and ID queries; keyboard selection and dismissal; localized country labels; no-match text; and single/paired card layout in the running 760 × 650 Settings window. Confirm a selected zone persists after reopening; see the [frontend dashboard checklist](../../../doc/backlog.md#add-on-dashboard-live-verification).

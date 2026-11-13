@@ -48,7 +48,7 @@ export function createAddonController({ getSettings, getState, dispatchNative, d
             if (!choice || !addon || !dispatchMenuChoiceNative) throw new Error('Add-on menu choice is unavailable');
             return dispatchMenuChoiceNative(addon, choice, confirmation);
         },
-        async dispatch(id, actionId, role) {
+        async dispatch(id, actionId, role, options = {}) {
             let addon = instance(id);
             if (!actionsFor(addon, role).some((action) => action.id === actionId && action.enabled)) {
                 throw new Error('Add-on action is unavailable');
@@ -58,7 +58,7 @@ export function createAddonController({ getSettings, getState, dispatchNative, d
             if (!actionsFor(addon, role).some((action) => action.id === actionId && action.enabled)) {
                 throw new Error('Add-on action is unavailable');
             }
-            return dispatchNative(addon, actionId);
+            return dispatchNative(addon, actionId, options);
         },
     };
 }

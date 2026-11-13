@@ -33,8 +33,14 @@ pub(crate) fn valid_pairs(addons: &[AddonInstance], pairs: &[AddonPair]) -> bool
             return false;
         };
         right.id == pair.right_id
-            && left.kind != "progress"
-            && right.kind != "progress"
+            && matches!(
+                left.kind.as_str(),
+                "date" | "region_clock" | "timer" | "counter"
+            )
+            && matches!(
+                right.kind.as_str(),
+                "date" | "region_clock" | "timer" | "counter"
+            )
             && left.placement == right.placement
             && left.enabled == right.enabled
             && (10..=100).contains(&pair.size_percent)

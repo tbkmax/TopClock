@@ -1,5 +1,8 @@
 # Bundled view composition
 
+Counter follows the existing static fragment flow below. [counter.html](../counter.html) opens a Settings modal; only its confirmed Reset button dispatches the reset action. [clock-row.html](../clock-row.html) shows the semantic color and accessible signed state returned by the definition. The menu uses the three action descriptors and has no Reset entry.
+
+
 The Timer Settings fragment calls `timerChange('mode', value)` even while the session runs; Settings asks for confirmation when needed and sends the choice through the host. Its Details button opens the allowlisted Timer preset editor. That editor changes only the Timer preset list and both Timer warning preferences through the ordinary Settings save controller. The menu disclosures are rendered in [menu.html](../../../../menu.html) from each compiled add-on's sections, with one expanded section at a time.
 
 The [Region editor fragment](../region-clock.html) mounts only when its parent `addon` is a Region clock. It creates one local `regionZonePicker`, receives shared country/city/ID records from Settings, and displays city/country labels plus exact IDs. Focus opens the list, typing filters it, and a pointer or Enter commits a selected ID through the parent Settings method. Escape, Tab, or blur closes the list and restores the selected label. A Settings language change updates the records; search state is never serialized.

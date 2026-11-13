@@ -1,5 +1,23 @@
 # Frontend add-on host workflows
 
+## Counter action and display
+
+```mermaid
+sequenceDiagram
+    participant Menu as Clock menu or Settings
+    participant Host as AddonHost
+    participant Rust as counter_action
+    participant Clock as Clock and preview
+    Menu->>Host: Count up, Count down, Stop, or confirmed Reset
+    Host->>Rust: Dispatch current enabled Counter action
+    Rust-->>Host: Saved CounterSession
+    Rust-->>Clock: counter-state-changed
+    Clock->>Clock: Format signed balance and semantic color
+```
+
+[counter.js](../builtins/counter.js) supplies the three menu actions and pure `H:MM:SS`/`D:HH:MM` formatting. No Counter primary-click role exists. Reset has a Settings-only role and passes confirmation to Rust; an invalid or disabled target is rejected before a native write. The [native workflow](../../../src-tauri/src/addons/doc/workflow_diagram.md) covers shutdown persistence.
+
+
 Timer and Progress definitions contribute grouped menu entries. The controller asks for named sections, flattens the choices for current-instance revalidation, then the adapter invokes the matching native command. Timer Mode choices remain available in both modes; Timer Set choices exist only in countdown mode. The host updates its reactive Timer session from the command result only if a newer `timer-state-changed` event has not arrived. See the [Timer definition](../builtins/timer.js), [menu](../../menu.js), and [native workflow](../../../src-tauri/src/addons/doc/workflow_diagram.md).
 
 ## Region editor selection
@@ -33,7 +51,7 @@ classDiagram
     LayoutRow --> AddonPair : optional scale
 ```
 
-[layout.js](../layout.js) derives rows without moving type options into the pair. [instance-editor.js](../instance-editor.js) updates the flat list and pair metadata together; pointer hit testing includes horizontal distance for the two side-by-side Settings members. The Rust validator enforces two adjacent eligible members with shared placement and enabled state. A group switch mirrors both flags; removing a member removes its pair record. These are JavaScript records and a native serialized record, not inheritance.
+[layout.js](../layout.js) derives rows without moving type options or sessions into the pair. [instance-editor.js](../instance-editor.js) updates the flat list and pair metadata together; pointer hit testing includes horizontal distance for the two side-by-side Settings members. Date, Region clock, Timer, and Counter are eligible, while Progress is not. The Rust validator enforces two adjacent eligible members with shared placement and enabled state. A group switch mirrors both flags; removing a member removes its pair record. These are JavaScript records and a native serialized record, not inheritance.
 
 For the separate menu webview, `menuEntries()` combines enabled action descriptors and optional grouped sections from each compiled definition. Timer supplies Mode and countdown Set choices, while Progress supplies its own preset choices and confirmation metadata. `dispatchMenuChoice()` revalidates the chosen ID, then the native adapter invokes the corresponding Timer or Progress command; Rust atomically saves settings and the affected session. Settings and each clock observe its broadcasts. The registry also declares optional Details fragments for the catalog and instance buttons.
 

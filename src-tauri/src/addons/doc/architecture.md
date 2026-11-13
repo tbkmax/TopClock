@@ -1,8 +1,11 @@
 # Native add-on architecture
 
+[counter.rs](../counter.rs) owns a separate `CounterSession` with a signed millisecond balance, running direction, and start time. `counter_action` validates an enabled singleton and the action under the config lock, then saves and broadcasts `counter-state-changed`; a failed write restores the old session. Reset requires a confirmed request. `stop_on_quit` checkpoints and stops a running Counter before the common quit helper exits. [config_store.rs](../../config_store.rs) defaults missing Counter state for older files and stops any unexpectedly running saved state at startup without adding closed-app time. Disabling Counter stops and retains its value. Removing the add-on leaves its session running or stopped as it was, so re-adding the display restores the balance. Timer and Progress retain their separate data and behavior.
+
+
 [actions.rs](../actions.rs) also owns Timer mode and preset transactions. The mode operation accepts either compiled mode and resets a running or elapsed Timer after confirmation; the preset operation accepts a minute value only from `timer_countdown_presets` and only in countdown mode, then resets and starts. Each warning has its own saved dismissal flag. Both restore settings and the singleton Timer session on write failure and broadcast settings and Timer state on success. [settings.rs](../../settings.rs) defaults the new Timer fields for old files and validates both Timer and Progress lists through one helper.
 
-The serialized [AddonPair](../instance.rs) holds two adjacent instance IDs and a shared size percentage; it does not own type options, sessions, or actions. `valid_pairs` requires Date, Region clock, or Timer members, identical placement and enabled state, and unique membership. The parent [settings loader](../../config_store.rs) can dissolve stale links while keeping both flat instances; normal settings saves reject invalid links.
+The serialized [AddonPair](../instance.rs) holds two adjacent instance IDs and a shared size percentage; it does not own type options, sessions, or actions. `valid_pairs` allows Date, Region clock, Timer, and Counter members, requires identical placement and enabled state, and enforces unique membership. Progress remains ineligible. The parent [settings loader](../../config_store.rs) can dissolve stale links while keeping both flat instances; normal settings saves reject invalid links.
 
 [actions.rs](../actions.rs) now owns the atomic Progress preset restart in addition to toggle/reset. It accepts only an enabled countdown ID and a value from shared `ClockSettings.progress_countdown_presets`, requires confirmation when a session is running or has elapsed time unless warnings are dismissed, resets and starts that one session, and saves the duration and optional dismissal in the same config write. A write failure restores prior settings and the selected session; success emits settings and Progress-session events. Other IDs and the numeric Timer are unaffected.
 
@@ -15,6 +18,7 @@ This folder contains compiled add-on validation, session calculations, and the s
 | [instance.rs](../instance.rs) | Serialized `AddonInstance` and optional `AddonPair`, IDs, common constraints, pair invariants, total limit |
 | [date.rs](../date.rs), [region_clock.rs](../region_clock.rs) | Type options validation |
 | [timer.rs](../timer.rs), [progress.rs](../progress.rs) | Type options, action application, and type-specific settings cleanup |
+| [counter.rs](../counter.rs) | Signed Counter session, action validation, and quit checkpoint |
 | [session.rs](../session.rs) | Existing `TimerSession` calculations and Progress duration lock |
 | [actions.rs](../actions.rs) | Typed Timer/Progress target resolution, save rollback, and successful event publication |
 

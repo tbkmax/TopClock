@@ -35,8 +35,8 @@ export function canPair(addons, pairs, sourceId, targetId) {
     const source = addons.find((addon) => addon.id === sourceId);
     const target = addons.find((addon) => addon.id === targetId);
     return Boolean(source && target && source !== target
-        && ['date', 'region_clock', 'timer'].includes(source.kind)
-        && ['date', 'region_clock', 'timer'].includes(target.kind)
+        && ['date', 'region_clock', 'timer', 'counter'].includes(source.kind)
+        && ['date', 'region_clock', 'timer', 'counter'].includes(target.kind)
         && !pairFor(pairs, sourceId) && !pairFor(pairs, targetId));
 }
 

@@ -1,5 +1,5 @@
 use crate::{
-    addons::{self, progress_countdown_options, timer_options, TimerSession},
+    addons::{self, progress_countdown_options, timer_options, CounterSession, TimerSession},
     settings::{valid_settings, ClockSettings, PersistedConfig},
     state::ClockState,
     timer::epoch_ms,
@@ -34,7 +34,13 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
                 .ok()
                 .or_else(|| {
                     let mut recovered = raw.clone();
+                    recovered.as_object_mut()?.remove("counter_session");
+                    serde_json::from_value::<PersistedConfig>(recovered).ok()
+                })
+                .or_else(|| {
+                    let mut recovered = raw.clone();
                     recovered.as_object_mut()?.remove("progress_timer_sessions");
+                    recovered.as_object_mut()?.remove("counter_session");
                     serde_json::from_value::<PersistedConfig>(recovered).ok()
                 })
                 .or_else(|| {
@@ -43,6 +49,7 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
                     object.remove("addons");
                     object.remove("timer_session");
                     object.remove("progress_timer_sessions");
+                    object.remove("counter_session");
                     serde_json::from_value::<PersistedConfig>(recovered).ok()
                 })
         })
@@ -108,5 +115,41 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
         session.restore_progress_started();
         true
     });
+    if !config.counter_session.valid() {
+        config.counter_session = CounterSession::default();
+    } else if config.counter_session.running {
+        // A previous process did not complete its normal quit path. Keep the
+        // saved checkpoint, but never count time while TopClock was closed.
+        config.counter_session.running = false;
+        config.counter_session.started_at_ms = None;
+    }
     config
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn loading_without_counter_addon_retains_saved_balance() {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::env::temp_dir().join(format!("topclock-counter-{nonce}.json"));
+        let mut config = PersistedConfig::default();
+        config.counter_session.value_ms = 60_000;
+        config.counter_session.direction = 1;
+        config.counter_session.running = true;
+        config.counter_session.started_at_ms = Some(1_000);
+        fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
+
+        let loaded = load_config(&path);
+        let _ = fs::remove_file(&path);
+        assert!(loaded.settings.addons.is_empty());
+        assert_eq!(loaded.counter_session.value_ms, 60_000);
+        assert!(!loaded.counter_session.running);
+        assert_eq!(loaded.counter_session.started_at_ms, None);
+    }
 }

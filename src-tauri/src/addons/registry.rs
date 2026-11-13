@@ -1,4 +1,4 @@
-use super::{date, progress, region_clock, timer};
+use super::{counter, date, progress, region_clock, timer};
 use serde_json::{Map, Value};
 
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
@@ -7,6 +7,7 @@ pub(super) enum AddonKind {
     RegionClock,
     Timer,
     Progress,
+    Counter,
 }
 
 impl AddonKind {
@@ -16,13 +17,14 @@ impl AddonKind {
             "region_clock" => Some(Self::RegionClock),
             "timer" => Some(Self::Timer),
             "progress" => Some(Self::Progress),
+            "counter" => Some(Self::Counter),
             _ => None,
         }
     }
 
     pub(super) fn max_instances(self) -> usize {
         match self {
-            Self::Date | Self::Timer => 1,
+            Self::Date | Self::Timer | Self::Counter => 1,
             Self::RegionClock => 12,
             Self::Progress => 16,
         }
@@ -34,6 +36,7 @@ impl AddonKind {
             Self::RegionClock => region_clock::valid_options(options),
             Self::Timer => timer::valid_options(options),
             Self::Progress => progress::valid_options(options),
+            Self::Counter => counter::valid_options(options),
         }
     }
 }

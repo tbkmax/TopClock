@@ -2,5 +2,6 @@
   "date": [],
   "region_clock": [],
   "timer": ["toggle", "reset"],
-  "progress": ["toggle", "reset"]
+  "progress": ["toggle", "reset"],
+  "counter": ["start_positive", "start_negative", "stop", "reset"]
 }

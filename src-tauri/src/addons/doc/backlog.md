@@ -1,5 +1,8 @@
 # Native add-on backlog
 
+Verify a running Counter's Stop and confirmed Reset under a controlled settings write failure, then quit by each native entry point with a disposable config and restart. Remove a running Counter, re-add it, and confirm the elapsed balance; repeat after quitting while it is absent. Include Counter combined with each eligible kind and confirm its balance remains independent when the shared switch is toggled. Unit tests cover signed transitions, reset validation, removal, startup retention, and pair eligibility; the [frontend Counter checklist](../../../../src/doc/backlog.md#counter-live-windows-acceptance) tracks WebView and multi-display behavior. A pre-Counter build saving the newer file can discard the unknown Counter kind, so downgrade is unsupported for this data.
+
+
 Exercise Timer mode and preset transactions through the live WebView with a running session, confirmation dismissal, and a controlled write failure. Unit tests cover validation and session reset; the [frontend Timer checklist](../../../../src/doc/backlog.md#timer-menu-live-windows-acceptance) tracks physical input and cross-window state.
 
 Live upgrade and downgrade acceptance for pair links is tracked in the [frontend combined add-on checklist](../../../../src/doc/backlog.md#combined-add-on-live-acceptance). Native tests cover validation, while a real older binary must confirm that saving removes only the pairing.

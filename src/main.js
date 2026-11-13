@@ -30,6 +30,7 @@ Alpine.data('clockApp', () => ({
     addonHost: null,
     get timerSession() { return this.addonHost?.snapshot.timerSession ?? null; },
     get progressTimerSessions() { return this.addonHost?.snapshot.progressTimerSessions ?? {}; },
+    get counterSession() { return this.addonHost?.snapshot.counterSession ?? null; },
     progressPreviousPercent: {},
     progressCompletionUntil: {},
     previousNumbers: {},
@@ -193,7 +194,10 @@ Alpine.data('clockApp', () => ({
         this.previousNumbers = result.numbers;
         this.numberActiveUntil = result.activeUntil;
         this.renderedAddons = (this.settings?.addons || []).filter((addon) => addon.enabled).map((addon) => {
-            const display = displayAddon(addon, now, this.settings, this.timerSession, this.language, this.progressTimerSessions);
+            const display = displayAddon(addon, now, this.settings, {
+                timerSession: this.timerSession, progressTimerSessions: this.progressTimerSessions,
+                counterSession: this.counterSession, language: this.language,
+            });
             markCountdownCompletion(display, addon, this.progressPreviousPercent, this.progressCompletionUntil, now.getTime());
             if (display.parts) {
                 const animation = markChangedNumbers(display.parts, this.addonPreviousNumbers[addon.id], this.addonNumberActiveUntil[addon.id], now.getTime());

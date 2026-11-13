@@ -1,5 +1,9 @@
 # Rust workflows
 
+The Counter command and normal quit path are detailed in the [native add-on workflow](../addons/doc/workflow_diagram.md). Settings removal leaves the Counter session in `PersistedConfig`, even if it is running; re-adding the display exposes it again. Menu, tray, and shortcut Quit use `quit_app`, which checkpoints a running Counter before saving the clock position and exiting. [lib.rs](../lib.rs) also applies the Counter checkpoint on other Tauri exit requests. The separate Timer and Progress sessions keep their existing restart rules.
+
+Counter pair validation follows the existing [native add-on pair workflow](../addons/doc/workflow_diagram.md#pair-validation): `update_settings` accepts an eligible adjacent Counter and another Date, Region clock, or Timer instance, while their sessions remain independent.
+
 ## Timer menu transactions
 
 `timer_set_mode` and `timer_set_preset` enter the shared action service in [addons/actions.rs](../addons/actions.rs). Under the config lock it verifies an enabled Timer, validates the mode or Timer-only preset, and requires confirmation when a running or elapsed session would be cleared unless that choice's warning was dismissed. Mode changes reset to an idle session; presets set the duration and start from zero. It saves once, restores the previous settings and session on failure, and emits `clock-settings-changed` plus `timer-state-changed` only after success. Settings mode changes use the same command. The two warning preferences remain independent; [frontend workflow](../../../src/doc/workflow_diagram.md#timer-menu-mode-and-preset) covers the confirmation UI.

@@ -1,4 +1,4 @@
-use crate::addons::{valid_addons, AddonInstance, TimerSession};
+use crate::addons::{valid_addons, AddonInstance, CounterSession, TimerSession};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -40,6 +40,8 @@ pub(crate) struct PersistedConfig {
     pub(crate) timer_session: TimerSession,
     #[serde(default)]
     pub(crate) progress_timer_sessions: HashMap<String, TimerSession>,
+    #[serde(default)]
+    pub(crate) counter_session: CounterSession,
 }
 
 fn default_auto_check_updates() -> bool {
@@ -260,6 +262,7 @@ mod tests {
             displays: HashMap::new(),
             timer_session: TimerSession::default(),
             progress_timer_sessions: HashMap::new(),
+            counter_session: CounterSession::default(),
         };
         let loaded: PersistedConfig =
             serde_json::from_str(&serde_json::to_string(&config).unwrap()).unwrap();

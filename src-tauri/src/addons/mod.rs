@@ -1,4 +1,5 @@
 mod actions;
+pub(crate) mod counter;
 mod date;
 mod instance;
 mod progress;
@@ -10,6 +11,8 @@ mod timer;
 pub(crate) use actions::{
     apply_action, apply_progress_preset, apply_timer_menu_change, ActionTarget, TimerMenuChange,
 };
+pub(crate) use counter::reconcile_settings as reconcile_counter_settings;
+pub(crate) use counter::{stop_on_quit, CounterSession};
 pub(crate) use instance::{valid_addons, valid_pairs, AddonInstance, AddonPair};
 pub(crate) use progress::progress_countdown_options;
 pub(crate) use progress::reconcile_settings as reconcile_progress_settings;
@@ -64,6 +67,50 @@ mod tests {
         separated[1].placement = "below".into();
         separated[1].enabled = false;
         assert!(!valid_pairs(&separated, &[pair]));
+    }
+
+    #[test]
+    fn counter_pairs_with_other_eligible_kinds() {
+        let mut counter = legacy_timer();
+        counter.id = "counter".into();
+        counter.kind = "counter".into();
+        counter.options = serde_json::json!({});
+        for (kind, options) in [
+            ("date", serde_json::json!({"format":"md"})),
+            ("region_clock", serde_json::json!({"time_zone":"Etc/UTC"})),
+            (
+                "timer",
+                serde_json::json!({"mode":"countdown","duration_seconds":300}),
+            ),
+        ] {
+            let mut other = legacy_timer();
+            other.id = kind.into();
+            other.kind = kind.into();
+            other.options = options;
+            for addons in [
+                vec![counter.clone(), other.clone()],
+                vec![other.clone(), counter.clone()],
+            ] {
+                let pair = AddonPair {
+                    left_id: addons[0].id.clone(),
+                    right_id: addons[1].id.clone(),
+                    size_percent: 100,
+                };
+                assert!(valid_addons(&addons));
+                assert!(valid_pairs(&addons, &[pair]));
+            }
+        }
+        let mut progress = counter.clone();
+        progress.id = "progress".into();
+        progress.kind = "progress".into();
+        assert!(!valid_pairs(
+            &[counter, progress],
+            &[AddonPair {
+                left_id: "counter".into(),
+                right_id: "progress".into(),
+                size_percent: 100,
+            }]
+        ));
     }
 
     #[test]
@@ -249,15 +296,17 @@ mod tests {
         let fixture: serde_json::Value =
             serde_json::from_str(include_str!("../../../src/addons/contracts.json")).unwrap();
         let entries = fixture.as_object().unwrap();
-        assert_eq!(entries.len(), 4);
+        assert_eq!(entries.len(), 5);
         for (kind, actions) in entries {
             assert!(registry::AddonKind::from_str(kind).is_some());
             let mut session = TimerSession::default();
+            let mut counter_session = CounterSession::default();
             for action in actions.as_array().unwrap() {
                 let action = action.as_str().unwrap();
                 let result = match kind.as_str() {
                     "timer" => timer::apply_action(&mut session, action, 1_000, "countdown", 5),
                     "progress" => progress::apply_action(&mut session, action, 1_000, 5),
+                    "counter" => counter::apply_action(&mut counter_session, action, 1_000, true),
                     _ => panic!("Unexpected actions for {kind}"),
                 };
                 assert!(result.is_ok());

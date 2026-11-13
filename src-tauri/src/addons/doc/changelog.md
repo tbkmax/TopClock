@@ -1,5 +1,19 @@
 # Native add-on changelog
 
+### 2026-11-12 - Keep Counter state after removal
+
+- Removing the Counter display now retains its separate signed session, including a running direction. Re-adding Counter reveals the continued balance; explicit disable still stops it, and normal Quit still checkpoints and stops it. No settings migration is required.
+
+### 2026-11-12 - Validate Counter pairs
+
+- Native settings validation now accepts a Counter paired with Date, Region clock, or Timer in either position. Progress remains ineligible, and pairing does not alter Counter, Timer, or Progress sessions. No saved settings migration is required.
+
+
+### 2026-11-12 - Persist an independent signed Counter
+
+- Added a singleton Counter session with signed balance, direction changes, Stop, and confirmed Reset. Normal Quit saves and stops its current balance; startup does not count time while the app was closed. Existing Timer and Progress sessions remain separate. No migration action is required for older settings.
+
+
 ## Added
 
 ### 2026-11-10 - Validate and save Timer menu choices

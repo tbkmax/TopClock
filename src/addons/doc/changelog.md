@@ -1,4 +1,18 @@
 # Frontend add-on host changelog
+
+### 2026-11-12 - Test Counter's minute-preserving day format
+
+- Display regression coverage now checks two-digit hours and the `D:HH:MM` boundary at 100 hours. The shared host and session routing are unchanged.
+
+### 2026-11-12 - Allow Counter in combined rows
+
+- Counter can now share the existing two-member layout with Date, Region clock, or Timer. Both members keep independent settings and runtime sessions; the shared pair switch and size work as before. Existing saved pairs need no migration.
+
+
+### 2026-11-12 - Add an independent Counter channel
+
+- The shared add-on host now observes Counter sessions, routes Count up, Count down, and Stop from the clock menu, and permits confirmed Reset from Settings. Existing Timer and Progress state remains separate. No action is required for existing settings.
+
 ## Latest update
 
 ### 2026-11-10 - Route Timer menu sections through the host

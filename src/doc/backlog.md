@@ -1,5 +1,16 @@
 # Frontend backlog
 
+## Counter live Windows acceptance
+
+- **Title:** Verify Counter controls, color, and persistence in the running desktop app.
+- **Problem and desired outcome:** Automated formatter and native session tests cannot prove WebView menu layout, input behavior, or shutdown persistence. Counter should show the same signed balance in every clock and Settings preview, and stop at the saved value when TopClock quits.
+- **Scope:** [Counter definition](../addons/builtins/counter.js), [shared views](../addons/views/doc/architecture.md), [Settings](../settings.js), [menu](../menu.js), and [native session](../../src-tauri/src/addons/counter.rs).
+- **Acceptance criteria:** In a disposable settings profile, Count up, Count down, and Stop from the submenu; reverse through zero; confirm and cancel Reset only in Settings; remove and re-add a running Counter without losing elapsed time; quit while Counter is absent and re-add after restart to check its stopped saved balance; quit by menu, tray, and shortcut; check per-second `H:MM:SS` updates and the `D:HH:MM` transition at 100 hours with minutes retained, screen reader label, and existing Timer/Progress independence. Pair Counter with Date, Region clock, and Timer in both left/right positions; check the shared switch and size without changing Counter's balance. Check click-through, Ctrl drag, position restore, and a second display.
+- **Dependencies and risks:** Requires a live Windows WebView and preferably two displays. A pre-Counter binary cannot retain an unknown Counter instance if it saves the newer settings file.
+- **Verification:** Run `npm run tauri:dev` with disposable data and inspect each path. Record outcomes before release.
+- **Priority:** High before release because shutdown and native input are user-visible and cannot be established by unit tests.
+
+
 ## Timer menu live Windows acceptance
 
 - **Problem and desired outcome:** Automated tests cover Timer menu choice routing and native validation, but physical menu and cross-window behavior need a Windows session. Confirm Mode and Set disclosures, immediate running-mode reset after confirmation, “don't show again,” countdown preset restart, and Start/Pause/Reset in both modes.

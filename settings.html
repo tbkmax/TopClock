@@ -170,6 +170,15 @@
                             </div>
                         </div>
                     </template>
+                    <template x-if="pendingCounterReset">
+                        <div class="addon-modal-backdrop" role="presentation" @keydown.escape.window="pendingCounterReset = false">
+                            <div class="addon-modal" role="dialog" aria-modal="true" aria-labelledby="counter-reset-title" x-init="$nextTick(() => $refs.counterResetCancel.focus())">
+                                <h2 id="counter-reset-title" x-text="t('addons.counterResetTitle')"></h2>
+                                <p x-text="t('addons.counterResetWarning')"></p>
+                                <div class="addon-modal-actions"><button type="button" class="action-button" x-ref="counterResetCancel" @click="pendingCounterReset = false" x-text="t('addons.cancel')"></button><button type="button" class="action-button primary-action" @click="confirmCounterReset()" x-text="t('addons.reset')"></button></div>
+                            </div>
+                        </div>
+                    </template>
                     <template x-if="activeAddonDetailsKind">
                         <div class="addon-modal-backdrop" role="presentation" @keydown.escape.window="closeAddonDetails()">
                             <div class="addon-modal" x-ref="addonDetails" role="dialog" aria-modal="true" aria-labelledby="addon-details-title">

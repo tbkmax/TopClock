@@ -5,11 +5,14 @@ import { listen } from '@tauri-apps/api/event';
 export const nativeAddonAdapter = {
     getTimer: () => invoke('get_timer_state'),
     getProgress: () => invoke('get_progress_timer_states'),
+    getCounter: () => invoke('get_counter_state'),
     onTimer: (callback) => listen('timer-state-changed', ({ payload }) => callback(payload)),
     onProgress: (callback) => listen('progress-timer-states-changed', ({ payload }) => callback(payload)),
-    action(addon, action) {
+    onCounter: (callback) => listen('counter-state-changed', ({ payload }) => callback(payload)),
+    action(addon, action, confirmedReset = false) {
         if (addon.kind === 'timer') return invoke('timer_action', { action });
         if (addon.kind === 'progress') return invoke('progress_timer_action', { id: addon.id, action });
+        if (addon.kind === 'counter') return invoke('counter_action', { action, confirmedReset });
         return Promise.reject(new Error('Add-on has no native actions'));
     },
     menuChoice(addon, choice, confirmation) {

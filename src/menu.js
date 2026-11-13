@@ -128,7 +128,7 @@ Alpine.data('clockMenu', () => ({
         } finally { this.busy = false; }
     },
     async openSettings() { await this.close(); invoke('open_settings').catch(console.error); },
-    quitApp() { invoke('quit').catch(console.error); },
+    quitApp() { invoke('quit').catch((error) => { this.error = String(error); }); },
 }));
 
 Alpine.start();

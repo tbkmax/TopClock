@@ -1,5 +1,8 @@
 # Frontend add-on host backlog
 
+Verify Counter actions across the clock menu, Settings, a paired row, and a second display in a live Windows session. Confirm the menu contains Count up, Count down, and Stop, with Reset only in Settings; inspect `D:HH:MM` near the 100-hour boundary in both the clock and preview. This extends the [frontend Counter checklist](../../doc/backlog.md#counter-live-windows-acceptance).
+
+
 Timer mode and preset routing pass frontend tests; verify its event ordering and cross-window labels in the [Timer menu live Windows checklist](../../doc/backlog.md#timer-menu-live-windows-acceptance). A physical menu and write-failure profile are still needed.
 
 The Region city/country search and exact-ID selection have a focused unit test, including country coverage for every zone reported by the test runtime. Pointer, keyboard, language switching, paired-card, and saved-value behavior still need the [live Add-ons dashboard check](../../doc/backlog.md#add-on-dashboard-live-verification).

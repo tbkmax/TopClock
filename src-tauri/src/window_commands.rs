@@ -61,7 +61,13 @@ pub(crate) fn open_release_page(url: Option<String>) {
     }
 }
 #[tauri::command]
-pub(crate) fn quit(app: tauri::AppHandle) {
-    save_current_position(&app);
+pub(crate) fn quit(app: tauri::AppHandle) -> Result<(), String> {
+    quit_app(&app)
+}
+
+pub(crate) fn quit_app(app: &tauri::AppHandle) -> Result<(), String> {
+    crate::addons::stop_on_quit(app)?;
+    save_current_position(app);
     app.exit(0);
+    Ok(())
 }

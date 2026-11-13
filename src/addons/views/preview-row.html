@@ -1,4 +1,4 @@
-<div class="addon-preview-line" :class="{ 'addon-preview-progress': Boolean(item.progress) }" :style="addonPreviewStyle(item)">
+<div class="addon-preview-line" :class="{ 'addon-preview-progress': Boolean(item.progress) }" :style="addonPreviewStyle(item)" :role="item.kind === 'counter' ? 'timer' : null" :aria-label="item.kind === 'counter' ? t('addons.counter') + ': ' + t('addons.counterState' + (item.direction || 'zero')) + ', ' + item.text : null">
     <span class="addon-preview-label" x-show="item.showLabel" x-text="item.label"></span>
     <span x-show="!item.progress" x-text="item.text || (item.parts || []).map((part) => part.text).join('')"></span>
     <span class="addon-preview-weekday" x-show="item.weekday" x-text="item.weekday"></span>

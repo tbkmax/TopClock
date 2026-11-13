@@ -73,6 +73,8 @@ Alpine.data('settingsApp', () => ({
     addonHost: null,
     get timerSession() { return this.addonHost?.snapshot.timerSession ?? null; },
     get progressTimerSessions() { return this.addonHost?.snapshot.progressTimerSessions ?? {}; },
+    get counterSession() { return this.addonHost?.snapshot.counterSession ?? null; },
+    pendingCounterReset: false,
     progressPreviousPercent: {},
     progressCompletionUntil: {},
     pendingTimerChange: null,
@@ -121,6 +123,7 @@ Alpine.data('settingsApp', () => ({
             onRollback: async (settings, isCurrent) => {
                 let timerSession = this.timerSession;
                 let progressTimerSessions = this.progressTimerSessions;
+                let counterSession = this.counterSession;
                 try {
                     timerSession = await invoke('get_timer_state');
                 } catch (error) {
@@ -131,11 +134,14 @@ Alpine.data('settingsApp', () => ({
                 } catch (error) {
                     console.error('Could not reload Progress countdowns after failed save:', error);
                 }
+                try { counterSession = await invoke('get_counter_state'); }
+                catch (error) { console.error('Could not reload Counter after failed save:', error); }
                 if (!isCurrent()) return;
                 this.settings = settings;
                 this.syncLanguage();
                 this.addonHost.setTimer(timerSession);
                 this.addonHost.setProgress(progressTimerSessions);
+                this.addonHost.setCounter(counterSession);
                 this.updatePreview();
             },
             onError: (error) => { this.error = this.t('error.save', { error }); },
@@ -197,8 +203,20 @@ Alpine.data('settingsApp', () => ({
             const result = await this.addonHost.dispatch(addon.id, action.id, 'settings-button');
             if (result) this.error = '';
         } catch (error) {
-            this.error = this.t(addon.kind === 'progress' ? 'error.progressTimer' : 'error.timer', { error });
+            const key = addon.kind === 'progress' ? 'error.progressTimer'
+                : addon.kind === 'counter' ? 'error.counter' : 'error.timer';
+            this.error = this.t(key, { error });
         }
+    },
+    requestCounterReset() { this.pendingCounterReset = true; },
+    async confirmCounterReset() {
+        const counter = this.settings.addons.find((addon) => addon.kind === 'counter');
+        if (!counter) { this.pendingCounterReset = false; return; }
+        try {
+            await this.addonHost.dispatch(counter.id, 'reset', 'counter-reset', { confirmedReset: true });
+            this.error = '';
+            this.pendingCounterReset = false;
+        } catch (error) { this.error = String(error); }
     },
     addonDescription(addon) {
         return getAddonDefinition(addon.kind)?.describe(addon, {
@@ -240,7 +258,10 @@ Alpine.data('settingsApp', () => ({
         this.previewNumberActiveUntil = result.activeUntil;
         this.previewAddons = (this.settings.addons || []).filter((addon) => addon.enabled)
             .map((addon) => {
-                const display = displayAddon(addon, now, this.settings, this.timerSession, this.language, this.progressTimerSessions);
+                const display = displayAddon(addon, now, this.settings, {
+                    timerSession: this.timerSession, progressTimerSessions: this.progressTimerSessions,
+                    counterSession: this.counterSession, language: this.language,
+                });
                 markCountdownCompletion(display, addon, this.progressPreviousPercent, this.progressCompletionUntil, now.getTime());
                 return display;
             })
@@ -260,7 +281,7 @@ Alpine.data('settingsApp', () => ({
 
     addonPreviewStyle(addon) {
         return {
-            color: this.settings.font_color,
+            color: addon.color || this.settings.font_color,
             fontSize: `${Math.min(this.settings.font_size, 64) * (addon.effective_size_percent ?? addon.size_percent) / 100}px`,
             fontFamily: clockFontStack(this.settings.font_family),
             WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,

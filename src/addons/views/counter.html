@@ -1,0 +1,4 @@
+<div class="addon-instance-controls" x-show="addon.kind === 'counter'">
+    <small x-text="t('addons.counterHint')"></small>
+    <button type="button" class="action-button addon-remove" :disabled="!addon.enabled" @click="requestCounterReset()" x-text="t('addons.reset')"></button>
+</div>

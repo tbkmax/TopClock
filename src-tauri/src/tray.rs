@@ -1,5 +1,5 @@
 use crate::{
-    displays::save_current_position, locale, settings::ClockSettings, state::ClockState,
+    locale, settings::ClockSettings, state::ClockState, window_commands::quit_app,
     window_commands::show_settings,
 };
 use std::sync::Arc;
@@ -36,8 +36,9 @@ pub(crate) fn setup_tray(app: &tauri::App) -> tauri::Result<()> {
         .show_menu_on_left_click(false)
         .on_menu_event(|app, event| {
             if event.id().as_ref() == "quit" {
-                save_current_position(app);
-                app.exit(0);
+                if let Err(error) = quit_app(app) {
+                    eprintln!("Unable to save Counter before quitting: {error}");
+                }
             }
         })
         .on_tray_icon_event(|tray, event| {

@@ -1,4 +1,18 @@
 # Built-in definitions changelog
+
+### 2026-11-12 - Retain minutes in the long Counter format
+
+- At 100 total hours, Counter now displays `D:HH:MM`. The shorter `H:MM:SS` format remains, including two-digit hour values from 10 through 99.
+
+### 2026-11-12 - Show Counter seconds below 100 hours
+
+- Counter now shows `H:MM:SS` while its total hours are below 100. At 100 hours it still switches to `D:HH`; its signed color and saved balance are unchanged.
+
+
+### 2026-11-12 - Add signed Counter display and actions
+
+- A new Counter shows accrued or spent time in green or rose without a minus sign. It scales from hours and minutes to days and hours at 100 hours, and offers Count up, Count down, and Stop through its menu group. It has no modifier-click action.
+
 ## Latest update
 
 ### 2026-11-10 - Add Timer modes and independent presets

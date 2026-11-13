@@ -1,6 +1,18 @@
 // Each entry keeps the English source and its Simplified Chinese, Traditional
 // Chinese, and Japanese translations together so missing strings are visible.
 const messages = {
+    'addons.counter': ['Counter', '计数器', '計數器', 'カウンター'],
+    'addons.counterSubtitle': ['Signed time balance', '带正负值的时间余额', '有正負值的時間餘額', '正負の時間残高'],
+    'addons.counterHint': ['Count up or down from the current balance. Stop preserves it.', '从当前余额向上或向下计时。停止会保留余额。', '從目前餘額向上或向下計時。停止會保留餘額。', '現在の残高から増減します。停止しても残高は残ります。'],
+    'addons.countUp': ['Count up', '向上计时', '向上計時', '加算開始'],
+    'addons.countDown': ['Count down', '向下计时', '向下計時', '減算開始'],
+    'addons.stop': ['Stop', '停止', '停止', '停止'],
+    'addons.counterResetTitle': ['Reset Counter?', '重置计数器？', '重設計數器？', 'カウンターをリセットしますか？'],
+    'addons.counterResetWarning': ['This clears the saved time balance.', '这将清除已保存的时间余额。', '這會清除已儲存的時間餘額。', '保存された時間残高が消去されます。'],
+    'addons.counterStatepositive': ['positive', '正值', '正值', 'プラス'],
+    'addons.counterStatenegative': ['negative', '负值', '負值', 'マイナス'],
+    'addons.counterStatezero': ['zero', '零', '零', 'ゼロ'],
+    'error.counter': ['Could not control Counter: {error}', '无法控制计数器：{error}', '無法控制計數器：{error}', 'カウンターを操作できませんでした: {error}'],
     'app.settingsTitle': ['TopClock Settings', 'TopClock 设置', 'TopClock 設定', 'TopClock 設定'],
     'app.settingsBrand': ['/ SETTINGS', '/ 设置', '/ 設定', '/ 設定'],
     'app.settings': ['Settings', '设置', '設定', '設定'],

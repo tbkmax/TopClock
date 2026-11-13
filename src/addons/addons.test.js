@@ -3,6 +3,7 @@ import test from 'node:test';
 import { readFileSync } from 'node:fs';
 import { createAddon, displayAddon } from './model.js';
 import { timerText } from './builtins/timer.js';
+import { counterDisplay } from './builtins/counter.js';
 import { availableTimeZones } from './builtins/region-clock.js';
 import { createTimeZoneOptions, filterTimeZones, regionZonePicker } from './builtins/region-picker.js';
 import { markCountdownCompletion, progressBarStyle, progressDisplay, validDateValue } from './builtins/progress-display.js';
@@ -53,7 +54,7 @@ test('bundled add-on views reject unknown slots and never use runtime HTML injec
         }
     }
     assert.throws(() => composeAddonFragments('<!-- addon-view:unknown -->'), /Invalid add-on view slot/);
-    assert.deepEqual(addonDefinitions.map(({ kind }) => kind), ['date', 'region_clock', 'timer', 'progress']);
+    assert.deepEqual(addonDefinitions.map(({ kind }) => kind), ['date', 'region_clock', 'timer', 'progress', 'counter']);
 });
 
 test('bundled definitions keep the native kind and action fixture', () => {
@@ -179,8 +180,10 @@ test('add-on host labels read one reactive native session store', async () => {
             adapter: {
                 onTimer: async () => () => {},
                 onProgress: async (callback) => { progressEvent = callback; return () => {}; },
+                onCounter: async () => () => {},
                 getTimer: async () => null,
                 getProgress: async () => ({}),
+                getCounter: async () => null,
                 action: async () => ({ running: true }),
             },
         });
@@ -221,8 +224,10 @@ test('add-on state keeps newer broadcasts and disposes its native listeners', as
         adapter: {
             onTimer: async (callback) => { onTimer = callback; return () => { stopped++; }; },
             onProgress: async (callback) => { onProgress = callback; return () => { stopped++; }; },
+            onCounter: async () => () => { stopped++; },
             getTimer: () => new Promise((resolve) => { resolveTimer = resolve; }),
             getProgress: async () => ({}),
+            getCounter: async () => null,
             action: () => new Promise((resolve) => { resolveAction = resolve; }),
         },
         onChange: (snapshot) => updates.push(snapshot),
@@ -242,7 +247,7 @@ test('add-on state keeps newer broadcasts and disposes its native listeners', as
     onTimer({ elapsed_ms: 500 });
     onProgress({});
     assert.equal(state.snapshot.timerSession.elapsed_ms, 400);
-    assert.equal(stopped, 2);
+    assert.equal(stopped, 3);
     assert.ok(updates.length >= 2);
 });
 
@@ -286,6 +291,21 @@ test('a pair retains both instance sizes and can swap, move, or split', () => {
     assert.deepEqual(split.pairs, []);
     assert.deepEqual(split.addons.map((addon) => addon.id), ['date', 'timer', 'progress']);
     assert.equal(split.addons[1].size_percent, 60);
+});
+
+test('Counter pairs with eligible text add-ons in either position', () => {
+    const counter = { id: 'counter', kind: 'counter', placement: 'below', enabled: true, size_percent: 30 };
+    for (const kind of ['date', 'region_clock', 'timer']) {
+        const other = { id: kind, kind, placement: 'below', enabled: true, size_percent: 40 };
+        for (const [source, target] of [[counter, other], [other, counter]]) {
+            assert.equal(canPair([source, target], [], source.id, target.id), true);
+            const combined = combineAddons([source, target], [], source.id, target.id);
+            assert.deepEqual(addonLayout(combined.addons, combined.pairs)[0].items.map((item) => item.id),
+                [target.id, source.id]);
+        }
+    }
+    const progress = { id: 'progress', kind: 'progress', placement: 'below', enabled: true };
+    assert.equal(canPair([counter, progress], [], 'counter', 'progress'), false);
 });
 
 test('combined switch and removal keep pair metadata consistent', () => {
@@ -401,6 +421,32 @@ test('horizontal drag swaps paired members without splitting on a small movement
     }
 });
 
+test('Counter display keeps a signed balance and scales to days', async () => {
+    const session = { value_ms: 2 * 3600000, running: true, direction: -1, started_at_ms: 1000 };
+    assert.deepEqual(counterDisplay(session, 1000), { text: '2:00:00', color: '#22c55e', direction: 'positive' });
+    assert.deepEqual(counterDisplay(session, 4 * 3600000 + 1000), { text: '2:00:00', color: '#ef4444', direction: 'negative' });
+    assert.equal(counterDisplay({ value_ms: 3723000, running: false }, 0).text, '1:02:03');
+    assert.equal(counterDisplay({ value_ms: 12 * 3600000 + 123000, running: false }, 0).text, '12:02:03');
+    assert.equal(counterDisplay({ value_ms: 100 * 3600000 - 1000, running: false }, 0).text, '99:59:59');
+    assert.deepEqual(counterDisplay({ value_ms: 100 * 3600000, running: false }, 0),
+        { text: '4:04:00', color: '#22c55e', direction: 'positive' });
+    assert.equal(counterDisplay({ value_ms: 100 * 3600000 + 59 * 60000, running: false }, 0).text, '4:04:59');
+    const counter = createAddon('counter');
+    const calls = [];
+    const controller = createAddonController({
+        getSettings: () => ({ addons: [counter] }),
+        getState: () => ({ counterSession: session }),
+        dispatchNative: async (_addon, action, options) => { calls.push([action, options]); return {}; },
+    });
+    assert.deepEqual(controller.menuEntries((key) => key)[0].actions.map((action) => action.id),
+        ['start_positive', 'start_negative', 'stop']);
+    assert.equal(controller.actionsFor(counter, 'primary-click').length, 0);
+    assert.deepEqual(controller.actionsFor(counter, 'counter-reset').map((action) => action.id), ['reset']);
+    await assert.rejects(controller.dispatch(counter.id, 'reset', 'clock-menu'), /unavailable/);
+    await controller.dispatch(counter.id, 'reset', 'counter-reset', { confirmedReset: true });
+    assert.deepEqual(calls, [['reset', { confirmedReset: true }]]);
+});
+
 test('Timer display formats a saved countdown session', () => {
     const timer = { options: { mode: 'countdown', duration_seconds: 300 } };
     assert.equal(timerText(timer, { running: false, elapsed_ms: 1000 }, new Date('2026-10-29T13:04:05.000Z').getTime()), '04:59');
@@ -410,7 +456,7 @@ test('date weekday uses the selected language in clock and preview', () => {
     const date = new Date(2026, 9, 29, 13);
     const addon = { kind: 'date', options: { format: 'ymd', show_weekday: true } };
     for (const language of ['en', 'zh-Hans', 'zh-Hant', 'ja']) {
-        const display = displayAddon(addon, date, {}, null, language);
+        const display = displayAddon(addon, date, {}, { language });
         assert.equal(display.weekday, weekdayText(date, language));
         assert.equal(display.text, '2026-10-29');
     }
@@ -573,17 +619,17 @@ test('Progress countdowns have independent elapsed bars and a completion pulse',
         [second.id]: { running: false, elapsed_ms: 5000, started_at_ms: null, finished: false },
     };
     const now = new Date(4000);
-    assert.equal(displayAddon(first, now, {}, null, 'en', sessions).progress.rows[0].percent, 50);
-    assert.equal(displayAddon(second, now, {}, null, 'en', sessions).progress.rows[0].percent, 25);
+    assert.equal(displayAddon(first, now, {}, { progressTimerSessions: sessions }).progress.rows[0].percent, 50);
+    assert.equal(displayAddon(second, now, {}, { progressTimerSessions: sessions }).progress.rows[0].percent, 25);
     assert.equal(progressDisplay(first.options, new Date(1000)).rows[0].percent, 0);
     const previous = { [first.id]: 50 };
     const activeUntil = {};
-    const done = displayAddon(first, new Date(9000), {}, null, 'en', sessions);
+    const done = displayAddon(first, new Date(9000), {}, { progressTimerSessions: sessions });
     markCountdownCompletion(done, first, previous, activeUntil, 9000);
     assert.equal(done.progress.rows[0].percent, 100);
     assert.equal(done.progress.rows[0].celebrating, true);
     assert.equal(done.progress.rows[0].phase, 'complete');
-    const later = displayAddon(first, new Date(10500), {}, null, 'en', sessions);
+    const later = displayAddon(first, new Date(10500), {}, { progressTimerSessions: sessions });
     markCountdownCompletion(later, first, previous, activeUntil, 10500);
     assert.equal(later.progress.rows[0].celebrating, false);
 });

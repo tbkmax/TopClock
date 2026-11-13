@@ -1,6 +1,6 @@
 use crate::settings::ShortcutSettings;
 use crate::{
-    displays::save_current_position, state::ClockState, timer::apply_timer_action,
+    state::ClockState, timer::apply_timer_action, window_commands::quit_app,
     window_commands::show_settings,
 };
 use std::{ptr, sync::Arc, thread, time::Duration};
@@ -178,8 +178,9 @@ pub(super) fn start_hotkeys(app: tauri::AppHandle, state: Arc<ClockState>) {
                 match message.wParam as i32 {
                     1 => show_settings(&app),
                     2 => {
-                        save_current_position(&app);
-                        app.exit(0);
+                        if let Err(error) = quit_app(&app) {
+                            eprintln!("Unable to save Counter before quitting: {error}");
+                        }
                         return;
                     }
                     3 => {

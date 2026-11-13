@@ -1,4 +1,18 @@
 # Frontend changelog
+
+### 2026-11-12 - Keep Counter minutes in day display
+
+- Counter now shows `D:HH:MM` from 100 hours onward, retaining minutes after the format transition. Below 100 hours it still shows `H:MM:SS`, with hours naturally growing to two digits.
+
+### 2026-11-12 - Show Counter seconds and permit pairing
+
+- Counter now shows seconds in its hours/minutes format and can share a row with Date, Region clock, or Timer. At 100 hours it still switches to days/hours. The existing pair switch and scale apply without combining the members' timers or settings; no data migration is required.
+
+
+### 2026-11-12 - Show a signed Counter add-on
+
+- Counter can increase or decrease a saved time balance. The clock menu offers Count up, Count down, and Stop, while Settings asks before Reset. Positive and negative values use the design colors without a minus sign; the display switches to days and hours at 100 hours. Existing timers are unchanged, and older settings default to no Counter.
+
 ## Latest update
 
 ### 2026-11-12 - Restore Progress preset clicks in the clock menu

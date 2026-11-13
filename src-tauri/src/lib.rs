@@ -47,6 +47,8 @@ pub fn run() {
             timer::get_progress_timer_states,
             timer::progress_timer_action,
             timer::progress_timer_set_preset,
+            addons::counter::counter_action,
+            addons::counter::get_counter_state,
             settings_commands::get_hotkey_errors,
             displays::get_displays,
             displays::reset_clock_positions,
@@ -82,6 +84,14 @@ pub fn run() {
             hotkeys::start_hotkeys(app.handle().clone(), state);
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("clock failed to start");
+        .build(tauri::generate_context!())
+        .expect("clock failed to start")
+        .run(|app, event| {
+            if let tauri::RunEvent::ExitRequested { api, .. } = event {
+                if let Err(error) = addons::stop_on_quit(app) {
+                    eprintln!("Unable to save Counter before exiting: {error}");
+                    api.prevent_exit();
+                }
+            }
+        });
 }

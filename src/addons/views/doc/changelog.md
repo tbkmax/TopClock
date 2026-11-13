@@ -1,4 +1,9 @@
 # Bundled view changelog
+
+### 2026-11-12 - Add Counter controls and reset confirmation
+
+- The Settings Counter editor shows a Reset button with a confirmation dialog; its clock row uses signed-state color and a spoken label. The clock menu shows Count up, Count down, and Stop, without Reset.
+
 ## Latest update
 
 ### 2026-11-10 - Add Timer preset details

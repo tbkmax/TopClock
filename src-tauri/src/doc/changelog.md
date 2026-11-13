@@ -1,4 +1,18 @@
 # Rust application changelog
+
+### 2026-11-12 - Retain Counter session without its display
+
+- Settings removal no longer clears the independently saved Counter. Startup keeps a saved balance even when no Counter add-on is configured; it still stops a leftover running snapshot so closed-app time is not added. Existing settings files need no migration.
+
+### 2026-11-12 - Accept Counter in paired settings
+
+- Saved pair metadata can now reference Counter with Date, Region clock, or Timer. It does not combine runtime sessions, and older unpaired Counter settings remain valid.
+
+
+### 2026-11-12 - Stop Counter through one quit path
+
+- Menu, tray, shortcut, and other Tauri exit requests now save a running Counter's current signed balance and stop it before exit. Its data is separate from Timer and Progress; older settings load with an idle zero Counter. If the Counter save fails, the normal exit is prevented.
+
 ## Latest update
 
 ### 2026-11-10 - Persist Timer menu changes atomically

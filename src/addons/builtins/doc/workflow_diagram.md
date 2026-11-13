@@ -1,5 +1,8 @@
 # Built-in definition workflow
 
+Counter's [display formatter](../counter.js) reads `value_ms`, running direction, and start time from the supplied native snapshot. It returns `H:MM:SS` until 100 hours, then `D:HH:MM`, along with semantic color and a state name for the shared clock row and Settings preview. Its three menu actions and Settings-only reset descriptor use the [host workflow](../../doc/workflow_diagram.md); this folder performs no persistence or shutdown write.
+
+
 The Timer definition builds Mode choices for both modes and Set choices only in countdown mode. [countdown-presets.js](../countdown-presets.js) supplies the same elapsed-session confirmation metadata and bounded sorted-list editing to Timer and Progress. Timer's Settings selector dispatches the same mode choice as the clock menu; a running or elapsed session can be reset after confirmation. Native validation is authoritative if another window changes state while confirmation is open. See [the host workflow](../../doc/workflow_diagram.md).
 
 For Region clock editing, [region-picker.js](../region-picker.js) joins browser-supported time zones with the bundled [IANA country map](../zone-country-codes.js), then derives localized and English names with `Intl.DisplayNames`. The [view](../../views/region-clock.html) filters those records from a transient query and sends only a chosen ID to the existing option editor. A Settings language change rebuilds the records; Escape and blur reset the query to the current selected label. The [display formatter](../region-clock.js) continues using the saved zone ID.
@@ -23,13 +26,15 @@ classDiagram
     class RegionClockAddon
     class TimerAddon
     class ProgressAddon
+    class CounterAddon
     DateAddon ..|> AddonDefinition
     RegionClockAddon ..|> AddonDefinition
     TimerAddon ..|> AddonDefinition
     ProgressAddon ..|> AddonDefinition
+    CounterAddon ..|> AddonDefinition
 ```
 
-The four definition objects live in [date.js](../date.js), [region-clock.js](../region-clock.js), [timer.js](../timer.js), and [progress.js](../progress.js). The notation describes their common fields; no runtime class or inheritance is created.
+The five definition objects live in [date.js](../date.js), [region-clock.js](../region-clock.js), [timer.js](../timer.js), [progress.js](../progress.js), and [counter.js](../counter.js). The notation describes their common fields; no runtime class or inheritance is created.
 
 ```mermaid
 sequenceDiagram

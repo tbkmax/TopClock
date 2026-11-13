@@ -18,7 +18,9 @@ export function addonName(addon) {
     return addon.kind === 'region_clock' ? regionName(addon) : getAddonDefinition(addon.kind)?.label || addon.kind;
 }
 
-export function displayAddon(addon, now, settings, session, language = 'en', progressSessions = {}) {
+export function displayAddon(addon, now, settings, {
+    timerSession = null, progressTimerSessions = {}, counterSession = null, language = 'en',
+} = {}) {
     const definition = getAddonDefinition(addon.kind);
     const base = {
         ...addon, label: addon.kind === 'region_clock' ? regionName(addon) : translate(language, `addons.${addon.kind}`),
@@ -26,6 +28,9 @@ export function displayAddon(addon, now, settings, session, language = 'en', pro
         text: '', weekday: '', parts: null, finished: false, hidden: false, progress: null,
     };
     return definition ? {
-        ...base, ...definition.display(addon, { now, settings, session, language, progressSessions }),
+        ...base, ...definition.display(addon, {
+            now, settings, session: timerSession, language,
+            progressSessions: progressTimerSessions, counterSession,
+        }),
     } : base;
 }
