@@ -1,5 +1,9 @@
 # Frontend changelog
 
+### 2026-11-12 - Show the full Add-ons catalog
+
+- The Add add-on section now grows with all registered cards. The Settings page handles any vertical overflow, so the catalog no longer needs its own scrollbar. The two-column cards and add actions are unchanged.
+
 ### 2026-11-12 - Keep Counter minutes in day display
 
 - Counter now shows `D:HH:MM` from 100 hours onward, retaining minutes after the format transition. Below 100 hours it still shows `H:MM:SS`, with hours naturally growing to two digits.

@@ -15,7 +15,7 @@ Alpine.data('site', () => ({
     init() {
         const updateRoute = () => {
             this.page = routeFromHash();
-            const addonRoute = window.location.hash.slice(1).match(/^addons-(date|region|timer|progress)$/);
+            const addonRoute = window.location.hash.slice(1).match(/^addons-(date|region|timer|progress|counter)$/);
             this.addonTab = addonRoute?.[1] || 'date';
             this.$nextTick(() => {
                 const id = window.location.hash.slice(1);
