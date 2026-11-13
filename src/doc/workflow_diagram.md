@@ -1,5 +1,28 @@
 # Frontend workflows
 
+## Clock menu add-on switches
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Menu as menu.js
+    participant Host as addons/controller.js
+    participant Rust as settings_commands.rs
+    User->>Menu: Expand Add-on and select a switch
+    Menu->>Host: setEnabled(instance ID, new state)
+    Host->>Rust: set_addon_enabled(id, enabled)
+    alt Save succeeds
+        Rust-->>Menu: Saved ClockSettings
+        Rust-->>Menu: clock-settings-changed
+        Menu-->>User: Update switches; keep menu open
+    else Save fails or instance vanished
+        Rust-->>Menu: Error
+        Menu-->>User: Show error; keep previous state
+    end
+```
+
+The disclosure is below the existing add-on action rows in [menu.html](../../menu.html). [controller.js](../addons/controller.js) derives its switch rows from the same pair layout as Settings; Rust applies a paired switch to both saved members. Mode and Set choices also stay open on success, while first-level actions still close the menu. [menu.js](../menu.js) marks newly expanded rows as visually pending before Alpine reveals them. They still take their final layout space, so `show_clock_menu` receives the correct dimensions. After that native resize completes, the current request clears the pending state and [menu.css](../menu.css) fades the rows in. A later resize request supersedes an earlier completion. Overflow stays clipped during resizing and returns to scrolling when needed. The [native workflow](../../src-tauri/src/doc/workflow_diagram.md) owns validation, persistence, and session reconciliation.
+
 Counter uses the shared add-on display and action pipeline. [menu.js](../menu.js) renders three actions from the Counter definition; [settings.js](../settings.js) opens a confirmation dialog for Reset and dispatches only after confirmation. [main.js](../main.js) and the Settings preview read the same signed `counterSession` snapshot, while [the native workflow](../../src-tauri/src/addons/doc/workflow_diagram.md) owns saving and stopping on quit. No primary-click action is registered for Counter. Its `H:MM:SS` display changes to `D:HH:MM` at 100 hours; its session remains independent when [layout.js](../addons/layout.js) places it beside Date, Region clock, or Timer.
 
 ## Timer menu mode and preset

@@ -40,6 +40,7 @@ pub fn run() {
             locale::get_system_locale,
             fonts::get_font_families,
             settings_commands::update_settings,
+            settings_commands::set_addon_enabled,
             timer::get_timer_state,
             timer::timer_action,
             timer::timer_set_mode,

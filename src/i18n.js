@@ -148,6 +148,8 @@ const messages = {
     'addons.invalidProgressRange': ['Times must be valid and may overlap only on different weekdays.', '时间必须有效；只有在不同星期几的时段才能重叠。', '時間必須有效；只有不同星期幾的時段才能重疊。', '時刻を正しく指定してください。時間帯が重なる場合は別の曜日を選んでください。'],
     'addons.localDate': ['Local date', '本地日期', '本地日期', '現地の日付'],
     'addons.enable': ['Enable {name}', '启用{name}', '啟用{name}', '{name}を有効にする'],
+    'addons.disable': ['Disable {name}', '禁用{name}', '停用{name}', '{name}を無効にする'],
+    'addons.menuToggle': ['Add-on', '附加功能', '附加功能', 'アドオン'],
     'addons.position': ['Position', '位置', '位置', '位置'],
     'addons.positionFor': ['Position for {name}', '{name}的位置', '{name}的位置', '{name}の位置'],
     'addons.above': ['Above clock', '时钟上方', '時鐘上方', '時計の上'],

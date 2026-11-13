@@ -6,8 +6,8 @@
     <title>TopClock Menu</title>
 </head>
 <body>
-    <main id="menu-app" x-data="clockMenu" @contextmenu.prevent>
-        <div class="menu-surface" :class="{ 'menu-surface-wide': pendingChoice || menuEntries.some(entry => entry.type === 'group') }" x-ref="surface" x-show="request" x-cloak>
+    <main id="menu-app" x-data="clockMenu" :class="{ 'menu-resizing': resizing }" @contextmenu.prevent>
+        <div class="menu-surface" :class="{ 'menu-surface-wide': pendingChoice || expandedId === 'addon-toggle' || menuEntries.some(entry => entry.type === 'group') }" x-ref="surface" x-show="request" x-cloak>
             <template x-if="!pendingChoice">
                 <div>
                     <button class="menu-command" type="button" @click="openSettings()">
@@ -36,7 +36,7 @@
                                         </div>
                                     </div>
                                     <template x-for="section in entry.sections" :key="section.id"><div>
-                                        <div class="menu-choices" x-show="expandedId === `${entry.instanceId}-${section.id}`" x-cloak>
+                                        <div class="menu-choices" :class="{ 'menu-reveal-pending': revealPendingId === `${entry.instanceId}-${section.id}` }" x-show="expandedId === `${entry.instanceId}-${section.id}`" x-cloak>
                                             <template x-for="choice in section.choices" :key="choice.id">
                                                 <button type="button" class="menu-choice" :disabled="busy || Boolean(choice.selected)" :aria-current="choice.selected ? 'true' : null" @click="choose(entry, choice)" x-text="t(choice.labelKey, choice.labelVars)"></button>
                                             </template>
@@ -44,6 +44,22 @@
                                     </div></template>
                                 </section>
                             </template>
+                        </div>
+                    </template>
+                    <template x-if="toggleEntries.length">
+                        <div class="menu-addon-toggle-group">
+                            <button class="menu-command" type="button" :aria-expanded="expandedId === 'addon-toggle'" @click="toggleChoices('addon-toggle')">
+                                <span x-text="t('addons.menuToggle')"></span>
+                                <span class="menu-disclosure" x-text="expandedId === 'addon-toggle' ? '▴' : '▾'"></span>
+                            </button>
+                            <div class="menu-addon-toggles" :class="{ 'menu-reveal-pending': revealPendingId === 'addon-toggle' }" x-show="expandedId === 'addon-toggle'" x-cloak>
+                                <template x-for="entry in toggleEntries" :key="entry.id">
+                                    <button class="menu-addon-toggle" type="button" role="switch" :disabled="busy" :aria-checked="entry.enabled" :aria-label="t(entry.enabled ? 'addons.disable' : 'addons.enable', { name: entry.name })" @click="toggleAddon(entry)">
+                                        <span class="menu-addon-name" x-text="entry.name"></span>
+                                        <span class="switch" :class="{ on: entry.enabled }"><span></span></span>
+                                    </button>
+                                </template>
+                            </div>
                         </div>
                     </template>
                     <div class="menu-divider"></div>

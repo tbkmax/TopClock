@@ -9,6 +9,7 @@ export const nativeAddonAdapter = {
     onTimer: (callback) => listen('timer-state-changed', ({ payload }) => callback(payload)),
     onProgress: (callback) => listen('progress-timer-states-changed', ({ payload }) => callback(payload)),
     onCounter: (callback) => listen('counter-state-changed', ({ payload }) => callback(payload)),
+    setEnabled: (id, enabled) => invoke('set_addon_enabled', { id, enabled }),
     action(addon, action, confirmedReset = false) {
         if (addon.kind === 'timer') return invoke('timer_action', { action });
         if (addon.kind === 'progress') return invoke('progress_timer_action', { id: addon.id, action });

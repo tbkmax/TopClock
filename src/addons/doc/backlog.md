@@ -1,5 +1,7 @@
 # Frontend add-on host backlog
 
+Check switch row names, pair grouping, multiple Progress instances, and native event refresh in a running WebView. The [frontend Add-on menu checklist](../../doc/backlog.md#add-on-menu-live-verification) covers the physical menu, persistence, and click-through checks; the controller test covers list composition and command routing.
+
 Verify Counter actions across the clock menu, Settings, a paired row, and a second display in a live Windows session. Confirm the menu contains Count up, Count down, and Stop, with Reset only in Settings; inspect `D:HH:MM` near the 100-hour boundary in both the clock and preview. This extends the [frontend Counter checklist](../../doc/backlog.md#counter-live-windows-acceptance).
 
 

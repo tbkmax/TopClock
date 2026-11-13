@@ -1,5 +1,17 @@
 # Frontend changelog
 
+### 2026-11-12 - Reveal expanded menu rows after native resize
+
+- Add-on, Timer, and Progress disclosure rows now wait for the menu window to finish resizing before fading in. Reduced-motion settings skip the fade. No new dependency or saved settings change is required.
+
+### 2026-11-12 - Point Add-on disclosure down and hide resize scrollbar flash
+
+- The Add-on disclosure now uses a downward arrow when collapsed. Expanding or changing a menu section clips overflow until the native menu finishes resizing, so a temporary scrollbar does not flash; scrolling returns when the final menu is taller than the display.
+
+### 2026-11-12 - Keep second-level menu controls open
+
+- The clock menu now expands **Add-on >** beneath the existing controls and shows the same switch styling as Settings for configured add-ons. Combined members share one switch. Mode, Set, and these switches keep the menu open after use; first-level actions still close it. No settings migration is required.
+
 ### 2026-11-12 - Show the full Add-ons catalog
 
 - The Add add-on section now grows with all registered cards. The Settings page handles any vertical overflow, so the catalog no longer needs its own scrollbar. The two-column cards and add actions are unchanged.

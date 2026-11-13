@@ -1,5 +1,7 @@
 # Frontend add-on host workflows
 
+The clock menu's Add-on disclosure uses [controller.js](../controller.js) to list every configured row from [layout.js](../layout.js), including disabled rows and a single row per pair. A switch sends an explicit target state through [native-adapter.js](../native-adapter.js) and waits for saved settings. The menu applies the returned snapshot and stays open; a rejected command shows an error without changing the switch. See the [menu sequence diagram](../../doc/workflow_diagram.md#clock-menu-add-on-switches).
+
 ## Counter action and display
 
 ```mermaid

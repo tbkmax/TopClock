@@ -1,5 +1,9 @@
 # Frontend add-on host changelog
 
+### 2026-11-12 - Supply configured menu switch rows
+
+- The add-on host now lists enabled and disabled instances for the clock menu, combines paired members into one switch row, and routes switch requests to the native settings command. Existing runtime action descriptors remain unchanged; no saved schema changes are required.
+
 ### 2026-11-12 - Test Counter's minute-preserving day format
 
 - Display regression coverage now checks two-digit hours and the `D:HH:MM` boundary at 100 hours. The shared host and session routing are unchanged.

@@ -1,5 +1,16 @@
 # Frontend backlog
 
+## Add-on menu live verification
+
+- **Title:** Verify expanded switches and persistent second-level menu choices in Windows.
+- **Problem or opportunity:** Automated tests and the Vite build do not prove WebView focus, physical clicks, or native menu sizing.
+- **Desired outcome:** Every added instance appears under **Add-on >**, a paired row switches both members, and Mode/Set choices remain usable without reopening the menu.
+- **Scope:** [menu](../menu.js), [add-on controller](../addons/controller.js), and [native settings command](../../src-tauri/src/settings_commands.rs).
+- **Acceptance criteria:** Check enabled and disabled instances, two same-kind Progress instances, a pair, Timer and Counter session behavior on disable, successful and failed saves, confirmation, Escape, outside click, click-through restoration, Settings and tray actions, Ctrl drag, position restore, and a second display. First-level actions should still close the menu. Expand Add-on, Timer Mode/Set, and Progress Set to confirm no temporary scrollbar or pre-resize row flash appears; check the 120 ms reveal, reduced-motion behavior, and scrolling when many entries exceed the display height.
+- **Dependencies and risks:** Requires an interactive Windows WebView and a disposable settings profile. A simultaneous pending full Settings write may still replace a menu toggle; the normal debounce is 80 ms, and this task does not alter the broader whole-settings save contract.
+- **Verification:** Run `npm run tauri:dev` and record the observed results before release.
+- **Priority:** High before release because input and cross-window synchronization are user-visible.
+
 ## Counter live Windows acceptance
 
 - **Title:** Verify Counter controls, color, and persistence in the running desktop app.

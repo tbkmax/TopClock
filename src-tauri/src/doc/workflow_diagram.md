@@ -1,5 +1,31 @@
 # Rust workflows
 
+## Clock menu enabled-state transaction
+
+```mermaid
+sequenceDiagram
+    participant Menu as menu.js
+    participant Command as settings_commands.rs
+    participant Config as ClockState config
+    participant Disk as settings.json
+    Menu->>Command: set_addon_enabled(id, enabled)
+    Command->>Config: Lock and find ID plus optional pair member
+    alt Unknown ID or invalid settings
+        Command-->>Menu: Error without write
+    else Valid change
+        Command->>Config: Reconcile Timer, Progress, Counter sessions
+        Command->>Disk: Save settings and sessions
+        alt Write fails
+            Command->>Config: Restore previous settings and sessions
+            Command-->>Menu: Error
+        else Write succeeds
+            Command-->>Menu: Saved settings and changed events
+        end
+    end
+```
+
+The typed command and the existing whole-settings `update_settings` share [save_settings_change](../settings_commands.rs). Pair membership is read from the current saved settings, so the menu cannot submit a stale copy of the full configuration. This command does not change the separate Settings page's 80 ms draft-save behavior; its pending full snapshot can still race a menu switch.
+
 The Counter command and normal quit path are detailed in the [native add-on workflow](../addons/doc/workflow_diagram.md). Settings removal leaves the Counter session in `PersistedConfig`, even if it is running; re-adding the display exposes it again. Menu, tray, and shortcut Quit use `quit_app`, which checkpoints a running Counter before saving the clock position and exiting. [lib.rs](../lib.rs) also applies the Counter checkpoint on other Tauri exit requests. The separate Timer and Progress sessions keep their existing restart rules.
 
 Counter pair validation follows the existing [native add-on pair workflow](../addons/doc/workflow_diagram.md#pair-validation): `update_settings` accepts an eligible adjacent Counter and another Date, Region clock, or Timer instance, while their sessions remain independent.

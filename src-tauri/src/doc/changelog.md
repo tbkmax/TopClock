@@ -1,5 +1,9 @@
 # Rust application changelog
 
+### 2026-11-12 - Save add-on switches from the clock menu
+
+- Added a targeted command for enabling or disabling an existing add-on from the clock menu. Paired members switch together, and the normal settings validation, session rules, rollback, and broadcast apply. Existing settings files need no migration or user action.
+
 ### 2026-11-12 - Retain Counter session without its display
 
 - Settings removal no longer clears the independently saved Counter. Startup keeps a saved balance even when no Counter add-on is configured; it still stops a leftover running snapshot so closed-app time is not added. Existing settings files need no migration.

@@ -1,6 +1,7 @@
 import { getAddonDefinition } from './registry.js';
+import { addonLayout } from './layout.js';
 
-export function createAddonController({ getSettings, getState, dispatchNative, dispatchMenuChoiceNative, beforeAction = async () => true }) {
+export function createAddonController({ getSettings, getState, dispatchNative, dispatchMenuChoiceNative, setEnabledNative, beforeAction = async () => true }) {
     function instance(id) {
         return (getSettings()?.addons || []).find((addon) => addon.id === id);
     }
@@ -11,6 +12,22 @@ export function createAddonController({ getSettings, getState, dispatchNative, d
     }
     return {
         actionsFor,
+        toggleEntries(t) {
+            const settings = getSettings();
+            return addonLayout(settings?.addons, settings?.addon_pairs).map((row) => ({
+                id: row.items[0].id,
+                name: row.items.map((addon) => getAddonDefinition(addon.kind)?.describe(addon, { t, settings }).name || addon.kind).join(' + '),
+                enabled: row.items[0].enabled,
+            }));
+        },
+        async setEnabled(id, enabled) {
+            if (typeof enabled !== 'boolean' || !instance(id) || !setEnabledNative) {
+                throw new Error('Add-on switch is unavailable');
+            }
+            if (!await beforeAction()) return null;
+            if (!instance(id)) throw new Error('Add-on switch is unavailable');
+            return setEnabledNative(id, enabled);
+        },
         menuActions() {
             return (getSettings()?.addons || []).flatMap((addon) =>
                 actionsFor(addon, 'clock-menu').filter((action) => action.enabled)

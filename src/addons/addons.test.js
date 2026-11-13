@@ -99,6 +99,32 @@ test('controller routes only declared actions to the current enabled instance', 
     assert.deepEqual(calls, [[second.id, 'toggle'], [first.id, 'reset']]);
 });
 
+test('menu switches list disabled instances and save paired members together', async () => {
+    const date = createAddon('date');
+    const timer = createAddon('timer');
+    const progress = createAddon('progress');
+    date.enabled = timer.enabled = false;
+    const settings = {
+        addons: [date, timer, progress],
+        addon_pairs: [{ left_id: date.id, right_id: timer.id, size_percent: 100 }],
+    };
+    const calls = [];
+    const controller = createAddonController({
+        getSettings: () => settings,
+        getState: () => ({}),
+        dispatchNative: async () => ({}),
+        setEnabledNative: async (id, enabled) => { calls.push([id, enabled]); return settings; },
+    });
+    const entries = controller.toggleEntries((key, vars) => translate('en', key, vars));
+    assert.equal(entries.length, 2);
+    assert.equal(entries[0].name, 'Date + Timer');
+    assert.equal(entries[0].enabled, false);
+    assert.equal(entries[1].name, 'Progress 1');
+    await controller.setEnabled(timer.id, true);
+    assert.deepEqual(calls, [[timer.id, true]]);
+    await assert.rejects(controller.setEnabled('removed', true), /unavailable/);
+});
+
 test('menu choices come from the definition and revalidate the selected instance', async () => {
     const first = createAddon('progress');
     const second = createAddon('progress');

@@ -14,12 +14,16 @@ Alpine.data('clockMenu', () => ({
     language: 'en',
     addonHost: null,
     expandedId: null,
+    revealPendingId: null,
     pendingChoice: null,
     dontShowAgain: false,
     busy: false,
     error: '',
     resizeTimer: null,
+    resizeRevision: 0,
+    resizing: false,
     get menuEntries() { return this.addonHost?.menuEntries((key, vars) => this.t(key, vars)) || []; },
+    get toggleEntries() { return this.addonHost?.toggleEntries((key, vars) => this.t(key, vars)) || []; },
     t(key, vars) { return key ? translate(this.language, key, vars) : ''; },
 
     async init() {
@@ -57,6 +61,7 @@ Alpine.data('clockMenu', () => ({
     async open(request) {
         this.request = request;
         this.expandedId = null;
+        this.revealPendingId = null;
         this.pendingChoice = null;
         this.error = '';
         if (!this.settings) await this.loadSettings();
@@ -64,6 +69,8 @@ Alpine.data('clockMenu', () => ({
     },
     resizeMenu() {
         if (!this.request) return;
+        const revision = ++this.resizeRevision;
+        this.resizing = true;
         clearTimeout(this.resizeTimer);
         this.resizeTimer = setTimeout(async () => {
             if (!this.request || !this.$refs.surface) return;
@@ -74,13 +81,28 @@ Alpine.data('clockMenu', () => ({
             const height = Math.ceil(this.$refs.surface.offsetHeight) + 12;
             try { await invoke('show_clock_menu', { requestId: id, width, height }); }
             catch (error) { if (this.request?.id === id) this.error = String(error); }
+            finally {
+                if (this.request?.id === id && this.resizeRevision === revision) {
+                    this.resizing = false;
+                    this.revealPendingId = null;
+                }
+            }
         }, 20);
     },
-    toggleChoices(id) { this.expandedId = this.expandedId === id ? null : id; this.$nextTick(() => this.resizeMenu()); },
+    toggleChoices(id) {
+        const opening = this.expandedId !== id;
+        this.resizing = true;
+        this.revealPendingId = opening ? id : null;
+        this.expandedId = opening ? id : null;
+        this.$nextTick(() => this.resizeMenu());
+    },
     async close() {
         if (!this.request) return;
         const id = this.request.id;
         this.request = null;
+        this.resizeRevision++;
+        this.resizing = false;
+        this.revealPendingId = null;
         clearTimeout(this.resizeTimer);
         try { await invoke('close_clock_menu', { requestId: id }); }
         catch (error) { console.error(error); }
@@ -95,9 +117,20 @@ Alpine.data('clockMenu', () => ({
         } catch (error) { this.error = String(error); }
         finally { this.busy = false; }
     },
+    async toggleAddon(entry) {
+        if (this.busy) return;
+        this.busy = true;
+        this.error = '';
+        try {
+            const saved = await this.addonHost.setEnabled(entry.id, !entry.enabled);
+            if (saved) this.applySettings(saved);
+        } catch (error) { this.error = String(error); }
+        finally { this.busy = false; }
+    },
     choose(entry, choice) {
         if (this.busy) return;
         if (choice.confirm?.required) {
+            this.resizing = true;
             this.pendingChoice = { entry, choice };
             this.dontShowAgain = false;
             this.$nextTick(() => this.resizeMenu());
@@ -118,9 +151,12 @@ Alpine.data('clockMenu', () => ({
             await this.addonHost.dispatchMenuChoice(entry.instanceId, choice.id, {
                 confirmedReset, dontShowAgain: confirmedReset && this.dontShowAgain,
             });
-            await this.close();
+            this.resizing = true;
+            this.pendingChoice = null;
+            this.$nextTick(() => this.resizeMenu());
         } catch (error) {
             if (String(error).includes('requires confirmation') && choice.confirm) {
+                this.resizing = true;
                 this.pendingChoice = { entry, choice };
                 this.dontShowAgain = false;
                 this.$nextTick(() => this.resizeMenu());

@@ -69,7 +69,7 @@ By default, the clock is non-intrusive and transparent to input: mouse clicks pa
 | :--- | :--- | :--- |
 | **Move / Reposition** | <kbd>Ctrl</kbd> + **Left Drag** | Drag a clock freely; each display's clock position is saved independently. |
 | **Toggle 12 / 24-Hour** | <kbd>Ctrl</kbd> + **Left Click** | Quick-toggle between 12-hour and 24-hour time formats. |
-| **Context Menu** | <kbd>Ctrl</kbd> + **Right Click** | Open Settings, Timer, Progress countdown, and Counter controls when enabled, or Quit. Timer offers mode switching and editable countdown presets. |
+| **Context Menu** | <kbd>Ctrl</kbd> + **Right Click** | Open Settings, Timer, Progress countdown, and Counter controls when enabled; expand **Add-on ▾** to switch configured add-ons on or off; or Quit. Expanded choices stay open after selection, while main action buttons close the menu. |
 | **Quit Application** | <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Q</kbd> | Optional system-wide shortcut, off by default. Enable it in Shortcuts. |
 | **Open Settings** | **Left Click Tray Icon** | Open the modern ClickHouse-inspired Settings panel. |
 | **Tray Context Menu** | **Right Click Tray Icon** | Access tray options and application exit. |

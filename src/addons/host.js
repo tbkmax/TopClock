@@ -1,5 +1,6 @@
 import { createAddonController } from './controller.js';
 import { createAddonState } from './state.js';
+import { nativeAddonAdapter } from './native-adapter.js';
 
 // One reactive session store feeds both the add-on controller and its page.
 export function createAddonHost({ reactive, getSettings, onChange = () => {}, beforeAction, adapter }) {
@@ -9,6 +10,7 @@ export function createAddonHost({ reactive, getSettings, onChange = () => {}, be
         getState: () => state.snapshot,
         dispatchNative: (addon, action, options) => state.dispatch(addon, action, options),
         dispatchMenuChoiceNative: (addon, choice, confirmation) => state.dispatchMenuChoice(addon, choice, confirmation),
+        setEnabledNative: (id, enabled) => (adapter || nativeAddonAdapter).setEnabled(id, enabled),
         beforeAction,
     });
     return {
@@ -21,6 +23,8 @@ export function createAddonHost({ reactive, getSettings, onChange = () => {}, be
         actionsFor: (addon, role) => controller.actionsFor(addon, role),
         menuActions: () => controller.menuActions(),
         menuEntries: (t) => controller.menuEntries(t),
+        toggleEntries: (t) => controller.toggleEntries(t),
+        setEnabled: (id, enabled) => controller.setEnabled(id, enabled),
         dispatchMenuChoice: (id, choiceId, confirmation) => controller.dispatchMenuChoice(id, choiceId, confirmation),
         dispatch: (id, action, role, options) => controller.dispatch(id, action, role, options),
     };
