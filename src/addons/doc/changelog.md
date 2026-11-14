@@ -1,5 +1,9 @@
 # Frontend add-on host changelog
 
+### 2026-11-13 - Cover Counter running and stopped colors
+
+- The display regression test now checks positive and negative balances while running and stopped. The clock and preview continue to use the same definition result; action routing and saved sessions are unchanged.
+
 ### 2026-11-12 - Supply configured menu switch rows
 
 - The add-on host now lists enabled and disabled instances for the clock menu, combines paired members into one switch row, and routes switch requests to the native settings command. Existing runtime action descriptors remain unchanged; no saved schema changes are required.

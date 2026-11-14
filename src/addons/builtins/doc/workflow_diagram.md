@@ -1,6 +1,6 @@
 # Built-in definition workflow
 
-Counter's [display formatter](../counter.js) reads `value_ms`, running direction, and start time from the supplied native snapshot. It returns `H:MM:SS` until 100 hours, then `D:HH:MM`, along with semantic color and a state name for the shared clock row and Settings preview. Its three menu actions and Settings-only reset descriptor use the [host workflow](../../doc/workflow_diagram.md); this folder performs no persistence or shutdown write.
+Counter's [display formatter](../counter.js) reads `value_ms`, running direction, and start time from the supplied native snapshot. It returns `H:MM:SS` until 100 hours, then `D:HH:MM`. The pure [appearance helper](../signed-balance-appearance.js) maps the resulting signed value and session's running flag to a color and signed state name for the shared clock row and Settings preview. Zero leaves the configured text color in place. Its three menu actions and Settings-only reset descriptor use the [host workflow](../../doc/workflow_diagram.md); this folder performs no persistence or shutdown write.
 
 
 The Timer definition builds Mode choices for both modes and Set choices only in countdown mode. [countdown-presets.js](../countdown-presets.js) supplies the same elapsed-session confirmation metadata and bounded sorted-list editing to Timer and Progress. Timer's Settings selector dispatches the same mode choice as the clock menu; a running or elapsed session can be reset after confirmation. Native validation is authoritative if another window changes state while confirmation is open. See [the host workflow](../../doc/workflow_diagram.md).
@@ -43,7 +43,7 @@ sequenceDiagram
     participant Native as Native session snapshot
     Clock->>Registry: display(instance, settings, time, session)
     Registry->>Native: Read supplied snapshot
-    Registry-->>Clock: Text, parts, progress, hidden/finished flags
+    Registry-->>Clock: Text, color, signed state, or other display data
     Clock->>Clock: Apply view-local animation history
 ```
 

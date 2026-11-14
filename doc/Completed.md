@@ -32,6 +32,7 @@
 - [x] currently the clock will only display in main display, which when user have multiple screen it won't show it other, make it by default will show on all display (even user plug in new screen after app open show detect and shows) (also position of each screen can be customizable and should be remember). For this on in general tab, add a setting that will have check box for user to select which screen to show the clock (which default will check all the box)
 
 ### TODO 5: Add-on tab
+- [x] 2026-11-13 Counter fix: positive and negative balances use blue and red while running, and lighter blue and red when stopped, so the activity state is clearer at small text sizes. The same colors appear in the clock and Settings preview.
 - [x] Design add-on system which user can add or remove the add-on which in this TODO will be consider as default add-on
 - [x] Add-on can be place up or down of clock usually will be smaller text or even button to change any feature
 - [x] Add-on will share space in up and down of clock which always consider about how to place it to make sure there is no conflict

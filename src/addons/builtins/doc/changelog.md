@@ -1,5 +1,9 @@
 # Built-in definitions changelog
 
+### 2026-11-13 - Distinguish stopped signed balances by color
+
+- Counter uses blue for a running positive balance and red for a running negative balance. Stopping keeps each sign's hue but changes to a lighter shade; zero keeps the configured clock color. A shared pure appearance helper owns the palette for possible reuse by another signed-time add-on. No saved settings change is required.
+
 ### 2026-11-12 - Retain minutes in the long Counter format
 
 - At 100 total hours, Counter now displays `D:HH:MM`. The shorter `H:MM:SS` format remains, including two-digit hour values from 10 through 99.

@@ -1,5 +1,9 @@
 # Frontend changelog
 
+### 2026-11-13 - Show lighter Counter colors when stopped
+
+- Positive balances now appear blue while running and light blue after Stop; negative balances remain red while running and become light red after Stop. The clock and Settings preview share the same colors. Zero still uses the configured text color, and saved Counter state is unchanged.
+
 ### 2026-11-12 - Reveal expanded menu rows after native resize
 
 - Add-on, Timer, and Progress disclosure rows now wait for the menu window to finish resizing before fading in. Reduced-motion settings skip the fade. No new dependency or saved settings change is required.

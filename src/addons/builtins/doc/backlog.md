@@ -1,6 +1,6 @@
 # Built-in definitions backlog
 
-Confirm Counter's `H:MM:SS` per-second display, `D:HH:MM` transition at 100 hours with minutes retained, and positive, negative, and zero colors in a running clock on both dark and light desktop backgrounds; see the [frontend Counter checklist](../../../doc/backlog.md#counter-live-windows-acceptance).
+Confirm Counter's `H:MM:SS` per-second display, `D:HH:MM` transition at 100 hours with minutes retained, and blue/red running versus light blue/red stopped colors on both dark and light desktop backgrounds. Verify zero uses the configured text color and that the color changes promptly after Stop or restart; see the [frontend Counter checklist](../../../doc/backlog.md#counter-live-windows-acceptance).
 
 
 Confirm Timer preset edits stay independent of Progress and that stopwatch hides Set while both modes retain Mode, Start/Pause, and Reset in the [live Timer checklist](../../../doc/backlog.md#timer-menu-live-windows-acceptance). Frontend choice tests cover the definition path; native WebView interaction remains open.

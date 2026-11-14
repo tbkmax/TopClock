@@ -449,13 +449,19 @@ test('horizontal drag swaps paired members without splitting on a small movement
 
 test('Counter display keeps a signed balance and scales to days', async () => {
     const session = { value_ms: 2 * 3600000, running: true, direction: -1, started_at_ms: 1000 };
-    assert.deepEqual(counterDisplay(session, 1000), { text: '2:00:00', color: '#22c55e', direction: 'positive' });
+    assert.deepEqual(counterDisplay(session, 1000), { text: '2:00:00', color: '#3b82f6', direction: 'positive' });
     assert.deepEqual(counterDisplay(session, 4 * 3600000 + 1000), { text: '2:00:00', color: '#ef4444', direction: 'negative' });
+    assert.deepEqual(counterDisplay({ value_ms: 2 * 3600000, running: false }, 0),
+        { text: '2:00:00', color: '#93c5fd', direction: 'positive' });
+    assert.deepEqual(counterDisplay({ value_ms: -2 * 3600000, running: false }, 0),
+        { text: '2:00:00', color: '#fca5a5', direction: 'negative' });
+    assert.deepEqual(counterDisplay({ value_ms: 0, running: false }, 0),
+        { text: '0:00:00', color: null, direction: 'zero' });
     assert.equal(counterDisplay({ value_ms: 3723000, running: false }, 0).text, '1:02:03');
     assert.equal(counterDisplay({ value_ms: 12 * 3600000 + 123000, running: false }, 0).text, '12:02:03');
     assert.equal(counterDisplay({ value_ms: 100 * 3600000 - 1000, running: false }, 0).text, '99:59:59');
     assert.deepEqual(counterDisplay({ value_ms: 100 * 3600000, running: false }, 0),
-        { text: '4:04:00', color: '#22c55e', direction: 'positive' });
+        { text: '4:04:00', color: '#93c5fd', direction: 'positive' });
     assert.equal(counterDisplay({ value_ms: 100 * 3600000 + 59 * 60000, running: false }, 0).text, '4:04:59');
     const counter = createAddon('counter');
     const calls = [];

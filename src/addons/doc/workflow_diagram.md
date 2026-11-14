@@ -14,10 +14,10 @@ sequenceDiagram
     Host->>Rust: Dispatch current enabled Counter action
     Rust-->>Host: Saved CounterSession
     Rust-->>Clock: counter-state-changed
-    Clock->>Clock: Format signed balance and semantic color
+    Clock->>Clock: Format balance; map sign and running state to color
 ```
 
-[counter.js](../builtins/counter.js) supplies the three menu actions and pure `H:MM:SS`/`D:HH:MM` formatting. No Counter primary-click role exists. Reset has a Settings-only role and passes confirmation to Rust; an invalid or disabled target is rejected before a native write. The [native workflow](../../../src-tauri/src/addons/doc/workflow_diagram.md) covers shutdown persistence.
+[counter.js](../builtins/counter.js) supplies the three menu actions and pure `H:MM:SS`/`D:HH:MM` formatting. Its [appearance helper](../builtins/signed-balance-appearance.js) selects blue/red for a running nonzero balance and lighter shades for a stopped one; the clock and preview receive the same result. No Counter primary-click role exists. Reset has a Settings-only role and passes confirmation to Rust; an invalid or disabled target is rejected before a native write. The [native workflow](../../../src-tauri/src/addons/doc/workflow_diagram.md) covers shutdown persistence.
 
 
 Timer and Progress definitions contribute grouped menu entries. The controller asks for named sections, flattens the choices for current-instance revalidation, then the adapter invokes the matching native command. Timer Mode choices remain available in both modes; Timer Set choices exist only in countdown mode. The host updates its reactive Timer session from the command result only if a newer `timer-state-changed` event has not arrived. See the [Timer definition](../builtins/timer.js), [menu](../../menu.js), and [native workflow](../../../src-tauri/src/addons/doc/workflow_diagram.md).
