@@ -1,5 +1,9 @@
 # Frontend changelog
 
+### 2026-11-13 - Translate the Counter catalog description
+
+- The Add Add-on catalog now shows a Counter description in English, Simplified Chinese, Traditional Chinese, and Japanese instead of the raw `addons.counterDescription` key. A catalog-wide translation check covers all registered add-on descriptions.
+
 ### 2026-11-13 - Show lighter Counter colors when stopped
 
 - Positive balances now appear blue while running and light blue after Stop; negative balances remain red while running and become light red after Stop. The clock and Settings preview share the same colors. Zero still uses the configured text color, and saved Counter state is unchanged.

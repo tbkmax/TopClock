@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { resolveLanguage } from './i18n.js';
+import { languageOptions, resolveLanguage, translate } from './i18n.js';
+import { addonCatalog } from './addons/registry.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { createSettingsPersistence } from './settings-persistence.js';
 import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './settings-shortcuts.js';
@@ -8,6 +9,19 @@ import { nextSettingsTab } from './settings-tabs.js';
 import { timeParts } from './time-format.js';
 import { clockWindowLayout } from './clock-layout.js';
 import { createSettingsPreview } from './settings-preview.js';
+
+test('Add-on catalog descriptions are translated in every explicit language', () => {
+    for (const { kind } of addonCatalog) {
+        const key = `addons.${kind}Description`;
+        const english = translate('en', key);
+        assert.notEqual(english, key, `missing English description for ${kind}`);
+        for (const { value: language } of languageOptions.filter(({ value }) => value !== 'system' && value !== 'en')) {
+            const translated = translate(language, key);
+            assert.notEqual(translated, key, `missing ${language} description for ${kind}`);
+            assert.notEqual(translated, english, `untranslated ${language} description for ${kind}`);
+        }
+    }
+});
 
 test('Settings preview pauses while hidden/minimized and resumes with exactly one timer', async () => {
     let visible = false;

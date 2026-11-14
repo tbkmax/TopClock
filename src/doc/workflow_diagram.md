@@ -66,7 +66,7 @@ The [instance editor](../addons/instance-editor.js) also swaps members, moves a 
 
 ## Add-on Details layout
 
-The catalog and configured Progress instances open the same registered detail fragment. Settings places that fragment above a dedicated modal action footer. Preset chips and the input form wrap within the modal, and the modal scrolls when needed. Catalog cards keep Add on the left and Details on the right.
+The catalog and configured Progress instances open the same registered detail fragment. Settings places that fragment above a dedicated modal action footer. Preset chips and the input form wrap within the modal, and the modal scrolls when needed. Catalog cards keep Add on the left and Details on the right. [settings.html](../../settings.html) builds each catalog description key from the add-on kind; [i18n.js](../i18n.js) resolves the Counter key in English, Simplified Chinese, Traditional Chinese, and Japanese.
 
 ## Progress menu preset
 
