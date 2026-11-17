@@ -1,5 +1,9 @@
 # Tauri package changelog
 
+### 2026-11-16 - Recover clock click-through during normal use
+
+- The native monitor now restores a visible clock's click-through style when it differs from the released modifier state, without waiting for a new Ctrl interaction. No package or settings migration is needed. Live reproduction of the intermittent trigger remains open; see the [Rust acceptance item](../src/doc/backlog.md#click-through-recovery-acceptance).
+
 ### 2026-11-16 - Keep the palette with native interaction code
 
 - The palette window now uses the native monitor in `src/palette.rs`; its Tauri window definition and capability remain the same.

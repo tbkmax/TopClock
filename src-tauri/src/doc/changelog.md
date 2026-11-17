@@ -1,5 +1,9 @@
 # Rust application changelog
 
+### 2026-11-16 - Restore click-through after native style drift
+
+- Visible clocks now recheck their actual Windows input style on each existing monitor pass, restoring click-through if a window operation clears it while the interaction modifier is released. The setter leaves matching styles alone. This requires no settings migration or user action. A native style-drift test passes; the intermittent desktop trigger still needs live verification.
+
 ### 2026-11-16 - Move the palette monitor beside native input modules
 
 - The palette monitor and its commands now live in `src/palette.rs`. Window behavior, settings fields, and command names remain unchanged; no user action is required.

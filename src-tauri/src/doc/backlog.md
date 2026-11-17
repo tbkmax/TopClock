@@ -1,5 +1,16 @@
 # Rust application backlog
 
+## Click-through recovery acceptance
+
+- **Title:** Verify click-through recovery against the intermittent desktop trigger.
+- **Problem or opportunity:** The previous monitor cached the desired modifier state and could not detect a later change to the HWND input style. A native test proves the new polling path restores a cleared style bit, but the original intermittent cause has not been captured in a live session.
+- **Desired outcome:** With the interaction modifier released, clicks pass through every visible clock without requiring Ctrl-click, including after window resize, display changes, and long ordinary use.
+- **Scope:** [interaction.rs](../interaction.rs), [clock resize](../../../src/main.js), and the per-display window lifecycle in [displays.rs](../displays.rs).
+- **Acceptance criteria:** Leave the clock running through ordinary desktop use and repeated content-driven resizes; confirm proximity fade and click-through together. Check Ctrl-drag, Ctrl-click, menu open/dismissal, palette, tray actions, settings persistence, and position restore before and after display hide/show or reconnection. If the symptom recurs, record whether the native `WS_EX_TRANSPARENT` bit is set on the affected clock HWND and whether its monitor is still polling.
+- **Dependencies and risks:** Requires an interactive Windows desktop and preferably the environment that showed the intermittent failure. Keep the user's settings safe when testing persistence. A changing third-party window style could make the monitor reapply the bit repeatedly; the setter is idempotent while styles match.
+- **Verification:** Run `npm run tauri:dev` and the checks above, including enough idle time to exercise the original intermittent case. The Rust native style-drift test and full `cargo test` suite pass, but cannot demonstrate the real trigger.
+- **Priority:** High because loss of pass-through blocks ordinary desktop clicks.
+
 ## Mouse palette native input acceptance
 
 - **Title:** Verify palette key polling and overlay pass-through in Windows.

@@ -107,9 +107,6 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
         let hwnd = hwnd_raw as HWND;
         let mut last_ctrl = None;
         let mut last_near = None;
-        // The pre-show style may be changed while Windows shows the webview.
-        // Reconcile the actual window after it becomes visible on the first poll.
-        let mut last_ignore = None;
         let mut last_position = window.outer_position().ok();
         let mut position_changed_at = None;
         let mut last_topmost_refresh: Option<Instant> = None;
@@ -191,10 +188,10 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
             }
             let ignore = !ctrl;
 
-            if last_ignore != Some(ignore) {
-                set_click_through(hwnd, ignore);
-                last_ignore = Some(ignore);
-            }
+            // Reconcile the actual HWND style on every visible poll. Resizing or
+            // showing a webview can change it without changing the modifier;
+            // set_click_through only writes when the native bits differ.
+            set_click_through(hwnd, ignore);
 
             if last_ctrl != Some(ctrl) {
                 let _ = window.emit_to(window.label(), "ctrl-state", ctrl);
@@ -262,6 +259,53 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use windows_sys::Win32::UI::WindowsAndMessaging::{CreateWindowExW, DestroyWindow, WS_POPUP};
+
+    #[test]
+    fn click_through_reconciles_native_style_without_a_modifier_change() {
+        let class: Vec<u16> = "STATIC\0".encode_utf16().collect();
+        let hwnd = unsafe {
+            CreateWindowExW(
+                WS_EX_LAYERED,
+                class.as_ptr(),
+                class.as_ptr(),
+                WS_POPUP,
+                -30000,
+                -30000,
+                10,
+                10,
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                std::ptr::null(),
+            )
+        };
+        assert!(!hwnd.is_null());
+        set_click_through(hwnd, true);
+        let intended_style = unsafe { GetWindowLongPtrW(hwnd, GWL_EXSTYLE) };
+        assert_ne!(intended_style & WS_EX_TRANSPARENT as isize, 0);
+
+        // Simulate another window operation clearing the bit while Ctrl stays up.
+        unsafe {
+            SetWindowLongPtrW(
+                hwnd,
+                GWL_EXSTYLE,
+                intended_style & !(WS_EX_TRANSPARENT as isize),
+            )
+        };
+        set_click_through(hwnd, true);
+        assert_eq!(
+            unsafe { GetWindowLongPtrW(hwnd, GWL_EXSTYLE) },
+            intended_style
+        );
+        set_click_through(hwnd, true);
+        assert_eq!(
+            unsafe { GetWindowLongPtrW(hwnd, GWL_EXSTYLE) },
+            intended_style
+        );
+
+        unsafe { DestroyWindow(hwnd) };
+    }
 
     #[test]
     fn menu_dismissal_observes_new_outside_presses_without_replaying_held_buttons() {
