@@ -146,7 +146,12 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
             let menu_visible = menu_window
                 .as_ref()
                 .is_some_and(|menu| menu.is_visible().unwrap_or(false));
+            let palette_visible = window
+                .app_handle()
+                .get_webview_window("palette")
+                .is_some_and(|palette| palette.is_visible().unwrap_or(false));
             if !menu_visible
+                && !palette_visible
                 && last_topmost_refresh
                     .is_none_or(|last| last.elapsed() >= topmost::REFRESH_INTERVAL)
             {

@@ -52,6 +52,10 @@ fn default_modifier() -> String {
     "Ctrl".into()
 }
 
+fn default_palette_key() -> String {
+    "Alt".into()
+}
+
 fn default_open_settings() -> String {
     "Ctrl+,".into()
 }
@@ -72,6 +76,8 @@ fn default_timer_reset() -> String {
 pub(crate) struct ShortcutSettings {
     #[serde(default = "default_modifier")]
     pub(crate) interaction_modifier: String,
+    #[serde(default = "default_palette_key")]
+    pub(crate) palette_key: String,
     #[serde(default = "default_open_settings")]
     pub(crate) open_settings: String,
     #[serde(default)]
@@ -94,6 +100,7 @@ impl Default for ShortcutSettings {
     fn default() -> Self {
         Self {
             interaction_modifier: default_modifier(),
+            palette_key: default_palette_key(),
             open_settings: default_open_settings(),
             open_settings_enabled: false,
             quit: default_quit(),
@@ -122,6 +129,8 @@ pub(crate) struct ClockSettings {
     pub(crate) time_layout: String,
     #[serde(default = "default_auto_check_updates")]
     pub(crate) auto_check_updates: bool,
+    #[serde(default)]
+    pub(crate) palette_enabled: bool,
     #[serde(default)]
     pub(crate) shortcuts: ShortcutSettings,
     #[serde(default, skip_serializing)]
@@ -167,6 +176,7 @@ impl Default for ClockSettings {
             show_ampm: true,
             time_layout: "hms".into(),
             auto_check_updates: true,
+            palette_enabled: false,
             shortcuts: ShortcutSettings::default(),
             timer_addon_enabled: false,
             addons: Vec::new(),
@@ -232,6 +242,13 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
             settings.shortcuts.interaction_modifier.as_str(),
             "Ctrl" | "Alt" | "Shift"
         )
+        && matches!(
+            settings.shortcuts.palette_key.as_str(),
+            "" | "Ctrl" | "Alt" | "Shift"
+        )
+        && (!settings.palette_enabled
+            || (!settings.shortcuts.palette_key.is_empty()
+                && settings.shortcuts.palette_key != settings.shortcuts.interaction_modifier))
         && valid_shortcut_string(&settings.shortcuts.open_settings)
         && valid_shortcut_string(&settings.shortcuts.quit)
         && valid_shortcut_string(&settings.shortcuts.timer_toggle)
@@ -280,6 +297,22 @@ mod tests {
         assert_eq!(loaded.settings.shortcuts.open_settings, "Ctrl+,");
         assert!(loaded.settings.auto_check_updates);
         assert!(valid_settings(&loaded.settings));
+    }
+
+    #[test]
+    fn palette_defaults_off_and_rejects_interaction_key_collision() {
+        let mut settings = ClockSettings::default();
+        assert!(!settings.palette_enabled);
+        assert_eq!(settings.shortcuts.palette_key, "Alt");
+        settings.palette_enabled = true;
+        assert!(valid_settings(&settings));
+        settings.shortcuts.interaction_modifier = "Alt".into();
+        assert!(!valid_settings(&settings));
+        settings.palette_enabled = false;
+        assert!(valid_settings(&settings));
+        settings.shortcuts.palette_key.clear();
+        settings.palette_enabled = true;
+        assert!(!valid_settings(&settings));
     }
 
     #[test]

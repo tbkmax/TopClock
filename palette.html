@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>TopClock Mouse Palette</title></head>
+<body>
+    <main id="palette-app" x-data="mousePalette" x-show="open" x-cloak>
+        <svg class="palette-svg" :width="viewportWidth" :height="viewportHeight" x-ref="svg" x-effect="renderPalette()" aria-hidden="true"></svg>
+        <div class="palette-error" x-show="error" x-text="error"></div>
+    </main>
+    <script type="module" src="/src/addons/palette/palette.js"></script>
+</body>
+</html>

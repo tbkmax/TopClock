@@ -1,5 +1,17 @@
 # Frontend add-on host changelog
 
+### 2026-11-16 - Fit combined palette names
+
+- The palette now scales labels such as Date+Counter to the available sector width. The shared add-on host and saved instance names remain unchanged.
+
+### 2026-11-16 - Dismiss palette before host actions
+
+- Palette release now closes the overlay before the shared host runs a selected add-on action. The action definitions, command routing, and add-on instance data remain unchanged.
+
+### 2026-11-16 - Place the mouse palette beside the add-on host
+
+- Added a dedicated `palette/` folder and its documentation. The palette reads current menu actions and switches from the existing host; it does not create an add-on instance or duplicate action definitions. Its General and Shortcuts controls remain outside the instance dashboard.
+
 ### 2026-11-13 - Cover Counter running and stopped colors
 
 - The display regression test now checks positive and negative balances while running and stopped. The clock and preview continue to use the same definition result; action routing and saved sessions are unchanged.

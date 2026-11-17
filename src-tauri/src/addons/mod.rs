@@ -2,6 +2,7 @@ mod actions;
 pub(crate) mod counter;
 mod date;
 mod instance;
+pub(crate) mod palette;
 mod progress;
 mod region_clock;
 mod registry;

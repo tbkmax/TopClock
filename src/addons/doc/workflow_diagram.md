@@ -1,5 +1,7 @@
 # Frontend add-on host workflows
 
+The [mouse palette](../palette/doc/workflow_diagram.md) consumes the same `menuEntries` and `toggleEntries` as the separate clock menu. It fits their current labels to each radial sector, maps the final cursor position to an existing action descriptor, closes its overlay on key release, then dispatches through this folder's host. The palette adds no instance type or native add-on action pathway; the normal controller and native validators still reject stale selections.
+
 The clock menu's Add-on disclosure uses [controller.js](../controller.js) to list every configured row from [layout.js](../layout.js), including disabled rows and a single row per pair. A switch sends an explicit target state through [native-adapter.js](../native-adapter.js) and waits for saved settings. The menu applies the returned snapshot and stays open; a rejected command shows an error without changing the switch. See the [menu sequence diagram](../../doc/workflow_diagram.md#clock-menu-add-on-switches).
 
 ## Counter action and display

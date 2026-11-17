@@ -1,5 +1,17 @@
 # Frontend changelog
 
+### 2026-11-16 - Fit palette names and close Settings from the palette
+
+- Palette sector labels now scale to available space, preserving combined names such as Date+Counter. Selecting Settings while it is already visible calls its existing close method, including the pending-save flush; selecting it while hidden or minimized opens it.
+
+### 2026-11-16 - Make palette release dismiss immediately
+
+- The mouse palette page hides before awaiting a selected command, and the center hint now fits inside its circle. A failed command can briefly reopen the overlay with an error. The native monitor also hides on release and cancels on mouse clicks or Escape.
+
+### 2026-11-16 - Add the mouse palette page
+
+- General can enable an off-by-default mouse palette, while Shortcuts selects Alt, Ctrl, Shift, or None. Holding the key shows paged radial menu choices around the cursor; release runs a final choice, and center/outside release cancels. The palette reuses existing add-on actions, switches, and confirmation panel, so add-on state and settings files keep their prior behavior. Existing installations require no action.
+
 ### 2026-11-13 - Translate the Counter catalog description
 
 - The Add Add-on catalog now shows a Counter description in English, Simplified Chinese, Traditional Chinese, and Japanese instead of the raw `addons.counterDescription` key. A catalog-wide translation check covers all registered add-on descriptions.

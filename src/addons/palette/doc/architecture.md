@@ -1,0 +1,14 @@
+# Mouse palette frontend architecture
+
+This folder owns the frontend of the optional mouse palette. [palette.js](../palette.js) runs in [palette.html](../../../../palette.html), listens to native open/move/release/cancel events, and uses the existing [add-on host](../../host.js) to read current menu entries, switch rows, sessions, and action routing. The palette has no `AddonInstance`, type definition, or separate timer state. Its General enable switch and Shortcuts key selector are in [settings.html](../../../../settings.html); [native validation](../../../../src-tauri/src/settings.rs) owns the saved fields.
+
+[palette-model.js](../palette-model.js) converts menu descriptors to a tree with at most three rings. It pages the first ring after six normal entries and groups more than eight add-on switches into numbered ranges in the second and third rings. It hit-tests the cursor's position relative to the original pointer center rather than motion direction. A shared label fitter measures each label at the base SVG font, scales it to the sector's radial and angular width, and adds an ellipsis only if it still cannot fit at the minimum size. [palette.css](../palette.css) styles SVG sectors; the page creates SVG DOM nodes from local labels, avoiding runtime HTML insertion. The center reads “Cancel” so it fits inside the center circle. The page hides the overlay before awaiting a selected action; a failed action briefly reopens it to show an error. A confirmation-required choice opens the existing [menu confirmation panel](../../../menu.js) after key release; the native action revalidates before changing settings or a session. Selecting Settings uses a palette-only native command: it opens hidden or minimized Settings, or requests its normal save-and-close method when visible. Quit uses its existing command.
+
+The [native palette monitor](../../../../src-tauri/src/addons/palette.rs) owns the click-through, nonactivating full-monitor window and physical coordinates. It also hides the overlay on key release, so a missed page event cannot leave a monitor-sized window open. This folder does not poll Windows input or persist settings. [Parent add-on architecture](../../doc/architecture.md) describes the shared controller and action contract; [feature record](../../../../doc/feature/MOUSE_PALETTE_PLAN.md) describes behavior and verification limits.
+
+| File | Responsibility |
+| --- | --- |
+| [palette.js](../palette.js) | Alpine page, native event subscription, current selection, action dispatch, and overlay close |
+| [palette-model.js](../palette-model.js) | Pure menu tree, first-ring paging, radial hit testing, SVG geometry, and label fitting |
+| [palette-model.test.js](../palette-model.test.js) | Menu depth, switch target, paging, position, and label-fit checks |
+| [palette.css](../palette.css) | Sector, selection, center, and error appearance |

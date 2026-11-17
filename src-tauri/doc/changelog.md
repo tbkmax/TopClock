@@ -1,4 +1,12 @@
 # Tauri package changelog
+
+### 2026-11-16 - Keep palette focus in the foreground app
+
+- Configured the palette window as nonfocused and nonfocusable so Tauri can show it without activating a topmost input surface. Its native monitor still enforces click-through and hides it on release.
+
+### 2026-11-16 - Bundle the optional mouse palette
+
+- Added a hidden transparent `palette` window and capability entry for its WebView. Its page is included in the Vite build; existing installs start with the palette off and require no operator migration. Physical and packaged-window checks remain open.
 ## Latest update
 
 ### 2026-11-08 - Configure a separate menu webview

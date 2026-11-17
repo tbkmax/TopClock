@@ -1,0 +1,7 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "palette-hide",
+  "description": "Allow the mouse palette to hide itself after key release",
+  "windows": ["palette"],
+  "permissions": ["core:window:allow-hide"]
+}

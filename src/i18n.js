@@ -1,6 +1,15 @@
 // Each entry keeps the English source and its Simplified Chinese, Traditional
 // Chinese, and Japanese translations together so missing strings are visible.
 const messages = {
+    'palette.title': ['Mouse palette', '鼠标调色盘', '滑鼠調色盤', 'マウスパレット'],
+    'palette.description': ['Hold its key, move to a choice, then release. Configure the key in Shortcuts.', '按住指定按键，移动到选项后松开。在快捷键中设置按键。', '按住指定按鍵，移到選項後放開。在快速鍵中設定按鍵。', 'キーを押したまま選択肢へ移動し、離して実行します。キーはショートカットで設定できます。'],
+    'palette.shortcut': ['Mouse palette key', '鼠标调色盘按键', '滑鼠調色盤按鍵', 'マウスパレットのキー'],
+    'palette.shortcutDescription': ['Hold to open the palette. Must differ from the Interaction Modifier.', '按住以打开调色盘，不能与交互修饰键相同。', '按住以開啟調色盤，不能與互動修飾鍵相同。', '押してパレットを開きます。操作用修飾キーとは別のキーを選んでください。'],
+    'palette.keyConflict': ['Choose a palette key different from the Interaction Modifier before enabling it.', '启用前请选择与交互修饰键不同的按键。', '啟用前請選擇與互動修飾鍵不同的按鍵。', '有効にする前に操作用修飾キーとは別のキーを選んでください。'],
+    'palette.more': ['More', '更多', '更多', '次へ'],
+    'palette.back': ['Back', '返回', '返回', '戻る'],
+    'palette.cancel': ['Cancel', '取消', '取消', 'キャンセル'],
+    'palette.addonSwitch': ['Add-on', '附加功能', '附加功能', 'アドオン'],
     'addons.counter': ['Counter', '计数器', '計數器', 'カウンター'],
     'addons.counterDescription': ['Count time up or down from a saved balance.', '从已保存的时间余额向上或向下计时。', '從已儲存的時間餘額向上或向下計時。', '保存した時間残高から加算または減算します。'],
     'addons.counterSubtitle': ['Signed time balance', '带正负值的时间余额', '有正負值的時間餘額', '正負の時間残高'],

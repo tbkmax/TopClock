@@ -1,5 +1,37 @@
 # Frontend workflows
 
+## Mouse palette selection
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant Native as palette.rs
+    participant Palette as palette.js
+    participant Model as palette-model.js
+    participant Host as addons/controller.js
+    User->>Native: Hold configured modifier and move mouse
+    Native-->>Palette: palette-open and palette-move with physical cursor position
+    Palette->>Model: Build current menu tree and hit-test up to three rings
+    User->>Native: Release modifier
+    Native-->>Palette: palette-release with final cursor position
+    Native->>Native: Hide overlay immediately
+    Palette->>Palette: Hide before awaiting action
+    alt Final sector is a valid action
+        Palette->>Host: Revalidate and dispatch action or choice
+        Host-->>Palette: Native command result
+    else Settings sector
+        Palette->>Native: Toggle Settings visibility
+        Native-->>Palette: Request normal Settings close if already visible
+    else Center, outside, or incomplete branch
+        Palette->>Palette: Cancel selection
+    end
+    opt Action fails
+        Palette->>Palette: Briefly show error, then hide
+    end
+```
+
+[palette.rs](../../src-tauri/src/addons/palette.rs) owns key polling and the click-through window. [palette-model.js](../addons/palette/palette-model.js) reads the same add-on menu descriptors as [menu.js](../menu.js), with six entries per first-ring page, and fits text to sector width. The palette-specific Settings command opens a hidden or minimized window or requests the Settings page's normal save-and-close flow; Quit uses its existing command. A confirmation-required choice opens the existing menu confirmation panel before dispatch; native commands retain final validation and persistence. No palette state is saved beyond its enabled flag and chosen key.
+
 ## Clock menu add-on switches
 
 ```mermaid

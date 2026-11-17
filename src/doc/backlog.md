@@ -1,5 +1,16 @@
 # Frontend backlog
 
+## Mouse palette live Windows acceptance
+
+- **Title:** Verify mouse palette input and radial selection on desktop displays.
+- **Problem or opportunity:** Build and unit checks cannot prove nonactivating WebView focus, physical modifier release timing, or sector readability near monitor edges.
+- **Desired outcome:** Hold the selected key, move across root, outer, and third rings, and release to run exactly one current action or cancel without intercepting desktop clicks.
+- **Scope:** [palette page](../addons/palette/palette.js), [palette model](../addons/palette/palette-model.js), [native monitor](../../src-tauri/src/addons/palette.rs), Settings, the clock menu, and second-display windows.
+- **Acceptance criteria:** Test one Alt release running a selected action and a center release closing the palette; click elsewhere, Escape, and Alt-Tab while it is open. Check fitted Date+Counter and long localized labels, then select Settings twice to open and save-close it; verify a minimized Settings window restores. Test Ctrl interaction, each alternative key, None/off, switching the Interaction Modifier, pagination with many add-ons, Counter choices, Timer/Progress Mode and Set confirmation/cancellation, add-on switches and pairs, Quit, stale actions, click-through, normal menu, tray, persistence, Ctrl drag, and position restore. Repeat near each screen edge and on mixed-DPI displays.
+- **Dependencies and risks:** Use a disposable settings profile and an interactive Windows desktop. The user chose a cursor-centered circle that may clip at display edges; test center cancellation and retry from farther inward. Native modifier keys still affect the foreground application.
+- **Verification:** Run `npm run tauri:dev` and record observed results. A packaged build must include `palette.html` and permit its Tauri calls.
+- **Priority:** High before release because this feature depends on OS input and WebView focus behavior.
+
 ## Add-on menu live verification
 
 - **Title:** Verify expanded switches and persistent second-level menu choices in Windows.

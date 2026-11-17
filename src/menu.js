@@ -2,6 +2,7 @@ import Alpine from 'alpinejs';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { createAddonHost } from './addons/host.js';
+import { pendingPaletteChoice } from './addons/palette/palette-model.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './menu.css';
 
@@ -64,7 +65,12 @@ Alpine.data('clockMenu', () => ({
         this.revealPendingId = null;
         this.pendingChoice = null;
         this.error = '';
-        if (!this.settings) await this.loadSettings();
+        if (!this.settings || request.pending_choice) await this.loadSettings();
+        if (request.pending_choice) {
+            const pending = pendingPaletteChoice(this.menuEntries, request.pending_choice);
+            if (pending) this.pendingChoice = pending;
+            else this.error = 'Choice is no longer available';
+        }
         this.resizeMenu();
     },
     resizeMenu() {

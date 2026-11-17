@@ -1,5 +1,30 @@
 # Native add-on workflows
 
+## Mouse palette input
+
+```mermaid
+sequenceDiagram
+    participant Windows
+    participant Monitor as addons/palette.rs
+    participant Webview as palette.html
+    participant Host as Frontend add-on host
+    Windows->>Monitor: Configured modifier held for 120 ms
+    Monitor->>Webview: Show click-through overlay and emit palette-open
+    Windows->>Monitor: Cursor moves, then key releases
+    Monitor-->>Webview: palette-move and palette-release
+    Monitor->>Webview: Hide immediately on release
+    Webview->>Webview: Keep hidden while resolving selection
+    Webview->>Host: Dispatch final menu action or switch
+    Host-->>Webview: Native command result
+    opt Action fails
+        Webview->>Webview: Briefly show error, then hide
+    end
+```
+
+[settings.rs](../../settings.rs) rejects an enabled palette key equal to the Interaction Modifier. [palette.rs](../palette.rs) cancels its window when the standard menu, another modifier, Tab, Escape, or a mouse button is active. Its polling uses the current key-state high bit and physical monitor coordinates. The [frontend palette](../../../../src/addons/palette/doc/workflow_diagram.md) owns rings and hit testing; the normal native action service still validates and saves selected actions.
+
+The palette's Settings command checks that the caller is the palette window. If Settings is visible and not minimized, it emits `palette-request-settings-close` to that page, whose existing close method flushes drafts before hiding. Otherwise it reuses [show_settings](../../window_commands.rs). Other Settings entry points keep their existing open behavior.
+
 ## Counter state and normal quit
 
 ```mermaid

@@ -1,5 +1,16 @@
 # Rust application backlog
 
+## Mouse palette native input acceptance
+
+- **Title:** Verify palette key polling and overlay pass-through in Windows.
+- **Problem or opportunity:** Rust tests validate settings and compile the Win32 code but cannot prove WebView show/focus, physical key release, or multi-display coordinates.
+- **Desired outcome:** The configured key opens the palette only when enabled; the full-monitor overlay never captures mouse clicks or changes clock input behavior.
+- **Scope:** [native palette monitor](../addons/palette.rs), [interaction monitor](../interaction.rs), [settings validation](../settings.rs), and the palette capability/window config.
+- **Acceptance criteria:** Confirm that a single Alt release hides the overlay and runs a selected action, and that center release, mouse click, Escape, or Alt-Tab closes it without a second key press. Select Settings twice to verify open and save-close, and restore it from minimized state. Exercise Ctrl, Shift, None/off, Interaction Modifier conflicts, the normal clock menu, rapid press/release, monitor edges, mixed DPI and reconnect, tray, Ctrl drag, position restore, and quitting while visible. A failed palette action must preserve native transaction rollback.
+- **Dependencies and risks:** Requires an interactive Windows desktop, disposable config, and a second display for full coverage. Modifier keys retain their foreground-application behavior.
+- **Verification:** Run `npm run tauri:dev`, observe focus and pass-through, and follow the [frontend checklist](../../../src/doc/backlog.md#mouse-palette-live-windows-acceptance).
+- **Priority:** High before release because native input behavior is central to the feature.
+
 Verify `set_addon_enabled` through a live menu with a disposable settings profile, including a pair, a running Timer, a running Counter, a Progress countdown, an unknown or removed ID, and a controlled write failure. The [frontend Add-on menu checklist](../../../src/doc/backlog.md#add-on-menu-live-verification) tracks physical input and cross-window updates. Unit tests cover pair targeting; native WebView and disk failure behavior remain to be checked.
 
 Check Counter checkpoint and stop behavior for menu, tray, and shortcut Quit in a disposable live Windows profile, including a controlled write failure and restart. Remove and re-add a running Counter, and restart once while it is absent to confirm the saved balance. Also verify a paired Counter's shared switch and unchanged balance; see the [frontend Counter acceptance](../../../src/doc/backlog.md#counter-live-windows-acceptance). Native unit tests cover signed session calculations, removal retention, and pair validation, but not actual OS exit timing or WebView synchronization.

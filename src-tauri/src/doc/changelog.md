@@ -1,5 +1,17 @@
 # Rust application changelog
 
+### 2026-11-16 - Toggle Settings through the palette
+
+- The palette can close an already visible Settings window through its existing save-and-close handler, or open a hidden or minimized Settings window. Other Settings controls remain unchanged.
+
+### 2026-11-16 - Close the palette on release and cancellation
+
+- The native monitor now closes the overlay on key release before action completion, and cancels on Escape or mouse clicks as well as modifier combinations. It reapplies the nonactivating and click-through styles on reveal. Saved settings and action commands are unchanged.
+
+### 2026-11-16 - Persist and run the optional mouse palette
+
+- Added an off-by-default palette setting and Alt-preselected modifier with validation against the clock Interaction Modifier. The add-on palette monitor shows a nonactivating, click-through WebView and emits physical cursor events for release selection. Choices needing confirmation use the existing menu panel and native transaction. Existing settings files load with defaults; no user migration is needed. Physical Windows interaction remains to be checked.
+
 ### 2026-11-12 - Save add-on switches from the clock menu
 
 - Added a targeted command for enabling or disabling an existing add-on from the clock menu. Paired members switch together, and the normal settings validation, session rules, rollback, and broadcast apply. Existing settings files need no migration or user action.

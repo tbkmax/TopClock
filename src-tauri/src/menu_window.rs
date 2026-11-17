@@ -2,6 +2,7 @@ use crate::state::ClockState;
 use serde::Serialize;
 use std::sync::{atomic::Ordering, Arc};
 use tauri::{Emitter, Manager, PhysicalPosition, PhysicalSize, WebviewWindow};
+use windows_sys::Win32::{Foundation::POINT, UI::WindowsAndMessaging::GetCursorPos};
 
 const EDGE_INSET: i32 = 8;
 
@@ -11,6 +12,14 @@ pub(crate) struct MenuRequest {
     pub(crate) source: String,
     pub(crate) anchor_x: i32,
     pub(crate) anchor_y: i32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub(crate) pending_choice: Option<PaletteChoiceRequest>,
+}
+
+#[derive(Clone, Serialize)]
+pub(crate) struct PaletteChoiceRequest {
+    pub(crate) instance_id: String,
+    pub(crate) choice_id: String,
 }
 
 #[derive(Clone, Copy)]
@@ -55,6 +64,24 @@ fn fit_menu(
     (position, size)
 }
 
+fn publish_menu_request(
+    app: &tauri::AppHandle,
+    state: &ClockState,
+    request: MenuRequest,
+) -> Result<(), String> {
+    let menu = app
+        .get_webview_window("menu")
+        .ok_or("Clock menu is unavailable")?;
+    let _ = menu.hide();
+    *state.menu_request.lock().unwrap() = Some(request.clone());
+    let mut open = state.menu_open.lock().unwrap();
+    open.clear();
+    open.insert(request.source.clone());
+    drop(open);
+    app.emit_to("menu", "clock-menu-open", request)
+        .map_err(|error| error.to_string())
+}
+
 #[tauri::command]
 pub(crate) fn open_clock_menu(
     app: tauri::AppHandle,
@@ -76,18 +103,66 @@ pub(crate) fn open_clock_menu(
         source: window.label().to_owned(),
         anchor_x: origin.x.saturating_add((client_x * scale).round() as i32),
         anchor_y: origin.y.saturating_add((client_y * scale).round() as i32),
+        pending_choice: None,
     };
-    let menu = app
-        .get_webview_window("menu")
-        .ok_or("Clock menu is unavailable")?;
-    let _ = menu.hide();
-    *state.menu_request.lock().unwrap() = Some(request.clone());
-    let mut open = state.menu_open.lock().unwrap();
-    open.clear();
-    open.insert(request.source.clone());
-    drop(open);
-    app.emit_to("menu", "clock-menu-open", request)
-        .map_err(|error| error.to_string())
+    publish_menu_request(&app, &state, request)
+}
+
+#[tauri::command]
+pub(crate) fn open_palette_confirmation(
+    app: tauri::AppHandle,
+    window: WebviewWindow,
+    state: tauri::State<'_, Arc<ClockState>>,
+    instance_id: String,
+    choice_id: String,
+) -> Result<(), String> {
+    if window.label() != "palette"
+        || instance_id.len() > 80
+        || choice_id.len() > 80
+        || instance_id.is_empty()
+        || choice_id.is_empty()
+    {
+        return Err("Invalid palette confirmation request".into());
+    }
+    let mut cursor = POINT { x: 0, y: 0 };
+    if unsafe { GetCursorPos(&mut cursor) } == 0 {
+        return Err("Cursor position is unavailable".into());
+    }
+    let displays = state.active_displays.lock().unwrap();
+    let visible = displays
+        .values()
+        .filter(|display| {
+            app.get_webview_window(&display.label)
+                .is_some_and(|clock| clock.is_visible().unwrap_or(false))
+        })
+        .collect::<Vec<_>>();
+    let source = visible
+        .iter()
+        .find(|display| {
+            let bounds = display.bounds;
+            cursor.x >= bounds.x
+                && cursor.y >= bounds.y
+                && i64::from(cursor.x) < i64::from(bounds.x) + i64::from(bounds.width)
+                && i64::from(cursor.y) < i64::from(bounds.y) + i64::from(bounds.height)
+        })
+        .or_else(|| visible.first())
+        .map_or("main", |display| display.label.as_str())
+        .to_owned();
+    drop(displays);
+    publish_menu_request(
+        &app,
+        &state,
+        MenuRequest {
+            id: state.next_menu_request_id.fetch_add(1, Ordering::Relaxed),
+            source,
+            anchor_x: cursor.x,
+            anchor_y: cursor.y,
+            pending_choice: Some(PaletteChoiceRequest {
+                instance_id,
+                choice_id,
+            }),
+        },
+    )
 }
 
 #[tauri::command]

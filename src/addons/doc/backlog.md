@@ -1,5 +1,7 @@
 # Frontend add-on host backlog
 
+The new [palette live acceptance](../palette/doc/backlog.md) must verify that one key release runs the chosen host action, while a center release cancels. Check fitted combined names, switches, stale-selection checks, and session events against the existing clock menu. It adds no new add-on kind; physical input and window checks are tracked in that folder and the [frontend backlog](../../doc/backlog.md#mouse-palette-live-windows-acceptance).
+
 Check switch row names, pair grouping, multiple Progress instances, and native event refresh in a running WebView. The [frontend Add-on menu checklist](../../doc/backlog.md#add-on-menu-live-verification) covers the physical menu, persistence, and click-through checks; the controller test covers list composition and command routing.
 
 Verify Counter actions across the clock menu, Settings, a paired row, and a second display in a live Windows session. Confirm the menu contains Count up, Count down, and Stop, with Reset only in Settings; inspect `D:HH:MM` near the 100-hour boundary and compare running/stopped colors in both the clock and preview. This extends the [frontend Counter checklist](../../doc/backlog.md#counter-live-windows-acceptance).

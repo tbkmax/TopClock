@@ -1,5 +1,17 @@
 # Native add-on changelog
 
+### 2026-11-16 - Toggle Settings from the palette
+
+- Added a palette-only Settings command that requests the existing save-and-close flow when Settings is visible and restores it when hidden or minimized. Other Settings entry points and saved fields are unchanged.
+
+### 2026-11-16 - Hide the palette on key release
+
+- The monitor now hides the topmost overlay as soon as it emits release, including a center cancellation. It reapplies nonactivation and click-through styles after showing, and a mouse button or Escape cancels a held palette. The page can still dispatch the selected action after the persistent WebView is hidden.
+
+### 2026-11-16 - Add the palette input monitor in add-ons
+
+- Added a dedicated monitor for the optional mouse palette. It shows a click-through, nonactivating WebView while a configured modifier is held and sends final cursor coordinates on release. It does not add an add-on instance or change Timer, Progress, or Counter sessions. Existing settings default to off with Alt selected; no migration action is needed.
+
 ### 2026-11-12 - Keep Counter state after removal
 
 - Removing the Counter display now retains its separate signed session, including a running direction. Re-adding Counter reveals the continued balance; explicit disable still stops it, and normal Quit still checkpoints and stops it. No settings migration is required.

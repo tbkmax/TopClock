@@ -1,5 +1,6 @@
 export const DEFAULT_SHORTCUTS = {
     interaction_modifier: 'Ctrl',
+    palette_key: 'Alt',
     open_settings: 'Ctrl+,',
     open_settings_enabled: false,
     quit: 'Ctrl+Alt+Q',

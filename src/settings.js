@@ -45,6 +45,7 @@ Alpine.data('settingsApp', () => ({
         show_ampm: true,
         time_layout: 'hms',
         auto_check_updates: true,
+        palette_enabled: false,
         shortcuts: { ...DEFAULT_SHORTCUTS },
         addons: [],
         addon_pairs: [],
@@ -178,6 +179,7 @@ Alpine.data('settingsApp', () => ({
         });
         await listen('hotkey-errors-changed', (event) => { this.hotkeyErrors = event.payload; });
         await listen('displays-changed', (event) => { this.displays = event.payload; });
+        await listen('palette-request-settings-close', () => this.close());
         await settingsWindow.onCloseRequested((event) => {
             event.preventDefault();
             this.close();
@@ -361,6 +363,37 @@ Alpine.data('settingsApp', () => ({
     },
 
     hotkeyErrors: [],
+
+    setInteractionModifier(value) {
+        if (this.settings.palette_enabled && value === this.settings.shortcuts.palette_key) {
+            this.error = this.t('palette.keyConflict');
+            return;
+        }
+        this.settings.shortcuts.interaction_modifier = value;
+        this.error = '';
+        this.save();
+    },
+    setPaletteKey(value) {
+        if (this.settings.palette_enabled && value === this.settings.shortcuts.interaction_modifier) {
+            this.error = this.t('palette.keyConflict');
+            return;
+        }
+        this.settings.shortcuts.palette_key = value;
+        if (!value) this.settings.palette_enabled = false;
+        this.error = '';
+        this.save();
+    },
+    togglePalette() {
+        if (!this.settings.palette_enabled && (!this.settings.shortcuts.palette_key
+            || this.settings.shortcuts.palette_key === this.settings.shortcuts.interaction_modifier)) {
+            this.error = this.t('palette.keyConflict');
+            this.selectTab('shortcuts');
+            return;
+        }
+        this.settings.palette_enabled = !this.settings.palette_enabled;
+        this.error = '';
+        this.save();
+    },
 
     ...addonMethods,
     ...updateMethods,

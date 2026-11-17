@@ -1,5 +1,32 @@
 # Rust workflows
 
+## Mouse palette window lifecycle
+
+```mermaid
+sequenceDiagram
+    participant Windows
+    participant Monitor as addons/palette.rs
+    participant State as ClockState.config
+    participant Window as palette WebView
+    Monitor->>State: Read palette_enabled and palette_key
+    Windows->>Monitor: Hold key for 120 ms without another modifier or Tab
+    Monitor->>Window: Fit to current physical monitor; show without focus; set click-through
+    Monitor-->>Window: palette-open and palette-move coordinates
+    alt Key released
+        Monitor-->>Window: palette-release with final position
+        Monitor->>Window: Hide immediately
+        Window->>Window: Dispatch or cancel while hidden
+    else Menu opened, combination pressed, Escape, or mouse click
+        Monitor-->>Window: palette-cancel; hide
+    end
+```
+
+The saved fields are validated by [settings.rs](../settings.rs); the thread and pointer are transient. [addons/palette.rs](../addons/palette.rs) owns the native window/input boundary. [Frontend palette code](../../../src/addons/palette/doc/workflow_diagram.md) owns the three-ring selection and existing action dispatch. The monitor samples state every 20 ms, so very short presses do not open it.
+
+When the Settings sector is selected, the palette-only command checks visibility. Hidden or minimized Settings is shown; visible Settings receives a close request so its page can flush unsaved edits before hiding. This route does not change the other Settings open commands.
+
+For a Timer or Progress choice requiring confirmation, the palette calls `open_palette_confirmation` in [menu_window.rs](../menu_window.rs). That request stores the selected instance/choice IDs and uses the cursor as the menu anchor. [menu.js](../../../src/menu.js) resolves the current choice and shows the same confirmation panel used by Ctrl-right-click. Cancel makes no native change; Confirm enters the existing validated action transaction.
+
 ## Clock menu enabled-state transaction
 
 ```mermaid
@@ -252,6 +279,7 @@ classDiagram
       show_ampm: bool
       time_layout: String
       auto_check_updates: bool
+      palette_enabled: bool
       shortcuts: ShortcutSettings
       timer_addon_enabled: bool
       addons: Vec~AddonInstance~
@@ -259,6 +287,7 @@ classDiagram
     }
     class ShortcutSettings {
       interaction_modifier: String
+      palette_key: String
       open_settings: String
       open_settings_enabled: bool
       quit: String

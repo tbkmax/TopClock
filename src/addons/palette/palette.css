@@ -1,0 +1,11 @@
+html, body, #palette-app { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+[x-cloak] { display: none !important; }
+.palette-svg { display: block; overflow: hidden; font-family: 'Segoe UI', sans-serif; pointer-events: none; }
+.palette-sector { fill: rgba(15, 17, 21, .92); stroke: rgba(255, 255, 255, .25); stroke-width: 1.5; }
+.selected .palette-sector { fill: rgba(255, 214, 0, .95); stroke: #fff4a3; }
+.palette-svg text { fill: #fff; font-size: 14px; font-weight: 600; paint-order: stroke; stroke: rgba(0, 0, 0, .75); stroke-width: 2px; }
+.selected text { fill: #111; stroke: none; }
+.disabled { opacity: .35; }
+.palette-center { fill: rgba(12, 13, 16, .96); stroke: #ffd600; stroke-width: 2; }
+.palette-hint { font-size: 13px !important; stroke: none !important; }
+.palette-error { position: fixed; left: 12px; bottom: 12px; background: #151515; color: #fff; padding: 9px 12px; border: 1px solid #ff5b5b; border-radius: 6px; }

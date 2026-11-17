@@ -1,4 +1,12 @@
 # Capabilities changelog
+
+### 2026-11-16 - Keep palette error reveal native
+
+- The palette retains its narrow hide-only permission. A palette-scoped native command handles the brief error reveal so it can reapply click-through and nonactivation without adding frontend show permission.
+
+### 2026-11-16 - Permit the palette WebView
+
+- Added `palette` to the shared window allowlist and a separate palette-only hide capability so its release handler can close the transparent overlay. The palette remains off by default; existing settings require no action.
 ## Latest update
 
 ### 2026-11-08 - Allow the menu webview

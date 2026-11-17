@@ -221,10 +221,19 @@
                                     <div class="shortcut-desc">Hold this modifier to move or right-click the transparent clock</div>
                                 </div>
                                 <div class="shortcut-action">
-                                    <select class="select-control modifier-select" x-model="settings.shortcuts.interaction_modifier" @change="save()" aria-label="Interaction Modifier">
+                                    <select class="select-control modifier-select" :value="settings.shortcuts.interaction_modifier" @change="setInteractionModifier($event.target.value); $event.target.value = settings.shortcuts.interaction_modifier" aria-label="Interaction Modifier">
                                         <option value="Ctrl">Ctrl</option>
                                         <option value="Alt">Alt</option>
                                         <option value="Shift">Shift</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="shortcut-row" x-show="group.id === 'core'">
+                                <div class="shortcut-info"><div class="shortcut-name" x-text="t('palette.shortcut')"></div><div class="shortcut-desc" x-text="t('palette.shortcutDescription')"></div></div>
+                                <div class="shortcut-action">
+                                    <select class="select-control modifier-select" :value="settings.shortcuts.palette_key" @change="setPaletteKey($event.target.value); $event.target.value = settings.shortcuts.palette_key" :aria-label="t('palette.shortcut')">
+                                        <option value="" x-text="t('shortcuts.none')"></option>
+                                        <option value="Ctrl">Ctrl</option><option value="Alt">Alt</option><option value="Shift">Shift</option>
                                     </select>
                                 </div>
                             </div>
@@ -284,6 +293,10 @@
                             <p class="display-section-note">Appearance and add-ons are shared across displays.</p>
                         </section>
                         <h2 class="general-group-heading">App behavior</h2>
+                        <div class="setting-row">
+                            <div><div class="control-title" x-text="t('palette.title')"></div><div class="control-description" x-text="t('palette.description')"></div></div>
+                            <button type="button" class="switch" role="switch" :aria-checked="settings.palette_enabled" :class="{ on: settings.palette_enabled }" :aria-label="t('palette.title')" @click="togglePalette()"><span></span></button>
+                        </div>
                         <div class="setting-row">
                             <div><div class="control-title">Language</div><div class="control-description">Choose the language for TopClock and the date weekday.</div></div>
                             <select class="select-control" x-model="settings.language" @change="save()" aria-label="Language">

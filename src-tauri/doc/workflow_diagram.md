@@ -2,13 +2,14 @@
 
 The package builds the same [native locale command](../src/locale.rs) and bundled frontend translations into direct and MSIX outputs. The `get_system_locale` Tauri command uses the Windows user's UI language; the MSIX manifest does not select or persist the app language. The user's explicit choice remains in `settings.json`. See the [native language workflow](../src/doc/workflow_diagram.md).
 
-The package connects webview configuration to the Rust application. This class diagram describes package relationships rather than Rust inheritance.
+The package connects webview configuration to the Rust application. The palette window starts hidden with `focus: false` and `focusable: false`, so showing its topmost overlay should leave keyboard focus with the foreground application. This class diagram describes package relationships rather than Rust inheritance.
 
 ```mermaid
 classDiagram
     class TauriConfig {
       mainWindow
       settingsWindow
+      paletteWindow
       frontendDist
     }
     class ClockState {
@@ -32,7 +33,7 @@ classDiagram
     DefaultCapability --> RuntimeClock : applies to clock-*
 ```
 
-The definitions are in [tauri.conf.json](../tauri.conf.json), [lib.rs](../src/lib.rs), [state.rs](../src/state.rs), [displays.rs](../src/displays.rs), and [default.json](../capabilities/default.json). This diagram omits generated Tauri types. Add-on instances and Timer sessions live inside `ClockState.config`; see the [Rust workflow](../src/doc/workflow_diagram.md).
+The definitions are in [tauri.conf.json](../tauri.conf.json), [lib.rs](../src/lib.rs), [state.rs](../src/state.rs), [displays.rs](../src/displays.rs), and [default.json](../capabilities/default.json). This diagram omits generated Tauri types. The optional palette is a configured window with a separate input monitor under [addons/](../src/addons/palette.rs), not a saved add-on instance. Add-on instances and Timer sessions live inside `ClockState.config`; see the [Rust workflow](../src/doc/workflow_diagram.md).
 
 ```mermaid
 sequenceDiagram

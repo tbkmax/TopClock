@@ -57,6 +57,25 @@
         "decorations": false,
         "center": true,
         "visible": false
+      },
+      {
+        "label": "palette",
+        "create": false,
+        "title": "TopClock Mouse Palette",
+        "url": "palette.html",
+        "focus": false,
+        "focusable": false,
+        "width": 640,
+        "height": 640,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "shadow": false
       }
     ],
     "security": {
