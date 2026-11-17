@@ -1,5 +1,9 @@
 # Capabilities changelog
 
+### 2026-11-16 - Update palette ownership references
+
+- Capability documentation now points to the palette page and native monitor outside the add-on modules. Window permissions remain unchanged.
+
 ### 2026-11-16 - Keep palette error reveal native
 
 - The palette retains its narrow hide-only permission. A palette-scoped native command handles the brief error reveal so it can reapply click-through and nonactivation without adding frontend show permission.

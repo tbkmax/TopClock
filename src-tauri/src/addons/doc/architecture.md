@@ -11,8 +11,6 @@ The serialized [AddonPair](../instance.rs) holds two adjacent instance IDs and a
 
 This folder contains compiled add-on validation, session calculations, and the shared native action service. The [Rust application architecture](../../doc/architecture.md) owns startup, settings persistence, commands, and Win32 behavior.
 
-The optional [palette.rs](../palette.rs) monitor is grouped here with the add-on controls it presents. It reads the separately validated `palette_enabled` and `shortcuts.palette_key` fields from [settings.rs](../../settings.rs), polls Windows modifier and cursor state, and emits coordinates to the palette webview. It has no `AddonInstance` or action validation of its own; frontend selections enter the existing add-on commands. The full-monitor WebView is nonactivating and click-through. The monitor hides it immediately after emitting key release, independent of frontend dispatch, and cancels on a mouse button, Escape, Tab, or another modifier. A palette-only command can briefly show an action error while reapplying the native styles. Another palette-only command opens hidden or minimized Settings, or asks its page to run the normal save-and-close method when visible. The palette is off by default; enabling it adds one 20 ms poll thread.
-
 | Module | Responsibility |
 | --- | --- |
 | [mod.rs](../mod.rs) | Internal compatibility re-exports and tests |
@@ -23,8 +21,7 @@ The optional [palette.rs](../palette.rs) monitor is grouped here with the add-on
 | [counter.rs](../counter.rs) | Signed Counter session, action validation, and quit checkpoint |
 | [session.rs](../session.rs) | Existing `TimerSession` calculations and Progress duration lock |
 | [actions.rs](../actions.rs) | Typed Timer/Progress target resolution, save rollback, and successful event publication |
-| [palette.rs](../palette.rs) | Global hold-and-release key monitor, physical cursor events, and click-through overlay lifetime |
 
 The JSON field names, optional defaults, limits, and Timer migration remain unchanged. `timer_session` and `progress_timer_sessions` keep separate storage and event paths. [settings_commands.rs](../../settings_commands.rs) owns the settings transaction: it validates, asks type modules to reconcile cloned sessions, persists, rolls back on write failure, then emits. [config_store.rs](../../config_store.rs) still loads legacy settings and normalizes sessions; semantically invalid add-on data can still clear the add-on list, an existing recovery limitation.
 
-[timer.rs](../../timer.rs) retains the public Tauri command functions and main-window completion monitor. Commands and global shortcuts enter [actions.rs](../actions.rs), which checks current target and enabled state, applies a typed action, persists, and emits only after success. Type helpers do not write the config independently. The palette has a window-scoped hide capability; no network access, credential storage, or plugin loader is introduced. The Timer preset fields extend the saved settings schema with defaults for older files.
+[timer.rs](../../timer.rs) retains the public Tauri command functions and main-window completion monitor. Commands and global shortcuts enter [actions.rs](../actions.rs), which checks current target and enabled state, applies a typed action, persists, and emits only after success. Type helpers do not write the config independently. No network access, credential storage, or plugin loader is introduced. The Timer preset fields extend the saved settings schema with defaults for older files.

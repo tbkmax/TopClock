@@ -2,8 +2,8 @@ import Alpine from 'alpinejs';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { createAddonHost } from '../host.js';
-import { localizeDocument, resolveLanguage, translate } from '../../i18n.js';
+import { createAddonHost } from '../addons/host.js';
+import { localizeDocument, resolveLanguage, translate } from '../i18n.js';
 import { fitSectorLabel, pageNodes, paletteTree, PALETTE_RADII, ringAndIndex, sectorLabel, sectorPath } from './palette-model.js';
 import './palette.css';
 

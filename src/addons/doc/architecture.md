@@ -10,7 +10,7 @@ The shared [layout helper](../layout.js) turns flat instances and optional `addo
 
 The add-on controller composes menu entries for the separate menu webview. Definitions may declare a grouped menu with sections and choices; Progress supplies per-instance Start/Pause and Reset plus shared duration choices, while Timer supplies Mode and its own Set choices. `dispatchMenuChoice` rechecks the current instance before the native adapter invokes the atomic transaction. Definitions may also declare a `detailsViewKey`; the catalog and instance Details buttons use the same Settings method and allowlisted view fragment. Timer and Progress each provide a preset editor. This keeps future compiled add-on menu and details contributions in the registry/controller path.
 
-This folder owns the fixed built-in registry, the shared add-on host, and the [mouse palette](../palette/doc/architecture.md) that consumes the host's menu contributions. The palette is a global control surface, not an `AddonInstance`; its implementation stays together in the add-on folder without adding a registry kind. Its page fits each label to its sector and hides on key release before awaiting host dispatch, while the native monitor also closes the overlay. The [frontend architecture](../../doc/architecture.md) covers the four Alpine pages; [built-in definitions](../builtins/doc/architecture.md) own type behavior, and [bundled views](../views/doc/architecture.md) own markup.
+This folder owns the fixed built-in registry and shared add-on host. The separate [mouse palette](../../palette/doc/architecture.md) consumes this host's menu contributions without adding a registry kind or an `AddonInstance`. The [frontend architecture](../../doc/architecture.md) covers the four Alpine pages; [built-in definitions](../builtins/doc/architecture.md) own type behavior, and [bundled views](../views/doc/architecture.md) own markup.
 
 | File | Responsibility |
 | --- | --- |
@@ -25,7 +25,6 @@ This folder owns the fixed built-in registry, the shared add-on host, and the [m
 | [build-fragments.js](../build-fragments.js) | Allowlisted Vite HTML composition from bundled views |
 | [contracts.json](../contracts.json) | Checked kind and action IDs shared by frontend and Rust tests |
 | [addons.test.js](../addons.test.js) | Add-on routing, state, view composition, editing, and display regression tests |
-| [palette/](../palette/doc/architecture.md) | Optional radial menu page and pure, paged three-ring selection model |
 
 The registry contains compiled definitions only. A definition supplies fresh options, a pure display result, Settings descriptions and rules, bundled view keys, and action descriptors. The clock, menu, and Settings pages each create one host, which gives the controller and page the same Alpine-reactive session object. The page's Timer, Progress, and Counter getters derive from this object; neither page keeps another session copy. Rust remains authoritative for saved settings and sessions. The host does not own Settings persistence or clock pointer geometry. [model.js](../model.js) passes named session context to definitions so adding another session kind does not extend a positional argument list.
 

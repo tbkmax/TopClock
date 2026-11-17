@@ -1,7 +1,5 @@
 # Native add-on backlog
 
-The [mouse palette live checklist](../../../../src/addons/palette/doc/backlog.md) covers one-release action, center cancellation, click and Alt-Tab cancellation, Settings open/close with a pending save, physical modifier timing, nonactivating window behavior, second displays, mixed DPI, and click-through after show. Rust tests establish settings validation and compilation but cannot verify OS input or WebView event delivery. Use a disposable profile before release.
-
 Verify a running Counter's Stop and confirmed Reset under a controlled settings write failure, then quit by each native entry point with a disposable config and restart. Remove a running Counter, re-add it, and confirm the elapsed balance; repeat after quitting while it is absent. Include Counter combined with each eligible kind and confirm its balance remains independent when the shared switch is toggled. Unit tests cover signed transitions, reset validation, removal, startup retention, and pair eligibility; the [frontend Counter checklist](../../../../src/doc/backlog.md#counter-live-windows-acceptance) tracks WebView and multi-display behavior. A pre-Counter build saving the newer file can discard the unknown Counter kind, so downgrade is unsupported for this data.
 
 

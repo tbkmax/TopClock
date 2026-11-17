@@ -5,7 +5,7 @@
 - **Title:** Verify palette key polling and overlay pass-through in Windows.
 - **Problem or opportunity:** Rust tests validate settings and compile the Win32 code but cannot prove WebView show/focus, physical key release, or multi-display coordinates.
 - **Desired outcome:** The configured key opens the palette only when enabled; the full-monitor overlay never captures mouse clicks or changes clock input behavior.
-- **Scope:** [native palette monitor](../addons/palette.rs), [interaction monitor](../interaction.rs), [settings validation](../settings.rs), and the palette capability/window config.
+- **Scope:** [native palette monitor](../palette.rs), [interaction monitor](../interaction.rs), [settings validation](../settings.rs), and the palette capability/window config.
 - **Acceptance criteria:** Confirm that a single Alt release hides the overlay and runs a selected action, and that center release, mouse click, Escape, or Alt-Tab closes it without a second key press. Select Settings twice to verify open and save-close, and restore it from minimized state. Exercise Ctrl, Shift, None/off, Interaction Modifier conflicts, the normal clock menu, rapid press/release, monitor edges, mixed DPI and reconnect, tray, Ctrl drag, position restore, and quitting while visible. A failed palette action must preserve native transaction rollback.
 - **Dependencies and risks:** Requires an interactive Windows desktop, disposable config, and a second display for full coverage. Modifier keys retain their foreground-application behavior.
 - **Verification:** Run `npm run tauri:dev`, observe focus and pass-through, and follow the [frontend checklist](../../../src/doc/backlog.md#mouse-palette-live-windows-acceptance).

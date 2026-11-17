@@ -5,7 +5,7 @@
 ```mermaid
 sequenceDiagram
     participant Windows
-    participant Monitor as addons/palette.rs
+    participant Monitor as palette.rs
     participant State as ClockState.config
     participant Window as palette WebView
     Monitor->>State: Read palette_enabled and palette_key
@@ -21,7 +21,7 @@ sequenceDiagram
     end
 ```
 
-The saved fields are validated by [settings.rs](../settings.rs); the thread and pointer are transient. [addons/palette.rs](../addons/palette.rs) owns the native window/input boundary. [Frontend palette code](../../../src/addons/palette/doc/workflow_diagram.md) owns the three-ring selection and existing action dispatch. The monitor samples state every 20 ms, so very short presses do not open it.
+The saved fields are validated by [settings.rs](../settings.rs); the thread and pointer are transient. [palette.rs](../palette.rs) owns the native window/input boundary. [Frontend palette code](../../../src/palette/doc/workflow_diagram.md) owns the three-ring selection and existing action dispatch. The monitor samples state every 20 ms, so very short presses do not open it.
 
 When the Settings sector is selected, the palette-only command checks visibility. Hidden or minimized Settings is shown; visible Settings receives a close request so its page can flush unsaved edits before hiding. This route does not change the other Settings open commands.
 

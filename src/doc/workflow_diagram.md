@@ -30,7 +30,7 @@ sequenceDiagram
     end
 ```
 
-[palette.rs](../../src-tauri/src/addons/palette.rs) owns key polling and the click-through window. [palette-model.js](../addons/palette/palette-model.js) reads the same add-on menu descriptors as [menu.js](../menu.js), with six entries per first-ring page, and fits text to sector width. The palette-specific Settings command opens a hidden or minimized window or requests the Settings page's normal save-and-close flow; Quit uses its existing command. A confirmation-required choice opens the existing menu confirmation panel before dispatch; native commands retain final validation and persistence. No palette state is saved beyond its enabled flag and chosen key.
+[palette.rs](../../src-tauri/src/palette.rs) owns key polling and the click-through window. [palette-model.js](../palette/palette-model.js) reads the same add-on menu descriptors as [menu.js](../menu.js), with six entries per first-ring page, and fits text to sector width. The palette-specific Settings command opens a hidden or minimized window or requests the Settings page's normal save-and-close flow; Quit uses its existing command. A confirmation-required choice opens the existing menu confirmation panel before dispatch; native commands retain final validation and persistence. No palette state is saved beyond its enabled flag and chosen key.
 
 ## Clock menu add-on switches
 

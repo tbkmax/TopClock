@@ -33,7 +33,7 @@ classDiagram
     DefaultCapability --> RuntimeClock : applies to clock-*
 ```
 
-The definitions are in [tauri.conf.json](../tauri.conf.json), [lib.rs](../src/lib.rs), [state.rs](../src/state.rs), [displays.rs](../src/displays.rs), and [default.json](../capabilities/default.json). This diagram omits generated Tauri types. The optional palette is a configured window with a separate input monitor under [addons/](../src/addons/palette.rs), not a saved add-on instance. Add-on instances and Timer sessions live inside `ClockState.config`; see the [Rust workflow](../src/doc/workflow_diagram.md).
+The definitions are in [tauri.conf.json](../tauri.conf.json), [lib.rs](../src/lib.rs), [state.rs](../src/state.rs), [displays.rs](../src/displays.rs), and [default.json](../capabilities/default.json). This diagram omits generated Tauri types. The optional palette is a configured window with a separate [input monitor](../src/palette.rs) beside the other native interaction modules. Add-on instances and Timer sessions live inside `ClockState.config`; see the [Rust workflow](../src/doc/workflow_diagram.md).
 
 ```mermaid
 sequenceDiagram

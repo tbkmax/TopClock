@@ -1,5 +1,9 @@
 # Tauri package changelog
 
+### 2026-11-16 - Keep the palette with native interaction code
+
+- The palette window now uses the native monitor in `src/palette.rs`; its Tauri window definition and capability remain the same.
+
 ### 2026-11-16 - Keep palette focus in the foreground app
 
 - Configured the palette window as nonfocused and nonfocusable so Tauri can show it without activating a topmost input surface. Its native monitor still enforces click-through and hides it on release.

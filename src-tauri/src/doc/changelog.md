@@ -1,5 +1,9 @@
 # Rust application changelog
 
+### 2026-11-16 - Move the palette monitor beside native input modules
+
+- The palette monitor and its commands now live in `src/palette.rs`. Window behavior, settings fields, and command names remain unchanged; no user action is required.
+
 ### 2026-11-16 - Toggle Settings through the palette
 
 - The palette can close an already visible Settings window through its existing save-and-close handler, or open a hidden or minimized Settings window. Other Settings controls remain unchanged.

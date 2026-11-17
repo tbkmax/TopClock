@@ -1,5 +1,9 @@
 # Native add-on changelog
 
+### 2026-11-16 - Separate the palette from native add-ons
+
+- Moved the global palette monitor out of the add-on module. Add-on validation, sessions, and commands keep their existing behavior.
+
 ### 2026-11-16 - Toggle Settings from the palette
 
 - Added a palette-only Settings command that requests the existing save-and-close flow when Settings is visible and restores it when hidden or minimized. Other Settings entry points and saved fields are unchanged.

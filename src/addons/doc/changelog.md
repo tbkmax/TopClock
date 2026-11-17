@@ -1,5 +1,9 @@
 # Frontend add-on host changelog
 
+### 2026-11-16 - Remove palette implementation from add-ons
+
+- The palette now consumes the add-on host from `src/palette/`; add-on kinds, actions, and sessions remain unchanged.
+
 ### 2026-11-16 - Fit combined palette names
 
 - The palette now scales labels such as Date+Counter to the available sector width. The shared add-on host and saved instance names remain unchanged.

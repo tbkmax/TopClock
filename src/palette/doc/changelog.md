@@ -1,5 +1,9 @@
 # Mouse palette frontend changelog
 
+### 2026-11-16 - Move palette into its own frontend folder
+
+- This folder and its four documentation files now sit under `src/` beside the other pages. The palette still uses the shared add-on host and existing native commands; settings require no migration.
+
 ### 2026-11-16 - Fit sector labels and toggle Settings
 
 - Measured sector labels now shrink to fit their ring and sector, keeping combined names such as Date+Counter visible when possible; very long names use an ellipsis at the minimum size. Selecting Settings again requests its existing save-and-close flow instead of reopening it.

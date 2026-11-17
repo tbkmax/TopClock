@@ -7,6 +7,7 @@ mod hotkeys;
 mod interaction;
 mod locale;
 mod menu_window;
+mod palette;
 mod settings;
 mod settings_commands;
 mod startup;
@@ -29,8 +30,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             menu_window::open_clock_menu,
             menu_window::open_palette_confirmation,
-            addons::palette::show_palette_error,
-            addons::palette::toggle_palette_settings,
+            palette::show_palette_error,
+            palette::toggle_palette_settings,
             menu_window::get_clock_menu_request,
             menu_window::show_clock_menu,
             menu_window::close_clock_menu,
@@ -86,7 +87,7 @@ pub fn run() {
             displays::reconcile_displays(app.handle(), &state).map_err(std::io::Error::other)?;
             displays::start_display_manager(app.handle().clone(), state.clone());
             hotkeys::start_hotkeys(app.handle().clone(), state);
-            addons::palette::start_palette(
+            palette::start_palette(
                 app.handle().clone(),
                 app.state::<Arc<ClockState>>().inner().clone(),
             );

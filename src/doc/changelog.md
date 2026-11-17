@@ -1,5 +1,9 @@
 # Frontend changelog
 
+### 2026-11-16 - Place the mouse palette with global controls
+
+- Moved the palette page and model to `src/palette/`; the menu still shares its choice model, and General and Shortcuts still own the controls. No saved settings change is required.
+
 ### 2026-11-16 - Fit palette names and close Settings from the palette
 
 - Palette sector labels now scale to available space, preserving combined names such as Date+Counter. Selecting Settings while it is already visible calls its existing close method, including the pending-save flush; selecting it while hidden or minimized opens it.
