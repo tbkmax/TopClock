@@ -25,7 +25,8 @@ export function paletteTree(menuEntries, toggleEntries, t) {
         if (children.length) nodes.push({ id: `group:${entry.instanceId}`, label: entry.name, children });
     }
     if (toggleEntries.length) {
-        const switches = toggleEntries.map((entry) => ({ id: `toggle:${entry.id}`, label: entry.name,
+        const switches = toggleEntries.map((entry) => ({ id: `toggle:${entry.id}`, label: entry.paletteName || entry.name,
+            sectorLabel: entry.paired ? `${entry.name} ⛓` : undefined,
             operation: { type: 'toggle', instanceId: entry.id, enabled: !entry.enabled } }));
         const children = switches.length <= 8 ? switches
             : Array.from({ length: Math.ceil(switches.length / PAGE_SIZE) }, (_, index) => ({

@@ -44,6 +44,7 @@ Alpine.data('mousePalette', () => ({
     get rootNodes() { return pageNodes(this.tree, this.page, (key) => this.t(key)); },
     get rootNode() { return this.rootNodes.find((node) => node.id === this.rootId); },
     get secondNode() { return this.rootNode?.children?.find((node) => node.id === this.secondId); },
+    get activeLabel() { return this.selectedNode?.label || this.secondNode?.label || this.rootNode?.label || ''; },
     get rings() {
         if (!this.pointer) return [];
         const lists = [this.rootNodes, this.rootNode?.children, this.secondNode?.children];
@@ -52,7 +53,7 @@ Alpine.data('mousePalette', () => ({
             items: nodes.map((node, index) => {
                 const { x, y } = sectorLabel(this.pointer.center_x, this.pointer.center_y,
                     PALETTE_RADII[depth], PALETTE_RADII[depth + 1], index, nodes.length);
-                const fitted = fitSectorLabel(node.label, PALETTE_RADII[depth], PALETTE_RADII[depth + 1],
+                const fitted = fitSectorLabel(node.sectorLabel || node.label, PALETTE_RADII[depth], PALETTE_RADII[depth + 1],
                     nodes.length, measureLabel);
                 return { node, x, y, label: fitted.text, fontSize: fitted.fontSize,
                     path: sectorPath(this.pointer.center_x, this.pointer.center_y,

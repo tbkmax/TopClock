@@ -22,13 +22,19 @@ export function displayLayout(addons = [], pairs = []) {
         ...row,
         items: row.items.map((addon) => ({
             ...addon,
-            effective_size_percent: addon.size_percent * (row.pair?.size_percent ?? 100) / 100,
+            // A hidden partner leaves a centered single member, but the pair's
+            // shared scale still applies when it is shown again.
+            effective_size_percent: addon.size_percent * (pairFor(pairs, addon.id)?.size_percent ?? 100) / 100,
         })),
     }));
 }
 
 export function pairFor(pairs = [], id) {
     return pairs.find((pair) => pair.left_id === id || pair.right_id === id);
+}
+
+export function pairEnabled(items) {
+    return items.some((addon) => addon.enabled);
 }
 
 export function canPair(addons, pairs, sourceId, targetId) {
@@ -46,7 +52,7 @@ export function combineAddons(addons, pairs, sourceId, targetId, after = true) {
     const target = addons.find((addon) => addon.id === targetId);
     const remaining = addons.filter((addon) => addon.id !== sourceId);
     const index = remaining.findIndex((addon) => addon.id === targetId);
-    const moved = { ...source, placement: target.placement, enabled: target.enabled };
+    const moved = { ...source, placement: target.placement };
     remaining.splice(index + Number(after), 0, moved);
     const left_id = after ? targetId : sourceId;
     const right_id = after ? sourceId : targetId;

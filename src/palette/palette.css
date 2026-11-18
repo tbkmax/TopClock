@@ -8,4 +8,6 @@ html, body, #palette-app { margin: 0; width: 100%; height: 100%; overflow: hidde
 .disabled { opacity: .35; }
 .palette-center { fill: rgba(12, 13, 16, .96); stroke: #ffd600; stroke-width: 2; }
 .palette-hint { font-size: 13px !important; stroke: none !important; }
+.palette-selection-label { position:fixed; top:12px; left:12px; right:12px; width:max-content; max-width:calc(100vw - 24px); margin:auto; padding:8px 12px; border:1px solid #777; border-radius:8px; background:rgba(15,17,21,.96); color:#fff; font:600 13px/1.4 'Segoe UI',sans-serif; text-align:center; overflow-wrap:anywhere; pointer-events:none; box-sizing:border-box; }
+.palette-selection-label.palette-selection-bottom { top:auto; bottom:12px; }
 .palette-error { position: fixed; left: 12px; bottom: 12px; background: #151515; color: #fff; padding: 9px 12px; border: 1px solid #ff5b5b; border-radius: 6px; }

@@ -1,5 +1,13 @@
 # Frontend add-on host changelog
 
+### 2026-11-17 - Treat any visible pair member as Combined on
+
+- The shared pair enabled helper now reports on when either member is enabled. The Settings group control turns both off from that state and turns both on from fully off; member switches remain independent.
+
+### 2026-11-17 - Keep pair membership while switching members
+
+- Combining no longer copies one member's enabled state to the other. The menu and palette receive a switch per member, while the display keeps pair scale for a lone visible member. No saved field or action command was added.
+
 ### 2026-11-17 - Split add-on regression tests by responsibility
 
 - Moved 27 tests from one add-on test file into eight files under `src/addons/tests/`, separating shared registry, runtime, and layout checks from Date, Region clock, Timer, Counter, and Progress checks. `npm run test:frontend` now discovers test files automatically; add-on behavior and saved data are unchanged.

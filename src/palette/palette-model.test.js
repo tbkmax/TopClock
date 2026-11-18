@@ -23,6 +23,14 @@ assert.equal(switchTree[1].children.length, 3);
 assert.equal(switchTree[1].children[2].children.length, 4);
 assert.equal(switchTree[1].children[2].children[3].operation.instanceId, 'addon-15');
 
+const pairedSwitches = paletteTree([], [
+    { id: 'date', name: 'Date', paletteName: 'Date · Combined', paired: true, enabled: true },
+    { id: 'counter', name: 'Counter', paletteName: 'Counter · Combined', paired: true, enabled: false },
+], t)[1].children;
+assert.deepEqual(pairedSwitches.map((node) => [node.label, node.sectorLabel, node.operation.instanceId, node.operation.enabled]), [
+    ['Date · Combined', 'Date ⛓', 'date', false], ['Counter · Combined', 'Counter ⛓', 'counter', true],
+]);
+
 const many = Array.from({ length: 17 }, (_, index) => ({ id: `node-${index}` }));
 assert.equal(pageNodes(many, 0, t).length, 7);
 assert.equal(pageNodes(many, 1, t).length, 8);

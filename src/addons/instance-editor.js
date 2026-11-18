@@ -1,5 +1,5 @@
 import { createAddon } from './model.js';
-import { addonLayout, canPair, combineAddons, moveAddonLayout, pairFor, swapPair } from './layout.js';
+import { addonLayout, canPair, combineAddons, moveAddonLayout, pairEnabled, pairFor, swapPair } from './layout.js';
 import { getAddonDefinition } from './registry.js';
 import { progressEditorMethods } from './builtins/progress.js';
 import { timerEditorMethods } from './builtins/timer.js';
@@ -30,6 +30,7 @@ export function reorderAddons(addons, sourceId, targetId, placement, after = fal
 }
 
 export const addonMethods = {
+    pairEnabled,
     hasAddon(kind) { return (this.settings.addons || []).some((addon) => addon.kind === kind); },
     canAddAddon(kind) {
         const definition = getAddonDefinition(kind);
@@ -191,7 +192,7 @@ export const addonMethods = {
         const left = this.settings.addons.find((addon) => addon.id === pair.left_id);
         const right = this.settings.addons.find((addon) => addon.id === pair.right_id);
         if (!left || !right) return;
-        left.enabled = right.enabled = !left.enabled;
+        left.enabled = right.enabled = !pairEnabled([left, right]);
         this.save();
     },
 

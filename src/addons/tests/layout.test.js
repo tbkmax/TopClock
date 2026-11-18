@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { addonMethods, reorderAddons } from '../instance-editor.js';
-import { addonLayout, canPair, combineAddons, displayLayout, moveAddonLayout, swapPair } from '../layout.js';
+import { addonLayout, canPair, combineAddons, displayLayout, moveAddonLayout, pairEnabled, swapPair } from '../layout.js';
 import { counterDisplay } from '../builtins/counter.js';
 
 test('drag ordering moves add-ons within a stack and across the clock', () => {
@@ -46,6 +46,21 @@ test('a pair retains both instance sizes and can swap, move, or split', () => {
     assert.equal(split.addons[1].size_percent, 60);
 });
 
+test('combining preserves member switches and a lone visible member keeps shared size', () => {
+    const date = { id: 'date', kind: 'date', placement: 'below', enabled: false, size_percent: 40 };
+    const timer = { id: 'timer', kind: 'timer', placement: 'below', enabled: true, size_percent: 60 };
+    const combined = combineAddons([date, timer], [], 'date', 'timer');
+    combined.pairs[0].size_percent = 50;
+    assert.deepEqual(combined.addons.map((addon) => addon.enabled), [true, false]);
+    for (const visibleId of ['date', 'timer']) {
+        const visible = combined.addons.filter((addon) => addon.id === visibleId);
+        const rows = displayLayout(visible, combined.pairs);
+        assert.equal(rows.length, 1);
+        assert.equal(rows[0].items.length, 1);
+        assert.equal(rows[0].items[0].effective_size_percent, visible[0].size_percent / 2);
+    }
+});
+
 test('Counter pairs with eligible text add-ons in either position', () => {
     const counter = { id: 'counter', kind: 'counter', placement: 'below', enabled: true, size_percent: 30 };
     for (const kind of ['date', 'region_clock', 'timer']) {
@@ -78,10 +93,20 @@ test('combined switch and removal keep pair metadata consistent', () => {
     };
     app.toggleAddonPair('date');
     assert.deepEqual(app.settings.addons.map((addon) => addon.enabled), [false, false]);
+    assert.equal(pairEnabled(app.settings.addons), false);
+    app.settings.addons[0].enabled = true;
+    assert.equal(pairEnabled(app.settings.addons), true);
+    app.toggleAddonPair('date');
+    assert.deepEqual(app.settings.addons.map((addon) => addon.enabled), [false, false]);
+    app.toggleAddonPair('date');
+    assert.deepEqual(app.settings.addons.map((addon) => addon.enabled), [true, true]);
+    assert.equal(pairEnabled(app.settings.addons), true);
+    app.toggleAddonPair('date');
+    assert.deepEqual(app.settings.addons.map((addon) => addon.enabled), [false, false]);
     app.removeAddon('region');
     assert.deepEqual(app.settings.addon_pairs, []);
     assert.deepEqual(app.settings.addons.map((addon) => addon.id), ['date']);
-    assert.equal(app.saves, 2);
+    assert.equal(app.saves, 5);
 });
 
 test('pointer drag moves the card and commits its new placement on release', () => {

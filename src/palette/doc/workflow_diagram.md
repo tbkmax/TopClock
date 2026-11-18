@@ -31,6 +31,8 @@ classDiagram
 
 [palette.js](../palette.js) owns transient selection state; [palette-model.js](../palette-model.js) owns pure calculations; [host.js](../../addons/host.js) rechecks action availability before native dispatch. No class shown here is serialized. Saved enable/key fields belong to [native settings](../../../src-tauri/src/config/model.rs).
 
+For a paired add-on, the model creates separate leaves for the two member IDs. A compact chain mark identifies the pair in each sector, while the current leaf's full localized Combined label appears in a bounded readout. Other long labels use the same readout. Choosing either leaf follows the same host and native switch sequence below and changes only that member; the Settings group switch is not a palette leaf.
+
 ```mermaid
 sequenceDiagram
     participant Native as palette.rs

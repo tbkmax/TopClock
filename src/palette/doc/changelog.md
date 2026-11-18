@@ -1,5 +1,13 @@
 # Mouse palette frontend changelog
 
+### 2026-11-17 - Show full selected labels inside the window
+
+- Paired switches use a compact chain mark in sectors instead of spelling out Combined there. The current full label appears in a bounded, wrapping readout at the top or bottom of the palette window, so long Japanese and other labels can be read without extending past the window. Selection and native action routing are unchanged.
+
+### 2026-11-17 - List combined members separately
+
+- The Add-on branch now has one switch per paired member, each labeled Combined. Selecting one changes only that member; existing ring paging and label fitting still apply.
+
 ### 2026-11-17 - Follow shared localization folder
 
 - The palette now imports the relocated translation module. Labels and selection behavior remain compatible.

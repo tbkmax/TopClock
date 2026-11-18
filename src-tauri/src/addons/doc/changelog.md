@@ -1,5 +1,9 @@
 # Native add-on changelog
 
+### 2026-11-17 - Accept mixed pair visibility
+
+- Pair validation now permits one enabled and one disabled member while retaining adjacency, placement, size, and unique membership checks. Older settings files need no migration. A pre-change build may dissolve a mixed pair if it saves the newer file, while retaining both flat instances.
+
 ### 2026-11-17 - Keep Timer command runtime with add-ons
 
 - Timer and Progress command adapters and completion checks now live in `addons/runtime.rs`. Their command names, sessions, and events remain unchanged; no user action is required.

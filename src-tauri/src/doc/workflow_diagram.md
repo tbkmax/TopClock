@@ -40,7 +40,7 @@ sequenceDiagram
     participant Config as ClockState config
     participant Disk as settings.json
     Menu->>Command: set_addon_enabled(id, enabled)
-    Command->>Config: Lock and find ID plus optional pair member
+    Command->>Config: Lock and change only the requested ID
     alt Unknown ID or invalid settings
         Command-->>Menu: Error without write
     else Valid change
@@ -55,7 +55,7 @@ sequenceDiagram
     end
 ```
 
-The typed command and the existing whole-settings `update_settings` share [save_settings_change](../config/commands.rs). Pair membership is read from the current saved settings, so the menu cannot submit a stale copy of the full configuration. This command does not change the separate Settings page's 80 ms draft-save behavior; its pending full snapshot can still race a menu switch.
+The typed command and the existing whole-settings `update_settings` share [save_settings_change](../config/commands.rs). The targeted command changes one member without submitting a stale copy of the full configuration; Settings saves a Combined switch as one whole-settings update of both flags. This command does not change the separate Settings page's 80 ms draft-save behavior; its pending full snapshot can still race a menu switch.
 
 The Counter command and normal quit path are detailed in the [native add-on workflow](../addons/doc/workflow_diagram.md). Settings removal leaves the Counter session in `PersistedConfig`, even if it is running; re-adding the display exposes it again. Menu, tray, and shortcut Quit use `quit_app`, which checkpoints a running Counter before saving the clock position and exiting. [lib.rs](../lib.rs) also applies the Counter checkpoint on other Tauri exit requests. The separate Timer and Progress sessions keep their existing restart rules.
 

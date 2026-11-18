@@ -48,23 +48,6 @@ fn settings_with_addon_enabled(
         .find(|addon| addon.id == id)
         .ok_or("Add-on is no longer available")?;
     target.enabled = enabled;
-    if let Some(pair) = next
-        .addon_pairs
-        .iter()
-        .find(|pair| pair.left_id == id || pair.right_id == id)
-    {
-        let other_id = if pair.left_id == id {
-            &pair.right_id
-        } else {
-            &pair.left_id
-        };
-        let other = next
-            .addons
-            .iter_mut()
-            .find(|addon| addon.id == *other_id)
-            .ok_or("Paired add-on is no longer available")?;
-        other.enabled = enabled;
-    }
     Ok(next)
 }
 
@@ -151,7 +134,7 @@ mod tests {
     use crate::addons::{legacy_timer, AddonPair};
 
     #[test]
-    fn menu_switch_targets_one_instance_or_its_pair() {
+    fn menu_switch_targets_only_one_instance() {
         let mut settings = ClockSettings::default();
         let mut date = legacy_timer();
         date.id = "date".into();
@@ -176,8 +159,12 @@ mod tests {
                 .iter()
                 .map(|addon| addon.enabled)
                 .collect::<Vec<_>>(),
-            vec![false, false, true]
+            vec![true, false, true]
         );
+        assert!(crate::addons::valid_pairs(
+            &disabled.addons,
+            &disabled.addon_pairs
+        ));
         assert!(settings.addons.iter().all(|addon| addon.enabled));
 
         let progress_off = settings_with_addon_enabled(&settings, "progress", false).unwrap();

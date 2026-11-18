@@ -1,5 +1,9 @@
 # Rust application changelog
 
+### 2026-11-17 - Let paired add-ons have independent visibility
+
+- Native pair validation retains mixed enabled states, and a targeted Add-on switch changes one instance at a time. Settings can still save both flags together. Existing files and command names remain compatible; live Windows persistence and downgrade checks remain open.
+
 ### 2026-11-17 - Group backend domains
 
 - Configuration, displays, input, window handling, and Windows platform services now have dedicated source folders and folder documentation. Display discovery, geometry, and position commands are separated from window reconciliation; settings validation is separated from the saved model. The add-on Timer command runtime moved beside add-on actions. Existing JSON fields, Tauri command and event names, and click-through behavior require no user action. Live Windows smoke verification remains in the backlog.

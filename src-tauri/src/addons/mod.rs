@@ -67,7 +67,7 @@ mod tests {
         assert!(!valid_pairs(&separated, &[pair.clone()]));
         separated[1].placement = "below".into();
         separated[1].enabled = false;
-        assert!(!valid_pairs(&separated, &[pair]));
+        assert!(valid_pairs(&separated, &[pair]));
     }
 
     #[test]

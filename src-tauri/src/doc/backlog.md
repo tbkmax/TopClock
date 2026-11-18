@@ -1,5 +1,7 @@
 # Rust application backlog
 
+The [combined add-on live acceptance](../../../src/doc/backlog.md#combined-add-on-live-acceptance) now includes mixed pair persistence, independent native switches, session reconciliation, and downgrade behavior with a disposable profile. Unit tests cover pair validation and targeted command behavior; the live Windows flow remains open.
+
 The [Counter live Windows check](../../../src/doc/backlog.md#counter-live-windows-acceptance) includes saving the app-wide 0–100% Direction glow preference, reopening Settings, and restarting with both new and older settings files. Check that an older Counter-aware build retains Counter instances when it encounters this unknown shared field; saving there may reset only the preference to its default. Unit validation and `cargo test` pass; the native WebView persistence flow still needs a disposable live profile.
 
 ## Click-through recovery acceptance
@@ -26,7 +28,7 @@ The [Counter live Windows check](../../../src/doc/backlog.md#counter-live-window
 
 Verify `set_addon_enabled` through a live menu with a disposable settings profile, including a pair, a running Timer, a running Counter, a Progress countdown, an unknown or removed ID, and a controlled write failure. The [frontend Add-on menu checklist](../../../src/doc/backlog.md#add-on-menu-live-verification) tracks physical input and cross-window updates. Unit tests cover pair targeting; native WebView and disk failure behavior remain to be checked.
 
-Check Counter checkpoint and stop behavior for menu, tray, and shortcut Quit in a disposable live Windows profile, including a controlled write failure and restart. Remove and re-add a running Counter, and restart once while it is absent to confirm the saved balance. Also verify a paired Counter's shared switch and unchanged balance; see the [frontend Counter acceptance](../../../src/doc/backlog.md#counter-live-windows-acceptance). Native unit tests cover signed session calculations, removal retention, and pair validation, but not actual OS exit timing or WebView synchronization.
+Check Counter checkpoint and stop behavior for menu, tray, and shortcut Quit in a disposable live Windows profile, including a controlled write failure and restart. Remove and re-add a running Counter, and restart once while it is absent to confirm the saved balance. Also verify a paired Counter's member switch and Combined control leave its balance unchanged; see the [frontend Counter acceptance](../../../src/doc/backlog.md#counter-live-windows-acceptance). Native unit tests cover signed session calculations, removal retention, and pair validation, but not actual OS exit timing or WebView synchronization.
 
 
 Verify the new Timer mode and preset commands with a disposable native settings profile, including restart, save failure rollback, and settings plus session events across windows. The [frontend Timer checklist](../../../src/doc/backlog.md#timer-menu-live-windows-acceptance) includes Ctrl menu, tray, shortcut, click-through, and position restore checks.

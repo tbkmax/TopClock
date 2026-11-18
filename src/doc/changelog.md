@@ -1,5 +1,13 @@
 # Frontend changelog
 
+### 2026-11-17 - Refine Combined control and palette labels
+
+- The Combined control now stays visually on when either paired member is on; clicking it turns both off, and the next click turns both on. The palette uses a short chain mark for paired sector labels and shows the full selected label in a readout bounded by the window, including long Japanese text. Saved settings and native input behavior are unchanged.
+
+### 2026-11-17 - Switch combined add-ons independently
+
+- Settings now offers one switch per paired member and a Combined control that turns both on or off. The clock menu and mouse palette list the members separately with a Combined mark. A lone visible member stays centered at the pair's shared size. Existing settings files need no migration; live Windows verification remains open.
+
 ### 2026-11-17 - Discover frontend tests automatically
 
 - The frontend test command now runs Node's test discovery, including eight focused add-on files and future `*.test.js` files. The tests retain their original assertions; production behavior is unchanged.

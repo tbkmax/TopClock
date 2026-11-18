@@ -4,6 +4,7 @@
 <body>
     <main id="palette-app" x-data="mousePalette" x-show="open" x-cloak>
         <svg class="palette-svg" :width="viewportWidth" :height="viewportHeight" x-ref="svg" x-effect="renderPalette()" aria-hidden="true"></svg>
+        <div class="palette-selection-label" :class="{ 'palette-selection-bottom': pointer?.center_y < viewportHeight / 2 }" x-show="activeLabel && !error" x-text="activeLabel"></div>
         <div class="palette-error" x-show="error" x-text="error"></div>
     </main>
     <script type="module" src="/src/palette/palette.js"></script>

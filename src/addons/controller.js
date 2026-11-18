@@ -14,11 +14,14 @@ export function createAddonController({ getSettings, getState, dispatchNative, d
         actionsFor,
         toggleEntries(t) {
             const settings = getSettings();
-            return addonLayout(settings?.addons, settings?.addon_pairs).map((row) => ({
-                id: row.items[0].id,
-                name: row.items.map((addon) => getAddonDefinition(addon.kind)?.describe(addon, { t, settings }).name || addon.kind).join(' + '),
-                enabled: row.items[0].enabled,
-            }));
+            return addonLayout(settings?.addons, settings?.addon_pairs).flatMap((row) =>
+                row.items.map((addon) => {
+                    const name = getAddonDefinition(addon.kind)?.describe(addon, { t, settings }).name || addon.kind;
+                    return {
+                        id: addon.id, name, enabled: addon.enabled, paired: Boolean(row.pair),
+                        paletteName: row.pair ? `${name} · ${t('addons.combined')}` : name,
+                    };
+                }));
         },
         async setEnabled(id, enabled) {
             if (typeof enabled !== 'boolean' || !instance(id) || !setEnabledNative) {

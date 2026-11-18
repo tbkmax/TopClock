@@ -38,7 +38,7 @@ test('controller routes only declared actions to the current enabled instance', 
     assert.deepEqual(calls, [[second.id, 'toggle'], [first.id, 'reset']]);
 });
 
-test('menu switches list disabled instances and save paired members together', async () => {
+test('menu switches list paired members separately and target one instance', async () => {
     const date = createAddon('date');
     const timer = createAddon('timer');
     const progress = createAddon('progress');
@@ -55,10 +55,15 @@ test('menu switches list disabled instances and save paired members together', a
         setEnabledNative: async (id, enabled) => { calls.push([id, enabled]); return settings; },
     });
     const entries = controller.toggleEntries((key, vars) => translate('en', key, vars));
-    assert.equal(entries.length, 2);
-    assert.equal(entries[0].name, 'Date + Timer');
+    assert.equal(entries.length, 3);
+    assert.equal(entries[0].name, 'Date');
+    assert.equal(entries[0].paired, true);
+    assert.match(entries[0].paletteName, /Combined/);
     assert.equal(entries[0].enabled, false);
-    assert.equal(entries[1].name, 'Progress 1');
+    assert.equal(entries[1].name, 'Timer');
+    assert.equal(entries[1].paired, true);
+    assert.equal(entries[2].name, 'Progress 1');
+    assert.equal(entries[2].paired, false);
     await controller.setEnabled(timer.id, true);
     assert.deepEqual(calls, [[timer.id, true]]);
     await assert.rejects(controller.setEnabled('removed', true), /unavailable/);

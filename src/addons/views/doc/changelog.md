@@ -1,5 +1,13 @@
 # Bundled view changelog
 
+### 2026-11-17 - Keep the Combined group switch binary
+
+- The paired Settings card now shows Combined on whenever either member is enabled, with no middle thumb position. Each member still has its own switch; the clock and preview row fragments are unchanged.
+
+### 2026-11-17 - Show both member switches in a combined card
+
+- Both Settings member panels now expose their own enable switch beside the Combined control. The group control shows a mixed state when only one member is on. The clock and preview fragments still render visible members through the shared row layout.
+
 ### 2026-11-17 - Key static fragment labels
 
 - Date, Region, and settings-row fragments now identify static translations explicitly, so English copy edits do not redirect their localized labels. No saved add-on data changes.

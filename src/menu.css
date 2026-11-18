@@ -31,7 +31,9 @@ button:disabled { opacity: .55; cursor: wait; }
 @media (prefers-reduced-motion: reduce) { .menu-addon-toggles, .menu-choices { transition: none; } }
 .menu-addon-toggle { width: 100%; min-height: 35px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 7px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); text-align: left; font-size: 12px; }
 .menu-addon-toggle:hover, .menu-addon-toggle:focus-visible { background: var(--raised); }
-.menu-addon-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu-addon-label { display:flex; align-items:center; gap:6px; min-width:0; }
+  .menu-addon-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .menu-addon-pair-mark { flex:none; padding:2px 4px; border:1px solid #55583b; border-radius:4px; color:var(--primary); font-size:9px; line-height:1; }
 .menu-group { padding: 9px 3px; border-top: 1px solid #2a2a2a; }
 .menu-group-head { display: flex; align-items: center; gap: 8px; }
 .menu-group-name { flex: 1; min-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink); font-size: 12px; font-weight: 600; }

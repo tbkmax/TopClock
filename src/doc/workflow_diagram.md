@@ -43,7 +43,7 @@ sequenceDiagram
     participant User
     participant Menu as menu.js
     participant Host as addons/controller.js
-    participant Rust as settings_commands.rs
+    participant Rust as config/commands.rs
     User->>Menu: Expand Add-on and select a switch
     Menu->>Host: setEnabled(instance ID, new state)
     Host->>Rust: set_addon_enabled(id, enabled)
@@ -57,7 +57,7 @@ sequenceDiagram
     end
 ```
 
-The disclosure is below the existing add-on action rows in [menu.html](../../menu.html). [controller.js](../addons/controller.js) derives its switch rows from the same pair layout as Settings; Rust applies a paired switch to both saved members. Mode and Set choices also stay open on success, while first-level actions still close the menu. [menu.js](../menu.js) marks newly expanded rows as visually pending before Alpine reveals them. They still take their final layout space, so `show_clock_menu` receives the correct dimensions. After that native resize completes, the current request clears the pending state and [menu.css](../menu.css) fades the rows in. A later resize request supersedes an earlier completion. Overflow stays clipped during resizing and returns to scrolling when needed. The [native workflow](../../src-tauri/src/doc/workflow_diagram.md) owns validation, persistence, and session reconciliation.
+The disclosure is below the existing add-on action rows in [menu.html](../../menu.html). [controller.js](../addons/controller.js) derives a separate, Combined-marked switch for each paired member; Rust changes only the selected ID. Settings owns the group control that changes both flags in one ordinary settings save. Mode and Set choices also stay open on success, while first-level actions still close the menu. [menu.js](../menu.js) marks newly expanded rows as visually pending before Alpine reveals them. They still take their final layout space, so `show_clock_menu` receives the correct dimensions. After that native resize completes, the current request clears the pending state and [menu.css](../menu.css) fades the rows in. A later resize request supersedes an earlier completion. Overflow stays clipped during resizing and returns to scrolling when needed. The [native workflow](../../src-tauri/src/doc/workflow_diagram.md) owns validation, persistence, and session reconciliation.
 
 Counter uses the shared add-on display and action pipeline. [menu.js](../menu.js) renders three actions from the Counter definition; [settings.js](../settings/settings.js) opens the existing Details modal only from the Add Add-on catalog, saves the app-wide Direction glow percentage through the normal settings path, and opens a separate confirmation dialog for Reset. [main.js](../main.js) and the Settings preview read the same signed `counterSession` snapshot and [appearance result](../addons/builtins/signed-balance-appearance.js), while [the native workflow](../../src-tauri/src/addons/doc/workflow_diagram.md) owns saving and stopping on quit. No primary-click action is registered for Counter. Its `H:MM:SS` display changes to `D:HH:MM` at 100 hours; Stop changes the displayed text to a lighter shade of the same sign and removes the direction glow. The glow follows count up or down independently of sign and scales from 0% (off) to 100%, with 50% retaining the clock Ctrl shadow opacities and a tighter Counter blur. Its session and visual hint remain on Counter when [layout.js](../addons/layout.js) places it beside Date, Region clock, or Timer.
 
@@ -100,7 +100,7 @@ sequenceDiagram
     Clock->>Layout: Derive side-by-side display row
 ```
 
-The [instance editor](../addons/instance-editor.js) also swaps members, moves a whole pair, splits a dragged member, and mirrors the pair switch. Pointer targeting measures both axes so dragging between the left and right panels swaps members; a short movement within one panel does not split it. The paired Settings card uses one local `expanded` flag to open both member editors; single cards keep their own Edit/Done button. [settings.html](../../settings.html) and [index.html](../../index.html) render the same derived grouping. Rust validates adjacency, placement, enable state and eligible kinds before saving; see the [native add-on workflow](../../src-tauri/src/addons/doc/workflow_diagram.md). The diagram omits the existing debounced preview and save rollback, which still apply.
+The [instance editor](../addons/instance-editor.js) also swaps members, moves a whole pair, splits a dragged member, and sets both enabled flags from the Combined control. Pointer targeting measures both axes so dragging between the left and right panels swaps members; a short movement within one panel does not split it. The paired Settings card has independent member switches and one local `expanded` flag to open both editors; single cards keep their own Edit/Done button. [settings.html](../../settings.html) and [index.html](../../index.html) render the same derived grouping. If only one member is enabled, the shared scale still applies and the row centers it. Rust validates adjacency, placement, and eligible kinds without requiring matching enabled flags; see the [native add-on workflow](../../src-tauri/src/addons/doc/workflow_diagram.md). The diagram omits the existing debounced preview and save rollback, which still apply.
 
 ## Add-on Details layout
 

@@ -54,8 +54,8 @@
                             </button>
                             <div class="menu-addon-toggles" :class="{ 'menu-reveal-pending': revealPendingId === 'addon-toggle' }" x-show="expandedId === 'addon-toggle'" x-cloak>
                                 <template x-for="entry in toggleEntries" :key="entry.id">
-                                    <button class="menu-addon-toggle" type="button" role="switch" :disabled="busy" :aria-checked="entry.enabled" :aria-label="t(entry.enabled ? 'addons.disable' : 'addons.enable', { name: entry.name })" @click="toggleAddon(entry)">
-                                        <span class="menu-addon-name" x-text="entry.name"></span>
+                                    <button class="menu-addon-toggle" type="button" role="switch" :disabled="busy" :aria-checked="entry.enabled" :aria-label="t(entry.enabled ? 'addons.disable' : 'addons.enable', { name: entry.paletteName })" @click="toggleAddon(entry)">
+                                        <span class="menu-addon-label"><span class="menu-addon-name" x-text="entry.name"></span><small class="menu-addon-pair-mark" x-show="entry.paired" x-text="t('addons.combined')"></small></span>
                                         <span class="switch" :class="{ on: entry.enabled }"><span></span></span>
                                     </button>
                                 </template>

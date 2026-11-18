@@ -56,7 +56,7 @@ classDiagram
     AddonPair --> AddonInstance : two adjacent IDs
 ```
 
-[instance.rs](../instance.rs) validates pair references, eligibility (Date, Region clock, Timer, or Counter), placement, enabled state, scale, and uniqueness before a settings save. Progress remains ineligible. [config store](../../config/store.rs) keeps valid flat instances when pair links are stale after loading. Pair metadata is durable; row rendering is derived in the frontend, while Counter's session remains separate.
+[instance.rs](../instance.rs) validates pair references, eligibility (Date, Region clock, Timer, or Counter), shared placement, scale, and uniqueness before a settings save. Either member may be disabled independently. Progress remains ineligible. [config store](../../config/store.rs) keeps valid flat instances when pair links are stale after loading. Pair metadata is durable; row rendering is derived in the frontend, while Counter's session remains separate.
 
 The Progress preset action reads the selected instance and shared preset list under one config lock, checks whether an existing session needs confirmation, then writes its option duration and new running session together. On write failure it restores the prior settings and session and emits nothing. On success it broadcasts the settings snapshot and all Progress sessions; the frontend's single reactive host updates Start/Pause labels by instance ID.
 

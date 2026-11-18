@@ -42,7 +42,6 @@ pub(crate) fn valid_pairs(addons: &[AddonInstance], pairs: &[AddonPair]) -> bool
                 "date" | "region_clock" | "timer" | "counter"
             )
             && left.placement == right.placement
-            && left.enabled == right.enabled
             && (10..=100).contains(&pair.size_percent)
             && paired.insert(left.id.as_str())
             && paired.insert(right.id.as_str())
