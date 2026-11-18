@@ -1,5 +1,9 @@
 # Rust application changelog
 
+### 2026-11-17 - Accept Counter direction glow preference
+
+- Settings now stores and validates one app-wide 0–100% Counter glow intensity, defaulting to 50% for older files. Counter instance options remain empty; the saved Counter session, input handling, and command names are unchanged.
+
 ### 2026-11-16 - Restore click-through after native style drift
 
 - Visible clocks now recheck their actual Windows input style on each existing monitor pass, restoring click-through if a window operation clears it while the interaction modifier is released. The setter leaves matching styles alone. This requires no settings migration or user action. A native style-drift test passes; the intermittent desktop trigger still needs live verification.

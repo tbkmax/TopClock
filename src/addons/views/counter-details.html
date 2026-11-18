@@ -1,0 +1,14 @@
+<template x-if="activeAddonDetailsKind === 'counter'">
+    <div class="addon-detail-content">
+        <h2 id="addon-details-title" x-text="t('addons.counter')"></h2>
+        <p x-text="t('addons.haloIntensityHint')"></p>
+        <div class="addon-instance-controls">
+            <label>
+                <span x-text="`${t('addons.haloIntensity')} · ${counterHaloIntensity()}%`"></span>
+                <input data-detail-initial-focus class="size-range" type="range" min="0" max="100" step="5"
+                    :value="counterHaloIntensity()" :style="rangeStyle(counterHaloIntensity(), 0, 100)"
+                    @input="setCounterHaloIntensity(Number($event.target.value))" :aria-label="t('addons.haloIntensity')">
+            </label>
+        </div>
+    </div>
+</template>

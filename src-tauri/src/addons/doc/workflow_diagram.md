@@ -26,6 +26,8 @@ sequenceDiagram
 
 Removing Counter through Settings changes only the add-on list. Its separate session keeps its balance and continues running if it was running; adding Counter again exposes that session. An explicit disable stops it while retaining the balance. The quit helper stops a running session even when the Counter add-on is absent.
 
+The Counter Details slider writes the app-wide `counter_halo_intensity_percent` setting through the ordinary settings update route. [settings.rs](../../settings.rs) validates 0–100 and defaults a missing field to 50; [counter.rs](../counter.rs) continues to require empty instance options. This preference does not change CounterSession or the action event above.
+
 
 For a Timer mode or preset choice, [actions.rs](../actions.rs) rechecks the enabled Timer and session under the config lock, then requires confirmation if a running or elapsed session would be discarded unless that choice's warning was dismissed. A mode choice writes the new mode and an idle session; a preset choice writes its duration and a running session. If saving fails, prior settings and Timer session are restored with no event. Success emits both settings and Timer session events. Progress continues using its per-ID transaction and session map.
 

@@ -1,5 +1,21 @@
 # Bundled view changelog
 
+### 2026-11-17 - Tighten Counter glow around text
+
+- Counter's clock and preview classes now use 4px/8px blur distances, bringing the colored glow closer to the smaller digits. The shared Ctrl-held clock keeps its 10px/20px distances.
+
+### 2026-11-17 - Keep Counter glow visible in built views
+
+- The clock and preview Counter selectors now outrank the base clock text shadow, and their glow uses lighter blue/red shades. The previous selector lost to `.addon-line` in the production CSS, hiding the glow at every intensity.
+
+### 2026-11-17 - Add Counter glow slider
+
+- Counter's shared Details modal now has a Direction glow slider from 0% to 100%, opened only from the Add Add-on catalog. The clock and Settings preview apply the selected app-wide text glow on Counter's own glyphs, including in combined rows; older settings default to 50%.
+
+### 2026-11-17 - Glow Counter text for active direction
+
+- The clock row and Settings preview now show a blue or red Counter glyph glow while it counts up or down. It uses the clock's Ctrl shadow opacities at default intensity with a tighter blur, stays on Counter's member when paired, and disappears on Stop.
+
 ### 2026-11-12 - Add Counter controls and reset confirmation
 
 - The Settings Counter editor shows a Reset button with a confirmation dialog; its clock row uses signed-state color and a spoken label. The clock menu shows Count up, Count down, and Stop, without Reset.

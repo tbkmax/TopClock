@@ -1,0 +1,21 @@
+/* Clock interaction and signed-time direction share one glyph glow treatment. */
+#app.ctrl-active .clock-digits { --text-glow-rgb: 250, 255, 105; }
+.addon-line.addon-motion-up,
+.addon-preview-line.addon-motion-up { --text-glow-rgb: 147, 197, 253; }
+.addon-line.addon-motion-down,
+.addon-preview-line.addon-motion-down { --text-glow-rgb: 252, 165, 165; }
+.addon-line:is(.addon-motion-up, .addon-motion-down),
+.addon-preview-line:is(.addon-motion-up, .addon-motion-down) {
+    --text-glow-near-blur: 4px;
+    --text-glow-far-blur: 8px;
+}
+
+#app.ctrl-active .clock-digits,
+.addon-line.addon-motion-up,
+.addon-line.addon-motion-down,
+.addon-preview-line.addon-motion-up,
+.addon-preview-line.addon-motion-down {
+    text-shadow: 0 0 var(--text-glow-near-blur, 10px) rgba(var(--text-glow-rgb), var(--text-glow-near-alpha, .9)),
+                 0 0 var(--text-glow-far-blur, 20px) rgba(var(--text-glow-rgb), var(--text-glow-far-alpha, .5));
+    transition: text-shadow .2s ease;
+}

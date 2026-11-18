@@ -1,5 +1,21 @@
 # Frontend changelog
 
+### 2026-11-17 - Bring Counter glow closer to the glyphs
+
+- Counter now uses 4px/8px blur instead of 10px/20px while retaining the saved intensity and lighter direction colors. The shared rule still leaves the clock's Ctrl glow at 10px/20px.
+
+### 2026-11-17 - Restore visible Counter text glow
+
+- The Counter glow now wins over the base clock text shadow in production CSS and uses lighter blue/red tones. The previous glow rule was loaded before `.addon-line`, which hid it even at 100%. The clock's Ctrl glow and saved intensity setting are unchanged.
+
+### 2026-11-17 - Add a Counter direction glow control
+
+- Counter Details now offers an app-wide 0–100% Direction glow slider, accessible only from the Add Add-on catalog. Older settings use a 50% default, matching the clock's Ctrl text-glow brightness; 0% hides the colored glow. The clock and preview update from the same saved preference without changing Counter timing or click-through behavior.
+
+### 2026-11-17 - Add a subtle Counter direction hint
+
+- While Counter runs, the desktop clock and Settings preview show a blue glyph glow for counting up or red for counting down, independently of the balance's text color. It shares the clock's Ctrl text-shadow treatment; Stop removes it, and a combined row keeps it on Counter alone. No settings migration or user action is needed.
+
 ### 2026-11-16 - Place the mouse palette with global controls
 
 - Moved the palette page and model to `src/palette/`; the menu still shares its choice model, and General and Shortcuts still own the controls. No saved settings change is required.

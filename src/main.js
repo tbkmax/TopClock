@@ -12,6 +12,7 @@ import { createAddonHost } from './addons/host.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
 import { localizeDocument, resolveLanguage, translate } from './i18n.js';
 import './style.css';
+import './text-glow.css';
 import './addons/builtins/progress.css';
 
 const appWindow = getCurrentWindow();

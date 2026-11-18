@@ -1,5 +1,7 @@
 # Rust workflows
 
+Counter Details' Direction glow slider saves the app-wide `counter_halo_intensity_percent` field through the existing `update_settings` flow. [Settings validation](../settings.rs) accepts 0–100 and defaults missing older values to 50. Counter instance options remain empty, and the preference does not modify the separate Counter session or its action event. See the [native add-on workflow](../addons/doc/workflow_diagram.md#counter-state-and-normal-quit).
+
 ## Mouse palette window lifecycle
 
 ```mermaid

@@ -139,6 +139,8 @@ pub(crate) struct ClockSettings {
     pub(crate) addons: Vec<AddonInstance>,
     #[serde(default, deserialize_with = "deserialize_addon_pairs")]
     pub(crate) addon_pairs: Vec<crate::addons::AddonPair>,
+    #[serde(default = "default_counter_halo_intensity_percent")]
+    pub(crate) counter_halo_intensity_percent: u8,
     #[serde(default)]
     pub(crate) timer_reset_warning_dismissed: bool,
     #[serde(default = "default_countdown_presets")]
@@ -181,6 +183,7 @@ impl Default for ClockSettings {
             timer_addon_enabled: false,
             addons: Vec::new(),
             addon_pairs: Vec::new(),
+            counter_halo_intensity_percent: default_counter_halo_intensity_percent(),
             timer_reset_warning_dismissed: false,
             timer_countdown_presets: default_countdown_presets(),
             timer_preset_warning_dismissed: false,
@@ -196,6 +199,10 @@ fn default_language() -> String {
 
 fn default_countdown_presets() -> Vec<u16> {
     vec![10, 30, 60]
+}
+
+fn default_counter_halo_intensity_percent() -> u8 {
+    50
 }
 
 pub(crate) fn valid_countdown_presets(presets: &[u16]) -> bool {
@@ -255,6 +262,7 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
         && valid_shortcut_string(&settings.shortcuts.timer_reset)
         && valid_countdown_presets(&settings.timer_countdown_presets)
         && valid_countdown_presets(&settings.progress_countdown_presets)
+        && settings.counter_halo_intensity_percent <= 100
         && valid_addons(&settings.addons)
         && crate::addons::valid_pairs(&settings.addons, &settings.addon_pairs)
 }
@@ -262,6 +270,36 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn counter_halo_preference_is_shared_and_legacy_safe() {
+        let mut settings = ClockSettings::default();
+        let mut counter = crate::addons::legacy_timer();
+        counter.kind = "counter".into();
+        counter.options = serde_json::json!({});
+        settings.addons.push(counter);
+        assert_eq!(settings.counter_halo_intensity_percent, 50);
+        assert!(valid_settings(&settings));
+        settings.counter_halo_intensity_percent = 0;
+        assert!(valid_settings(&settings));
+        settings.counter_halo_intensity_percent = 100;
+        assert!(valid_settings(&settings));
+        settings.counter_halo_intensity_percent = 75;
+        let restored: ClockSettings =
+            serde_json::from_value(serde_json::to_value(&settings).unwrap()).unwrap();
+        assert_eq!(restored.counter_halo_intensity_percent, 75);
+        assert_eq!(restored.addons[0].options, serde_json::json!({}));
+        settings.counter_halo_intensity_percent = 101;
+        assert!(!valid_settings(&settings));
+
+        let mut saved = serde_json::to_value(ClockSettings::default()).unwrap();
+        saved
+            .as_object_mut()
+            .unwrap()
+            .remove("counter_halo_intensity_percent");
+        let old: ClockSettings = serde_json::from_value(saved).unwrap();
+        assert_eq!(old.counter_halo_intensity_percent, 50);
+    }
 
     #[test]
     fn settings_and_position_round_trip_together() {

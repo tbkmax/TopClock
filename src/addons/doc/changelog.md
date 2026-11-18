@@ -1,5 +1,13 @@
 # Frontend add-on host changelog
 
+### 2026-11-17 - Open shared Counter glow setting in Details
+
+- Counter now declares an allowlisted Details view for the app-wide 0–100% glow setting, opened only from the catalog. The display model scales the clock's Ctrl-style text glow for clock and preview; older settings use the 50% default without a migration. Counter instance options remain empty.
+
+### 2026-11-17 - Keep Counter direction on its own display member
+
+- Counter's display result now carries active count direction separately from the signed balance color. Single and paired layouts preserve the glyph glow on Counter alone in the desktop clock and Settings preview; saved instances and native sessions are unchanged.
+
 ### 2026-11-16 - Remove palette implementation from add-ons
 
 - The palette now consumes the add-on host from `src/palette/`; add-on kinds, actions, and sessions remain unchanged.

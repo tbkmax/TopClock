@@ -10,6 +10,8 @@ The clock menu can call `set_addon_enabled(id, enabled)` for one configured inst
 
 `PersistedConfig.counter_session` is independent of `timer_session` and `progress_timer_sessions`. The [native Counter module](../addons/counter.rs) validates actions, saves signed balance and direction, and emits `counter-state-changed`. [settings_commands.rs](../settings_commands.rs) stops a disabled Counter without clearing its balance; removing an instance leaves the separate session intact and can leave it running. [window_commands.rs](../window_commands.rs) routes menu, tray, and shortcut Quit through one helper that saves and stops a running Counter before exit; [lib.rs](../lib.rs) applies the same checkpoint on other Tauri exit requests. A failed Counter save prevents a normal exit. [config_store.rs](../config_store.rs) retains the session without an add-on and stops an unexpectedly running saved Counter at its last checkpoint on startup. The clock's click-through behavior is unchanged.
 
+`ClockSettings.counter_halo_intensity_percent` stores one app-wide integer from 0 to 100 and defaults to 50 when older settings files lack the field. [Settings validation](../settings.rs) checks the range. [Counter option validation](../addons/counter.rs) still requires empty instance options, so older Counter instances remain valid. Appearance never enters `CounterSession` or the native input path.
+
 [addons/instance.rs](../addons/instance.rs) accepts Counter in the existing two-member pair metadata alongside Date, Region clock, and Timer. The pair still stores only IDs and shared size; `counter_session` stays separate and is not changed by pair placement.
 
 

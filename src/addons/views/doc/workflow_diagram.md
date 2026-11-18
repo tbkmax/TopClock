@@ -1,6 +1,10 @@
 # Bundled view composition
 
-Counter follows the existing static fragment flow below. [counter.html](../counter.html) opens a Settings modal; only its confirmed Reset button dispatches the reset action. [clock-row.html](../clock-row.html) shows the semantic color and accessible signed state returned by the definition. The menu uses the three action descriptors and has no Reset entry.
+Counter follows the existing static fragment flow below. The Add Add-on catalog opens [counter-details.html](../counter-details.html), which sends the Direction glow slider value through Settings' ordinary save path even before Counter is added. [counter.html](../counter.html) has no Details button; Reset still opens a separate confirmation modal and only its confirmed button dispatches the reset action. [clock-row.html](../clock-row.html) shows the semantic text color and accessible signed state returned by the definition. It and [preview-row.html](../preview-row.html) apply the returned motion class and glow alpha to Counter's glyphs, so either position in a pair keeps the chosen intensity while the neighboring add-on stays uncolored. The menu uses the three action descriptors and has no Reset entry.
+
+The production build loads the shared glow CSS before the clock page's base CSS. The Counter motion selectors now include each row's class, so the later `.addon-line` text shadow does not cover the colored glow; the preview uses the same selectors and lighter glow shades.
+
+The Counter classes also set blur-distance variables to 4px and 8px. The common shadow rule uses those values in the desktop clock and preview, while its 10px and 20px fallbacks retain the Ctrl-held clock treatment.
 
 
 The Timer Settings fragment calls `timerChange('mode', value)` even while the session runs; Settings asks for confirmation when needed and sends the choice through the host. Its Details button opens the allowlisted Timer preset editor. That editor changes only the Timer preset list and both Timer warning preferences through the ordinary Settings save controller. The menu disclosures are rendered in [menu.html](../../../../menu.html) from each compiled add-on's sections, with one expanded section at a time.

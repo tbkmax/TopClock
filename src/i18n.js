@@ -14,6 +14,8 @@ const messages = {
     'addons.counterDescription': ['Count time up or down from a saved balance.', '从已保存的时间余额向上或向下计时。', '從已儲存的時間餘額向上或向下計時。', '保存した時間残高から加算または減算します。'],
     'addons.counterSubtitle': ['Signed time balance', '带正负值的时间余额', '有正負值的時間餘額', '正負の時間残高'],
     'addons.counterHint': ['Count up or down from the current balance. Stop preserves it.', '从当前余额向上或向下计时。停止会保留余额。', '從目前餘額向上或向下計時。停止會保留餘額。', '現在の残高から増減します。停止しても残高は残ります。'],
+    'addons.haloIntensity': ['Direction glow', '计时方向光晕', '計時方向光暈', '計測方向の光の強さ'],
+    'addons.haloIntensityHint': ['Adjust the glow around Counter text while it runs. Zero turns it off.', '调整计数器运行时文字周围的光晕。设为零可关闭。', '調整計數器運行時文字周圍的光暈。設為零可關閉。', 'カウンター動作中の文字の光を調整します。0 でオフになります。'],
     'addons.countUp': ['Count up', '向上计时', '向上計時', '加算開始'],
     'addons.countDown': ['Count down', '向下计时', '向下計時', '減算開始'],
     'addons.stop': ['Stop', '停止', '停止', '停止'],

@@ -1,5 +1,7 @@
 # Rust application backlog
 
+The [Counter live Windows check](../../../src/doc/backlog.md#counter-live-windows-acceptance) includes saving the app-wide 0–100% Direction glow preference, reopening Settings, and restarting with both new and older settings files. Check that an older Counter-aware build retains Counter instances when it encounters this unknown shared field; saving there may reset only the preference to its default. Unit validation and `cargo test` pass; the native WebView persistence flow still needs a disposable live profile.
+
 ## Click-through recovery acceptance
 
 - **Title:** Verify click-through recovery against the intermittent desktop trigger.

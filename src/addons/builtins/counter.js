@@ -1,4 +1,4 @@
-import { signedBalanceAppearance } from './signed-balance-appearance.js';
+import { DEFAULT_HALO_INTENSITY_PERCENT, signedBalanceAppearance } from './signed-balance-appearance.js';
 
 export function counterValue(session, nowMs) {
     if (!session) return 0;
@@ -6,7 +6,7 @@ export function counterValue(session, nowMs) {
     return session.value_ms + elapsed * (session.direction || 0);
 }
 
-export function counterDisplay(session, nowMs) {
+export function counterDisplay(session, nowMs, intensityPercent = DEFAULT_HALO_INTENSITY_PERCENT) {
     const value = counterValue(session, nowMs);
     const totalSeconds = Math.floor(Math.abs(value) / 1000);
     const hours = Math.floor(totalSeconds / 3600);
@@ -14,16 +14,18 @@ export function counterDisplay(session, nowMs) {
     const text = hours >= 100
         ? `${Math.floor(hours / 24)}:${String(hours % 24).padStart(2, '0')}:${minutes}`
         : `${hours}:${minutes}:${String(totalSeconds % 60).padStart(2, '0')}`;
-    return { text, ...signedBalanceAppearance(value, session?.running === true) };
+    return { text, ...signedBalanceAppearance(value, session?.running === true, session?.direction, intensityPercent) };
 }
 
 export const counterAddon = {
     kind: 'counter', label: 'Counter', labelKey: 'addons.counter',
     description: 'Keep a signed time balance.', maxInstances: 1,
-    viewKey: 'shared', settingsViewKey: 'counter',
+    viewKey: 'shared', settingsViewKey: 'counter', detailsViewKey: 'counter-details',
     createOptions: () => ({}),
     describe: (_addon, { t }) => ({ name: t('addons.counter'), subtitle: t('addons.counterSubtitle') }),
-    display(_addon, { now, counterSession }) { return counterDisplay(counterSession, now.getTime()); },
+    display(_addon, { now, settings, counterSession }) {
+        return counterDisplay(counterSession, now.getTime(), settings?.counter_halo_intensity_percent);
+    },
     actions(addon) {
         return [
             { id: 'start_positive', labelKey: 'addons.countUp', roles: ['clock-menu', 'settings-button'], enabled: addon.enabled },

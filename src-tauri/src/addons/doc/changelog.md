@@ -1,5 +1,9 @@
 # Native add-on changelog
 
+### 2026-11-17 - Keep Counter glow out of instance options
+
+- Counter instances continue to use empty options. The 0–100% Direction glow preference is validated in shared Settings, so older Counter instances remain valid and their sessions and commands are unchanged.
+
 ### 2026-11-16 - Separate the palette from native add-ons
 
 - Moved the global palette monitor out of the add-on module. Add-on validation, sessions, and commands keep their existing behavior.

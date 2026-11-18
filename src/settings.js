@@ -10,6 +10,7 @@ import { displayLayout } from './addons/layout.js';
 import { getAddonDefinition } from './addons/registry.js';
 import { createAddonHost } from './addons/host.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
+import { DEFAULT_HALO_INTENSITY_PERCENT, haloIntensityPercent } from './addons/builtins/signed-balance-appearance.js';
 import { createTimeZoneOptions, regionZonePicker } from './addons/builtins/region-picker.js';
 import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
 import { addonMethods } from './addons/instance-editor.js';
@@ -19,6 +20,7 @@ import { createSettingsPersistence } from './settings-persistence.js';
 import { nextSettingsTab } from './settings-tabs.js';
 import { createSettingsPreview } from './settings-preview.js';
 import './settings.css';
+import './text-glow.css';
 import './addons/builtins/progress.css';
 
 const settingsWindow = getCurrentWindow();
@@ -49,6 +51,7 @@ Alpine.data('settingsApp', () => ({
         shortcuts: { ...DEFAULT_SHORTCUTS },
         addons: [],
         addon_pairs: [],
+        counter_halo_intensity_percent: DEFAULT_HALO_INTENSITY_PERCENT,
         timer_reset_warning_dismissed: false,
         timer_countdown_presets: [10, 30, 60],
         timer_preset_warning_dismissed: false,
@@ -283,11 +286,18 @@ Alpine.data('settingsApp', () => ({
 
     addonPreviewStyle(addon) {
         return {
+            ...addon.glowStyle,
             color: addon.color || this.settings.font_color,
             fontSize: `${Math.min(this.settings.font_size, 64) * (addon.effective_size_percent ?? addon.size_percent) / 100}px`,
             fontFamily: clockFontStack(this.settings.font_family),
             WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
         };
+    },
+    counterHaloIntensity() { return haloIntensityPercent(this.settings.counter_halo_intensity_percent); },
+    setCounterHaloIntensity(value) {
+        if (!Number.isInteger(value) || value < 0 || value > 100) return;
+        this.settings.counter_halo_intensity_percent = value;
+        this.save();
     },
 
     progressStyle(addon) { return progressBarStyle(addon, Math.min(this.settings.font_size, 64)); },

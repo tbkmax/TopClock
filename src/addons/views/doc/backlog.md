@@ -1,6 +1,10 @@
 # Bundled view backlog
 
-Check the Counter buttons, Reset dialog focus and Escape dismissal, spoken signed state, and menu fit in the fixed-size Settings and native clock windows. Include all supported languages and the 100-hour display transition in the [frontend Counter checklist](../../../doc/backlog.md#counter-live-windows-acceptance).
+Check the Counter buttons, Reset dialog focus and Escape dismissal, spoken signed state, and menu fit in the fixed-size Settings and native clock windows. Open Counter Details only from the catalog, before and after adding Counter, including when paired. Drag Direction glow through 0%, default 50%, and 100%, then reopen Details to verify the saved value. Compare the default glyph glow with the clock's Ctrl glow and check that it remains on Counter alone in both pair positions and stays legible on light and dark backgrounds. Include all supported languages and the 100-hour display transition in the [frontend Counter checklist](../../../doc/backlog.md#counter-live-windows-acceptance).
+
+Recheck the built clock at 50% and 100% to confirm the higher-specificity motion rule visibly overrides `.addon-line` in the live WebView; inspect both the standalone Counter and both pair positions.
+
+Compare the tightened 4px/8px Counter glow against the supplied screenshot in the live desktop clock and Settings preview at small text sizes. Confirm it remains close to the glyphs without merging into the signed text color.
 
 
 Check Timer Details and mode confirmation with mouse, keyboard, all supported languages, and combined add-on cards in the [live Timer checklist](../../../doc/backlog.md#timer-menu-live-windows-acceptance). The bundled fragment build check passes; a running WebView is still needed for focus and layout acceptance.

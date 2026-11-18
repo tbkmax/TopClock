@@ -86,11 +86,6 @@ html, body {
     cursor: grabbing;
 }
 
-#app.ctrl-active .clock-digits {
-    text-shadow: 0 0 10px rgba(250, 255, 105, 0.9), 0 0 20px rgba(250, 255, 105, 0.5);
-    transition: text-shadow 0.2s ease;
-}
-
 /* Clock Container */
 .clock-container {
     /* Keep the digits' position stable while clock add-ons change size. */
