@@ -3,7 +3,7 @@ use crate::{
         apply_action, apply_progress_preset, apply_timer_menu_change, progress_countdown_options,
         timer_options, ActionTarget, TimerMenuChange, TimerSession,
     },
-    config_store::save_config,
+    config::store::save_config,
     state::ClockState,
 };
 use std::{
@@ -100,7 +100,7 @@ pub(crate) fn normalize_finished_timer(window: &WebviewWindow, state: &Arc<Clock
     if let Some((mode, duration)) = timer_options(&config.settings.addons) {
         let mode = mode.to_owned();
         if config.timer_session.normalize(epoch_ms(), &mode, duration) {
-            if let Err(error) = save_config(state, &config) {
+            if let Err(error) = save_config(&state.settings_path, &config) {
                 eprintln!("Unable to save completed timer: {error}");
             }
             let _ = window
@@ -124,7 +124,7 @@ pub(crate) fn normalize_finished_progress_timers(window: &WebviewWindow, state: 
         }
     }
     if changed {
-        if let Err(error) = save_config(state, &config) {
+        if let Err(error) = save_config(&state.settings_path, &config) {
             eprintln!("Unable to save completed Progress countdown: {error}");
         }
         let _ = window.app_handle().emit(

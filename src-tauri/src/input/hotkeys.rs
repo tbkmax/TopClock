@@ -1,7 +1,7 @@
-use crate::settings::ShortcutSettings;
+use crate::config::model::ShortcutSettings;
 use crate::{
-    state::ClockState, timer::apply_timer_action, window_commands::quit_app,
-    window_commands::show_settings,
+    addons::runtime::apply_timer_action, state::ClockState, windows::window_commands::quit_app,
+    windows::window_commands::show_settings,
 };
 use std::{ptr, sync::Arc, thread, time::Duration};
 use tauri::Emitter;
@@ -82,7 +82,7 @@ fn parse_shortcut(binding: &str) -> Option<(u32, u32)> {
     Some((modifiers, key?))
 }
 
-pub(super) fn start_hotkeys(app: tauri::AppHandle, state: Arc<ClockState>) {
+pub(crate) fn start_hotkeys(app: tauri::AppHandle, state: Arc<ClockState>) {
     thread::spawn(move || {
         // Ensure this thread has a Windows message queue before registering thread hotkeys.
         let mut queue_message: MSG = unsafe { std::mem::zeroed() };

@@ -1,5 +1,9 @@
 # Native add-on changelog
 
+### 2026-11-17 - Keep Timer command runtime with add-ons
+
+- Timer and Progress command adapters and completion checks now live in `addons/runtime.rs`. Their command names, sessions, and events remain unchanged; no user action is required.
+
 ### 2026-11-17 - Keep Counter glow out of instance options
 
 - Counter instances continue to use empty options. The 0–100% Direction glow preference is validated in shared Settings, so older Counter instances remain valid and their sessions and commands are unchanged.

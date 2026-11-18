@@ -1,4 +1,4 @@
-use crate::{config_store::save_config, state::ClockState, timer::epoch_ms};
+use crate::{addons::runtime::epoch_ms, config::store::save_config, state::ClockState};
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
 use std::sync::Arc;
@@ -100,7 +100,7 @@ pub(crate) fn counter_action(
     let before = config.counter_session.clone();
     let now = epoch_ms();
     apply_action(&mut config.counter_session, &action, now, confirmed_reset)?;
-    if let Err(error) = save_config(&state, &config) {
+    if let Err(error) = save_config(&state.settings_path, &config) {
         config.counter_session = before;
         return Err(error);
     }
@@ -118,7 +118,7 @@ pub(crate) fn stop_on_quit(app: &tauri::AppHandle) -> Result<(), String> {
     }
     let before = config.counter_session.clone();
     config.counter_session.stop(epoch_ms());
-    if let Err(error) = save_config(&state, &config) {
+    if let Err(error) = save_config(&state.settings_path, &config) {
         config.counter_session = before;
         return Err(error);
     }

@@ -5,7 +5,7 @@ Status: implemented in the working tree on 2026-10-27; build and unit checks pas
 ## Before implementation
 
 - [The Add-ons tab](../../settings.html) has a Timer toggle and a placeholder World clocks card. There is no date, region clock, timer display, add-on ordering, or placement control.
-- [Rust settings](../../src-tauri/src/settings.rs) persist `timer_addon_enabled` and timer shortcut strings. The timer shortcuts currently have settings controls but no action handler.
+- [Rust settings](../../src-tauri/src/config/model.rs) persist `timer_addon_enabled` and timer shortcut strings. The timer shortcuts currently have settings controls but no action handler.
 - [The clock UI](../../src/main.js) resizes the transparent window to its content and keeps its right edge fixed. [Native input handling](../../src-tauri/src/main.rs) enables pointer input only while the configured modifier is held or the clock menu is open. Shortcut matching in the webview requires keyboard focus.
 - The repository's [visual language](../DESIGN.md) uses a black settings surface and yellow accent. The desktop clock is otherwise transparent and uses the configurable clock appearance.
 

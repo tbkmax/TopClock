@@ -1,5 +1,9 @@
 # Tauri package changelog
 
+### 2026-11-17 - Document grouped Rust backend
+
+- The native source now groups configuration, displays, input, windows, platform services, and add-ons under `src/`. Tauri windows and capabilities, saved settings, and frontend command names are unchanged; no user action is required.
+
 ### 2026-11-16 - Recover clock click-through during normal use
 
 - The native monitor now restores a visible clock's click-through style when it differs from the released modifier state, without waiting for a new Ctrl interaction. No package or settings migration is needed. Live reproduction of the intermittent trigger remains open; see the [Rust acceptance item](../src/doc/backlog.md#click-through-recovery-acceptance).

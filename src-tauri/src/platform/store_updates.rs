@@ -79,7 +79,7 @@ fn settings_hwnd(window: &WebviewWindow) -> Result<isize, String> {
 
 #[tauri::command]
 pub(crate) async fn check_store_updates(window: WebviewWindow) -> Result<bool, String> {
-    if !crate::startup::is_packaged()? {
+    if !crate::platform::startup::is_packaged()? {
         return Err("Microsoft Store updates require a packaged installation".into());
     }
     let hwnd_raw = settings_hwnd(&window)?;
@@ -98,7 +98,7 @@ pub(crate) async fn check_store_updates(window: WebviewWindow) -> Result<bool, S
 
 #[tauri::command]
 pub(crate) async fn install_store_update(window: WebviewWindow) -> Result<String, String> {
-    if !crate::startup::is_packaged()? {
+    if !crate::platform::startup::is_packaged()? {
         return Err("Microsoft Store updates require a packaged installation".into());
     }
     let hwnd_raw = settings_hwnd(&window)?;

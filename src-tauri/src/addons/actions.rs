@@ -1,6 +1,7 @@
 use super::{progress, progress_countdown_options, timer, timer_options, TimerSession};
 use crate::{
-    config_store::save_config, settings::PersistedConfig, state::ClockState, timer::epoch_ms,
+    addons::runtime::epoch_ms, config::model::PersistedConfig, config::store::save_config,
+    state::ClockState,
 };
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
@@ -33,7 +34,7 @@ pub(crate) fn apply_timer_menu_change(
         dont_show_again,
         epoch_ms(),
     )?;
-    if let Err(error) = save_config(&state, &config) {
+    if let Err(error) = save_config(&state.settings_path, &config) {
         config.settings = previous_settings;
         config.timer_session = previous_session;
         return Err(error);
@@ -132,7 +133,7 @@ pub(crate) fn apply_timer_action(
         &mode,
         duration,
     )?;
-    if let Err(error) = save_config(&state, &config) {
+    if let Err(error) = save_config(&state.settings_path, &config) {
         config.timer_session = before;
         return Err(error);
     }
@@ -170,7 +171,7 @@ pub(crate) fn apply_progress_action(
         .entry(id.to_owned())
         .or_default();
     progress::apply_action(session, action, epoch_ms(), duration)?;
-    if let Err(error) = save_config(&state, &config) {
+    if let Err(error) = save_config(&state.settings_path, &config) {
         if let Some(previous) = before {
             config
                 .progress_timer_sessions
@@ -206,7 +207,7 @@ pub(crate) fn apply_progress_preset(
         dont_show_again,
         epoch_ms(),
     )?;
-    if let Err(error) = save_config(&state, &config) {
+    if let Err(error) = save_config(&state.settings_path, &config) {
         config.settings = previous_settings;
         if let Some(previous) = previous_session {
             config

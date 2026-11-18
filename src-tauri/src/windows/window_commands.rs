@@ -1,4 +1,4 @@
-use crate::{displays::save_current_position, startup, state::ClockState};
+use crate::{displays::save_current_position, platform::startup, state::ClockState};
 use std::{fs, sync::Arc};
 use tauri::Manager;
 

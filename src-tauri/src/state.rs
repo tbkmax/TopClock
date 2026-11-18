@@ -1,6 +1,6 @@
+use crate::config::model::PersistedConfig;
 use crate::displays::ActiveDisplay;
-use crate::menu_window::MenuRequest;
-use crate::settings::PersistedConfig;
+use crate::windows::menu_window::MenuRequest;
 use std::{
     collections::{HashMap, HashSet},
     path::PathBuf,

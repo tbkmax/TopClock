@@ -1,4 +1,4 @@
-use crate::{interaction::set_click_through, state::ClockState};
+use crate::{input::interaction::set_click_through, state::ClockState};
 use serde::Serialize;
 use std::{
     sync::Arc,
@@ -104,7 +104,7 @@ pub(crate) fn toggle_palette_settings(
         app.emit_to("settings", "palette-request-settings-close", ())
             .map_err(|error| error.to_string())
     } else {
-        crate::window_commands::show_settings(&app);
+        crate::windows::window_commands::show_settings(&app);
         Ok(())
     }
 }

@@ -1,6 +1,8 @@
 # Rust workflows
 
-Counter Details' Direction glow slider saves the app-wide `counter_halo_intensity_percent` field through the existing `update_settings` flow. [Settings validation](../settings.rs) accepts 0–100 and defaults missing older values to 50. Counter instance options remain empty, and the preference does not modify the separate Counter session or its action event. See the [native add-on workflow](../addons/doc/workflow_diagram.md#counter-state-and-normal-quit).
+The Rust crate is organized into [configuration](../config/doc/workflow_diagram.md), [displays](../displays/doc/workflow_diagram.md), [input](../input/doc/workflow_diagram.md), [windows](../windows/doc/workflow_diagram.md), [platform services](../platform/doc/workflow_diagram.md), and [add-ons](../addons/doc/workflow_diagram.md). Each folder documents its own state and command flow; [lib.rs](../lib.rs) registers those commands and starts the runtime monitors.
+
+Counter Details' Direction glow slider saves the app-wide `counter_halo_intensity_percent` field through the existing `update_settings` flow. [Settings validation](../config/validation.rs) accepts 0–100; [config model](../config/model.rs) defaults missing older values to 50. Counter instance options remain empty, and the preference does not modify the separate Counter session or its action event. See the [native add-on workflow](../addons/doc/workflow_diagram.md#counter-state-and-normal-quit).
 
 ## Mouse palette window lifecycle
 
@@ -23,18 +25,18 @@ sequenceDiagram
     end
 ```
 
-The saved fields are validated by [settings.rs](../settings.rs); the thread and pointer are transient. [palette.rs](../palette.rs) owns the native window/input boundary. [Frontend palette code](../../../src/palette/doc/workflow_diagram.md) owns the three-ring selection and existing action dispatch. The monitor samples state every 20 ms, so very short presses do not open it.
+The saved fields are validated by [configuration validation](../config/validation.rs); the thread and pointer are transient. [palette.rs](../input/palette.rs) owns the native window/input boundary. [Frontend palette code](../../../src/palette/doc/workflow_diagram.md) owns the three-ring selection and existing action dispatch. The monitor samples state every 20 ms, so very short presses do not open it.
 
 When the Settings sector is selected, the palette-only command checks visibility. Hidden or minimized Settings is shown; visible Settings receives a close request so its page can flush unsaved edits before hiding. This route does not change the other Settings open commands.
 
-For a Timer or Progress choice requiring confirmation, the palette calls `open_palette_confirmation` in [menu_window.rs](../menu_window.rs). That request stores the selected instance/choice IDs and uses the cursor as the menu anchor. [menu.js](../../../src/menu.js) resolves the current choice and shows the same confirmation panel used by Ctrl-right-click. Cancel makes no native change; Confirm enters the existing validated action transaction.
+For a Timer or Progress choice requiring confirmation, the palette calls `open_palette_confirmation` in [menu_window.rs](../windows/menu_window.rs). That request stores the selected instance/choice IDs and uses the cursor as the menu anchor. [menu.js](../../../src/menu.js) resolves the current choice and shows the same confirmation panel used by Ctrl-right-click. Cancel makes no native change; Confirm enters the existing validated action transaction.
 
 ## Clock menu enabled-state transaction
 
 ```mermaid
 sequenceDiagram
     participant Menu as menu.js
-    participant Command as settings_commands.rs
+    participant Command as config/commands.rs
     participant Config as ClockState config
     participant Disk as settings.json
     Menu->>Command: set_addon_enabled(id, enabled)
@@ -53,7 +55,7 @@ sequenceDiagram
     end
 ```
 
-The typed command and the existing whole-settings `update_settings` share [save_settings_change](../settings_commands.rs). Pair membership is read from the current saved settings, so the menu cannot submit a stale copy of the full configuration. This command does not change the separate Settings page's 80 ms draft-save behavior; its pending full snapshot can still race a menu switch.
+The typed command and the existing whole-settings `update_settings` share [save_settings_change](../config/commands.rs). Pair membership is read from the current saved settings, so the menu cannot submit a stale copy of the full configuration. This command does not change the separate Settings page's 80 ms draft-save behavior; its pending full snapshot can still race a menu switch.
 
 The Counter command and normal quit path are detailed in the [native add-on workflow](../addons/doc/workflow_diagram.md). Settings removal leaves the Counter session in `PersistedConfig`, even if it is running; re-adding the display exposes it again. Menu, tray, and shortcut Quit use `quit_app`, which checkpoints a running Counter before saving the clock position and exiting. [lib.rs](../lib.rs) also applies the Counter checkpoint on other Tauri exit requests. The separate Timer and Progress sessions keep their existing restart rules.
 
@@ -68,7 +70,7 @@ Counter pair validation follows the existing [native add-on pair workflow](../ad
 ```mermaid
 sequenceDiagram
     participant UI as Settings webview
-    participant Save as settings_commands.rs
+    participant Save as config/commands.rs
     participant Validator as addons/instance.rs
     participant Disk as settings.json
     UI->>Save: update_settings(addons, addon_pairs)
@@ -81,7 +83,7 @@ sequenceDiagram
     end
 ```
 
-At startup, [config_store.rs](../config_store.rs) removes invalid pair links after loading and keeps valid flat instances. A malformed pair field defaults to an empty list. This protects the downgrade path without changing command or session names. The existing save rollback still applies to a write failure.
+At startup, [config store](../config/store.rs) removes invalid pair links after loading and keeps valid flat instances. A malformed pair field defaults to an empty list. This protects the downgrade path without changing command or session names. The existing save rollback still applies to a write failure.
 
 For `progress_timer_set_preset(id, minutes, confirmed_reset, dont_show_again)`, Rust holds the config lock, verifies membership in the shared preset list and an enabled countdown with that ID, and rejects replacement of a running or elapsed session without confirmation unless the warning is already dismissed. It updates only that add-on's duration and session, starts from zero, optionally persists warning dismissal, and writes once. Failure restores prior settings and session. Success emits `clock-settings-changed` and `progress-timer-states-changed` to all webviews, so Settings and all clock menus redraw from the same saved state.
 
@@ -90,7 +92,7 @@ For `progress_timer_set_preset(id, minutes, confirmed_reset, dont_show_again)`, 
 ```mermaid
 sequenceDiagram
     participant App as lib.rs
-    participant Config as config_store.rs
+    participant Config as config/store.rs
     participant Windows as Clock windows
     App->>Config: Load and normalize settings
     App->>Config: Save startup configuration
@@ -101,7 +103,7 @@ sequenceDiagram
     App->>Windows: Create windows and reconcile displays
 ```
 
-[displays.rs](../displays.rs) also logs a failed legacy position-migration save and keeps the migrated in-memory position. User-triggered saves still report errors to their callers. See the [package architecture](../../doc/architecture.md) for startup dependencies.
+[display module](../displays/mod.rs) also logs a failed legacy position-migration save and keeps the migrated in-memory position. User-triggered saves still report errors to their callers. See the [package architecture](../../doc/architecture.md) for startup dependencies.
 
 ## Separate menu window and input observation
 
@@ -119,7 +121,7 @@ sequenceDiagram
     Menu->>Native: close_clock_menu(request ID)
 ```
 
-`ClockState` stores the current menu request and owning clock in memory. The native input monitor compares pointer presses against the separate menu HWND, while each clock remains click-through unless the modifier is held. A visible menu temporarily prevents that clock's topmost refresh from covering it. Stale request IDs cannot close a newer menu. The monitor samples every 30 ms, so a very short nonactivating click can still be missed. [menu_window.rs](../menu_window.rs) tests fitting against negative-origin and edge displays.
+`ClockState` stores the current menu request and owning clock in memory. The native input monitor compares pointer presses against the separate menu HWND, while each clock remains click-through unless the modifier is held. A visible menu temporarily prevents that clock's topmost refresh from covering it. Stale request IDs cannot close a newer menu. The monitor samples every 30 ms, so a very short nonactivating click can still be missed. [menu_window.rs](../windows/menu_window.rs) tests fitting against negative-origin and edge displays.
 
 ## Clock topmost recovery
 
@@ -142,16 +144,16 @@ sequenceDiagram
     end
 ```
 
-[topmost.rs](../topmost.rs) bypasses the cached framework topmost flag, restoring order even when another topmost window covers a clock that still has `WS_EX_TOPMOST`. The callback checks visibility again so queued work does not show a disabled display or restore a minimized window. A dispatch failure is logged by [interaction.rs](../interaction.rs); retry waits for the next two-second interval. The timestamp is per-monitor in-memory state and is discarded when that clock's monitor exits. Existing input polling, proximity events, position persistence, and display lifecycle continue independently. UI stalls can delay recovery; competing overlays may obscure the clock again. No global OS event hook or additional thread is installed.
+[topmost.rs](../windows/topmost.rs) bypasses the cached framework topmost flag, restoring order even when another topmost window covers a clock that still has `WS_EX_TOPMOST`. The callback checks visibility again so queued work does not show a disabled display or restore a minimized window. A dispatch failure is logged by [interaction.rs](../input/interaction.rs); retry waits for the next two-second interval. The timestamp is per-monitor in-memory state and is discarded when that clock's monitor exits. Existing input polling, proximity events, position persistence, and display lifecycle continue independently. UI stalls can delay recovery; competing overlays may obscure the clock again. No global OS event hook or additional thread is installed.
 
 ## Progress add-on save boundary
 
 ```mermaid
 sequenceDiagram
     participant Settings
-    participant Command as settings_commands.rs
+    participant Command as config/commands.rs
     participant Validator as addons/ validators
-    participant Store as config_store.rs
+    participant Store as config/store.rs
     participant Clocks as clockApp windows
     Settings->>Command: update_settings with Progress instances
     Command->>Validator: valid_settings and valid_addons
@@ -163,12 +165,12 @@ sequenceDiagram
     end
 ```
 
-[addons/](../addons/doc/architecture.md) accepts multiple Progress instances within the shared 16-instance limit. It validates date, daily time, and countdown modes, their bounds, auto-hide, optional appearance fields, and optional per-range weekday arrays. Missing or empty weekday arrays mean every day, so older saved ranges remain valid. Time ranges stay ordered by start time; overlapping hours are valid only for disjoint weekday sets. Missing appearance fields from older saved instances remain valid. [settings_commands.rs](../settings_commands.rs) saves only validated settings, rejects duration changes after first Start until finish or Reset, prunes sessions when a countdown mode or duration is removed, and rolls back memory on write failure. Date and daily time bars derive from local time. Countdown sessions are stored by add-on ID in `PersistedConfig`, separate from the numeric Timer. `progress_timer_action` saves Start/Pause or Reset and emits `progress-timer-states-changed`; the monitor normalizes completed sessions. Type-specific cleanup now runs in [progress.rs](../addons/progress.rs) through the same settings transaction. The diagram omits the Settings preview event and countdown action, described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
+[addons/](../addons/doc/architecture.md) accepts multiple Progress instances within the shared 16-instance limit. It validates date, daily time, and countdown modes, their bounds, auto-hide, optional appearance fields, and optional per-range weekday arrays. Missing or empty weekday arrays mean every day, so older saved ranges remain valid. Time ranges stay ordered by start time; overlapping hours are valid only for disjoint weekday sets. Missing appearance fields from older saved instances remain valid. [config commands](../config/commands.rs) saves only validated settings, rejects duration changes after first Start until finish or Reset, prunes sessions when a countdown mode or duration is removed, and rolls back memory on write failure. Date and daily time bars derive from local time. Countdown sessions are stored by add-on ID in `PersistedConfig`, separate from the numeric Timer. `progress_timer_action` saves Start/Pause or Reset and emits `progress-timer-states-changed`; the monitor normalizes completed sessions. Type-specific cleanup now runs in [progress.rs](../addons/progress.rs) through the same settings transaction. The diagram omits the Settings preview event and countdown action, described in the [frontend workflow](../../../src/doc/workflow_diagram.md).
 
 ```mermaid
 sequenceDiagram
     participant UI as Settings or clock
-    participant Rust as timer.rs and addons/actions.rs
+    participant Rust as addons/runtime.rs and addons/actions.rs
     participant File as settings.json
     UI->>Rust: progress_timer_action(id, toggle or reset)
     Rust->>File: Save session for id
@@ -199,11 +201,11 @@ sequenceDiagram
     Rust->>Clocks: clock-settings-changed
 ```
 
-The [native locale command](../locale.rs) reads the current user's Windows UI preference in both direct and MSIX processes. The saved value is only `system` or one of four supported language tags; the frontend resolves `system` and formats Date weekdays. Failed validation or save leaves the old setting and tray text in place. See [frontend localization](../../../src/doc/architecture.md).
+The [native locale command](../platform/locale.rs) reads the current user's Windows UI preference in both direct and MSIX processes. The saved value is only `system` or one of four supported language tags; the frontend resolves `system` and formats Date weekdays. Failed validation or save leaves the old setting and tray text in place. See [frontend localization](../../../src/doc/architecture.md).
 
-The General tab calls `open_settings_folder` in [window_commands.rs](../window_commands.rs). The command derives the folder from `ClockState.settings_path`, creates it if necessary, and asks Explorer to open it. Directory or process launch errors return to Settings; this flow does not write `settings.json`.
+The General tab calls `open_settings_folder` in [window_commands.rs](../windows/window_commands.rs). The command derives the folder from `ClockState.settings_path`, creates it if necessary, and asks Explorer to open it. Directory or process launch errors return to Settings; this flow does not write `settings.json`.
 
-The sign-in toggle uses [startup.rs](../startup.rs). `is_packaged` probes the process package identity. Packaged builds query the manifest's `TopClockStartup` task and request enablement or disable it through Windows; direct builds continue to read and write the `TopClock` Run value. If Windows disabled the task as a user action, the enable request reports that state and leaves it disabled. Settings reads the authoritative state after a toggle. The Store update UI uses the same package identity query to select [store_updates.rs](../store_updates.rs) instead of the direct-build GitHub release page.
+The sign-in toggle uses [startup.rs](../platform/startup.rs). `is_packaged` probes the process package identity. Packaged builds query the manifest's `TopClockStartup` task and request enablement or disable it through Windows; direct builds continue to read and write the `TopClock` Run value. If Windows disabled the task as a user action, the enable request reports that state and leaves it disabled. Settings reads the authoritative state after a toggle. The Store update UI uses the same package identity query to select [store_updates.rs](../platform/store_updates.rs) instead of the direct-build GitHub release page.
 
 ```mermaid
 sequenceDiagram
@@ -242,11 +244,11 @@ sequenceDiagram
 
 The `TopClockStartup` declaration is generated by [Build-Msix.ps1](../../../scripts/Build-Msix.ps1). The diagram excludes installed-package behavior that still needs manual verification.
 
-Before Tauri creates any windows, [webview_runtime.rs](../webview_runtime.rs) asks the WebView2 loader for an installed Evergreen runtime version. If unavailable, it shows a native message with Microsoft's download page and exits. This check applies to package and direct builds.
+Before Tauri creates any windows, [webview_runtime.rs](../platform/webview_runtime.rs) asks the WebView2 loader for an installed Evergreen runtime version. If unavailable, it shows a native message with Microsoft's download page and exits. This check applies to package and direct builds.
 
-The display manager in [displays.rs](../displays.rs) polls connected desktop displays every two seconds. [display_identity.rs](../display_identity.rs) matches GDI names to active Windows target paths. Enabled displays receive separate clock windows, while one `ClockSettings` and `TimerSession` remain shared. A per-display preference stores visibility and a position relative to that display's origin; absent preferences mean visible.
+The display manager in [display module](../displays/mod.rs) polls connected desktop displays every two seconds. [display identity](../displays/identity.rs) matches GDI names to active Windows target paths. Enabled displays receive separate clock windows, while one `ClockSettings` and `TimerSession` remain shared. A per-display preference stores visibility and a position relative to that display's origin; absent preferences mean visible.
 
-The core Rust types in [settings.rs](../settings.rs) and [state.rs](../state.rs) own durable configuration and live window state.
+The core Rust types in [config model](../config/model.rs) and [state.rs](../state.rs) own durable configuration and live window state.
 
 ```mermaid
 classDiagram
@@ -327,7 +329,7 @@ classDiagram
     PersistedConfig --> DisplayPreference : by display identity
 ```
 
-Names and fields match [settings.rs](../settings.rs), [addons/](../addons/doc/architecture.md), and [state.rs](../state.rs). [config_store.rs](../config_store.rs) writes the config to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
+Names and fields match [config model](../config/model.rs), [addons/](../addons/doc/architecture.md), and [state.rs](../state.rs). [config store](../config/store.rs) writes the config to `settings.json`; `menu_open` and hotkey errors are in-memory only. `timer_addon_enabled` is a retained legacy migration field, set false after migration.
 The `options` value contains `format` and optionally `show_weekday` for Date, or `time_zone` and optionally `show_label` for Region clock. [addons/](../addons/doc/architecture.md) accepts missing optional switches for older files, requires booleans when present, and validates sizes from 10% to 100% before the save flow below proceeds.
 
 ```mermaid
@@ -352,7 +354,7 @@ sequenceDiagram
     end
 ```
 
-Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. [settings_commands.rs](../settings_commands.rs) validates changes and calls [config_store.rs](../config_store.rs) to save. Window-position saves in [displays.rs](../displays.rs) use the same file. The background monitor in [interaction.rs](../interaction.rs) polls Windows input and window geometry every 30 ms. Each visible poll reconciles the actual HWND click-through style with the current modifier. `set_click_through` changes `WS_EX_TRANSPARENT` while retaining `WS_EX_LAYERED` and refreshes the native frame only when the styles differ, including after a webview operation changes them without a modifier event. The monitor also emits modifier and proximity events. It calls [timer.rs](../timer.rs) to normalize a completed Timer on the main window.
+Before selection, the Settings UI calls `get_font_families` in [fonts.rs](../platform/fonts.rs). It enumerates the Windows font table, removes duplicate family names, and returns an error if enumeration fails; it does not write configuration. [config commands](../config/commands.rs) validates changes and calls [config store](../config/store.rs) to save. Window-position saves in [display module](../displays/mod.rs) use the same file. The background monitor in [interaction.rs](../input/interaction.rs) polls Windows input and window geometry every 30 ms. Each visible poll reconciles the actual HWND click-through style with the current modifier. `set_click_through` changes `WS_EX_TRANSPARENT` while retaining `WS_EX_LAYERED` and refreshes the native frame only when the styles differ, including after a webview operation changes them without a modifier event. The monitor also emits modifier and proximity events. It calls [Timer runtime](../addons/runtime.rs) to normalize a completed Timer on the main window.
 
 
 ```mermaid

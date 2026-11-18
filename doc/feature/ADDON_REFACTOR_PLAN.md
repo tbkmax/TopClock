@@ -33,8 +33,8 @@ No new menu actions, shortcuts, add-on types, or install/uninstall UI belong to 
 | [main.js](../../src/main.js), [settings.js](../../src/settings/settings.js) | Shared formatting, native events, separate live and preview views | Share state subscription and action adapters; keep view-local animation state separate |
 | [index.html](../../index.html), [settings.html](../../settings.html) | Ordered stacks, dashboard, preview and menu | Replace type checks in common shells with registered, bundled views and action descriptors |
 | [addons.rs](../../src-tauri/src/addons/mod.rs) | Validated instances and TimerSession calculations | Separate common validation, type validators and session logic |
-| [timer.rs](../../src-tauri/src/timer.rs), [hotkeys.rs](../../src-tauri/src/hotkeys.rs) | Durable timer commands and shortcut dispatch | Route existing entry points through shared native action services |
-| [settings_commands.rs](../../src-tauri/src/settings_commands.rs), [config_store.rs](../../src-tauri/src/config_store.rs) | Save validation, rollback, recovery and session cleanup | Preserve transaction ownership and delegate type rules through a small internal interface |
+| [Timer runtime](../../src-tauri/src/addons/runtime.rs), [hotkeys.rs](../../src-tauri/src/input/hotkeys.rs) | Durable timer commands and shortcut dispatch | Route existing entry points through shared native action services |
+| [config commands](../../src-tauri/src/config/commands.rs), [config store](../../src-tauri/src/config/store.rs) | Save validation, rollback, recovery and session cleanup | Preserve transaction ownership and delegate type rules through a small internal interface |
 
 The current catalog is an extension point for compiled built-ins, not an installer or executable plugin loader. Timer and Progress already share the TimerSession representation, but use different persisted storage and command/event paths. Preserve those paths behind adapters before considering any later unification.
 

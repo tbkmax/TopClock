@@ -34,7 +34,7 @@ sequenceDiagram
     end
 ```
 
-[palette.rs](../../src-tauri/src/palette.rs) owns key polling and the click-through window. [palette-model.js](../palette/palette-model.js) reads the same add-on menu descriptors as [menu.js](../menu.js), with six entries per first-ring page, and fits text to sector width. The palette-specific Settings command opens a hidden or minimized window or requests the Settings page's normal save-and-close flow; Quit uses its existing command. A confirmation-required choice opens the existing menu confirmation panel before dispatch; native commands retain final validation and persistence. No palette state is saved beyond its enabled flag and chosen key.
+[palette.rs](../../src-tauri/src/input/palette.rs) owns key polling and the click-through window. [palette-model.js](../palette/palette-model.js) reads the same add-on menu descriptors as [menu.js](../menu.js), with six entries per first-ring page, and fits text to sector width. The palette-specific Settings command opens a hidden or minimized window or requests the Settings page's normal save-and-close flow; Quit uses its existing command. A confirmation-required choice opens the existing menu confirmation panel before dispatch; native commands retain final validation and persistence. No palette state is saved beyond its enabled flag and chosen key.
 
 ## Clock menu add-on switches
 
@@ -198,7 +198,7 @@ sequenceDiagram
 
 The General tab's Settings files button calls `open_settings_folder`; Rust opens the app config directory in Explorer. Failures appear in the Settings error toast, and this action does not change saved settings.
 
-General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings/settings-updates.js) calls the native Store check on button press and changes the button to **Update** when a published package is available. That action asks Windows Store to install the update, with cancellation and failure reported in Settings. If false, the GitHub reminder opens a release page; TopClock never installs that download. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
+General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings/settings-updates.js) calls the native Store check on button press and changes the button to **Update** when a published package is available. That action asks Windows Store to install the update, with cancellation and failure reported in Settings. If false, the GitHub reminder opens a release page; TopClock never installs that download. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/platform/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
 
 ```mermaid
 sequenceDiagram
@@ -332,7 +332,7 @@ sequenceDiagram
     end
 ```
 
-On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings-persistence.js](../settings/settings-persistence.js) after a control changes. The save controller snapshots each draft, debounces it, and serializes writes. It rolls back only when the latest draft fails, so an earlier failed write cannot erase a newer draft. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the clock group and resizes only the clock window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/platform/fonts.rs) reads the Windows font table. The sequence above follows [settings-persistence.js](../settings/settings-persistence.js) after a control changes. The save controller snapshots each draft, debounces it, and serializes writes. It rolls back only when the latest draft fails, so an earlier failed write cannot erase a newer draft. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the clock group and resizes only the clock window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
 The Settings navigation in [settings.html](../../settings.html) exposes four tab buttons and four mounted panels. [settings-tabs.js](../settings/settings-tabs.js) maps Arrow, Home, and End keys to the next selected tab; the selected tab receives focus and its panel remains available to keyboard users. The Shortcuts tab draws the core and Timer actions from one metadata list in [settings-shortcuts.js](../settings/settings-shortcuts.js).
 

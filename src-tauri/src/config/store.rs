@@ -1,17 +1,19 @@
 use crate::{
+    addons::runtime::epoch_ms,
     addons::{self, progress_countdown_options, timer_options, CounterSession, TimerSession},
-    settings::{valid_settings, ClockSettings, PersistedConfig},
-    state::ClockState,
-    timer::epoch_ms,
+    config::{
+        model::{ClockSettings, PersistedConfig},
+        validation::valid_settings,
+    },
 };
 use std::{fs, path::Path};
 
-pub(crate) fn save_config(state: &ClockState, config: &PersistedConfig) -> Result<(), String> {
+pub(crate) fn save_config(settings_path: &Path, config: &PersistedConfig) -> Result<(), String> {
     let data = serde_json::to_vec_pretty(config).map_err(|error| error.to_string())?;
-    if let Some(parent) = state.settings_path.parent() {
+    if let Some(parent) = settings_path.parent() {
         fs::create_dir_all(parent).map_err(|error| error.to_string())?;
     }
-    fs::write(&state.settings_path, data).map_err(|error| error.to_string())
+    fs::write(settings_path, data).map_err(|error| error.to_string())
 }
 
 pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {

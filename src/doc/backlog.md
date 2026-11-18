@@ -9,7 +9,7 @@ The 2026-11-17 Settings and localization refactor is implemented. Its native Win
 - **Title:** Verify mouse palette input and radial selection on desktop displays.
 - **Problem or opportunity:** Build and unit checks cannot prove nonactivating WebView focus, physical modifier release timing, or sector readability near monitor edges.
 - **Desired outcome:** Hold the selected key, move across root, outer, and third rings, and release to run exactly one current action or cancel without intercepting desktop clicks.
-- **Scope:** [palette page](../palette/palette.js), [palette model](../palette/palette-model.js), [native monitor](../../src-tauri/src/palette.rs), Settings, the clock menu, and second-display windows.
+- **Scope:** [palette page](../palette/palette.js), [palette model](../palette/palette-model.js), [native monitor](../../src-tauri/src/input/palette.rs), Settings, the clock menu, and second-display windows.
 - **Acceptance criteria:** Test one Alt release running a selected action and a center release closing the palette; click elsewhere, Escape, and Alt-Tab while it is open. Check fitted Date+Counter and long localized labels, then select Settings twice to open and save-close it; verify a minimized Settings window restores. Test Ctrl interaction, each alternative key, None/off, switching the Interaction Modifier, pagination with many add-ons, Counter choices, Timer/Progress Mode and Set confirmation/cancellation, add-on switches and pairs, Quit, stale actions, click-through, normal menu, tray, persistence, Ctrl drag, and position restore. Repeat near each screen edge and on mixed-DPI displays.
 - **Dependencies and risks:** Use a disposable settings profile and an interactive Windows desktop. The user chose a cursor-centered circle that may clip at display edges; test center cancellation and retry from farther inward. Native modifier keys still affect the foreground application.
 - **Verification:** Run `npm run tauri:dev` and record observed results. A packaged build must include `palette.html` and permit its Tauri calls.
@@ -20,7 +20,7 @@ The 2026-11-17 Settings and localization refactor is implemented. Its native Win
 - **Title:** Verify expanded switches and persistent second-level menu choices in Windows.
 - **Problem or opportunity:** Automated tests and the Vite build do not prove WebView focus, physical clicks, or native menu sizing.
 - **Desired outcome:** Every added instance appears under **Add-on >**, a paired row switches both members, and Mode/Set choices remain usable without reopening the menu.
-- **Scope:** [menu](../menu.js), [add-on controller](../addons/controller.js), and [native settings command](../../src-tauri/src/settings_commands.rs).
+- **Scope:** [menu](../menu.js), [add-on controller](../addons/controller.js), and [native settings command](../../src-tauri/src/config/commands.rs).
 - **Acceptance criteria:** Check enabled and disabled instances, two same-kind Progress instances, a pair, Timer and Counter session behavior on disable, successful and failed saves, confirmation, Escape, outside click, click-through restoration, Settings and tray actions, Ctrl drag, position restore, and a second display. First-level actions should still close the menu. Expand Add-on, Timer Mode/Set, and Progress Set to confirm no temporary scrollbar or pre-resize row flash appears; check the 120 ms reveal, reduced-motion behavior, and scrolling when many entries exceed the display height.
 - **Dependencies and risks:** Requires an interactive Windows WebView and a disposable settings profile. A simultaneous pending full Settings write may still replace a menu toggle; the normal debounce is 80 ms, and this task does not alter the broader whole-settings save contract.
 - **Verification:** Run `npm run tauri:dev` and record the observed results before release.
@@ -67,7 +67,7 @@ The Details modal and catalog button alignment were visually checked in a 760 ×
 ## Context menu live Windows acceptance
 
 - **Problem and desired outcome:** Automated layout and mocked-native browser checks pass, but the actual WebView must show an unclipped shadow and dismiss on outside input without leaving click-through disabled or shifting saved positions.
-- **Scope:** [main.js](../main.js), [clock-layout.js](../clock-layout.js), [style.css](../style.css), [index.html](../../index.html), and [interaction.rs](../../src-tauri/src/interaction.rs).
+- **Scope:** [main.js](../main.js), [clock-layout.js](../clock-layout.js), [style.css](../style.css), [index.html](../../index.html), and [interaction.rs](../../src-tauri/src/input/interaction.rs).
 - **Acceptance criteria:** Complete the [five-step native checklist](../../doc/report/CONTEXT_MENU_FIX.md#residual-risks-and-verification), including menu actions, tray, all mouse buttons, modifier hold/release, Escape, Alt-Tab, settings persistence and restart, and mixed-DPI/negative-origin displays. Distinguish off-screen placement from WebView clipping.
 - **Dependencies and risks:** Requires an interactive Windows desktop; 30 ms polling can miss short nonactivating clicks and samples pointer location after the exact press. The enlarged menu surface and native resize timing need live checks. Physical display-edge fitting remains a separate limitation.
 - **Verification:** Run `npm run tauri:dev`; record results against the report. Browser rendering alone cannot verify Windows input delivery.
@@ -101,7 +101,7 @@ The Details modal and catalog button alignment were visually checked in a 760 ×
 - **Title:** Verify translated Settings and weekday display in running direct and MSIX builds.
 - **Problem or opportunity:** Automated locale tests and the Vite build cannot show clipping, installed font fallback, or packaged Windows language selection.
 - **Desired outcome:** All four explicit languages and System default remain readable in Settings, the clock menu, Date preview, and desktop clocks.
-- **Scope:** [i18n.js](../i18n/index.js), [settings.html](../../settings.html), [index.html](../../index.html), and the native locale command in [locale.rs](../../src-tauri/src/locale.rs).
+- **Scope:** [i18n.js](../i18n/index.js), [settings.html](../../settings.html), [index.html](../../index.html), and the native locale command in [locale.rs](../../src-tauri/src/platform/locale.rs).
 - **Acceptance criteria:** On Chinese and Japanese Windows UI languages, a new or `system` preference shows the corresponding short weekday; explicit choice overrides Windows; Settings and menu text fit without clipping; a restart keeps the choice.
 - **Dependencies and risks:** Requires Windows installations with those UI languages and a signed MSIX for the package check. Preserve click-through and existing numeric time layouts.
 - **Verification:** Run `npm run tauri:dev`, exercise all language choices and Date weekday on the clock and preview, then repeat System default and restart checks in an installed MSIX.
@@ -125,7 +125,7 @@ TODO 4's Settings files button and multiple-display controls are implemented. Ma
 - **Title:** Exercise clock controls on mixed-DPI displays and after display reconnection.
 - **Problem or opportunity:** The current development session exposes one physical display, so independent drag, hot-plug, and click-through were not observed live on multiple monitors.
 - **Desired outcome:** Each clock keeps its own unrestricted position; shared appearance, add-ons, Timer, and menu actions stay synchronized.
-- **Scope:** [main.js](../main.js), [settings.js](../settings/settings.js), and the native display manager in [displays.rs](../../src-tauri/src/displays.rs).
+- **Scope:** [main.js](../main.js), [settings.js](../settings/settings.js), and the native display manager in [display module](../../src-tauri/src/displays/mod.rs).
 - **Acceptance criteria:** Move a secondary clock without moving the primary; change an add-on or style and see every clock update; unplug and reconnect a display and recover its position and visibility choice. General keeps each switch paired with the correct display label after reconnection and shows no Windows device prefix.
 - **Dependencies and risks:** Include different scale factors and display order changes; preserve click-through and tray access if all displays are unchecked. The Clock tab now resets visible clocks to their display centers; a display switched off in General keeps its saved position.
 - **Verification:** Run `npm run tauri:dev` with two physical monitors and exercise each case.

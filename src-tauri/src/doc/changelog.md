@@ -1,5 +1,9 @@
 # Rust application changelog
 
+### 2026-11-17 - Group backend domains
+
+- Configuration, displays, input, window handling, and Windows platform services now have dedicated source folders and folder documentation. Display discovery, geometry, and position commands are separated from window reconciliation; settings validation is separated from the saved model. The add-on Timer command runtime moved beside add-on actions. Existing JSON fields, Tauri command and event names, and click-through behavior require no user action. Live Windows smoke verification remains in the backlog.
+
 ### 2026-11-17 - Accept Counter direction glow preference
 
 - Settings now stores and validates one app-wide 0–100% Counter glow intensity, defaulting to 50% for older files. Counter instance options remain empty; the saved Counter session, input handling, and command names are unchanged.
@@ -167,13 +171,13 @@
 
 ### 2026-10-27 - Add-on persistence, Timer sessions and optional global shortcuts
 
-- Added a validated ordered add-on list for Date, multiple Region clocks and Timer in [addons.rs](../addons/mod.rs) and [settings.rs](../settings.rs). Existing enabled Timer settings migrate to a Countdown instance; malformed add-on data can be discarded while preserving valid clock appearance.
+- Added a validated ordered add-on list for Date, multiple Region clocks and Timer in [addons.rs](../addons/mod.rs) and [config model](../config/model.rs). Existing enabled Timer settings migrate to a Countdown instance; malformed add-on data can be discarded while preserving valid clock appearance.
 - Added durable Timer Start/Pause, Reset, resume-after-restart and countdown completion state. Timer state is separate from add-on appearance and broadcasts `timer-state-changed`.
-- Added per-action enable switches, off by default, and system-wide Windows hotkey registration in [hotkeys.rs](../hotkeys.rs). Registration failures are shown in Settings. The configured interaction modifier remains active. The default Quit binding changes to `Ctrl+Alt+Q`; older `Ctrl+Q` defaults migrate. No operator action is required.
+- Added per-action enable switches, off by default, and system-wide Windows hotkey registration in [hotkeys.rs](../input/hotkeys.rs). Registration failures are shown in Settings. The configured interaction modifier remains active. The default Quit binding changes to `Ctrl+Alt+Q`; older `Ctrl+Q` defaults migrate. No operator action is required.
 
 ### 2026-10-26 - Shortcut settings and configurable interaction modifier
 
-- Added `ShortcutSettings` to `ClockSettings` in [settings.rs](../settings.rs) with serde default fallbacks for `interaction_modifier` ("Ctrl"), `open_settings` ("Ctrl+,"), `quit` ("Ctrl+Q"), `timer_toggle` ("Ctrl+Shift+S"), and `timer_reset` ("Ctrl+Shift+R").
+- Added `ShortcutSettings` to `ClockSettings` in [config model](../config/model.rs) with serde default fallbacks for `interaction_modifier` ("Ctrl"), `open_settings` ("Ctrl+,"), `quit` ("Ctrl+Q"), `timer_toggle` ("Ctrl+Shift+S"), and `timer_reset` ("Ctrl+Shift+R").
 - Added validation for `interaction_modifier` (accepting "Ctrl", "Alt", or "Shift") and shortcut string length/control character limits.
 - Updated `start_monitor` in [main.rs](../main.rs) to poll the dynamically configured modifier virtual key code (`VK_CONTROL`, `VK_MENU`, or `VK_SHIFT`) via `GetAsyncKeyState`.
 - Added unit tests in `settings.rs` validating shortcut serialization round-trip, empty string acceptance (no shortcut), and invalid modifier rejection.
@@ -181,7 +185,7 @@
 ### 2026-10-25 - Release reminder command and auto-update setting
 
 - Added `open_release_page` Tauri command in [main.rs](../main.rs) that opens the GitHub releases download page in the default web browser, eliminating internal dropper/updater code.
-- Added `auto_check_updates` boolean setting (defaulting to true) to `ClockSettings` in [settings.rs](../settings.rs) with serde default fallback for existing config files.
+- Added `auto_check_updates` boolean setting (defaulting to true) to `ClockSettings` in [config model](../config/model.rs) with serde default fallback for existing config files.
 - Added unit tests in `settings.rs` validating serialization and roundtrip of `auto_check_updates`.
 
 ### 2026-10-24 - Legacy settings migration

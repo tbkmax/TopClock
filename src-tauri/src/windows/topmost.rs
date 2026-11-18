@@ -168,7 +168,7 @@ mod tests {
 
         // Preserve Ctrl/menu interaction as well as ordinary click-through.
         for ignore in [false, true] {
-            crate::interaction::set_click_through(clock.0, ignore);
+            crate::input::interaction::set_click_through(clock.0, ignore);
             let input_styles = clock.styles();
             assert_eq!(input_styles & WS_EX_TRANSPARENT as isize != 0, ignore);
             assert_ne!(input_styles & WS_EX_LAYERED as isize, 0);

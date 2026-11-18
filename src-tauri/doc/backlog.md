@@ -15,12 +15,12 @@ The add-on system uses existing Tauri window and event permissions. Timer clock-
 
 ## MSIX installed-package validation
 
-Include a Chinese or Japanese Windows UI language in the installed-package pass and confirm System default picks it on first launch and after restart. This verifies [locale.rs](../src/locale.rs) under package identity alongside the existing startup and persistence checks.
+Include a Chinese or Japanese Windows UI language in the installed-package pass and confirm System default picks it on first launch and after restart. This verifies [locale.rs](../src/platform/locale.rs) under package identity alongside the existing startup and persistence checks.
 
 - **Title:** Validate Store-signed installation and upgrades.
 - **Problem or opportunity:** MakeAppx accepts the Store-identity manifest and a loose-registered development package works, but a Store-signed install and upgrade have not been exercised.
 - **Desired outcome:** Startup, settings persistence, tray, windows, shortcuts, click-through, and upgrade behavior work from MSIX.
-- **Scope:** [Build-Msix.ps1](../../scripts/Build-Msix.ps1), [startup.rs](../src/startup.rs), configuration paths and package manifest.
+- **Scope:** [Build-Msix.ps1](../../scripts/Build-Msix.ps1), [startup.rs](../src/platform/startup.rs), configuration paths and package manifest.
 - **Acceptance criteria:** Use the full checklist in the [MSIX plan](../../doc/feature/MSIX_STORE_PLAN.md), including in-place upgrade, Store update button and permission flow, and Windows Startup settings disable behavior. Record the real data path and uninstall result.
 - **Dependencies and risks:** Requires a certified Store candidate and test Windows installations; the user declined a self-signed certificate. GitHub publishes a portable ZIP during this validation period.
 - **Verification:** Install two increasing MSIX versions, exercise the app, and run Windows App Certification Kit.

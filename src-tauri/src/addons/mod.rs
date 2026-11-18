@@ -5,6 +5,7 @@ mod instance;
 mod progress;
 mod region_clock;
 mod registry;
+pub(crate) mod runtime;
 mod session;
 mod timer;
 

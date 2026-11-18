@@ -1,5 +1,6 @@
 use crate::{
-    config_store::save_config, settings::ClockPosition, state::ClockState, timer, topmost,
+    addons::runtime as timer, config::model::ClockPosition, config::store::save_config,
+    state::ClockState, windows::topmost,
 };
 use std::{
     sync::Arc,
@@ -243,7 +244,7 @@ pub(crate) fn start_monitor(window: WebviewWindow, state: Arc<ClockState>) {
                                 x: position.x - display.bounds.x,
                                 y: position.y - display.bounds.y,
                             });
-                        if let Err(error) = save_config(&state, &config) {
+                        if let Err(error) = save_config(&state.settings_path, &config) {
                             eprintln!("Unable to save clock position: {error}");
                         }
                     }

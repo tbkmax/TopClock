@@ -1,6 +1,6 @@
 use crate::{
-    locale, settings::ClockSettings, state::ClockState, window_commands::quit_app,
-    window_commands::show_settings,
+    config::model::ClockSettings, platform::locale, state::ClockState,
+    windows::window_commands::quit_app, windows::window_commands::show_settings,
 };
 use std::sync::Arc;
 use tauri::{

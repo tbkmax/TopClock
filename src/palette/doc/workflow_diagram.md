@@ -29,7 +29,7 @@ classDiagram
     PalettePage --> AddonHost : reads and dispatches current actions
 ```
 
-[palette.js](../palette.js) owns transient selection state; [palette-model.js](../palette-model.js) owns pure calculations; [host.js](../../addons/host.js) rechecks action availability before native dispatch. No class shown here is serialized. Saved enable/key fields belong to [native settings](../../../src-tauri/src/settings.rs).
+[palette.js](../palette.js) owns transient selection state; [palette-model.js](../palette-model.js) owns pure calculations; [host.js](../../addons/host.js) rechecks action availability before native dispatch. No class shown here is serialized. Saved enable/key fields belong to [native settings](../../../src-tauri/src/config/model.rs).
 
 ```mermaid
 sequenceDiagram

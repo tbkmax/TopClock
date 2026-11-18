@@ -5,8 +5,8 @@ Status: implementation in progress, 2026-10-29. The Partner Center identity is a
 ## Implementation progress (2026-10-29)
 
 - [Build-Msix.ps1](../../scripts/Build-Msix.ps1) locally builds the existing Tauri executable with a release-version override, stages only the executable and three logo assets, generates a full-trust manifest with a disabled `TopClockStartup` task, and packages with MakeAppx. Versions map from `vM.m.p` to `M.m.p.0`; a zero major version is rejected. Identity and publisher can be overridden, with the reserved Store values as defaults. GitHub Actions does not build the Store package.
-- [startup.rs](../../src-tauri/src/startup.rs) selects Windows StartupTask for packaged builds and the existing Run key for direct builds. [Settings](../../src/settings/settings.js) routes a packaged process to [StoreContext update commands](../../src-tauri/src/store_updates.rs) and a direct process to the GitHub release reminder. The settings schema is unchanged.
-- The chosen runtime strategy is Evergreen WebView2. [webview_runtime.rs](../../src-tauri/src/webview_runtime.rs) checks availability before Tauri creates windows and shows Microsoft's download location if missing. No browser runtime is bundled.
+- [startup.rs](../../src-tauri/src/platform/startup.rs) selects Windows StartupTask for packaged builds and the existing Run key for direct builds. [Settings](../../src/settings/settings.js) routes a packaged process to [StoreContext update commands](../../src-tauri/src/platform/store_updates.rs) and a direct process to the GitHub release reminder. The settings schema is unchanged.
+- The chosen runtime strategy is Evergreen WebView2. [webview_runtime.rs](../../src-tauri/src/platform/webview_runtime.rs) checks availability before Tauri creates windows and shows Microsoft's download location if missing. No browser runtime is bundled.
 - The reserved Partner Center identity is `tbkmax.TopClock`, publisher `CN=508EFCDF-2961-4370-827D-3736CE5AC66A`, and publisher display name `tbkmax`. The local script uses those values by default. The Store package stages separately from the loose-registered development package.
 - The MSIX build path previously produced a `1.0.0.0` candidate, and the user reports the development package works from a loose manifest registration. The new in-app Store update path still needs a Store-signed two-version check. Store-signed installation, settings-path and upgrade checks, clean Windows runtime checks, WACK, and Store cutover remain open. The tag-triggered GitHub workflow builds only the portable ZIP and checksum; the MSIX remains a local Partner Center artifact.
 
@@ -21,9 +21,9 @@ Once the MSIX passes the acceptance checks below, make it the primary Windows re
 ## Baseline before this implementation
 
 - [`src-tauri/tauri.conf.json`](../../src-tauri/tauri.conf.json) bundles only `nsis`; [`release.yml`](../../.github/workflows/release.yml) publishes an NSIS installer and portable ZIP from tags.
-- [`startup.rs`](../../src-tauri/src/startup.rs) originally enabled sign-in launch only through `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` and pointed it at `current_exe()`.
-- [`lib.rs`](../../src-tauri/src/lib.rs) obtains the settings path from Tauri's app config directory; [`config_store.rs`](../../src-tauri/src/config_store.rs) reads and writes `settings.json` there.
-- [`window_commands.rs`](../../src-tauri/src/window_commands.rs) passes that folder to `explorer.exe` for **Open settings folder**.
+- [`startup.rs`](../../src-tauri/src/platform/startup.rs) originally enabled sign-in launch only through `HKCU\Software\Microsoft\Windows\CurrentVersion\Run` and pointed it at `current_exe()`.
+- [`lib.rs`](../../src-tauri/src/lib.rs) obtains the settings path from Tauri's app config directory; [`config_store.rs`](../../src-tauri/src/config/store.rs) reads and writes `settings.json` there.
+- [`window_commands.rs`](../../src-tauri/src/windows/window_commands.rs) passes that folder to `explorer.exe` for **Open settings folder**.
 - [`settings-updates.js`](../../src/settings/settings-updates.js) originally checked GitHub Releases for every build and opened the release page.
 - The repository uses `0.0.0` in development. The tag-driven release workflow replaces that with the tag version during builds.
 

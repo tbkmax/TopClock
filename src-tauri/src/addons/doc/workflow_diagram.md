@@ -22,11 +22,11 @@ sequenceDiagram
     Rust->>Rust: Exit only after successful Counter save
 ```
 
-[counter.rs](../counter.rs) provides the signed transition and transaction; [window_commands.rs](../../window_commands.rs) supplies the common quit helper for menu, tray, and shortcut entry points. [lib.rs](../../lib.rs) also checkpoints a running Counter on another Tauri exit request. If the process terminates without an exit request, [config_store.rs](../../config_store.rs) loads the last saved checkpoint stopped rather than counting closed-app time. The diagram omits separate position persistence, which remains in the quit helper.
+[counter.rs](../counter.rs) provides the signed transition and transaction; [window_commands.rs](../../windows/window_commands.rs) supplies the common quit helper for menu, tray, and shortcut entry points. [lib.rs](../../lib.rs) also checkpoints a running Counter on another Tauri exit request. If the process terminates without an exit request, [config store](../../config/store.rs) loads the last saved checkpoint stopped rather than counting closed-app time. The diagram omits separate position persistence, which remains in the quit helper.
 
 Removing Counter through Settings changes only the add-on list. Its separate session keeps its balance and continues running if it was running; adding Counter again exposes that session. An explicit disable stops it while retaining the balance. The quit helper stops a running session even when the Counter add-on is absent.
 
-The Counter Details slider writes the app-wide `counter_halo_intensity_percent` setting through the ordinary settings update route. [settings.rs](../../settings.rs) validates 0–100 and defaults a missing field to 50; [counter.rs](../counter.rs) continues to require empty instance options. This preference does not change CounterSession or the action event above.
+The Counter Details slider writes the app-wide `counter_halo_intensity_percent` setting through the ordinary settings update route. [configuration validation](../../config/validation.rs) checks 0–100, while [config model](../../config/model.rs) defaults a missing field to 50; [counter.rs](../counter.rs) continues to require empty instance options. This preference does not change CounterSession or the action event above.
 
 
 For a Timer mode or preset choice, [actions.rs](../actions.rs) rechecks the enabled Timer and session under the config lock, then requires confirmation if a running or elapsed session would be discarded unless that choice's warning was dismissed. A mode choice writes the new mode and an idle session; a preset choice writes its duration and a running session. If saving fails, prior settings and Timer session are restored with no event. Success emits both settings and Timer session events. Progress continues using its per-ID transaction and session map.
@@ -56,7 +56,7 @@ classDiagram
     AddonPair --> AddonInstance : two adjacent IDs
 ```
 
-[instance.rs](../instance.rs) validates pair references, eligibility (Date, Region clock, Timer, or Counter), placement, enabled state, scale, and uniqueness before a settings save. Progress remains ineligible. [config_store.rs](../../config_store.rs) keeps valid flat instances when pair links are stale after loading. Pair metadata is durable; row rendering is derived in the frontend, while Counter's session remains separate.
+[instance.rs](../instance.rs) validates pair references, eligibility (Date, Region clock, Timer, or Counter), placement, enabled state, scale, and uniqueness before a settings save. Progress remains ineligible. [config store](../../config/store.rs) keeps valid flat instances when pair links are stale after loading. Pair metadata is durable; row rendering is derived in the frontend, while Counter's session remains separate.
 
 The Progress preset action reads the selected instance and shared preset list under one config lock, checks whether an existing session needs confirmation, then writes its option duration and new running session together. On write failure it restores the prior settings and session and emits nothing. On success it broadcasts the settings snapshot and all Progress sessions; the frontend's single reactive host updates Start/Pause labels by instance ID.
 
@@ -112,7 +112,7 @@ sequenceDiagram
     participant Entry as Tauri command or hotkey
     participant Service as actions.rs
     participant Type as timer.rs or progress.rs
-    participant Store as config_store.rs
+    participant Store as config/store.rs
     participant UI as All webviews
     Entry->>Service: Typed target and toggle/reset
     Service->>Service: Resolve current enabled instance
@@ -131,4 +131,4 @@ sequenceDiagram
     end
 ```
 
-[settings_commands.rs](../../settings_commands.rs) separately asks type modules to reconcile cloned sessions before replacing durable settings. Disabling Progress retains its countdown session; removing, changing mode, or changing duration can remove it. Timer uses its existing different reset rules. The [parent workflow](../../doc/workflow_diagram.md) covers load recovery and settings broadcasts.
+[config commands](../../config/commands.rs) separately asks type modules to reconcile cloned sessions before replacing durable settings. Disabling Progress retains its countdown session; removing, changing mode, or changing duration can remove it. Timer uses its existing different reset rules. The [parent workflow](../../doc/workflow_diagram.md) covers load recovery and settings broadcasts.

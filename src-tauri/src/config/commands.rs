@@ -3,8 +3,8 @@ use crate::{
         reconcile_counter_settings, reconcile_progress_settings, reconcile_timer_settings,
         TimerSession,
     },
-    config_store::save_config,
-    settings::{valid_settings, ClockSettings},
+    config::store::save_config,
+    config::{model::ClockSettings, validation::valid_settings},
     state::ClockState,
 };
 use std::sync::Arc;
@@ -105,14 +105,14 @@ fn save_settings_change(
         counter_state_changed = reconcile_counter_settings(
             &settings.addons,
             &mut next_counter_session,
-            crate::timer::epoch_ms(),
+            crate::addons::runtime::epoch_ms(),
         );
         config.timer_session = next_timer_session;
         config.progress_timer_sessions = next_progress_sessions;
         config.counter_session = next_counter_session;
         let previous = std::mem::replace(&mut config.settings, settings.clone());
         language_changed = previous.language != settings.language;
-        if let Err(error) = save_config(&state, &config) {
+        if let Err(error) = save_config(&state.settings_path, &config) {
             config.settings = previous;
             config.timer_session = previous_session;
             config.progress_timer_sessions = previous_progress_sessions;
@@ -121,7 +121,7 @@ fn save_settings_change(
         }
     }
     if language_changed {
-        if let Err(error) = crate::tray::update_language(&app, &settings) {
+        if let Err(error) = crate::windows::tray::update_language(&app, &settings) {
             eprintln!("Could not update tray language: {error}");
         }
     }

@@ -7,7 +7,7 @@ The [Counter live Windows check](../../../src/doc/backlog.md#counter-live-window
 - **Title:** Verify click-through recovery against the intermittent desktop trigger.
 - **Problem or opportunity:** The previous monitor cached the desired modifier state and could not detect a later change to the HWND input style. A native test proves the new polling path restores a cleared style bit, but the original intermittent cause has not been captured in a live session.
 - **Desired outcome:** With the interaction modifier released, clicks pass through every visible clock without requiring Ctrl-click, including after window resize, display changes, and long ordinary use.
-- **Scope:** [interaction.rs](../interaction.rs), [clock resize](../../../src/main.js), and the per-display window lifecycle in [displays.rs](../displays.rs).
+- **Scope:** [interaction.rs](../input/interaction.rs), [clock resize](../../../src/main.js), and the per-display window lifecycle in [display module](../displays/mod.rs).
 - **Acceptance criteria:** Leave the clock running through ordinary desktop use and repeated content-driven resizes; confirm proximity fade and click-through together. Check Ctrl-drag, Ctrl-click, menu open/dismissal, palette, tray actions, settings persistence, and position restore before and after display hide/show or reconnection. If the symptom recurs, record whether the native `WS_EX_TRANSPARENT` bit is set on the affected clock HWND and whether its monitor is still polling.
 - **Dependencies and risks:** Requires an interactive Windows desktop and preferably the environment that showed the intermittent failure. Keep the user's settings safe when testing persistence. A changing third-party window style could make the monitor reapply the bit repeatedly; the setter is idempotent while styles match.
 - **Verification:** Run `npm run tauri:dev` and the checks above, including enough idle time to exercise the original intermittent case. The Rust native style-drift test and full `cargo test` suite pass, but cannot demonstrate the real trigger.
@@ -18,7 +18,7 @@ The [Counter live Windows check](../../../src/doc/backlog.md#counter-live-window
 - **Title:** Verify palette key polling and overlay pass-through in Windows.
 - **Problem or opportunity:** Rust tests validate settings and compile the Win32 code but cannot prove WebView show/focus, physical key release, or multi-display coordinates.
 - **Desired outcome:** The configured key opens the palette only when enabled; the full-monitor overlay never captures mouse clicks or changes clock input behavior.
-- **Scope:** [native palette monitor](../palette.rs), [interaction monitor](../interaction.rs), [settings validation](../settings.rs), and the palette capability/window config.
+- **Scope:** [native palette monitor](../input/palette.rs), [interaction monitor](../input/interaction.rs), [settings validation](../config/model.rs), and the palette capability/window config.
 - **Acceptance criteria:** Confirm that a single Alt release hides the overlay and runs a selected action, and that center release, mouse click, Escape, or Alt-Tab closes it without a second key press. Select Settings twice to verify open and save-close, and restore it from minimized state. Exercise Ctrl, Shift, None/off, Interaction Modifier conflicts, the normal clock menu, rapid press/release, monitor edges, mixed DPI and reconnect, tray, Ctrl drag, position restore, and quitting while visible. A failed palette action must preserve native transaction rollback.
 - **Dependencies and risks:** Requires an interactive Windows desktop, disposable config, and a second display for full coverage. Modifier keys retain their foreground-application behavior.
 - **Verification:** Run `npm run tauri:dev`, observe focus and pass-through, and follow the [frontend checklist](../../../src/doc/backlog.md#mouse-palette-live-windows-acceptance).
@@ -58,7 +58,7 @@ The native dismissal observer and tests are implemented. Live verification of ou
 - **Title:** Check the recovery interval with the user's triggering applications.
 - **Problem or opportunity:** Native regression coverage can reproduce Z-order loss, but the original intermittent trigger and full desktop interaction matrix have not been observed.
 - **Desired outcome:** Visible desktop clocks recover without restart and without focus theft or input regressions.
-- **Scope:** [topmost.rs](../topmost.rs), [interaction.rs](../interaction.rs), and the [investigation checklist](../../../doc/report/TOPMOST_RECOVERY.md).
+- **Scope:** [topmost.rs](../windows/topmost.rs), [interaction.rs](../input/interaction.rs), and the [investigation checklist](../../../doc/report/TOPMOST_RECOVERY.md).
 - **Acceptance criteria:** Test launching another topmost app, borderless fullscreen and Alt-Tab, lock/unlock and resume, and display disconnect/reconnect. Verify recovery in roughly two seconds when the UI is responsive, hidden display clocks stay hidden, Ctrl-drag/menu and released click-through work, tray Settings/Quit work, and settings/positions survive restart.
 - **Dependencies and risks:** Requires the affected apps and an interactive multi-display Windows session. Two apps repeatedly raising themselves can flicker; exclusive fullscreen and secure desktops are outside this recovery's scope.
 - **Verification:** Run `npm run tauri:dev` and the checklist; record the triggering app/display mode and observed results before claiming the intermittent incident resolved.
@@ -74,14 +74,14 @@ The Clock tab's reset command now centers visible windows and stores their per-d
 
 Use this file for verified unfinished native work. Each item should include problem, desired outcome, scope, acceptance criteria, risks, verification and priority, following [the template](../../../templates/doc/backlog.md).
 
-The runtime module extraction is complete; [main.rs](../main.rs) remains a small entry point and [lib.rs](../lib.rs) owns startup wiring. TODO 7's shortcut persistence, modifier key validation, and dynamic Win32 modifier polling are complete. TODO 3's persistence, validation of independent animation choices and the 24–200 pixel size range, and Windows font enumeration are complete. Existing proposals in the [repository backlog](../../../doc/backlog.md) may be outdated; check [settings.rs](../settings.rs), [interaction.rs](../interaction.rs), and [fonts.rs](../fonts.rs) before adding them here.
+The runtime module extraction is complete; [main.rs](../main.rs) remains a small entry point and [lib.rs](../lib.rs) owns startup wiring. TODO 7's shortcut persistence, modifier key validation, and dynamic Win32 modifier polling are complete. TODO 3's persistence, validation of independent animation choices and the 24–200 pixel size range, and Windows font enumeration are complete. Existing proposals in the [repository backlog](../../../doc/backlog.md) may be outdated; check [config model](../config/model.rs), [interaction.rs](../input/interaction.rs), and [fonts.rs](../platform/fonts.rs) before adding them here.
 
 ## Store update command verification
 
 - **Title:** Verify Store update checks and installation in a certified private package.
 - **Problem or opportunity:** The new StoreContext commands compile but a local unpackaged process cannot query a published update or show the Store permission dialog.
 - **Desired outcome:** A Store-installed TopClock reports a higher version and installs it from Settings.
-- **Scope:** [store_updates.rs](../store_updates.rs), [lib.rs](../lib.rs), and the packaged Settings UI.
+- **Scope:** [store_updates.rs](../platform/store_updates.rs), [lib.rs](../lib.rs), and the packaged Settings UI.
 - **Acceptance criteria:** A first private Store version reports no update; after a higher-version private submission is published, Settings shows Update, the Store dialog appears, installation completes, and the new version starts with settings intact. Cancellation, offline failure, and a stale update result show recoverable status. Direct builds cannot invoke the Store commands.
 - **Dependencies and risks:** Requires two certified private MSIX versions with the same identity; preserve package data and allow Windows to close the app during installation.
 - **Verification:** Install version one through Store, submit version two, check and update in Settings, then repeat the failure and cancellation cases.
@@ -92,7 +92,7 @@ The runtime module extraction is complete; [main.rs](../main.rs) remains a small
 - **Title:** Verify the MSIX data path, folder action, and sign-in state in an installed package.
 - **Problem or opportunity:** The code compiles but package redirection can make Explorer show a different path from the one Rust reads; StartupTask behavior cannot be proved in an unpackaged process.
 - **Desired outcome:** General opens the real settings directory, and the sign-in toggle follows Windows Startup settings while preserving restart and upgrade state.
-- **Scope:** [lib.rs](../lib.rs), [window_commands.rs](../window_commands.rs), [startup.rs](../startup.rs), and the generated MSIX manifest.
+- **Scope:** [lib.rs](../lib.rs), [window_commands.rs](../windows/window_commands.rs), [startup.rs](../platform/startup.rs), and the generated MSIX manifest.
 - **Acceptance criteria:** The folder command reveals the actual `settings.json`; edits, positions, and Timer state survive restart and higher-version package installation; a Windows user-disable cannot be overridden by the app; direct builds keep their Run-key behavior.
 - **Dependencies and risks:** Requires signed package installation. If a path change is needed, preserve the schema and avoid an implicit import from direct builds.
 - **Verification:** Inspect the file path in an installed package, reopen it from General, and repeat after upgrade and sign-out/sign-in.
@@ -101,9 +101,9 @@ The runtime module extraction is complete; [main.rs](../main.rs) remains a small
 ## Clean Windows WebView2 check
 
 - **Title:** Verify missing-runtime guidance on supported Windows 10.
-- **Problem or opportunity:** The [WebView2 preflight](../webview_runtime.rs) compiles, but its missing-runtime path has not run on a clean machine.
+- **Problem or opportunity:** The [WebView2 preflight](../platform/webview_runtime.rs) compiles, but its missing-runtime path has not run on a clean machine.
 - **Desired outcome:** TopClock shows the Evergreen installation page before creating a blank webview and starts normally after installation.
-- **Scope:** [webview_runtime.rs](../webview_runtime.rs) and the MSIX acceptance environment.
+- **Scope:** [webview_runtime.rs](../platform/webview_runtime.rs) and the MSIX acceptance environment.
 - **Acceptance criteria:** Windows 10 without WebView2 shows guidance and exits; after Evergreen installation the clock and Settings open; Windows 11 starts normally.
 - **Dependencies and risks:** Requires a clean test VM and signed MSIX. Keep the package small and avoid silent runtime downloads.
 - **Verification:** Install on clean Windows 10 and Windows 11 images and follow the message's link.
@@ -114,7 +114,7 @@ The runtime module extraction is complete; [main.rs](../main.rs) remains a small
 - **Title:** Detect wall-clock jumps in a running Timer session.
 - **Problem or opportunity:** Resume-after-restart uses a saved Unix start time. A manual clock change or time synchronization can change apparent elapsed time.
 - **Desired outcome:** A running in-process Timer uses a monotonic clock; restart reconciliation explains or bounds an unexpected wall-clock jump.
-- **Scope:** [addons/](../addons/doc/architecture.md), [timer.rs](../timer.rs), [config_store.rs](../config_store.rs), and Timer state tests.
+- **Scope:** [addons/](../addons/doc/architecture.md), [Timer runtime](../addons/runtime.rs), [config store](../config/store.rs), and Timer state tests.
 - **Acceptance criteria:** Forward and backward system clock changes do not cause an in-process timer to jump; restart behavior is defined and tested.
 - **Dependencies and risks:** Keep the persisted session format backward compatible and preserve countdown completion at zero.
 - **Verification:** Simulate clock jumps in focused Timer tests and check a real Windows session.
@@ -122,10 +122,10 @@ The runtime module extraction is complete; [main.rs](../main.rs) remains a small
 
 ## Native refactor smoke verification
 
-- **Title:** Exercise the extracted runtime modules in a live Windows session.
+- **Title:** Exercise the grouped backend modules in a live Windows session.
 - **Problem or opportunity:** Rust unit tests pass, but this structural refactor has not been manually checked through the clock and Settings windows.
 - **Desired outcome:** Confirm that the unchanged command, event, window, and persistence behavior still works in the running app.
-- **Scope:** [lib.rs](../lib.rs), [displays.rs](../displays.rs), [interaction.rs](../interaction.rs), [tray.rs](../tray.rs), [settings_commands.rs](../settings_commands.rs), and [window_commands.rs](../window_commands.rs).
+- **Scope:** [lib.rs](../lib.rs), [display module](../displays/mod.rs), [interaction.rs](../input/interaction.rs), [tray.rs](../windows/tray.rs), [config commands](../config/commands.rs), and [window_commands.rs](../windows/window_commands.rs).
 - **Acceptance criteria:** Open Settings from the tray and clock menu; change and reload settings; use the configured modifier to interact with the clock and verify click-through after release; save and restore a clock position; confirm Quit and enabled shortcuts; check a second display if available.
 - **Dependencies and risks:** Requires an interactive Windows desktop; preserve per-display preferences and the layered click-through style.
 - **Verification:** Run `npm run tauri:dev` and exercise the listed flows, then remove this item once checked.
