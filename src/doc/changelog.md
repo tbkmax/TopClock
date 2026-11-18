@@ -1,5 +1,13 @@
 # Frontend changelog
 
+### 2026-11-17 - Discover frontend tests automatically
+
+- The frontend test command now runs Node's test discovery, including eight focused add-on files and future `*.test.js` files. The tests retain their original assertions; production behavior is unchanged.
+
+### 2026-11-17 - Organize Settings and key static translations
+
+- Created `src/settings/doc/` and `src/i18n/doc/` with the required folder documentation. Settings page files now share a folder, with native event hooks and failed-save session readback in focused modules. Bundled translations live apart from localization logic, and static markup uses explicit translation keys. Saved settings, command names, and the four page entry points remain compatible; no user action is required.
+
 ### 2026-11-17 - Bring Counter glow closer to the glyphs
 
 - Counter now uses 4px/8px blur instead of 10px/20px while retaining the saved intensity and lighter direction colors. The shared rule still leaves the clock's Ctrl glow at 10px/20px.
@@ -271,8 +279,8 @@
 - Added dynamic version indicator to the Settings sidebar and General preferences tab using `getVersion()` from `@tauri-apps/api/app`.
 - Switched update mechanism to lightweight GitHub Releases API polling, replacing heavy in-app dropper plugins to eliminate Windows Defender false positives.
 - Added an automatic update check toggle switch ("Automatically check for updates") in [settings.html](../../settings.html) that persists via `update_settings`.
-- Added "Check for updates" and "Download Update ↗" buttons opening the browser directly in [settings.html](../../settings.html) and [settings.css](../settings.css).
-- Set default development fallback version to `0.0.0` in [settings.js](../settings.js) and [settings.html](../../settings.html).
+- Added "Check for updates" and "Download Update ↗" buttons opening the browser directly in [settings.html](../../settings.html) and [settings.css](../settings/settings.css).
+- Set default development fallback version to `0.0.0` in [settings.js](../settings/settings.js) and [settings.html](../../settings.html).
 
 ### 2026-10-24 - Project rename to TopClock in UI
 

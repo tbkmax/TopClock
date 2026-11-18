@@ -8,7 +8,7 @@
     "build": "vite build",
     "build:pages": "vite build --config pages/vite.config.js",
     "preview:pages": "vite preview --config pages/vite.config.js",
-    "test:frontend": "node src/frontend.test.js && node src/addons/addons.test.js && node src/palette/palette-model.test.js",
+    "test:frontend": "node --test",
     "preview": "vite preview",
     "tauri:dev": "scripts\\tauri-windows.cmd dev",
     "tauri:build": "scripts\\tauri-windows.cmd build"

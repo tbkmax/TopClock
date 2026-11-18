@@ -1,5 +1,13 @@
 # Frontend add-on host changelog
 
+### 2026-11-17 - Split add-on regression tests by responsibility
+
+- Moved 27 tests from one add-on test file into eight files under `src/addons/tests/`, separating shared registry, runtime, and layout checks from Date, Region clock, Timer, Counter, and Progress checks. `npm run test:frontend` now discovers test files automatically; add-on behavior and saved data are unchanged.
+
+### 2026-11-17 - Follow shared localization folder
+
+- The add-on model now imports the relocated localization module. Menu and Settings add-on labels retain their existing keys and behavior; no saved settings change is required.
+
 ### 2026-11-17 - Open shared Counter glow setting in Details
 
 - Counter now declares an allowlisted Details view for the app-wide 0–100% glow setting, opened only from the catalog. The display model scales the clock's Ctrl-style text glow for clock and preview; older settings use the 50% default without a migration. Counter instance options remain empty.

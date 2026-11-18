@@ -1,5 +1,24 @@
 # Frontend add-on host workflows
 
+## Regression test workflow
+
+```mermaid
+sequenceDiagram
+    participant Developer
+    participant Npm as npm run test:frontend
+    participant Node as node --test
+    participant Tests as src/addons/tests/*.test.js
+    Developer->>Npm: Run frontend tests
+    Npm->>Node: Start test discovery
+    Node->>Tests: Run shared and per-add-on files
+    Tests-->>Node: Assertions and failures
+    Node-->>Developer: Combined result
+```
+
+The [test folder](../tests/) keeps shared architecture checks separate from built-in behavior checks. Node discovers new `*.test.js` files through the [package script](../../../package.json); tests do not exercise native WebView input or persistence, which remain in the live acceptance backlog.
+
+Localized add-on names continue through the existing model and definitions. The text source is now [i18n/messages.js](../../i18n/messages.js), reached through [i18n/index.js](../../i18n/index.js); action routing below is unchanged.
+
 The separate [mouse palette](../../palette/doc/workflow_diagram.md) consumes the same `menuEntries` and `toggleEntries` as the separate clock menu. It fits their current labels to each radial sector, maps the final cursor position to an existing action descriptor, closes its overlay on key release, then dispatches through this folder's host. The palette adds no instance type or native add-on action pathway; the normal controller and native validators still reject stale selections.
 
 The clock menu's Add-on disclosure uses [controller.js](../controller.js) to list every configured row from [layout.js](../layout.js), including disabled rows and a single row per pair. A switch sends an explicit target state through [native-adapter.js](../native-adapter.js) and waits for saved settings. The menu applies the returned snapshot and stays open; a rejected command shows an error without changing the switch. See the [menu sequence diagram](../../doc/workflow_diagram.md#clock-menu-add-on-switches).

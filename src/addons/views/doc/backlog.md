@@ -1,5 +1,7 @@
 # Bundled view backlog
 
+The static-key conversion is complete. Existing live Settings checks below still need to confirm newly inserted fragments and language switching in WebView2.
+
 Check the Counter buttons, Reset dialog focus and Escape dismissal, spoken signed state, and menu fit in the fixed-size Settings and native clock windows. Open Counter Details only from the catalog, before and after adding Counter, including when paired. Drag Direction glow through 0%, default 50%, and 100%, then reopen Details to verify the saved value. Compare the default glyph glow with the clock's Ctrl glow and check that it remains on Counter alone in both pair positions and stays legible on light and dark backgrounds. Include all supported languages and the 100-hour display transition in the [frontend Counter checklist](../../../doc/backlog.md#counter-live-windows-acceptance).
 
 Recheck the built clock at 50% and 100% to confirm the higher-specificity motion rule visibly overrides `.addon-line` in the live WebView; inspect both the standalone Counter and both pair positions.

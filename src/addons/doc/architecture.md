@@ -1,5 +1,9 @@
 # Frontend add-on host architecture
 
+Add-on regression tests live in [tests/](../tests/). Shared files cover the registry, runtime routing, and layout; one file per built-in add-on covers its behavior. The folder contains only tests, so [repository guidance](../../../AGENTS.md) exempts it from its own `doc/` folder. [package.json](../../../package.json) uses Node test discovery to include future `*.test.js` files automatically.
+
+[model.js](../model.js) imports translation functions from the [shared localization folder](../../i18n/doc/architecture.md). Add-on definitions still own their labels and display behavior; this path change does not alter their registry or native action contract.
+
 The [controller](../controller.js) derives all configured clock-menu switch rows through [addonLayout](../layout.js), so a pair contributes one row and disabled instances remain available. Names come from each compiled definition's `describe` method. The [native adapter](../native-adapter.js) sends a typed `set_addon_enabled` command; the host exposes this separately from runtime Start/Pause/Reset actions. The menu owns whether a successful control closes the window. See the [frontend menu architecture](../../doc/architecture.md).
 
 Grouped menu definitions can now supply named sections. [controller.js](../controller.js) flattens them for choice revalidation and preserves the existing Progress choice contract. [native-adapter.js](../native-adapter.js) maps Timer mode and preset choices to separate native commands; [state.js](../state.js) applies Timer command results only when no newer Timer event arrived. Both add-ons still share one host contract, while their saved presets remain independent. Timer and Progress both declare allowlisted Details fragments.
@@ -24,7 +28,7 @@ This folder owns the fixed built-in registry and shared add-on host. The separat
 | [instance-editor.js](../instance-editor.js) | Adds, removes, and reorders instances around the clock block, and mixes type editors into Settings |
 | [build-fragments.js](../build-fragments.js) | Allowlisted Vite HTML composition from bundled views |
 | [contracts.json](../contracts.json) | Checked kind and action IDs shared by frontend and Rust tests |
-| [addons.test.js](../addons.test.js) | Add-on routing, state, view composition, editing, and display regression tests |
+| [tests/](../tests/) | Add-on routing, state, view composition, editing, and per-add-on display regression tests |
 
 The registry contains compiled definitions only. A definition supplies fresh options, a pure display result, Settings descriptions and rules, bundled view keys, and action descriptors. The clock, menu, and Settings pages each create one host, which gives the controller and page the same Alpine-reactive session object. The page's Timer, Progress, and Counter getters derive from this object; neither page keeps another session copy. Rust remains authoritative for saved settings and sessions. The host does not own Settings persistence or clock pointer geometry. [model.js](../model.js) passes named session context to definitions so adding another session kind does not extend a positional argument list.
 

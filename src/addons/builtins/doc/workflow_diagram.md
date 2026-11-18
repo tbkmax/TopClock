@@ -1,5 +1,7 @@
 # Built-in definition workflow
 
+Date and Progress weekday rendering, and Region clock labels, still call the shared localization functions. Their import path is now [i18n/index.js](../../../i18n/index.js); the workflows below keep their existing data and native boundaries.
+
 Counter's [display formatter](../counter.js) reads `value_ms`, running direction, and start time from the supplied native snapshot, plus `counter_halo_intensity_percent` from shared settings. It returns `H:MM:SS` until 100 hours, then `D:HH:MM`. The pure [appearance helper](../signed-balance-appearance.js) maps the signed value to a text color and state name, and maps the running direction to `up` or `down` for [shared text-glow styling](../../../text-glow.css). It scales the two glyph-shadow opacities from the setting; 50% uses the Ctrl-held clock's shadow opacities with closer blur, while native settings validation rejects out-of-range saved values. A negative balance counting up therefore keeps red text with a blue glow; the opposite combination keeps blue text with a red glow. Zero leaves the configured text color in place, and Stop removes the colored glow. Clock and Settings preview consume the same display result, including when Counter shares a layout row. Its three menu actions and Settings-only reset descriptor use the [host workflow](../../doc/workflow_diagram.md); this folder performs no persistence or shutdown write.
 
 

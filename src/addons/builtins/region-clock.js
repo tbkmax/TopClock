@@ -1,5 +1,5 @@
 import { timeParts } from '../../time-format.js';
-import { translate } from '../../i18n.js';
+import { translate } from '../../i18n/index.js';
 
 export function regionName(addon) {
     const zone = addon.options.time_zone;

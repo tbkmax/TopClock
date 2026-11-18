@@ -10,7 +10,7 @@ import { displayAddon } from './addons/model.js';
 import { displayLayout } from './addons/layout.js';
 import { createAddonHost } from './addons/host.js';
 import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
-import { localizeDocument, resolveLanguage, translate } from './i18n.js';
+import { localizeDocument, resolveLanguage, translate } from './i18n/index.js';
 import './style.css';
 import './text-glow.css';
 import './addons/builtins/progress.css';

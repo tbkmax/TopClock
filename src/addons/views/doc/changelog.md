@@ -1,5 +1,9 @@
 # Bundled view changelog
 
+### 2026-11-17 - Key static fragment labels
+
+- Date, Region, and settings-row fragments now identify static translations explicitly, so English copy edits do not redirect their localized labels. No saved add-on data changes.
+
 ### 2026-11-17 - Tighten Counter glow around text
 
 - Counter's clock and preview classes now use 4px/8px blur distances, bringing the colored glow closer to the smaller digits. The shared Ctrl-held clock keeps its 10px/20px distances.

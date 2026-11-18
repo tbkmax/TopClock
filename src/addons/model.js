@@ -1,4 +1,4 @@
-import { translate } from '../i18n.js';
+import { translate } from '../i18n/index.js';
 import { addonCatalog, getAddonDefinition } from './registry.js';
 import { regionName, availableTimeZones } from './builtins/region-clock.js';
 import { timerElapsed, timerText } from './builtins/timer.js';

@@ -1,5 +1,9 @@
 # Mouse palette frontend changelog
 
+### 2026-11-17 - Follow shared localization folder
+
+- The palette now imports the relocated translation module. Labels and selection behavior remain compatible.
+
 ### 2026-11-16 - Move palette into its own frontend folder
 
 - This folder and its four documentation files now sit under `src/` beside the other pages. The palette still uses the shared add-on host and existing native commands; settings require no migration.

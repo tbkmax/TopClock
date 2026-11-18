@@ -26,12 +26,12 @@
             </div>
         </template>
     </div>
-    <label class="addon-option-switch">Show region name
+    <label class="addon-option-switch" data-i18n-text="addons.showRegion">Show region name
         <button type="button" class="switch" role="switch"
             :aria-checked="addon.options.show_label !== false"
             :class="{ on: addon.options.show_label !== false }"
             aria-label="Show region name on clock"
-            @click="editAddonOption(addon, 'show_label', addon.options.show_label === false)">
+            @click="editAddonOption(addon, 'show_label', addon.options.show_label === false)" data-i18n-aria-label="addons.showRegionOnClock">
             <span></span>
         </button>
     </label>

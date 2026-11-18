@@ -1,14 +1,133 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { languageOptions, resolveLanguage, translate } from './i18n.js';
+import { readFileSync, readdirSync } from 'node:fs';
+import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n/index.js';
+import { messages } from './i18n/messages.js';
 import { addonCatalog } from './addons/registry.js';
 import { markChangedNumbers } from './clock-animations.js';
-import { createSettingsPersistence } from './settings-persistence.js';
-import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './settings-shortcuts.js';
-import { nextSettingsTab } from './settings-tabs.js';
+import { createSettingsPersistence } from './settings/settings-persistence.js';
+import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './settings/settings-shortcuts.js';
+import { nextSettingsTab } from './settings/settings-tabs.js';
 import { timeParts } from './time-format.js';
 import { clockWindowLayout } from './clock-layout.js';
-import { createSettingsPreview } from './settings-preview.js';
+import { createSettingsPreview } from './settings/settings-preview.js';
+import { subscribeSettingsEvents } from './settings/settings-events.js';
+import { readAddonSessions } from './settings/settings-recovery.js';
+
+test('explicit markup keys have complete translations and matching variables', () => {
+    const htmlFiles = ['../index.html', '../settings.html', '../menu.html', '../palette.html'];
+    const views = new URL('./addons/views/', import.meta.url);
+    htmlFiles.push(...readdirSync(views).filter((name) => name.endsWith('.html')).map((name) => `./addons/views/${name}`));
+    for (const path of htmlFiles) {
+        const markup = readFileSync(new URL(path, import.meta.url), 'utf8');
+        for (const [, key] of markup.matchAll(/data-i18n-(?:text|title|aria-label|placeholder)="([^"]+)"/g)) {
+            assert.ok(messages[key], `${path}: missing ${key}`);
+        }
+    }
+    for (const [key, row] of Object.entries(messages)) {
+        assert.equal(row.length, 4, `${key}: expected four languages`);
+        const englishVars = [...row[0].matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
+        for (const value of row) {
+            assert.ok(value, `${key}: empty translation`);
+            assert.deepEqual([...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort(), englishVars, `${key}: variables differ`);
+        }
+    }
+});
+
+test('static localization switches marked text and preserves nested elements', () => {
+    const previous = { document: globalThis.document, Node: globalThis.Node, MutationObserver: globalThis.MutationObserver };
+    let observeChanges;
+    const makeElement = (value) => {
+        const text = { nodeType: 3, nodeValue: value };
+        const nested = { nodeType: 1 };
+        const attributes = new Map([['data-i18n-text', 'tab.clock'], ['data-i18n-title', 'app.minimize']]);
+        const element = {
+            nodeType: 1, childNodes: [nested, text],
+            matches: () => true, querySelectorAll: () => [],
+            getAttribute: (name) => attributes.get(name) ?? null,
+            hasAttribute: (name) => attributes.has(name),
+            setAttribute: (name, value) => attributes.set(name, value),
+        };
+        return { element, text, nested, attributes };
+    };
+    try {
+        globalThis.Node = { ELEMENT_NODE: 1, TEXT_NODE: 3 };
+        globalThis.MutationObserver = class {
+            constructor(callback) { observeChanges = callback; }
+            observe() {}
+        };
+        const first = makeElement(' Clock ');
+        const elements = [first.element];
+        globalThis.document = { documentElement: {
+            nodeType: 1, matches: () => false, querySelectorAll: () => elements,
+        } };
+        localizeDocument('ja');
+        assert.equal(first.text.nodeValue, ` ${translate('ja', 'tab.clock')} `);
+        assert.equal(first.attributes.get('title'), translate('ja', 'app.minimize'));
+        assert.equal(first.element.childNodes[0], first.nested);
+        const clone = makeElement(' Clock ');
+        elements.push(clone.element);
+        observeChanges([{ addedNodes: [clone.element] }]);
+        assert.equal(clone.text.nodeValue, ` ${translate('ja', 'tab.clock')} `);
+        localizeDocument('en');
+        assert.equal(first.text.nodeValue, ' Clock ');
+        assert.equal(clone.text.nodeValue, ' Clock ');
+    } finally {
+        for (const [name, value] of Object.entries(previous)) {
+            if (value === undefined) delete globalThis[name];
+            else globalThis[name] = value;
+        }
+    }
+});
+
+test('settings native event hooks route payloads and dispose together', async () => {
+    const handlers = new Map();
+    const calls = [];
+    const register = async (name, handler) => {
+        handlers.set(name, handler);
+        return () => handlers.delete(name);
+    };
+    const settingsWindow = {
+        onCloseRequested: (handler) => register('close', handler),
+        onFocusChanged: (handler) => register('focus', handler),
+        onResized: (handler) => register('resize', handler),
+    };
+    const dispose = await subscribeSettingsEvents({
+        listen: register, settingsWindow,
+        onSettingsChanged: (value) => calls.push(['settings', value]),
+        onHotkeyErrorsChanged: (value) => calls.push(['hotkeys', value]),
+        onDisplaysChanged: (value) => calls.push(['displays', value]),
+        onPaletteClose: () => calls.push(['palette']),
+        onClose: () => calls.push(['close']),
+        onFocus: (value) => calls.push(['focus', value]),
+        onResize: () => calls.push(['resize']),
+    });
+    handlers.get('clock-settings-changed')({ payload: 1 });
+    handlers.get('hotkey-errors-changed')({ payload: 2 });
+    handlers.get('displays-changed')({ payload: 3 });
+    handlers.get('palette-request-settings-close')();
+    let prevented = false;
+    handlers.get('close')({ preventDefault: () => { prevented = true; } });
+    handlers.get('focus')({ payload: true });
+    handlers.get('resize')();
+    assert.equal(prevented, true);
+    assert.deepEqual(calls, [['settings', 1], ['hotkeys', 2], ['displays', 3], ['palette'], ['close'], ['focus', true], ['resize']]);
+    dispose();
+    assert.equal(handlers.size, 0);
+});
+
+test('settings recovery retains a session when one native read fails', async () => {
+    const reads = [];
+    const sessions = await readAddonSessions(async (name) => {
+        reads.push(name);
+        if (name === 'get_progress_timer_states') throw new Error('unavailable');
+        return name;
+    }, { timerSession: 'old timer', progressTimerSessions: 'old progress', counterSession: 'old counter' }, () => {});
+    assert.deepEqual(reads, ['get_timer_state', 'get_progress_timer_states', 'get_counter_state']);
+    assert.deepEqual(sessions, {
+        timerSession: 'get_timer_state', progressTimerSessions: 'old progress', counterSession: 'get_counter_state',
+    });
+});
 
 test('Add-on catalog descriptions are translated in every explicit language', () => {
     for (const { kind } of addonCatalog) {

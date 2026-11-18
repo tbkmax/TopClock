@@ -1,5 +1,7 @@
 # Mouse palette frontend workflow
 
+The palette still resolves labels before drawing SVG sectors. Its translation import now comes from [i18n/index.js](../../i18n/index.js); selection and native release handling below are unchanged.
+
 ```mermaid
 classDiagram
     class PalettePage {

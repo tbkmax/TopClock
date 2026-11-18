@@ -1,4 +1,4 @@
-import { weekdayText } from '../../i18n.js';
+import { weekdayText } from '../../i18n/index.js';
 
 export const dateAddon = {
     kind: 'date', label: 'Date', labelKey: 'addons.date',

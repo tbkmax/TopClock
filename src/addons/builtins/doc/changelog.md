@@ -1,5 +1,9 @@
 # Built-in definitions changelog
 
+### 2026-11-17 - Use relocated localization functions
+
+- Date, Region clock, and Progress now resolve bundled translations from `src/i18n/`. Display text and saved options remain compatible; no user action is required.
+
 ### 2026-11-17 - Make Counter direction glow adjustable
 
 - Counter now reads a shared 0–100% intensity setting, defaulting to 50% for older settings files, and scales the blue/red glyph glow without changing the signed balance or text color. At 50% it uses the clock's Ctrl shadow opacities; zero turns it off. The setting is edited in Counter Details and needs no migration.

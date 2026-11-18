@@ -12,7 +12,7 @@
         <!-- addon-view:settings-types -->
         <div class="addon-instance-actions">
             <template x-if="addonActions(addon).length"><span class="addon-timer-actions"><template x-for="action in addonActions(addon)" :key="action.id"><button type="button" class="action-button" :class="{ 'primary-action': action.primary }" :disabled="!action.enabled" @click="runAddonAction(addon, action)" x-text="t(action.labelKey)"></button></template></span></template>
-            <button type="button" class="action-button addon-remove" @click="removeAddon(addon.id)" :aria-label="t('addons.removeName', { name: localizedAddonName(addon) })">Remove</button>
+            <button type="button" class="action-button addon-remove" @click="removeAddon(addon.id)" :aria-label="t('addons.removeName', { name: localizedAddonName(addon) })" data-i18n-text="addons.remove">Remove</button>
         </div>
     </div>
 </div>

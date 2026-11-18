@@ -1,5 +1,7 @@
 # Bundled view composition
 
+The build still inserts allowlisted fragments before runtime. On insertion, [i18n/index.js](../../../i18n/index.js) observes new elements and translates their explicit static keys; Alpine updates reactive labels separately. The view selection flow below is unchanged.
+
 Counter follows the existing static fragment flow below. The Add Add-on catalog opens [counter-details.html](../counter-details.html), which sends the Direction glow slider value through Settings' ordinary save path even before Counter is added. [counter.html](../counter.html) has no Details button; Reset still opens a separate confirmation modal and only its confirmed button dispatches the reset action. [clock-row.html](../clock-row.html) shows the semantic text color and accessible signed state returned by the definition. It and [preview-row.html](../preview-row.html) apply the returned motion class and glow alpha to Counter's glyphs, so either position in a pair keeps the chosen intensity while the neighboring add-on stays uncolored. The menu uses the three action descriptors and has no Reset entry.
 
 The production build loads the shared glow CSS before the clock page's base CSS. The Counter motion selectors now include each row's class, so the later `.addon-line` text shadow does not cover the colored glow; the preview uses the same selectors and lighter glow shades.

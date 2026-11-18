@@ -1,5 +1,5 @@
 import { PROGRESS_WEEKDAYS, timeMinutes, validDateValue } from './progress-display.js';
-import { weekdayText } from '../../i18n.js';
+import { weekdayText } from '../../i18n/index.js';
 import { addPreset, removePreset, presetChoices } from './countdown-presets.js';
 
 import { localDateValue, nextLocalDateValue, progressDisplay } from './progress-display.js';

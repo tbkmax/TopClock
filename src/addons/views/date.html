@@ -1,18 +1,18 @@
 <div class="addon-instance-controls" x-show="addon.kind === 'date'">
-    <label>Date format
+    <label data-i18n-text="addons.dateFormat">Date format
         <select class="select-control" :value="addon.options.format"
-            @change="editAddonOption(addon, 'format', $event.target.value)" aria-label="Date format">
-            <option value="ymd">Year-Month-Day</option>
-            <option value="md">Month-Day</option>
-            <option value="d">Day only</option>
+            @change="editAddonOption(addon, 'format', $event.target.value)" aria-label="Date format" data-i18n-aria-label="addons.dateFormat">
+            <option value="ymd" data-i18n-text="addons.ymd">Year-Month-Day</option>
+            <option value="md" data-i18n-text="addons.md">Month-Day</option>
+            <option value="d" data-i18n-text="addons.day">Day only</option>
         </select>
     </label>
-    <label class="addon-option-switch">Show weekday
+    <label class="addon-option-switch" data-i18n-text="addons.showWeekday">Show weekday
         <button type="button" class="switch" role="switch"
             :aria-checked="addon.options.show_weekday === true"
             :class="{ on: addon.options.show_weekday === true }"
             aria-label="Show weekday after date"
-            @click="editAddonOption(addon, 'show_weekday', addon.options.show_weekday !== true)">
+            @click="editAddonOption(addon, 'show_weekday', addon.options.show_weekday !== true)" data-i18n-aria-label="addons.showWeekdayAfter">
             <span></span>
         </button>
     </label>

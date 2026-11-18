@@ -1,5 +1,9 @@
 # Frontend workflows
 
+The [add-on test workflow](../addons/doc/workflow_diagram.md#regression-test-workflow) describes Node's discovery of shared and per-add-on regression files. `npm run test:frontend` is still the frontend check; native interactive acceptance remains separate.
+
+The [Settings workflow](../settings/doc/workflow_diagram.md) now shows the native event subscription and failed-save readback helpers. The [localization workflow](../i18n/doc/workflow_diagram.md) shows explicit markup keys for static text and attributes, including Alpine template clones. The four page entry points and native command/event contracts are unchanged.
+
 ## Mouse palette selection
 
 ```mermaid
@@ -55,7 +59,7 @@ sequenceDiagram
 
 The disclosure is below the existing add-on action rows in [menu.html](../../menu.html). [controller.js](../addons/controller.js) derives its switch rows from the same pair layout as Settings; Rust applies a paired switch to both saved members. Mode and Set choices also stay open on success, while first-level actions still close the menu. [menu.js](../menu.js) marks newly expanded rows as visually pending before Alpine reveals them. They still take their final layout space, so `show_clock_menu` receives the correct dimensions. After that native resize completes, the current request clears the pending state and [menu.css](../menu.css) fades the rows in. A later resize request supersedes an earlier completion. Overflow stays clipped during resizing and returns to scrolling when needed. The [native workflow](../../src-tauri/src/doc/workflow_diagram.md) owns validation, persistence, and session reconciliation.
 
-Counter uses the shared add-on display and action pipeline. [menu.js](../menu.js) renders three actions from the Counter definition; [settings.js](../settings.js) opens the existing Details modal only from the Add Add-on catalog, saves the app-wide Direction glow percentage through the normal settings path, and opens a separate confirmation dialog for Reset. [main.js](../main.js) and the Settings preview read the same signed `counterSession` snapshot and [appearance result](../addons/builtins/signed-balance-appearance.js), while [the native workflow](../../src-tauri/src/addons/doc/workflow_diagram.md) owns saving and stopping on quit. No primary-click action is registered for Counter. Its `H:MM:SS` display changes to `D:HH:MM` at 100 hours; Stop changes the displayed text to a lighter shade of the same sign and removes the direction glow. The glow follows count up or down independently of sign and scales from 0% (off) to 100%, with 50% retaining the clock Ctrl shadow opacities and a tighter Counter blur. Its session and visual hint remain on Counter when [layout.js](../addons/layout.js) places it beside Date, Region clock, or Timer.
+Counter uses the shared add-on display and action pipeline. [menu.js](../menu.js) renders three actions from the Counter definition; [settings.js](../settings/settings.js) opens the existing Details modal only from the Add Add-on catalog, saves the app-wide Direction glow percentage through the normal settings path, and opens a separate confirmation dialog for Reset. [main.js](../main.js) and the Settings preview read the same signed `counterSession` snapshot and [appearance result](../addons/builtins/signed-balance-appearance.js), while [the native workflow](../../src-tauri/src/addons/doc/workflow_diagram.md) owns saving and stopping on quit. No primary-click action is registered for Counter. Its `H:MM:SS` display changes to `D:HH:MM` at 100 hours; Stop changes the displayed text to a lighter shade of the same sign and removes the direction glow. The glow follows count up or down independently of sign and scales from 0% (off) to 100%, with 50% retaining the clock Ctrl shadow opacities and a tighter Counter blur. Its session and visual hint remain on Counter when [layout.js](../addons/layout.js) places it beside Date, Region clock, or Timer.
 
 Both pages load [text-glow.css](../text-glow.css) before their page stylesheet in the production build. Its Counter selectors include the display class and motion class, so they outrank the later base `.addon-line` shadow. The same rules use lighter blue/red glow colors and 4px/8px blur in both Counter views; the Ctrl clock keeps its yellow color and 10px/20px blur.
 
@@ -100,7 +104,7 @@ The [instance editor](../addons/instance-editor.js) also swaps members, moves a 
 
 ## Add-on Details layout
 
-The catalog and configured Progress instances open the same registered detail fragment. Settings places that fragment above a dedicated modal action footer. Preset chips and the input form wrap within the modal, and the modal scrolls when needed. Catalog cards keep Add on the left and Details on the right. [settings.html](../../settings.html) builds each catalog description key from the add-on kind; [i18n.js](../i18n.js) resolves the Counter key in English, Simplified Chinese, Traditional Chinese, and Japanese.
+The catalog and configured Progress instances open the same registered detail fragment. Settings places that fragment above a dedicated modal action footer. Preset chips and the input form wrap within the modal, and the modal scrolls when needed. Catalog cards keep Add on the left and Details on the right. [settings.html](../../settings.html) builds each catalog description key from the add-on kind; [i18n.js](../i18n/index.js) resolves the Counter key in English, Simplified Chinese, Traditional Chinese, and Japanese.
 
 ## Progress menu preset
 
@@ -123,7 +127,7 @@ sequenceDiagram
     end
 ```
 
-[settings-preview.js](../settings-preview.js) rejects obsolete responses. Settings and timer events keep the component's state current while rendering is paused. Existing component relationships below still apply.
+[settings-preview.js](../settings/settings-preview.js) rejects obsolete responses. Settings and timer events keep the component's state current while rendering is paused. Existing component relationships below still apply.
 
 ## Menu layout and dismissal
 
@@ -190,11 +194,11 @@ sequenceDiagram
     Clocks->>Clocks: Reformat Date weekday and menu labels
 ```
 
-[i18n.js](../i18n.js) supplies bundled translations and `Intl.DateTimeFormat` weekdays to both pages. The language preference is durable in `settings.json`; the detected Windows UI language is read at startup and is not saved. Rust updates the tray label after a successful language change. Unsupported Windows languages resolve to English.
+[i18n.js](../i18n/index.js) supplies bundled translations and `Intl.DateTimeFormat` weekdays to both pages. The language preference is durable in `settings.json`; the detected Windows UI language is read at startup and is not saved. Rust updates the tray label after a successful language change. Unsupported Windows languages resolve to English.
 
 The General tab's Settings files button calls `open_settings_folder`; Rust opens the app config directory in Explorer. Failures appear in the Settings error toast, and this action does not change saved settings.
 
-General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings-updates.js) calls the native Store check on button press and changes the button to **Update** when a published package is available. That action asks Windows Store to install the update, with cancellation and failure reported in Settings. If false, the GitHub reminder opens a release page; TopClock never installs that download. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
+General calls `is_packaged` before starting any update check. If true, [settings-updates.js](../settings/settings-updates.js) calls the native Store check on button press and changes the button to **Update** when a published package is available. That action asks Windows Store to install the update, with cancellation and failure reported in Settings. If false, the GitHub reminder opens a release page; TopClock never installs that download. The sign-in switch invokes the same native command names on both channels; [startup.rs](../../src-tauri/src/startup.rs) chooses Windows StartupTask or the Run key, and Settings refreshes the reported state after changing it.
 
 ```mermaid
 sequenceDiagram
@@ -301,7 +305,7 @@ classDiagram
     settingsApp --> AddonInstance : edits instances
 ```
 
-The add-on controller and state subscriptions are described in [their workflow](../addons/doc/workflow_diagram.md). These names map to [main.js](../main.js), [settings.js](../settings.js), and the command registrations in [lib.rs](../../src-tauri/src/lib.rs). Settings delegates add-on actions to [the shared controller](../addons/controller.js), shortcut actions to [settings-shortcuts.js](../settings-shortcuts.js), update checks to [settings-updates.js](../settings-updates.js), and save ordering to [settings-persistence.js](../settings-persistence.js). Both UI components call the shared `timeParts` function in [time-format.js](../time-format.js), which leaves hours unpadded and keeps minutes and seconds at two digits, then `markChangedNumbers` in [clock-animations.js](../clock-animations.js). The tracker compares each displayed hour, minute and second with its previous value. [style.css](../style.css) sizes clock segments to their text, keeping a one-digit hour beside the colon. CSS applies the chosen number effect to changed parts and the chosen colon effect to separators independently. `TauriCommands` represents the command interface; `SettingsPersistence` represents the object returned by `createSettingsPersistence`, rather than a source class.
+The add-on controller and state subscriptions are described in [their workflow](../addons/doc/workflow_diagram.md). These names map to [main.js](../main.js), [settings.js](../settings/settings.js), and the command registrations in [lib.rs](../../src-tauri/src/lib.rs). Settings delegates add-on actions to [the shared controller](../addons/controller.js), shortcut actions to [settings-shortcuts.js](../settings/settings-shortcuts.js), update checks to [settings-updates.js](../settings/settings-updates.js), and save ordering to [settings-persistence.js](../settings/settings-persistence.js). Both UI components call the shared `timeParts` function in [time-format.js](../time-format.js), which leaves hours unpadded and keeps minutes and seconds at two digits, then `markChangedNumbers` in [clock-animations.js](../clock-animations.js). The tracker compares each displayed hour, minute and second with its previous value. [style.css](../style.css) sizes clock segments to their text, keeping a one-digit hour beside the colon. CSS applies the chosen number effect to changed parts and the chosen colon effect to separators independently. `TauriCommands` represents the command interface; `SettingsPersistence` represents the object returned by `createSettingsPersistence`, rather than a source class.
 
 ```mermaid
 sequenceDiagram
@@ -328,11 +332,11 @@ sequenceDiagram
     end
 ```
 
-On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings-persistence.js](../settings-persistence.js) after a control changes. The save controller snapshots each draft, debounces it, and serializes writes. It rolls back only when the latest draft fails, so an earlier failed write cannot erase a newer draft. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the clock group and resizes only the clock window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
+On initialization, `settingsApp` calls `get_font_families` before enabling the font select; [fonts.rs](../../src-tauri/src/fonts.rs) reads the Windows font table. The sequence above follows [settings-persistence.js](../settings/settings-persistence.js) after a control changes. The save controller snapshots each draft, debounces it, and serializes writes. It rolls back only when the latest draft fails, so an earlier failed write cannot erase a newer draft. `clockApp` applies preview and saved settings in [main.js](../main.js), measures the clock group and resizes only the clock window. After the first resize, it adjusts the window position to preserve the main clock's top and right screen coordinates without clamping to monitor bounds. The Settings preview scales fonts above 64 pixels down to fit its card. The native side owns durability; see [Rust workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
-The Settings navigation in [settings.html](../../settings.html) exposes four tab buttons and four mounted panels. [settings-tabs.js](../settings-tabs.js) maps Arrow, Home, and End keys to the next selected tab; the selected tab receives focus and its panel remains available to keyboard users. The Shortcuts tab draws the core and Timer actions from one metadata list in [settings-shortcuts.js](../settings-shortcuts.js).
+The Settings navigation in [settings.html](../../settings.html) exposes four tab buttons and four mounted panels. [settings-tabs.js](../settings/settings-tabs.js) maps Arrow, Home, and End keys to the next selected tab; the selected tab receives focus and its panel remains available to keyboard users. The Shortcuts tab draws the core and Timer actions from one metadata list in [settings-shortcuts.js](../settings/settings-shortcuts.js).
 
-The Clock tab's Reset positions button calls `resetClockPositions()` in [settings.js](../settings.js), which invokes `reset_clock_positions`. Rust centers each visible window on its display and saves display-relative coordinates. A hidden display keeps its prior position; command errors appear in the Settings error toast. See the [native display workflow](../../src-tauri/src/doc/workflow_diagram.md).
+The Clock tab's Reset positions button calls `resetClockPositions()` in [settings.js](../settings/settings.js), which invokes `reset_clock_positions`. Rust centers each visible window on its display and saves display-relative coordinates. A hidden display keeps its prior position; command errors appear in the Settings error toast. See the [native display workflow](../../src-tauri/src/doc/workflow_diagram.md).
 
 
 ```mermaid

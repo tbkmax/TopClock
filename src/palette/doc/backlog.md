@@ -1,5 +1,7 @@
 # Mouse palette frontend backlog
 
+The localization import move is complete. Existing live palette checks below still cover language layout and modifier release behavior.
+
 ## Live radial interaction acceptance
 
 - **Title:** Check the palette with physical mouse and modifier input.

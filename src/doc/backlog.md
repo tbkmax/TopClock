@@ -1,5 +1,9 @@
 # Frontend backlog
 
+The add-on test split and automatic frontend test discovery are complete. Existing live Windows checks remain necessary; the file reorganization adds no new product behavior.
+
+The 2026-11-17 Settings and localization refactor is implemented. Its native Windows and language-switching behavior still needs the live checks below; frontend tests and a Vite build cover module imports, translation key contracts, and save/event helpers.
+
 ## Mouse palette live Windows acceptance
 
 - **Title:** Verify mouse palette input and radial selection on desktop displays.
@@ -26,7 +30,7 @@
 
 - **Title:** Verify Counter controls, color, and persistence in the running desktop app.
 - **Problem and desired outcome:** Automated formatter and native session tests cannot prove WebView menu layout, input behavior, or shutdown persistence. Counter should show the same signed balance in every clock and Settings preview, and stop at the saved value when TopClock quits.
-- **Scope:** [Counter definition](../addons/builtins/counter.js), [shared views](../addons/views/doc/architecture.md), [Settings](../settings.js), [menu](../menu.js), and [native session](../../src-tauri/src/addons/counter.rs).
+- **Scope:** [Counter definition](../addons/builtins/counter.js), [shared views](../addons/views/doc/architecture.md), [Settings](../settings/settings.js), [menu](../menu.js), and [native session](../../src-tauri/src/addons/counter.rs).
 - **Acceptance criteria:** In a disposable settings profile, Count up, Count down, and Stop from the submenu; verify blue/red running and light blue/red stopped text in the clock and preview on light and dark desktop backgrounds, with zero using the configured text color; verify the blue/red glyph glow follows active up/down direction independently of sign and disappears on Stop. Open Counter Details only from the Add Add-on catalog, before and after adding Counter; drag the shared Direction glow setting from 0% through the 50% default to 100%, compare 50% with the clock's Ctrl glow, compare clock and preview, save and reopen Settings, and restart to check persistence. An older settings file without the field should show 50%; a Counter-aware older build should retain the instance when it ignores the shared field. Reverse through zero; confirm and cancel Reset only in Settings; remove and re-add a running Counter without losing elapsed time; quit while Counter is absent and re-add after restart to check its stopped saved balance; quit by menu, tray, and shortcut; check per-second `H:MM:SS` updates and the `D:HH:MM` transition at 100 hours with minutes retained, screen reader label, and existing Timer/Progress independence. Pair Counter with Date, Region clock, and Timer in both left/right positions; check the glow stays on Counter text alone and the shared switch and size do not change its balance. Check click-through, Ctrl drag, position restore, and a second display.
 - **Dependencies and risks:** Requires a live Windows WebView and preferably two displays. Confirm the 4px/8px Counter glow is close to the glyphs yet visible at 50% and 100% in both desktop clock and preview after CSS bundling, including against light backgrounds. A pre-Counter binary cannot retain an unknown Counter instance if it saves the newer settings file.
 - **Verification:** Run `npm run tauri:dev` with disposable data and inspect each path. Record outcomes before release.
@@ -74,7 +78,7 @@ The Details modal and catalog button alignment were visually checked in a 760 ×
 - **Title:** Check the compact Add-ons tab in the running Settings window.
 - **Problem or opportunity:** The redesigned Alpine markup and Vite build have not been checked in the native WebView at the fixed 760 × 650 window size.
 - **Desired outcome:** Configured add-ons are reachable immediately, drag ordering and placement work across the clock block, and catalog, detail, and preview disclosures stay usable with many instances and translated labels.
-- **Scope:** [settings.html](../../settings.html), [instance-editor.js](../addons/instance-editor.js), [bundled views](../addons/views/doc/architecture.md), [settings.css](../settings.css), and [i18n.js](../i18n.js).
+- **Scope:** [settings.html](../../settings.html), [instance-editor.js](../addons/instance-editor.js), [bundled views](../addons/views/doc/architecture.md), [settings.css](../settings/settings.css), and [i18n.js](../i18n/index.js).
 - **Acceptance criteria:** With zero, one, and 16 instances, the first view exposes the configured list; Add scrolls to a catalog that opens and closes and shows all five types without an inner scrollbar, with localized names and descriptions instead of raw translation keys; adding an item returns to the list; each Edit button controls only its own details. A dragged card visibly follows the pointer, shows a drop indicator, and settles before or after another row, across the clock block, or into an empty stack when released; releasing outside cancels the move. The main clock and preview match the saved order after reopening. Arrow keys on a focused handle make the same moves. Enable switches and Timer actions still work; the preview opens and updates; keyboard focus and labels remain usable in all supported languages. In a Region editor, search `taipei`, `Taiwan`, `Japan`, and `China`, choose a result by pointer and Enter, and test arrow keys and Escape. Switch Settings language and verify localized country labels while English search still works. Confirm the preview and saved selection after reopening, and check the bounded list in single and paired cards.
 - **Dependencies and risks:** Requires a running Windows Tauri session. Use a disposable settings file when filling the list.
 - **Verification:** Run `npm run tauri:dev` and exercise the Add-ons tab at the fixed Settings size and with keyboard navigation.
@@ -97,7 +101,7 @@ The Details modal and catalog button alignment were visually checked in a 760 ×
 - **Title:** Verify translated Settings and weekday display in running direct and MSIX builds.
 - **Problem or opportunity:** Automated locale tests and the Vite build cannot show clipping, installed font fallback, or packaged Windows language selection.
 - **Desired outcome:** All four explicit languages and System default remain readable in Settings, the clock menu, Date preview, and desktop clocks.
-- **Scope:** [i18n.js](../i18n.js), [settings.html](../../settings.html), [index.html](../../index.html), and the native locale command in [locale.rs](../../src-tauri/src/locale.rs).
+- **Scope:** [i18n.js](../i18n/index.js), [settings.html](../../settings.html), [index.html](../../index.html), and the native locale command in [locale.rs](../../src-tauri/src/locale.rs).
 - **Acceptance criteria:** On Chinese and Japanese Windows UI languages, a new or `system` preference shows the corresponding short weekday; explicit choice overrides Windows; Settings and menu text fit without clipping; a restart keeps the choice.
 - **Dependencies and risks:** Requires Windows installations with those UI languages and a signed MSIX for the package check. Preserve click-through and existing numeric time layouts.
 - **Verification:** Run `npm run tauri:dev`, exercise all language choices and Date weekday on the clock and preview, then repeat System default and restart checks in an installed MSIX.
@@ -110,7 +114,7 @@ TODO 4's Settings files button and multiple-display controls are implemented. Ma
 - **Title:** Check General from an installed MSIX.
 - **Problem or opportunity:** Frontend tests and build confirm the code paths, but a packaged webview has not been exercised interactively.
 - **Desired outcome:** Store users can check for and install a published Store update inside Settings without seeing a GitHub download prompt, and the sign-in switch reflects Windows Startup settings.
-- **Scope:** [settings.html](../../settings.html), [settings.js](../settings.js), and [settings-updates.js](../settings-updates.js).
+- **Scope:** [settings.html](../../settings.html), [settings.js](../settings/settings.js), and [settings-updates.js](../settings/settings-updates.js).
 - **Acceptance criteria:** A first Store version shows Check Microsoft Store and no GitHub request; after a higher-version private submission is published, the button becomes Update, the Store permission dialog appears, and the update installs. Cancellation or failure keeps a retry action. Windows disabling startup is reflected and reported; direct builds identify GitHub Releases and only open the release page.
 - **Dependencies and risks:** Requires signed MSIX installation; keep the direct build behavior intact.
 - **Verification:** Open General in both installed MSIX and direct builds, test two increasing private Store versions, and check Windows Startup settings changes.
@@ -121,7 +125,7 @@ TODO 4's Settings files button and multiple-display controls are implemented. Ma
 - **Title:** Exercise clock controls on mixed-DPI displays and after display reconnection.
 - **Problem or opportunity:** The current development session exposes one physical display, so independent drag, hot-plug, and click-through were not observed live on multiple monitors.
 - **Desired outcome:** Each clock keeps its own unrestricted position; shared appearance, add-ons, Timer, and menu actions stay synchronized.
-- **Scope:** [main.js](../main.js), [settings.js](../settings.js), and the native display manager in [displays.rs](../../src-tauri/src/displays.rs).
+- **Scope:** [main.js](../main.js), [settings.js](../settings/settings.js), and the native display manager in [displays.rs](../../src-tauri/src/displays.rs).
 - **Acceptance criteria:** Move a secondary clock without moving the primary; change an add-on or style and see every clock update; unplug and reconnect a display and recover its position and visibility choice. General keeps each switch paired with the correct display label after reconnection and shows no Windows device prefix.
 - **Dependencies and risks:** Include different scale factors and display order changes; preserve click-through and tray access if all displays are unchecked. The Clock tab now resets visible clocks to their display centers; a display switched off in General keeps its saved position.
 - **Verification:** Run `npm run tauri:dev` with two physical monitors and exercise each case.
@@ -136,7 +140,7 @@ Settings save rollback, shared shortcut rows, keyboard tab navigation, and focus
 - **Title:** Check tab navigation and save recovery in the running Settings window.
 - **Problem or opportunity:** The frontend tests and Vite build pass, but the Alpine template and Tauri window were not exercised interactively after the refactor.
 - **Desired outcome:** Settings remains operable by pointer and keyboard, and a failed write never leaves a clock showing an unsaved preview.
-- **Scope:** [settings.html](../../settings.html), [settings.js](../settings.js), [settings-persistence.js](../settings-persistence.js), [settings-shortcuts.js](../settings-shortcuts.js), and the clock preview in [main.js](../main.js).
+- **Scope:** [settings.html](../../settings.html), [settings.js](../settings/settings.js), [settings-persistence.js](../settings/settings-persistence.js), [settings-shortcuts.js](../settings/settings-shortcuts.js), and the clock preview in [main.js](../main.js).
 - **Acceptance criteria:** Arrow, Home, End, and Tab navigation reach the intended tab and panel; all four shortcut rows can be enabled, recorded, cleared, and show conflicts; a Settings change appears on every clock and persists after reopening; a simulated write failure restores native settings and Timer state in Settings and every clock.
 - **Dependencies and risks:** Requires a live Tauri Windows session and a controlled way to cause a settings write failure without harming the user's settings file.
 - **Verification:** Run `npm run tauri:dev`, exercise the controls, and use a temporary test configuration for the failure case.

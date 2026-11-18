@@ -30,7 +30,7 @@ No new menu actions, shortcuts, add-on types, or install/uninstall UI belong to 
 | --- | --- | --- |
 | [addons.js](../../src/addons/model.js) | Catalog, defaults, shared instance shape, display formatting | Move type behavior into individual modules; retain one registry |
 | [settings-addons.js](../../src/addons/instance-editor.js) | Shared ordering plus type-specific edits and actions | Keep ordering in the host; move type editors and rules to their modules |
-| [main.js](../../src/main.js), [settings.js](../../src/settings.js) | Shared formatting, native events, separate live and preview views | Share state subscription and action adapters; keep view-local animation state separate |
+| [main.js](../../src/main.js), [settings.js](../../src/settings/settings.js) | Shared formatting, native events, separate live and preview views | Share state subscription and action adapters; keep view-local animation state separate |
 | [index.html](../../index.html), [settings.html](../../settings.html) | Ordered stacks, dashboard, preview and menu | Replace type checks in common shells with registered, bundled views and action descriptors |
 | [addons.rs](../../src-tauri/src/addons/mod.rs) | Validated instances and TimerSession calculations | Separate common validation, type validators and session logic |
 | [timer.rs](../../src-tauri/src/timer.rs), [hotkeys.rs](../../src-tauri/src/hotkeys.rs) | Durable timer commands and shortcut dispatch | Route existing entry points through shared native action services |
@@ -71,7 +71,7 @@ src/addons/
   model.js               # common instance creation and display entry point
   instance-editor.js     # common add/remove/order/placement/size behavior
   build-fragments.js     # allowlisted local Vite view composition
-  addons.test.js         # add-on regression checks
+  tests/                 # shared and per-add-on regression checks
   contracts.json         # checked frontend/native kind and action names
   builtins/
     date.js

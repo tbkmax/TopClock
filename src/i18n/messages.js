@@ -1,6 +1,6 @@
 // Each entry keeps the English source and its Simplified Chinese, Traditional
 // Chinese, and Japanese translations together so missing strings are visible.
-const messages = {
+export const messages = {
     'palette.title': ['Mouse palette', '鼠标调色盘', '滑鼠調色盤', 'マウスパレット'],
     'palette.description': ['Hold its key, move to a choice, then release. Configure the key in Shortcuts.', '按住指定按键，移动到选项后松开。在快捷键中设置按键。', '按住指定按鍵，移到選項後放開。在快速鍵中設定按鍵。', 'キーを押したまま選択肢へ移動し、離して実行します。キーはショートカットで設定できます。'],
     'palette.shortcut': ['Mouse palette key', '鼠标调色盘按键', '滑鼠調色盤按鍵', 'マウスパレットのキー'],
@@ -297,91 +297,3 @@ const messages = {
     'error.shortcutKey': ['Choose Ctrl, Alt, or Shift plus a supported key for a system-wide shortcut.', '请选择 Ctrl、Alt 或 Shift 加一个支持的按键作为系统快捷键。', '請選擇 Ctrl、Alt 或 Shift 加上一個支援的按鍵作為系統快速鍵。', 'システム全体のショートカットには Ctrl、Alt、Shift のいずれかと対応するキーを選んでください。'],
 };
 
-const indexes = { en: 0, 'zh-Hans': 1, 'zh-Hant': 2, ja: 3 };
-const keysByEnglish = new Map(Object.entries(messages).map(([key, row]) => [row[0], key]));
-const originalText = new WeakMap();
-const originalAttributes = new WeakMap();
-let domLanguage = 'en';
-let observer;
-const weekdayFormatters = new Map();
-
-export function resolveLanguage(preference = 'system', systemLocale = 'en') {
-    const locale = (preference === 'system' ? systemLocale : preference).toLowerCase();
-    if (locale.startsWith('ja')) return 'ja';
-    if (locale.startsWith('zh')) {
-        return /hant|^zh-(tw|hk|mo)(-|$)/.test(locale) ? 'zh-Hant' : 'zh-Hans';
-    }
-    return 'en';
-}
-
-export function translate(language, key, vars = {}) {
-    const row = messages[key];
-    if (!row) return key;
-    const template = row[indexes[language] ?? 0] || row[0];
-    return template.replace(/\{(\w+)\}/g, (_, name) => String(vars[name] ?? `{${name}}`));
-}
-
-// Translate static markup, including Alpine x-if/x-for clones. Dynamic x-text
-// nodes are handled by the component so their values remain reactive.
-function translateMarkup(root) {
-    if (!root || typeof document === 'undefined') return;
-    const elements = root.nodeType === Node.ELEMENT_NODE
-        ? [root, ...root.querySelectorAll('*')]
-        : [...root.querySelectorAll('*')];
-    for (const element of elements) {
-        let originals = originalAttributes.get(element);
-        if (!originals) {
-            originals = {};
-            for (const name of ['title', 'aria-label', 'placeholder']) {
-                if (element.hasAttribute(name) && !element.hasAttribute(`:${name}`)) originals[name] = element.getAttribute(name);
-            }
-            originalAttributes.set(element, originals);
-        }
-        for (const [name, english] of Object.entries(originals)) {
-            const key = keysByEnglish.get(english);
-            if (key) element.setAttribute(name, translate(domLanguage, key));
-        }
-    }
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    while (walker.nextNode()) {
-        const node = walker.currentNode;
-        const parent = node.parentElement;
-        if (!parent || parent.closest('[x-text], [x-html], script, style')) continue;
-        const english = originalText.get(node) ?? node.nodeValue;
-        if (!originalText.has(node)) originalText.set(node, english);
-        const key = keysByEnglish.get(english.trim());
-        if (key) node.nodeValue = english.replace(english.trim(), translate(domLanguage, key));
-    }
-}
-
-export function localizeDocument(language) {
-    if (typeof document === 'undefined') return;
-    domLanguage = language;
-    translateMarkup(document.documentElement);
-    if (!observer) {
-        observer = new MutationObserver((mutations) => {
-            for (const mutation of mutations) {
-                for (const node of mutation.addedNodes) {
-                    if (node.nodeType === Node.ELEMENT_NODE) translateMarkup(node);
-                }
-            }
-        });
-        observer.observe(document.documentElement, { childList: true, subtree: true });
-    }
-}
-
-export function weekdayText(date, language) {
-    const locale = { en: 'en-US', 'zh-Hans': 'zh-CN', 'zh-Hant': 'zh-TW', ja: 'ja-JP' }[language] || 'en-US';
-    if (!weekdayFormatters.has(locale)) {
-        weekdayFormatters.set(locale, new Intl.DateTimeFormat(locale, { weekday: 'short' }));
-    }
-    return `(${weekdayFormatters.get(locale).format(date)})`;
-}
-
-export const languageOptions = [
-    { value: 'system', name: 'system' },
-    { value: 'en', name: 'English' },
-    { value: 'zh-Hans', name: '简体中文' },
-    { value: 'zh-Hant', name: '繁體中文' },
-    { value: 'ja', name: '日本語' },
-];

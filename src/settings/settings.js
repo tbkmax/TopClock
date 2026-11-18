@@ -3,25 +3,25 @@ import { invoke } from '@tauri-apps/api/core';
 import { emit, listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { getVersion } from '@tauri-apps/api/app';
-import { clockFontStack, timeLayouts, timeParts } from './time-format.js';
-import { colonAnimations, markChangedNumbers, numberAnimations } from './clock-animations.js';
-import { addonCatalog, addonName, availableTimeZones, displayAddon } from './addons/model.js';
-import { displayLayout } from './addons/layout.js';
-import { getAddonDefinition } from './addons/registry.js';
-import { createAddonHost } from './addons/host.js';
-import { markCountdownCompletion, progressBarStyle } from './addons/builtins/progress-display.js';
-import { DEFAULT_HALO_INTENSITY_PERCENT, haloIntensityPercent } from './addons/builtins/signed-balance-appearance.js';
-import { createTimeZoneOptions, regionZonePicker } from './addons/builtins/region-picker.js';
-import { languageOptions, localizeDocument, resolveLanguage, translate } from './i18n.js';
-import { addonMethods } from './addons/instance-editor.js';
+import { timeLayouts } from '../time-format.js';
+import { colonAnimations, numberAnimations } from '../clock-animations.js';
+import { addonCatalog, addonName, availableTimeZones } from '../addons/model.js';
+import { getAddonDefinition } from '../addons/registry.js';
+import { createAddonHost } from '../addons/host.js';
+import { DEFAULT_HALO_INTENSITY_PERCENT, haloIntensityPercent } from '../addons/builtins/signed-balance-appearance.js';
+import { createTimeZoneOptions, regionZonePicker } from '../addons/builtins/region-picker.js';
+import { languageOptions, localizeDocument, resolveLanguage, translate } from '../i18n/index.js';
+import { addonMethods } from '../addons/instance-editor.js';
 import { DEFAULT_SHORTCUTS, shortcutGroups, shortcutMethods } from './settings-shortcuts.js';
 import { updateMethods } from './settings-updates.js';
 import { createSettingsPersistence } from './settings-persistence.js';
 import { nextSettingsTab } from './settings-tabs.js';
-import { createSettingsPreview } from './settings-preview.js';
+import { createSettingsPreview, createPreviewMethods } from './settings-preview.js';
+import { subscribeSettingsEvents } from './settings-events.js';
+import { readAddonSessions } from './settings-recovery.js';
 import './settings.css';
-import './text-glow.css';
-import './addons/builtins/progress.css';
+import '../text-glow.css';
+import '../addons/builtins/progress.css';
 
 const settingsWindow = getCurrentWindow();
 const timeZones = availableTimeZones();
@@ -105,6 +105,7 @@ Alpine.data('settingsApp', () => ({
     fontListError: false,
     error: '',
     saveController: null,
+    disposeEvents: null,
     shortcutGroups,
 
     async init() {
@@ -125,21 +126,11 @@ Alpine.data('settingsApp', () => ({
                 }
             },
             onRollback: async (settings, isCurrent) => {
-                let timerSession = this.timerSession;
-                let progressTimerSessions = this.progressTimerSessions;
-                let counterSession = this.counterSession;
-                try {
-                    timerSession = await invoke('get_timer_state');
-                } catch (error) {
-                    console.error('Could not reload timer after failed save:', error);
-                }
-                try {
-                    progressTimerSessions = await invoke('get_progress_timer_states');
-                } catch (error) {
-                    console.error('Could not reload Progress countdowns after failed save:', error);
-                }
-                try { counterSession = await invoke('get_counter_state'); }
-                catch (error) { console.error('Could not reload Counter after failed save:', error); }
+                const { timerSession, progressTimerSessions, counterSession } = await readAddonSessions(invoke, {
+                    timerSession: this.timerSession,
+                    progressTimerSessions: this.progressTimerSessions,
+                    counterSession: this.counterSession,
+                });
                 if (!isCurrent()) return;
                 this.settings = settings;
                 this.syncLanguage();
@@ -172,33 +163,37 @@ Alpine.data('settingsApp', () => ({
         } catch (error) {
             this.error = this.t('error.displays', { error });
         }
-        await listen('clock-settings-changed', (event) => {
-            if (!this.saveController.hasPending()) {
-                this.settings = event.payload;
-                this.syncLanguage();
-                this.saveController.setCommitted(event.payload);
-                this.updatePreview();
-            }
+        this.disposeEvents = await subscribeSettingsEvents({
+            listen, settingsWindow,
+            onSettingsChanged: (settings) => {
+                if (!this.saveController.hasPending()) {
+                    this.settings = settings;
+                    this.syncLanguage();
+                    this.saveController.setCommitted(settings);
+                    this.updatePreview();
+                }
+            },
+            onHotkeyErrorsChanged: (errors) => { this.hotkeyErrors = errors; },
+            onDisplaysChanged: (displays) => { this.displays = displays; },
+            onPaletteClose: () => this.close(),
+            onClose: () => this.close(),
+            onFocus: (focused) => {
+                if (focused) this.refreshStartupState();
+                this.syncPreviewTimer();
+            },
+            onResize: () => this.syncPreviewTimer(),
         });
-        await listen('hotkey-errors-changed', (event) => { this.hotkeyErrors = event.payload; });
-        await listen('displays-changed', (event) => { this.displays = event.payload; });
-        await listen('palette-request-settings-close', () => this.close());
-        await settingsWindow.onCloseRequested((event) => {
-            event.preventDefault();
-            this.close();
-        });
-        await settingsWindow.onFocusChanged(({ payload: focused }) => {
-            if (focused) this.refreshStartupState();
-            this.syncPreviewTimer();
-        });
-        await settingsWindow.onResized(() => this.syncPreviewTimer());
         await this.syncPreviewTimer();
         if (!this.isPackaged && this.settings.auto_check_updates) {
             this.checkForUpdates(false);
         }
     },
 
-    destroy() { this.addonHost?.dispose(); },
+    destroy() {
+        this.disposeEvents?.();
+        this.addonHost?.dispose();
+        this.stopRecording();
+    },
 
     addonActions(addon, role = 'settings-button') {
         return this.addonHost?.actionsFor(addon, role) || [];
@@ -241,66 +236,13 @@ Alpine.data('settingsApp', () => ({
     },
     closeAddonDetails() { this.activeAddonDetailsKind = null; },
 
-    async syncPreviewTimer() {
-        try {
-            await previewClock.refresh();
-        } catch (error) {
-            console.error('Could not check Settings window visibility:', error);
-        }
-    },
-
-    updatePreview() {
-        if (!previewClock?.running) return;
-        const now = new Date();
-        const result = markChangedNumbers(
-            timeParts(now, this.settings),
-            this.previousPreviewNumbers,
-            this.previewNumberActiveUntil,
-            now.getTime(),
-        );
-        this.previewParts = result.parts;
-        this.previousPreviewNumbers = result.numbers;
-        this.previewNumberActiveUntil = result.activeUntil;
-        this.previewAddons = (this.settings.addons || []).filter((addon) => addon.enabled)
-            .map((addon) => {
-                const display = displayAddon(addon, now, this.settings, {
-                    timerSession: this.timerSession, progressTimerSessions: this.progressTimerSessions,
-                    counterSession: this.counterSession, language: this.language,
-                });
-                markCountdownCompletion(display, addon, this.progressPreviousPercent, this.progressCompletionUntil, now.getTime());
-                return display;
-            })
-            .filter((addon) => !addon.hidden);
-    },
-    previewLayout() { return displayLayout(this.previewAddons, this.settings.addon_pairs); },
-
-    previewStyle() {
-        return {
-            color: this.settings.font_color,
-            fontSize: `${Math.min(this.settings.font_size, 64)}px`,
-            fontFamily: clockFontStack(this.settings.font_family),
-            WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
-            textShadow: '0 2px 6px rgba(0, 0, 0, .65)',
-        };
-    },
-
-    addonPreviewStyle(addon) {
-        return {
-            ...addon.glowStyle,
-            color: addon.color || this.settings.font_color,
-            fontSize: `${Math.min(this.settings.font_size, 64) * (addon.effective_size_percent ?? addon.size_percent) / 100}px`,
-            fontFamily: clockFontStack(this.settings.font_family),
-            WebkitTextStroke: `${this.settings.outline_width}px ${this.settings.outline_color}`,
-        };
-    },
+    ...createPreviewMethods(() => previewClock),
     counterHaloIntensity() { return haloIntensityPercent(this.settings.counter_halo_intensity_percent); },
     setCounterHaloIntensity(value) {
         if (!Number.isInteger(value) || value < 0 || value > 100) return;
         this.settings.counter_halo_intensity_percent = value;
         this.save();
     },
-
-    progressStyle(addon) { return progressBarStyle(addon, Math.min(this.settings.font_size, 64)); },
 
     rangeStyle(value, min, max) {
         return { '--range-progress': `${((value - min) / (max - min)) * 100}%` };

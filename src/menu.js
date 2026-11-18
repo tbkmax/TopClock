@@ -3,7 +3,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { createAddonHost } from './addons/host.js';
 import { pendingPaletteChoice } from './palette/palette-model.js';
-import { localizeDocument, resolveLanguage, translate } from './i18n.js';
+import { localizeDocument, resolveLanguage, translate } from './i18n/index.js';
 import './menu.css';
 
 window.Alpine = Alpine;

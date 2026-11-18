@@ -3,51 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TopClock Settings</title>
+    <title data-i18n-text="app.settingsTitle">TopClock Settings</title>
 </head>
 <body>
     <div id="settings-app" x-data="settingsApp" x-cloak>
         <header class="titlebar" @mousedown="startDrag($event)">
             <div class="brand-mark" aria-hidden="true">:</div>
-            <div class="titlebar-name">TOPCLOCK <span> / SETTINGS</span></div>
+            <div class="titlebar-name">TOPCLOCK <span data-i18n-text="app.settingsBrand"> / SETTINGS</span></div>
             <div class="window-actions">
-                <button class="window-action" type="button" title="Minimize" aria-label="Minimize" @mousedown.stop @click="minimize()">
+                <button class="window-action" type="button" title="Minimize" aria-label="Minimize" @mousedown.stop @click="minimize()" data-i18n-title="app.minimize" data-i18n-aria-label="app.minimize">
                     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12"/></svg>
                 </button>
-                <button class="window-action close-action" type="button" title="Close settings" aria-label="Close settings" @mousedown.stop @click="close()">
+                <button class="window-action close-action" type="button" title="Close settings" aria-label="Close settings" @mousedown.stop @click="close()" data-i18n-title="app.closeSettings" data-i18n-aria-label="app.closeSettings">
                     <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg>
                 </button>
             </div>
         </header>
 
         <div class="settings-layout">
-            <aside class="sidebar" aria-label="Settings sections">
-                <div class="sidebar-kicker">WORKSPACE</div>
-                <nav class="tab-list" role="tablist" aria-orientation="vertical" aria-label="Settings tabs" @keydown="onTabKeydown($event)">
-                    <button type="button" id="tab-clock" class="tab-button" role="tab" aria-controls="panel-clock" :tabindex="tab === 'clock' ? 0 : -1" :class="{ active: tab === 'clock' }" :aria-selected="tab === 'clock'" @click="selectTab('clock')">
+            <aside class="sidebar" aria-label="Settings sections" data-i18n-aria-label="app.settingsSections">
+                <div class="sidebar-kicker" data-i18n-text="app.workspace">WORKSPACE</div>
+                <nav class="tab-list" role="tablist" aria-orientation="vertical" aria-label="Settings tabs" @keydown="onTabKeydown($event)" data-i18n-aria-label="app.settingsTabs">
+                    <button type="button" id="tab-clock" class="tab-button" role="tab" aria-controls="panel-clock" :tabindex="tab === 'clock' ? 0 : -1" :class="{ active: tab === 'clock' }" :aria-selected="tab === 'clock'" @click="selectTab('clock')" data-i18n-text="tab.clock">
                         <span class="tab-glyph">◷</span> Clock <span class="tab-arrow">›</span>
                     </button>
-                    <button type="button" id="tab-addons" class="tab-button" role="tab" aria-controls="panel-addons" :tabindex="tab === 'addons' ? 0 : -1" :class="{ active: tab === 'addons' }" :aria-selected="tab === 'addons'" @click="selectTab('addons')">
+                    <button type="button" id="tab-addons" class="tab-button" role="tab" aria-controls="panel-addons" :tabindex="tab === 'addons' ? 0 : -1" :class="{ active: tab === 'addons' }" :aria-selected="tab === 'addons'" @click="selectTab('addons')" data-i18n-text="tab.addons">
                         <span class="tab-glyph">＋</span> Add-ons <span class="tab-arrow">›</span>
                     </button>
-                    <button type="button" id="tab-shortcuts" class="tab-button" role="tab" aria-controls="panel-shortcuts" :tabindex="tab === 'shortcuts' ? 0 : -1" :class="{ active: tab === 'shortcuts' }" :aria-selected="tab === 'shortcuts'" @click="selectTab('shortcuts')">
+                    <button type="button" id="tab-shortcuts" class="tab-button" role="tab" aria-controls="panel-shortcuts" :tabindex="tab === 'shortcuts' ? 0 : -1" :class="{ active: tab === 'shortcuts' }" :aria-selected="tab === 'shortcuts'" @click="selectTab('shortcuts')" data-i18n-text="tab.shortcuts">
                         <span class="tab-glyph">⌨</span> Shortcuts <span class="tab-arrow">›</span>
                     </button>
-                    <button type="button" id="tab-general" class="tab-button" role="tab" aria-controls="panel-general" :tabindex="tab === 'general' ? 0 : -1" :class="{ active: tab === 'general' }" :aria-selected="tab === 'general'" :aria-label="t(updateAvailable ? 'tab.generalUpdate' : 'tab.general')" @click="selectTab('general')">
-                        <span class="tab-glyph">⚙</span> General <span class="tab-update-badge" x-show="updateAvailable" title="Update available" aria-hidden="true">!</span><span class="tab-arrow">›</span>
+                    <button type="button" id="tab-general" class="tab-button" role="tab" aria-controls="panel-general" :tabindex="tab === 'general' ? 0 : -1" :class="{ active: tab === 'general' }" :aria-selected="tab === 'general'" :aria-label="t(updateAvailable ? 'tab.generalUpdate' : 'tab.general')" @click="selectTab('general')" data-i18n-text="tab.general">
+                        <span class="tab-glyph">⚙</span> General <span class="tab-update-badge" x-show="updateAvailable" title="Update available" aria-hidden="true" data-i18n-title="tab.updateAvailable">!</span><span class="tab-arrow">›</span>
                     </button>
                 </nav>
-                <div class="sidebar-bottom"><span class="status-dot"></span> CLOCK RUNNING <span class="version" x-text="`v${appVersion}`">v0.0.0</span></div>
+                <div class="sidebar-bottom" data-i18n-text="app.clockRunning"><span class="status-dot"></span> CLOCK RUNNING <span class="version" x-text="`v${appVersion}`">v0.0.0</span></div>
             </aside>
 
             <main class="settings-content">
                 <section id="panel-clock" class="tab-panel" role="tabpanel" aria-labelledby="tab-clock" tabindex="0" x-show="tab === 'clock'" x-cloak>
-                    <div class="section-kicker">DISPLAY / 01</div>
-                    <h1>Make time yours<span class="yellow-period">.</span></h1>
-                    <p class="section-description">Changes appear on your desktop clock as you make them.</p>
+                    <div class="section-kicker" data-i18n-text="clock.section">DISPLAY / 01</div>
+                    <h1 data-i18n-text="clock.title">Make time yours<span class="yellow-period">.</span></h1>
+                    <p class="section-description" data-i18n-text="clock.description">Changes appear on your desktop clock as you make them.</p>
 
                     <div class="preview-card">
-                        <div class="preview-heading"><span>LIVE PREVIEW</span><span class="preview-live"><i></i> LIVE</span></div>
+                        <div class="preview-heading"><span data-i18n-text="clock.livePreview">LIVE PREVIEW</span><span class="preview-live" data-i18n-text="clock.live"><i></i> LIVE</span></div>
                         <div class="preview-time" :class="[`colon-${settings.colon_animation}`, `number-${settings.number_animation}`]" :style="previewStyle()">
                             <template x-for="(part, index) in previewParts" :key="index">
                                 <span :class="{ 'preview-colon': part.kind === 'separator', 'preview-number': ['h', 'm', 's'].includes(part.kind), 'preview-ampm': part.kind === 'ampm', 'number-changing': part.changing }" x-text="part.text"></span>
@@ -58,61 +58,61 @@
 
                     <div class="control-grid">
                         <label class="control-card color-card">
-                            <span class="control-title">Font color</span>
-                            <span class="control-description">The face of your clock</span>
-                            <span class="color-control"><input type="color" :value="settings.font_color" @input="settings.font_color = $event.target.value; save()" aria-label="Font color"><span x-text="settings.font_color.toUpperCase()"></span></span>
+                            <span class="control-title" data-i18n-text="clock.fontColor">Font color</span>
+                            <span class="control-description" data-i18n-text="clock.fontColorDescription">The face of your clock</span>
+                            <span class="color-control"><input type="color" :value="settings.font_color" @input="settings.font_color = $event.target.value; save()" aria-label="Font color" data-i18n-aria-label="clock.fontColor"><span x-text="settings.font_color.toUpperCase()"></span></span>
                         </label>
                         <label class="control-card color-card">
-                            <span class="control-title">Outline color</span>
-                            <span class="control-description">Contrast against your desktop</span>
-                            <span class="color-control"><input type="color" :value="settings.outline_color" @input="settings.outline_color = $event.target.value; save()" aria-label="Outline color"><span x-text="settings.outline_color.toUpperCase()"></span></span>
+                            <span class="control-title" data-i18n-text="clock.outlineColor">Outline color</span>
+                            <span class="control-description" data-i18n-text="clock.outlineColorDescription">Contrast against your desktop</span>
+                            <span class="color-control"><input type="color" :value="settings.outline_color" @input="settings.outline_color = $event.target.value; save()" aria-label="Outline color" data-i18n-aria-label="clock.outlineColor"><span x-text="settings.outline_color.toUpperCase()"></span></span>
                         </label>
                     </div>
 
                     <div class="setting-row size-row">
-                        <div><div class="control-title">Clock size</div><div class="control-description">Set the type size from 24 to 200 pixels</div></div>
-                        <div class="slider-area"><input class="size-range" type="range" min="24" max="200" :value="settings.font_size" :style="rangeStyle(settings.font_size, 24, 200)" @input="settings.font_size = Number($event.target.value); save()" aria-label="Clock size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
+                        <div><div class="control-title" data-i18n-text="clock.size">Clock size</div><div class="control-description" data-i18n-text="clock.sizeDescription">Set the type size from 24 to 200 pixels</div></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="24" max="200" :value="settings.font_size" :style="rangeStyle(settings.font_size, 24, 200)" @input="settings.font_size = Number($event.target.value); save()" aria-label="Clock size" data-i18n-aria-label="clock.size"><span class="size-value" x-text="`${settings.font_size} px`"></span></div>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Outline thickness</div><div class="control-description">From no outline to a bold 4 pixel edge</div></div>
-                        <div class="slider-area"><input class="size-range" type="range" min="0" max="4" step="0.5" :value="settings.outline_width" :style="rangeStyle(settings.outline_width, 0, 4)" @input="settings.outline_width = Number($event.target.value); save()" aria-label="Outline thickness"><span class="size-value" x-text="`${settings.outline_width} px`"></span></div>
+                        <div><div class="control-title" data-i18n-text="clock.outlineThickness">Outline thickness</div><div class="control-description" data-i18n-text="clock.outlineThicknessDescription">From no outline to a bold 4 pixel edge</div></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="0" max="4" step="0.5" :value="settings.outline_width" :style="rangeStyle(settings.outline_width, 0, 4)" @input="settings.outline_width = Number($event.target.value); save()" aria-label="Outline thickness" data-i18n-aria-label="clock.outlineThickness"><span class="size-value" x-text="`${settings.outline_width} px`"></span></div>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Font family</div><div class="control-description" x-text="fontListError ? t('clock.fontUnavailable') : fontsLoading ? t('clock.loadingFonts') : t('clock.installedFonts', { count: fontFamilies.length })"></div></div>
-                        <select class="select-control font-select" x-model="settings.font_family" @change="save()" :disabled="fontsLoading || fontListError" :title="settings.font_family" aria-label="Font family">
+                        <div><div class="control-title" data-i18n-text="clock.fontFamily">Font family</div><div class="control-description" x-text="fontListError ? t('clock.fontUnavailable') : fontsLoading ? t('clock.loadingFonts') : t('clock.installedFonts', { count: fontFamilies.length })"></div></div>
+                        <select class="select-control font-select" x-model="settings.font_family" @change="save()" :disabled="fontsLoading || fontListError" :title="settings.font_family" aria-label="Font family" data-i18n-aria-label="clock.fontFamily">
                             <template x-for="family in fontFamilies" :key="family"><option :value="family" x-text="family"></option></template>
                         </select>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Time layout</div><div class="control-description">Choose which parts appear</div></div>
-                        <select class="select-control" x-model="settings.time_layout" @change="save()" aria-label="Time layout"><template x-for="layout in layouts" :key="layout.value"><option :value="layout.value" x-text="layout.label"></option></template></select>
+                        <div><div class="control-title" data-i18n-text="clock.timeLayout">Time layout</div><div class="control-description" data-i18n-text="clock.timeLayoutDescription">Choose which parts appear</div></div>
+                        <select class="select-control" x-model="settings.time_layout" @change="save()" aria-label="Time layout" data-i18n-aria-label="clock.timeLayout"><template x-for="layout in layouts" :key="layout.value"><option :value="layout.value" x-text="layout.label"></option></template></select>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">24-hour time</div><div class="control-description">Use 18 instead of 06 in the evening</div></div>
-                        <button type="button" class="switch" role="switch" :aria-checked="settings.twenty_four_hour" :class="{ on: settings.twenty_four_hour }" aria-label="24-hour time" @click="settings.twenty_four_hour = !settings.twenty_four_hour; save()"><span></span></button>
+                        <div><div class="control-title" data-i18n-text="clock.twentyFour">24-hour time</div><div class="control-description" data-i18n-text="clock.twentyFourDescription">Use 18 instead of 06 in the evening</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.twenty_four_hour" :class="{ on: settings.twenty_four_hour }" aria-label="24-hour time" @click="settings.twenty_four_hour = !settings.twenty_four_hour; save()" data-i18n-aria-label="clock.twentyFour"><span></span></button>
                     </div>
                     <div class="setting-row" x-show="!settings.twenty_four_hour && settings.time_layout.includes('h')">
-                        <div><div class="control-title">Show AM / PM</div><div class="control-description">Label morning and evening in 12-hour time</div></div>
-                        <button type="button" class="switch" role="switch" :aria-checked="settings.show_ampm" :class="{ on: settings.show_ampm }" aria-label="Show AM or PM" @click="settings.show_ampm = !settings.show_ampm; save()"><span></span></button>
+                        <div><div class="control-title" data-i18n-text="clock.showAmPm">Show AM / PM</div><div class="control-description" data-i18n-text="clock.showAmPmDescription">Label morning and evening in 12-hour time</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.show_ampm" :class="{ on: settings.show_ampm }" aria-label="Show AM or PM" @click="settings.show_ampm = !settings.show_ampm; save()" data-i18n-aria-label="clock.showAmPmAccessible"><span></span></button>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Colon animation</div><div class="control-description">Motion for the separators</div></div>
-                        <select class="select-control" x-model="settings.colon_animation" @change="save()" aria-label="Colon animation"><template x-for="animation in colonAnimations" :key="animation.value"><option :value="animation.value" x-text="t(`animation.${animation.value}`)"></option></template></select>
+                        <div><div class="control-title" data-i18n-text="clock.colonAnimation">Colon animation</div><div class="control-description" data-i18n-text="clock.colonAnimationDescription">Motion for the separators</div></div>
+                        <select class="select-control" x-model="settings.colon_animation" @change="save()" aria-label="Colon animation" data-i18n-aria-label="clock.colonAnimation"><template x-for="animation in colonAnimations" :key="animation.value"><option :value="animation.value" x-text="t(`animation.${animation.value}`)"></option></template></select>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Number change animation</div><div class="control-description">Motion when a displayed number changes</div></div>
-                        <select class="select-control" x-model="settings.number_animation" @change="save()" aria-label="Number change animation"><template x-for="animation in numberAnimations" :key="animation.value"><option :value="animation.value" x-text="t(`animation.${animation.value}`)"></option></template></select>
+                        <div><div class="control-title" data-i18n-text="clock.numberAnimation">Number change animation</div><div class="control-description" data-i18n-text="clock.numberAnimationDescription">Motion when a displayed number changes</div></div>
+                        <select class="select-control" x-model="settings.number_animation" @change="save()" aria-label="Number change animation" data-i18n-aria-label="clock.numberAnimation"><template x-for="animation in numberAnimations" :key="animation.value"><option :value="animation.value" x-text="t(`animation.${animation.value}`)"></option></template></select>
                     </div>
                     <div class="setting-row">
-                        <div><div class="control-title">Clock position</div><div class="control-description">Center clocks currently shown on displays</div></div>
+                        <div><div class="control-title" data-i18n-text="clock.position">Clock position</div><div class="control-description" data-i18n-text="clock.positionDescription">Center clocks currently shown on displays</div></div>
                         <button type="button" class="action-button" :disabled="resettingPositions" @click="resetClockPositions()" x-text="t(resettingPositions ? 'clock.resetting' : 'clock.resetPositions')"></button>
                     </div>
                 </section>
 
                 <section id="panel-addons" class="tab-panel" role="tabpanel" aria-labelledby="tab-addons" tabindex="0" x-data="{ catalogOpen: null }" x-show="tab === 'addons'" x-cloak>
-                    <div class="section-kicker">EXTENSIONS / 02</div>
-                    <h1>More than time<span class="yellow-period">.</span></h1>
-                    <p class="section-description">Place useful details around your clock. Add-ons share one layout so they never overlap.</p>
+                    <div class="section-kicker" data-i18n-text="addons.section">EXTENSIONS / 02</div>
+                    <h1 data-i18n-text="addons.title">More than time<span class="yellow-period">.</span></h1>
+                    <p class="section-description" data-i18n-text="addons.description">Place useful details around your clock. Add-ons share one layout so they never overlap.</p>
                     <div class="addon-dashboard-heading"><div class="addon-section-title"><span x-text="t('addons.yours')"></span> <span class="addon-count" x-text="settings.addons.length"></span></div><button type="button" class="addon-add-shortcut" @click="catalogOpen = true; $nextTick(() => $refs.addonCatalogToggle.scrollIntoView({ behavior: 'smooth', block: 'start' }))" x-text="'+ ' + t('addons.addButton')" :aria-label="t('addons.add')"></button></div>
                     <p class="addon-empty" x-show="settings.addons.length === 0" x-text="t('addons.empty')"></p>
                     <p class="addon-pair-hint" x-show="settings.addons.length > 1" x-text="t('addons.pairHint')"></p>
@@ -147,7 +147,7 @@
                     </div>
                     </div>
                     <div class="addon-preview" x-data="{ expanded: false }">
-                        <button type="button" class="addon-section-toggle" :aria-expanded="expanded" aria-controls="addon-preview-content" @click="expanded = !expanded"><span x-text="t('addons.desktopLayout')"></span><span class="addon-section-toggle-end"><span class="preview-live"><i></i> LIVE</span><span class="addon-chevron" :class="{ expanded }">⌄</span></span></button>
+                        <button type="button" class="addon-section-toggle" :aria-expanded="expanded" aria-controls="addon-preview-content" @click="expanded = !expanded"><span x-text="t('addons.desktopLayout')"></span><span class="addon-section-toggle-end"><span class="preview-live" data-i18n-text="clock.live"><i></i> LIVE</span><span class="addon-chevron" :class="{ expanded }">⌄</span></span></button>
                         <div id="addon-preview-content" x-show="expanded" x-transition.opacity.duration.150ms x-cloak>
                             <div class="addon-preview-stack">
                                 <template x-for="row in previewLayout().filter((item) => item.placement === 'above')" :key="row.id">
@@ -190,18 +190,18 @@
                 </section>
 
                 <section id="panel-shortcuts" class="tab-panel" role="tabpanel" aria-labelledby="tab-shortcuts" tabindex="0" x-show="tab === 'shortcuts'" x-cloak>
-                    <div class="section-kicker">SHORTCUTS / 03</div>
-                    <h1>Control at your fingertips<span class="yellow-period">.</span></h1>
-                    <p class="section-description">Action shortcuts work system-wide when switched on. They start off; the interaction modifier stays active. Unavailable combinations are shown below.</p>
-                    <template x-if="hotkeyErrors.length"><div class="conflict-alert" role="alert"><div><div class="conflict-title">System-wide shortcut unavailable</div><template x-for="message in hotkeyErrors" :key="message"><div class="conflict-text" x-text="message"></div></template></div></div></template>
+                    <div class="section-kicker" data-i18n-text="shortcuts.section">SHORTCUTS / 03</div>
+                    <h1 data-i18n-text="shortcuts.title">Control at your fingertips<span class="yellow-period">.</span></h1>
+                    <p class="section-description" data-i18n-text="shortcuts.description">Action shortcuts work system-wide when switched on. They start off; the interaction modifier stays active. Unavailable combinations are shown below.</p>
+                    <template x-if="hotkeyErrors.length"><div class="conflict-alert" role="alert"><div><div class="conflict-title" data-i18n-text="shortcuts.unavailable">System-wide shortcut unavailable</div><template x-for="message in hotkeyErrors" :key="message"><div class="conflict-text" x-text="message"></div></template></div></div></template>
 
                     <!-- Conflict alert banner -->
                     <template x-if="hasAnyConflict">
                         <div class="conflict-alert" role="alert">
                             <span class="conflict-icon">⚠️</span>
                             <div>
-                                <div class="conflict-title">Shortcut conflict detected</div>
-                                <div class="conflict-text">Multiple actions share the same key combination. Conflicting shortcuts are highlighted below.</div>
+                                <div class="conflict-title" data-i18n-text="shortcuts.conflict">Shortcut conflict detected</div>
+                                <div class="conflict-text" data-i18n-text="shortcuts.conflictDescription">Multiple actions share the same key combination. Conflicting shortcuts are highlighted below.</div>
                             </div>
                         </div>
                     </template>
@@ -217,11 +217,11 @@
                             </div>
                             <div class="shortcut-row" x-show="group.id === 'core'">
                                 <div class="shortcut-info">
-                                    <div class="shortcut-name">Interaction Modifier</div>
-                                    <div class="shortcut-desc">Hold this modifier to move or right-click the transparent clock</div>
+                                    <div class="shortcut-name" data-i18n-text="shortcuts.modifier">Interaction Modifier</div>
+                                    <div class="shortcut-desc" data-i18n-text="shortcuts.modifierDescription">Hold this modifier to move or right-click the transparent clock</div>
                                 </div>
                                 <div class="shortcut-action">
-                                    <select class="select-control modifier-select" :value="settings.shortcuts.interaction_modifier" @change="setInteractionModifier($event.target.value); $event.target.value = settings.shortcuts.interaction_modifier" aria-label="Interaction Modifier">
+                                    <select class="select-control modifier-select" :value="settings.shortcuts.interaction_modifier" @change="setInteractionModifier($event.target.value); $event.target.value = settings.shortcuts.interaction_modifier" aria-label="Interaction Modifier" data-i18n-aria-label="shortcuts.modifier">
                                         <option value="Ctrl">Ctrl</option>
                                         <option value="Alt">Alt</option>
                                         <option value="Shift">Shift</option>
@@ -256,7 +256,7 @@
                                         </div>
                                         <div class="shortcut-buttons">
                                             <button type="button" class="action-button record-btn" :class="{ active: recordingAction === action.key }" :disabled="(action.requiresTimer && !timerAddonEnabled) || settings.shortcuts[`${action.key}_enabled`]" :title="t('shortcuts.turnOffToChange')" @click="recordingAction === action.key ? stopRecording() : startRecording(action.key)" x-text="t(recordingAction === action.key ? 'addons.cancel' : 'shortcuts.change')"></button>
-                                            <button type="button" class="action-button clear-btn" :title="t('shortcuts.turnOffToClear')" :disabled="(action.requiresTimer && !timerAddonEnabled) || settings.shortcuts[`${action.key}_enabled`] || !settings.shortcuts[action.key]" @click="clearShortcut(action.key)">Clear</button>
+                                            <button type="button" class="action-button clear-btn" :title="t('shortcuts.turnOffToClear')" :disabled="(action.requiresTimer && !timerAddonEnabled) || settings.shortcuts[`${action.key}_enabled`] || !settings.shortcuts[action.key]" @click="clearShortcut(action.key)" data-i18n-text="shortcuts.clear">Clear</button>
                                         </div>
                                     </div>
                                 </div>
@@ -267,20 +267,20 @@
                     <!-- Reset all shortcuts footer -->
                     <div class="shortcut-footer">
                         <button type="button" class="action-button reset-shortcuts-btn" @click="resetAllShortcuts()">
-                            <span>Reset All Shortcuts to Default</span>
+                            <span data-i18n-text="shortcuts.resetAll">Reset All Shortcuts to Default</span>
                         </button>
                     </div>
                 </section>
 
                 <section id="panel-general" class="tab-panel" role="tabpanel" aria-labelledby="tab-general" tabindex="0" x-show="tab === 'general'" x-cloak>
-                    <div class="section-kicker">PREFERENCES / 04</div>
-                    <h1>Your clock, your way<span class="yellow-period">.</span></h1>
-                    <p class="section-description">Choose how TopClock behaves on your PC.</p>
+                    <div class="section-kicker" data-i18n-text="general.section">PREFERENCES / 04</div>
+                    <h1 data-i18n-text="general.title">Your clock, your way<span class="yellow-period">.</span></h1>
+                    <p class="section-description" data-i18n-text="general.description">Choose how TopClock behaves on your PC.</p>
                     <div class="general-panel">
                         <section class="display-section" aria-labelledby="display-section-title">
                             <div class="display-section-heading">
-                                <h2 id="display-section-title">Clocks on displays</h2>
-                                <p>Choose where TopClock appears. Each display remembers its clock position.</p>
+                                <h2 id="display-section-title" data-i18n-text="general.displays">Clocks on displays</h2>
+                                <p data-i18n-text="general.displaysDescription">Choose where TopClock appears. Each display remembers its clock position.</p>
                             </div>
                             <div class="display-list">
                                 <template x-for="display in displays" :key="display.id">
@@ -290,34 +290,34 @@
                                     </div>
                                 </template>
                             </div>
-                            <p class="display-section-note">Appearance and add-ons are shared across displays.</p>
+                            <p class="display-section-note" data-i18n-text="general.sharedAppearance">Appearance and add-ons are shared across displays.</p>
                         </section>
-                        <h2 class="general-group-heading">App behavior</h2>
+                        <h2 class="general-group-heading" data-i18n-text="general.appBehavior">App behavior</h2>
                         <div class="setting-row">
                             <div><div class="control-title" x-text="t('palette.title')"></div><div class="control-description" x-text="t('palette.description')"></div></div>
                             <button type="button" class="switch" role="switch" :aria-checked="settings.palette_enabled" :class="{ on: settings.palette_enabled }" :aria-label="t('palette.title')" @click="togglePalette()"><span></span></button>
                         </div>
                         <div class="setting-row">
-                            <div><div class="control-title">Language</div><div class="control-description">Choose the language for TopClock and the date weekday.</div></div>
-                            <select class="select-control" x-model="settings.language" @change="save()" aria-label="Language">
+                            <div><div class="control-title" data-i18n-text="general.language">Language</div><div class="control-description" data-i18n-text="general.languageDescription">Choose the language for TopClock and the date weekday.</div></div>
+                            <select class="select-control" x-model="settings.language" @change="save()" aria-label="Language" data-i18n-aria-label="general.language">
                                 <template x-for="option in languageOptions" :key="option.value"><option :value="option.value" x-text="option.value === 'system' ? t('general.system') : option.name"></option></template>
                             </select>
                         </div>
                         <div class="setting-row">
-                            <div><div class="control-title">Launch when I sign in</div><div class="control-description">Start the clock with Windows</div></div>
-                            <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()"><span></span></button>
+                            <div><div class="control-title" data-i18n-text="general.launch">Launch when I sign in</div><div class="control-description" data-i18n-text="general.launchDescription">Start the clock with Windows</div></div>
+                            <button type="button" class="switch" role="switch" :aria-checked="startupEnabled" :class="{ on: startupEnabled }" aria-label="Launch when I sign in" @click="toggleStartup()" data-i18n-aria-label="general.launch"><span></span></button>
                         </div>
                         <div class="setting-row" x-show="!isPackaged">
-                            <div><div class="control-title">Automatically check for updates</div><div class="control-description">Check GitHub Releases when TopClock starts</div></div>
-                            <button type="button" class="switch" role="switch" :aria-checked="settings.auto_check_updates" :class="{ on: settings.auto_check_updates }" aria-label="Automatically check for updates" @click="settings.auto_check_updates = !settings.auto_check_updates; save()"><span></span></button>
+                            <div><div class="control-title" data-i18n-text="general.autoUpdates">Automatically check for updates</div><div class="control-description" data-i18n-text="general.autoUpdatesDescription">Check GitHub Releases when TopClock starts</div></div>
+                            <button type="button" class="switch" role="switch" :aria-checked="settings.auto_check_updates" :class="{ on: settings.auto_check_updates }" aria-label="Automatically check for updates" @click="settings.auto_check_updates = !settings.auto_check_updates; save()" data-i18n-aria-label="general.autoUpdates"><span></span></button>
                         </div>
                         <div class="setting-row">
-                            <div><div class="control-title">Settings files</div><div class="control-description">Open the folder containing settings.json</div></div>
-                            <button type="button" class="action-button" @click="openSettingsFolder()">Open folder</button>
+                            <div><div class="control-title" data-i18n-text="general.settingsFiles">Settings files</div><div class="control-description" data-i18n-text="general.settingsFilesDescription">Open the folder containing settings.json</div></div>
+                            <button type="button" class="action-button" @click="openSettingsFolder()" data-i18n-text="general.openFolder">Open folder</button>
                         </div>
                         <div class="setting-row update-row">
                             <div>
-                                <div class="control-title">Software Updates</div>
+                                <div class="control-title" data-i18n-text="general.softwareUpdates">Software Updates</div>
                                 <div class="control-description" role="status" aria-live="polite" x-text="updateStatusText"></div>
                             </div>
                             <div class="update-actions">
@@ -334,12 +334,12 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tip-card"><span>TIP</span> <span class="tip-copy" x-text="t('general.tipText', { modifier: settings.shortcuts.interaction_modifier })"></span></div>
+                    <div class="tip-card"><span data-i18n-text="general.tip">TIP</span> <span class="tip-copy" x-text="t('general.tipText', { modifier: settings.shortcuts.interaction_modifier })"></span></div>
                 </section>
                 <div class="error-toast" x-show="error" x-transition.opacity x-text="error" x-cloak role="alert"></div>
             </main>
         </div>
     </div>
-    <script type="module" src="/src/settings.js"></script>
+    <script type="module" src="/src/settings/settings.js"></script>
 </body>
 </html>
