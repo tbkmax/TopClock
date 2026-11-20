@@ -1,5 +1,9 @@
 # Tauri package changelog
 
+### 2026-11-19 - Carry Clock visibility preferences
+
+- The packaged app accepts three new optional Clock settings fields for baseline transparency and hourly/half-hourly display. No Tauri window or capability definition changed.
+
 ### 2026-11-19 - Upgrade Counter schema for history-clearing Reset
 
 - Existing `topclock.db` files migrate from schema v1 to v2 automatically. Reset now deletes all Counter run and event rows while keeping only the zero state and a latest-Reset retry marker.

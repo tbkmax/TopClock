@@ -1,5 +1,21 @@
 # Frontend workflows
 
+## Clock content visibility
+
+```mermaid
+sequenceDiagram
+    participant Tick as Clock tick
+    participant App as main.js
+    participant Policy as clockContentOpacity
+    participant Container as Clock container
+    Tick->>App: Local time every 200 ms
+    App->>Policy: Settings, time, proximity, modifier
+    Policy-->>App: Content opacity
+    App->>Container: Apply opacity to digits and add-ons
+```
+
+The 200 ms clock tick updates the local minute used by the pure policy. Modifier reveal takes priority, then the optional one-minute schedule, then baseline transparency and proximity fade. The separate menu and palette windows do not use this opacity; see [native input workflow](../../src-tauri/src/input/doc/workflow_diagram.md) for their input monitoring.
+
 The Settings Counter Reset modal warns that Confirm clears the balance and history. Cancel sends no action. On Confirm, the existing add-on host sends the Reset command; the native database deletes all Counter event and run rows before broadcasting the zeroed state.
 
 The running Counter display uses a local monotonic receipt anchor attached when [state.js](../addons/state.js) receives a native snapshot. [counter.js](../addons/builtins/counter.js) advances that snapshot between native events; the native database remains authoritative for Stop and direction changes. The frontend sends a UUID with each Counter action so a retried action can be deduplicated.

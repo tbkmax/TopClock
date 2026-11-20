@@ -78,6 +78,10 @@
                         <div class="slider-area"><input class="size-range" type="range" min="0" max="4" step="0.5" :value="settings.outline_width" :style="rangeStyle(settings.outline_width, 0, 4)" @input="settings.outline_width = Number($event.target.value); save()" aria-label="Outline thickness" data-i18n-aria-label="clock.outlineThickness"><span class="size-value" x-text="`${settings.outline_width} px`"></span></div>
                     </div>
                     <div class="setting-row">
+                        <div><div class="control-title" data-i18n-text="clock.defaultTransparency">Default transparency</div><div class="control-description" data-i18n-text="clock.defaultTransparencyDescription">Clock and add-ons when the pointer is away; hold the Interaction Modifier to reveal fully</div></div>
+                        <div class="slider-area"><input class="size-range" type="range" min="0" max="100" step="1" :value="settings.default_transparency_percent" :style="rangeStyle(settings.default_transparency_percent, 0, 100)" @input="settings.default_transparency_percent = Number($event.target.value); save()" aria-label="Default transparency" data-i18n-aria-label="clock.defaultTransparency"><span class="size-value" x-text="`${settings.default_transparency_percent}%`"></span></div>
+                    </div>
+                    <div class="setting-row">
                         <div><div class="control-title" data-i18n-text="clock.fontFamily">Font family</div><div class="control-description" x-text="fontListError ? t('clock.fontUnavailable') : fontsLoading ? t('clock.loadingFonts') : t('clock.installedFonts', { count: fontFamilies.length })"></div></div>
                         <select class="select-control font-select" x-model="settings.font_family" @change="save()" :disabled="fontsLoading || fontListError" :title="settings.font_family" aria-label="Font family" data-i18n-aria-label="clock.fontFamily">
                             <template x-for="family in fontFamilies" :key="family"><option :value="family" x-text="family"></option></template>
@@ -102,6 +106,14 @@
                     <div class="setting-row">
                         <div><div class="control-title" data-i18n-text="clock.numberAnimation">Number change animation</div><div class="control-description" data-i18n-text="clock.numberAnimationDescription">Motion when a displayed number changes</div></div>
                         <select class="select-control" x-model="settings.number_animation" @change="save()" aria-label="Number change animation" data-i18n-aria-label="clock.numberAnimation"><template x-for="animation in numberAnimations" :key="animation.value"><option :value="animation.value" x-text="t(`animation.${animation.value}`)"></option></template></select>
+                    </div>
+                    <div class="setting-row">
+                        <div><div class="control-title" data-i18n-text="clock.showOnlyOnHour">Show only on the hour</div><div class="control-description" data-i18n-text="clock.showOnlyOnHourDescription">Show the clock and add-ons for the first minute of each hour</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.show_only_on_hour" :class="{ on: settings.show_only_on_hour }" aria-label="Show only on the hour" @click="settings.show_only_on_hour = !settings.show_only_on_hour; save()" data-i18n-aria-label="clock.showOnlyOnHour"><span></span></button>
+                    </div>
+                    <div class="setting-row" x-show="settings.show_only_on_hour" x-cloak>
+                        <div><div class="control-title" data-i18n-text="clock.showOnHalfHour">Also show on the half hour</div><div class="control-description" data-i18n-text="clock.showOnHalfHourDescription">Show for the first minute after :30 too</div></div>
+                        <button type="button" class="switch" role="switch" :aria-checked="settings.show_on_half_hour" :class="{ on: settings.show_on_half_hour }" aria-label="Also show on the half hour" @click="settings.show_on_half_hour = !settings.show_on_half_hour; save()" data-i18n-aria-label="clock.showOnHalfHour"><span></span></button>
                     </div>
                     <div class="setting-row">
                         <div><div class="control-title" data-i18n-text="clock.position">Clock position</div><div class="control-description" data-i18n-text="clock.positionDescription">Center clocks currently shown on displays</div></div>

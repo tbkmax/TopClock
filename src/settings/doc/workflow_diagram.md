@@ -1,5 +1,9 @@
 # Settings workflows
 
+## Clock visibility controls
+
+The transparency slider and two schedule switches edit the Settings draft, broadcast `clock-settings-preview`, and enter the existing debounced `update_settings` queue. Rust validates and saves the three fields, then emits `clock-settings-changed`; each clock reevaluates opacity on its next tick. The preview applies baseline transparency only so appearance remains editable while the desktop schedule is hidden. Save failure follows the rollback flow below.
+
 The Settings component composes separate save, event, recovery, and preview helpers. The diagram describes module relationships; these names are JavaScript functions and Alpine state, not ES classes.
 
 ```mermaid

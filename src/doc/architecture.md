@@ -1,5 +1,7 @@
 # Frontend architecture
 
+The desktop clock uses [clock-visibility.js](../clock-visibility.js) as one content-opacity policy for its digits and add-ons. [main.js](../main.js) supplies local time, proximity, modifier state, and shared saved settings; [index.html](../../index.html) applies the result to the clock container without removing it from layout. Baseline transparency defaults to 0%; the optional schedule shows the container during minute 00 and optionally minute 30 of each local hour. The Interaction Modifier reveals it at full opacity. Menu and palette are separate windows, so they remain available. Native click-through, window reconciliation, and saved position are unchanged.
+
 Settings' existing Counter Reset confirmation now uses [bundled translations](../i18n/messages.js) that explain history deletion. The frontend still dispatches the same confirmed action; the native [Counter database](../../src-tauri/src/addons/counter_db.rs) performs the deletion.
 
 Counter snapshots still use the existing native command and `counter-state-changed` event. [add-on state](../addons/state.js) attaches a webview-local `performance.now()` receipt anchor to a running snapshot; [Counter formatting](../addons/builtins/counter.js) uses it for live elapsed display so a later wall-clock correction does not change the displayed duration. The native [Counter database](../../src-tauri/src/addons/counter_db.rs) owns accepted intervals and final balances. No frontend history graph is included yet.

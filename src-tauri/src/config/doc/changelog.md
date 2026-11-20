@@ -2,6 +2,10 @@
 
 ### Changed
 
+#### 2026-11-19 - Save Clock visibility preferences
+
+- Added defaults and percentage validation for baseline transparency and the hourly and half-hourly display flags. Older settings files remain compatible; no migration is needed.
+
 #### 2026-11-19 - Coordinate Counter disable with database state
 
 - A settings change that disables a running Counter now stages a SQLite Stop, replaces JSON, then commits the Stop. JSON writes use a synced temporary file. The old `counter_session` field is still read for first import but is no longer written. Existing settings migrate automatically; an older binary cannot read the new Counter balance after downgrade.

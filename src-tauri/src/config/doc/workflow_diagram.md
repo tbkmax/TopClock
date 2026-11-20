@@ -1,5 +1,7 @@
 # Configuration workflow
 
+The Clock tab sends the three visibility fields through the existing `update_settings` command. Validation checks the percentage, persistence writes them with the other flattened `ClockSettings` fields, and the normal settings event updates all clock webviews. Missing fields on an older JSON file default to 0%, false, and false. There is no timer or native window state to reconcile for these preferences.
+
 The model is durable; `ClockState` owns its in-process copy. See the [parent workflow](../../doc/workflow_diagram.md) for application startup and other command paths.
 
 ## Ownership

@@ -1,5 +1,7 @@
 # Rust application backlog
 
+The [frontend Clock visibility acceptance](../../../src/doc/backlog.md#clock-visibility-live-acceptance) covers modifier reveal, click-through recovery, menu and palette actions, multi-display behavior, tray controls, and position restore in a running Windows app.
+
 - [ ] **Verify destructive Reset live:** In a disposable profile, count up and down, confirm Reset in Settings, and inspect `topclock.db` to ensure both history tables are empty and Counter shows zero and stopped across all webviews. Cancel Reset and force a database failure to confirm history remains. Rust tests cover transaction behavior and the v1-to-v2 schema upgrade; live WebView and file-failure behavior remain unverified.
 
 - [ ] **Verify database migration in live Windows builds:** Use disposable direct and packaged profiles to test old stopped/running Counter JSON, restart while counting, normal Quit, failed saves, and readback across clock and Settings windows. Confirm `topclock.db` is created in each actual app config directory and state is shared across monitors. Automated migration and transaction tests pass; packaged path and physical shutdown timing remain unverified.

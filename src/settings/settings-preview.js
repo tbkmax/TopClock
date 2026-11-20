@@ -67,6 +67,7 @@ export const createPreviewMethods = (getPreviewClock) => ({
 
     previewStyle() {
         return {
+            opacity: 1 - this.settings.default_transparency_percent / 100,
             color: this.settings.font_color,
             fontSize: `${Math.min(this.settings.font_size, 64)}px`,
             fontFamily: clockFontStack(this.settings.font_family),

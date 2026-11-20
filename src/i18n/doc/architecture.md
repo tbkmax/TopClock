@@ -1,5 +1,7 @@
 # Frontend localization architecture
 
+The Clock tab's baseline transparency and hourly/half-hourly visibility controls have stable keys in [messages.js](../messages.js) for all four bundled languages. The visibility policy itself is language-independent; see the [parent frontend architecture](../../doc/architecture.md).
+
 This folder owns bundled frontend text for the clock, Settings, menu, palette, and add-on views. See the [parent frontend architecture](../../doc/architecture.md) for those pages and the separate Rust tray translations.
 
 [messages.js](../messages.js) stores English, Simplified Chinese, Traditional Chinese, and Japanese strings together by stable key. [index.js](../index.js) resolves the saved or system language, interpolates `{variables}`, formats localized weekdays, and applies explicit `data-i18n-*` keys to static markup. Reactive Alpine labels call `translate` through each page's `t()` method. The static translator handles text, title, aria-label, and placeholder attributes in initial markup and later Alpine template clones. It preserves the original text node for language switching and does not replace child elements.

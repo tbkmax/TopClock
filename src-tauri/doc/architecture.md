@@ -1,5 +1,7 @@
 # Tauri package architecture
 
+The package keeps its existing clock, menu, Settings, and palette windows. New shared visibility preferences are saved by [native configuration](../src/config/doc/architecture.md) and applied only to the [frontend clock content](../../src/doc/architecture.md); no window configuration or capability changes are needed.
+
 The Counter schema now supports a v1-to-v2 migration for destructive Reset. The database retains its singleton state row and latest Reset ID, while Reset deletes all Counter event and run rows. This schema upgrade is handled locally in [counter_db.rs](../src/addons/counter_db.rs).
 
 The [Cargo manifest](../Cargo.toml) bundles SQLite through `rusqlite` for a local `topclock.db` beside `settings.json`. [counter_db.rs](../src/addons/counter_db.rs) owns its schema and first-run import; [config/store.rs](../src/config/store.rs) still owns JSON settings, Timer/Progress sessions, and display positions. The database has no network or shared-file role. Older binaries cannot read Counter state after it moves into SQLite.

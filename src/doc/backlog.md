@@ -1,5 +1,16 @@
 # Frontend backlog
 
+## Clock visibility live acceptance
+
+- [ ] **Title:** Verify Clock visibility in running Windows builds.
+  **Problem or opportunity:** Automated policy tests and the Vite build cannot show real WebView opacity, native input interaction, or a real minute boundary.
+  **Desired outcome:** The clock and add-ons follow the saved schedule and transparency without interrupting access to controls.
+  **Scope:** [Clock](../main.js), [Settings](../../settings.html), [visibility policy](../clock-visibility.js), and [native configuration](../../src-tauri/src/config/doc/architecture.md).
+  **Acceptance criteria:** Check 0%, partial, and 100% baseline transparency; proximity fade; full modifier reveal; a whole minute at :00 and optional :30; multi-display consistency; menu, palette, tray, drag, click-through, persistence, failed-save recovery, and position restore. The styling preview remains available while the desktop clock is scheduled off. Verify a rejected percentage retains the previous settings.
+  **Dependencies and risks:** Use a disposable settings profile for destructive persistence checks. Preserve the native click-through rule and existing display preferences.
+  **Verification:** Run `npm run tauri:dev`, observe both minute boundaries, restart, and repeat the relevant controls in an installed package.
+  **Priority:** High before release because hidden content and input behavior interact in a live Windows WebView.
+
 - [ ] In the live Windows Settings modal, verify Counter Reset's longer warning fits in all four languages and that Cancel preserves history while Confirm clears it and refreshes clock/preview across displays. Native and frontend automated checks pass; visual and cross-window behavior remain unverified.
 
 - [ ] **Check Counter database display live:** In a disposable Windows profile, compare clock and Settings preview during Count up/down, Stop, restart, direction switch, and an OS clock adjustment. Verify every clock webview advances smoothly and the accepted Stop does not jump visibly. Include tray/menu, Ctrl interactions, position restore, and a second display. Automated formatter tests cover the monotonic anchor; real WebView timing and sleep behavior remain to be checked.

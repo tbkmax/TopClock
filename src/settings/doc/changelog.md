@@ -2,6 +2,10 @@
 
 ### Changed
 
+#### 2026-11-19 - Add Clock visibility controls
+
+- Added baseline transparency, hourly display, and optional half-hour display controls to the Clock tab. The preview shows the chosen baseline transparency; the desktop schedule does not blank the styling preview. Existing save and failed-save recovery paths are reused.
+
 #### 2026-11-19 - Warn before destructive Counter Reset
 
 - The existing confirmation modal now states that Reset deletes the saved balance and all Counter history. Cancel and Confirm controls are unchanged; no settings migration is needed.

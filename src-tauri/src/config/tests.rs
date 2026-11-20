@@ -4,6 +4,31 @@ use crate::addons::{CounterSession, TimerSession};
 use std::collections::HashMap;
 
 #[test]
+fn clock_visibility_preferences_default_and_validate() {
+    let mut settings = ClockSettings::default();
+    assert_eq!(settings.default_transparency_percent, 0);
+    assert!(!settings.show_only_on_hour);
+    assert!(!settings.show_on_half_hour);
+    settings.default_transparency_percent = 100;
+    settings.show_only_on_hour = true;
+    settings.show_on_half_hour = true;
+    assert!(valid_settings(&settings));
+    let mut raw = serde_json::to_value(&settings).unwrap();
+    let round_trip: ClockSettings = serde_json::from_value(raw.clone()).unwrap();
+    assert_eq!(round_trip.default_transparency_percent, 100);
+    assert!(round_trip.show_only_on_hour && round_trip.show_on_half_hour);
+    let object = raw.as_object_mut().unwrap();
+    object.remove("default_transparency_percent");
+    object.remove("show_only_on_hour");
+    object.remove("show_on_half_hour");
+    let legacy: ClockSettings = serde_json::from_value(raw).unwrap();
+    assert_eq!(legacy.default_transparency_percent, 0);
+    assert!(!legacy.show_only_on_hour && !legacy.show_on_half_hour);
+    settings.default_transparency_percent = 101;
+    assert!(!valid_settings(&settings));
+}
+
+#[test]
 fn counter_halo_preference_is_shared_and_legacy_safe() {
     let mut settings = ClockSettings::default();
     let mut counter = crate::addons::legacy_timer();

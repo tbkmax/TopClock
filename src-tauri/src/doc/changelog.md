@@ -1,5 +1,9 @@
 # Rust application changelog
 
+### 2026-11-19 - Persist frontend Clock visibility choices
+
+- Rust now defaults, validates, saves, and broadcasts the new transparency and display schedule fields through the existing Settings path. Native window visibility, input monitoring, and click-through are unchanged.
+
 ### 2026-11-19 - Make Counter Reset erase its history
 
 - Confirmed Reset now removes every Counter run and transition event, zeros the balance, and stops counting in one database transaction. A schema upgrade adds a small retry marker to the required singleton state row. Existing database files upgrade automatically; no user action is required.

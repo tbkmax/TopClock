@@ -2,6 +2,10 @@
 
 ### Changed
 
+#### 2026-11-19 - Translate Clock visibility controls
+
+- Added bundled English, Simplified Chinese, Traditional Chinese, and Japanese labels and descriptions for baseline transparency and the hourly and half-hourly display switches.
+
 #### 2026-11-19 - Explain Counter history deletion in Reset confirmation
 
 - The Counter Reset warning now says the saved balance and all Counter history will be cleared in English, Simplified Chinese, Traditional Chinese, and Japanese. No saved language field changes.

@@ -141,11 +141,6 @@ html, body {
     cursor: pointer;
 }
 
-/* When mouse gets close to the clock without Ctrl held, fade out so user sees what is underneath */
-.clock-container.faded {
-    opacity: 0.08;
-}
-
 .clock-container:active {
     transform: scale(0.98);
 }

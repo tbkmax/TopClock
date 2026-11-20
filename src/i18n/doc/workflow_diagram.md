@@ -1,5 +1,7 @@
 # Frontend localization workflow
 
+The new Clock tab labels and accessibility names resolve through the existing `data-i18n-text` and `data-i18n-aria-label` paths. All four language rows use the same keys; no translation is needed for the saved numeric percentage or boolean schedule fields.
+
 The modules below are JavaScript functions and data, not ES classes. The class diagram shows their ownership and use.
 
 ```mermaid

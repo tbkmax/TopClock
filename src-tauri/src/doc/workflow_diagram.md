@@ -1,5 +1,7 @@
 # Rust workflows
 
+Clock visibility preferences follow the [configuration save workflow](../config/doc/workflow_diagram.md). The native clock monitor continues to emit modifier and proximity events for visible windows; the frontend applies the saved content opacity. Neither menu nor palette window uses the clock container opacity.
+
 Counter Reset is a destructive database transaction in [counter_db.rs](../addons/counter_db.rs): it deletes all Counter events and runs, zeros the singleton state, and commits before `counter-state-changed`. Confirmation is required by [counter.rs](../addons/counter.rs) and the database action validator; rejection or failed commit leaves the old data intact.
 
 The Rust crate is organized into [configuration](../config/doc/workflow_diagram.md), [displays](../displays/doc/workflow_diagram.md), [input](../input/doc/workflow_diagram.md), [windows](../windows/doc/workflow_diagram.md), [platform services](../platform/doc/workflow_diagram.md), and [add-ons](../addons/doc/workflow_diagram.md). Each folder documents its own state and command flow; [lib.rs](../lib.rs) registers those commands and starts the runtime monitors.

@@ -1,5 +1,7 @@
 # Tauri package workflow
 
+The Clock tab broadcasts transparency and display schedule drafts through the existing settings event path. Rust persists accepted values; each clock webview updates content opacity while its native window remains available to the existing input and display monitors. Menu and palette window lifecycles remain separate.
+
 An existing v1 Counter database is upgraded to v2 before webviews start. Reset then clears Counter history transactionally while retaining the singleton zero state and its latest retry marker.
 
 Startup opens [the Counter database](../src/addons/counter_db.rs) after loading legacy settings and before building webviews. A saved JSON Counter balance is imported only when the database is first created. An abandoned run is closed at its durable checkpoint; no closed-process time is counted.

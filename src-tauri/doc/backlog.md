@@ -1,5 +1,7 @@
 # Tauri package backlog
 
+The [frontend Clock visibility acceptance](../../src/doc/backlog.md#clock-visibility-live-acceptance) covers running direct and installed package checks, including restart, tray access while the content is hidden, and click-through.
+
 - [ ] Verify the v1-to-v2 Counter database migration in a disposable packaged profile and confirm Reset leaves both history tables empty after restart. Unit migration tests pass; packaged AppData and downgrade behavior still need live verification.
 
 - [ ] **Check packaged Counter storage:** In a disposable direct build and Store-identity package, locate the app config directory and verify `topclock.db` creation, first-run import, restart recovery, and uninstall behavior. The bundled SQLite build and Rust tests pass locally, but packaged AppData redirection and runtime behavior still need a live check.

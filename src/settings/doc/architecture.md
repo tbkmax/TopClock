@@ -1,5 +1,7 @@
 # Settings page architecture
 
+The Clock tab in [settings.html](../../../settings.html) edits `default_transparency_percent`, `show_only_on_hour`, and `show_on_half_hour` through the existing preview and save queue in [settings.js](../settings.js). The half-hour control appears when hourly display is enabled; its saved choice remains available if hourly display is switched off and on again. [settings-preview.js](../settings-preview.js) previews baseline transparency while keeping the styling preview visible outside scheduled minutes. The desktop clock uses the [shared visibility policy](../../doc/architecture.md).
+
 This folder owns the Settings webview's Alpine component. [settings.js](../settings.js) is the page composition root used by [settings.html](../../../settings.html). The [parent frontend architecture](../../doc/architecture.md) describes the clock, menu, palette, and add-on boundaries.
 
 | Component | Responsibility |

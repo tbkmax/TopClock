@@ -127,6 +127,12 @@ pub(crate) struct ClockSettings {
     pub(crate) twenty_four_hour: bool,
     pub(crate) show_ampm: bool,
     pub(crate) time_layout: String,
+    #[serde(default)]
+    pub(crate) default_transparency_percent: u8,
+    #[serde(default)]
+    pub(crate) show_only_on_hour: bool,
+    #[serde(default)]
+    pub(crate) show_on_half_hour: bool,
     #[serde(default = "default_auto_check_updates")]
     pub(crate) auto_check_updates: bool,
     #[serde(default)]
@@ -177,6 +183,9 @@ impl Default for ClockSettings {
             twenty_four_hour: true,
             show_ampm: true,
             time_layout: "hms".into(),
+            default_transparency_percent: 0,
+            show_only_on_hour: false,
+            show_on_half_hour: false,
             auto_check_updates: true,
             palette_enabled: false,
             shortcuts: ShortcutSettings::default(),

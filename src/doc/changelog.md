@@ -1,5 +1,9 @@
 # Frontend changelog
 
+### 2026-11-19 - Add clock visibility policy
+
+- Clock and add-ons now share baseline transparency and an optional one-minute hourly or half-hourly display schedule. Holding the Interaction Modifier reveals them fully; proximity fade remains available. Menu, palette, native window lifecycle, and click-through are unchanged.
+
 ### 2026-11-19 - Explain destructive Counter Reset
 
 - The Settings confirmation now warns in all four supported languages that Reset removes the saved balance and Counter history. The action remains Settings-only and still requires confirmation.

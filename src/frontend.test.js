@@ -10,9 +10,29 @@ import { DEFAULT_SHORTCUTS, shortcutConflict, supportedGlobalKey } from './setti
 import { nextSettingsTab } from './settings/settings-tabs.js';
 import { timeParts } from './time-format.js';
 import { clockWindowLayout } from './clock-layout.js';
+import { clockContentOpacity } from './clock-visibility.js';
 import { createSettingsPreview } from './settings/settings-preview.js';
 import { subscribeSettingsEvents } from './settings/settings-events.js';
 import { readAddonSessions } from './settings/settings-recovery.js';
+
+test('clock visibility combines the schedule, transparency, proximity, and modifier', () => {
+    const settings = { default_transparency_percent: 40, show_only_on_hour: true, show_on_half_hour: false };
+    const at = (minute, second = 0) => new Date(2026, 0, 1, 12, minute, second);
+    assert.equal(clockContentOpacity(settings, at(0), false, false), 0.6);
+    assert.equal(clockContentOpacity(settings, at(0, 59), true, false), 0.08);
+    assert.equal(clockContentOpacity(settings, at(1), false, false), 0);
+    assert.equal(clockContentOpacity(settings, at(30), false, false), 0);
+    settings.show_on_half_hour = true;
+    assert.equal(clockContentOpacity(settings, at(30, 59), false, false), 0.6);
+    assert.equal(clockContentOpacity(settings, at(31), false, false), 0);
+    assert.equal(clockContentOpacity(settings, at(31), true, true), 1);
+    settings.show_only_on_hour = false;
+    assert.equal(clockContentOpacity(settings, at(31), false, false), 0.6);
+    settings.default_transparency_percent = 100;
+    assert.equal(clockContentOpacity(settings, at(31), true, false), 0);
+    assert.equal(clockContentOpacity(settings, at(31), false, true), 1);
+    assert.equal(clockContentOpacity(null, at(31), false, false), 1);
+});
 
 test('explicit markup keys have complete translations and matching variables', () => {
     const htmlFiles = ['../index.html', '../settings.html', '../menu.html', '../palette.html'];

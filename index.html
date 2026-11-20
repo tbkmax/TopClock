@@ -15,10 +15,10 @@
         @contextmenu="handleContextMenu($event)"
         :class="{ 'ctrl-active': isCtrlHeld }"
     >
-        <!-- The Clock itself (fades out when mouse approaches without Ctrl) -->
+        <!-- Clock and add-ons share one visibility policy; menu and palette are separate windows. -->
         <div 
             class="clock-container" x-ref="clockContainer"
-            :class="{ 'faded': isNear && !isCtrlHeld }"
+            :style="{ opacity: clockOpacity() }"
             @click="toggleFormat" 
             :title="t('app.moveHint', { modifier: settings?.shortcuts?.interaction_modifier || 'Ctrl' })"
         >

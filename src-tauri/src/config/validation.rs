@@ -58,6 +58,7 @@ pub(crate) fn valid_settings(settings: &ClockSettings) -> bool {
         && valid_shortcut_string(&settings.shortcuts.timer_reset)
         && valid_countdown_presets(&settings.timer_countdown_presets)
         && valid_countdown_presets(&settings.progress_countdown_presets)
+        && settings.default_transparency_percent <= 100
         && settings.counter_halo_intensity_percent <= 100
         && valid_addons(&settings.addons)
         && valid_pairs(&settings.addons, &settings.addon_pairs)

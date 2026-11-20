@@ -1,5 +1,7 @@
 # Configuration architecture
 
+`ClockSettings` in [model.rs](../model.rs) now saves a 0–100 `default_transparency_percent` and off-by-default `show_only_on_hour` and `show_on_half_hour` flags. Serde defaults keep older settings files at full-time, fully opaque display. [validation.rs](../validation.rs) rejects percentages above 100. [Frontend visibility policy](../../../../src/doc/architecture.md) consumes these fields; this folder does not hide native windows or change input handling.
+
 This folder owns the saved `settings.json` shape, validation, load recovery, and Settings commands. See the [Rust application architecture](../../doc/architecture.md) for startup and cross-folder ownership.
 
 | File | Responsibility |

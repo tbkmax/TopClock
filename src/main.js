@@ -6,6 +6,7 @@ import { LogicalSize, PhysicalPosition } from '@tauri-apps/api/dpi';
 import { clockFontStack, timeParts } from './time-format.js';
 import { markChangedNumbers } from './clock-animations.js';
 import { clockWindowLayout } from './clock-layout.js';
+import { clockContentOpacity } from './clock-visibility.js';
 import { displayAddon } from './addons/model.js';
 import { displayLayout } from './addons/layout.js';
 import { createAddonHost } from './addons/host.js';
@@ -41,6 +42,7 @@ Alpine.data('clockApp', () => ({
     language: 'en',
     isCtrlHeld: false,
     isNear: false,
+    currentTimeMs: Date.now(),
     dragStart: null,
     dragStarted: false,
     isDragging: false,
@@ -144,6 +146,7 @@ Alpine.data('clockApp', () => ({
     t(key, vars) { return translate(this.language, key, vars); },
 
     progressStyle(addon) { return progressBarStyle(addon, this.settings?.font_size || 42); },
+    clockOpacity() { return clockContentOpacity(this.settings, new Date(this.currentTimeMs), this.isNear, this.isCtrlHeld); },
 
     scheduleResize() {
         if (!this.settings) return;
@@ -185,6 +188,7 @@ Alpine.data('clockApp', () => ({
 
     updateClock() {
         const now = new Date();
+        this.currentTimeMs = now.getTime();
         const result = markChangedNumbers(
             timeParts(now, this.settings || { time_layout: 'hms', twenty_four_hour: true }),
             this.previousNumbers,
