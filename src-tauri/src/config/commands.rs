@@ -1,14 +1,13 @@
 use crate::{
-    addons::{
-        reconcile_counter_settings, reconcile_progress_settings, reconcile_timer_settings,
-        TimerSession,
-    },
+    addons::counter_db::{epoch_ms, tick_ms, CounterDatabase},
+    addons::{reconcile_progress_settings, reconcile_timer_settings, TimerSession},
     config::store::save_config,
     config::{model::ClockSettings, validation::valid_settings},
     state::ClockState,
 };
 use std::sync::Arc;
 use tauri::Emitter;
+use uuid::Uuid;
 
 #[tauri::command]
 pub(crate) fn get_settings(state: tauri::State<'_, Arc<ClockState>>) -> ClockSettings {
@@ -60,7 +59,7 @@ fn save_settings_change(
 ) -> Result<ClockSettings, String> {
     let timer_state_changed;
     let progress_state_changed;
-    let counter_state_changed;
+    let counter_snapshot;
     let language_changed;
     let settings;
     {
@@ -69,12 +68,9 @@ fn save_settings_change(
         if !valid_settings(&settings) {
             return Err("Invalid settings or add-on configuration".into());
         }
-        let previous_session = config.timer_session.clone();
-        let previous_progress_sessions = config.progress_timer_sessions.clone();
-        let previous_counter_session = config.counter_session.clone();
-        let mut next_timer_session = previous_session.clone();
-        let mut next_progress_sessions = previous_progress_sessions.clone();
-        let mut next_counter_session = previous_counter_session.clone();
+        let previous = config.clone();
+        let mut next_timer_session = previous.timer_session.clone();
+        let mut next_progress_sessions = previous.progress_timer_sessions.clone();
         progress_state_changed = reconcile_progress_settings(
             &config.settings.addons,
             &settings.addons,
@@ -85,22 +81,56 @@ fn save_settings_change(
             &settings.addons,
             &mut next_timer_session,
         )?;
-        counter_state_changed = reconcile_counter_settings(
-            &settings.addons,
-            &mut next_counter_session,
-            crate::addons::runtime::epoch_ms(),
-        );
+        let now_epoch = epoch_ms();
+        let now_tick = tick_ms();
+        let mut counter_db = state.counter_db.lock().unwrap();
+        let should_stop_counter = settings
+            .addons
+            .iter()
+            .any(|addon| addon.kind == "counter" && !addon.enabled)
+            && counter_db.snapshot(now_epoch, now_tick)?.running;
+        config.settings = settings.clone();
         config.timer_session = next_timer_session;
         config.progress_timer_sessions = next_progress_sessions;
-        config.counter_session = next_counter_session;
-        let previous = std::mem::replace(&mut config.settings, settings.clone());
-        language_changed = previous.language != settings.language;
-        if let Err(error) = save_config(&state.settings_path, &config) {
-            config.settings = previous;
-            config.timer_session = previous_session;
-            config.progress_timer_sessions = previous_progress_sessions;
-            config.counter_session = previous_counter_session;
+        language_changed = previous.settings.language != settings.language;
+        let mut json_saved = false;
+        let saved = (|| -> Result<(), String> {
+            if should_stop_counter {
+                let elapsed = counter_db.elapsed(now_tick);
+                let tx = counter_db.transaction()?;
+                CounterDatabase::stage(
+                    &tx,
+                    "stop",
+                    now_epoch,
+                    elapsed,
+                    true,
+                    Some("disabled"),
+                    &Uuid::new_v4().to_string(),
+                )?;
+                save_config(&state.settings_path, &config)?;
+                json_saved = true;
+                tx.commit()
+                    .map_err(|error| format!("Counter database commit: {error}"))?;
+            } else {
+                save_config(&state.settings_path, &config)?;
+            }
+            Ok(())
+        })();
+        if let Err(error) = saved {
+            *config = previous;
+            if json_saved {
+                if let Err(restore_error) = save_config(&state.settings_path, &config) {
+                    *config = crate::config::store::load_config(&state.settings_path);
+                    return Err(format!("{error}; settings restore failed: {restore_error}"));
+                }
+            }
             return Err(error);
+        }
+        if should_stop_counter {
+            counter_db.committed(None, now_tick);
+            counter_snapshot = Some(counter_db.snapshot(now_epoch, now_tick)?);
+        } else {
+            counter_snapshot = None;
         }
     }
     if language_changed {
@@ -117,8 +147,7 @@ fn save_settings_change(
         let sessions = state.config.lock().unwrap().progress_timer_sessions.clone();
         let _ = app.emit("progress-timer-states-changed", sessions);
     }
-    if counter_state_changed {
-        let session = state.config.lock().unwrap().counter_session.clone();
+    if let Some(session) = counter_snapshot {
         let _ = app.emit("counter-state-changed", session);
     }
     Ok(settings)

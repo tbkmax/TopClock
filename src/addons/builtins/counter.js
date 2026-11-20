@@ -1,8 +1,12 @@
 import { DEFAULT_HALO_INTENSITY_PERCENT, signedBalanceAppearance } from './signed-balance-appearance.js';
 
-export function counterValue(session, nowMs) {
+export function counterValue(session, nowMs, monotonicNowMs = performance.now()) {
     if (!session) return 0;
-    const elapsed = session.running ? Math.max(0, nowMs - (session.started_at_ms ?? nowMs)) : 0;
+    const elapsed = session.running
+        ? Math.max(0, session.received_at_perf_ms == null
+            ? nowMs - (session.started_at_ms ?? nowMs)
+            : monotonicNowMs - session.received_at_perf_ms)
+        : 0;
     return session.value_ms + elapsed * (session.direction || 0);
 }
 

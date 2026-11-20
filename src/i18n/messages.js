@@ -20,7 +20,7 @@ export const messages = {
     'addons.countDown': ['Count down', '向下计时', '向下計時', '減算開始'],
     'addons.stop': ['Stop', '停止', '停止', '停止'],
     'addons.counterResetTitle': ['Reset Counter?', '重置计数器？', '重設計數器？', 'カウンターをリセットしますか？'],
-    'addons.counterResetWarning': ['This clears the saved time balance.', '这将清除已保存的时间余额。', '這會清除已儲存的時間餘額。', '保存された時間残高が消去されます。'],
+    'addons.counterResetWarning': ['This deletes the saved balance and all Counter history.', '这将删除已保存的余额和所有计数器历史记录。', '這將刪除已儲存的餘額和所有計數器歷史紀錄。', '保存された残高とカウンターの履歴がすべて削除されます。'],
     'addons.counterStatepositive': ['positive', '正值', '正值', 'プラス'],
     'addons.counterStatenegative': ['negative', '负值', '負值', 'マイナス'],
     'addons.counterStatezero': ['zero', '零', '零', 'ゼロ'],

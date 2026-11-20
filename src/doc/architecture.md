@@ -1,5 +1,9 @@
 # Frontend architecture
 
+Settings' existing Counter Reset confirmation now uses [bundled translations](../i18n/messages.js) that explain history deletion. The frontend still dispatches the same confirmed action; the native [Counter database](../../src-tauri/src/addons/counter_db.rs) performs the deletion.
+
+Counter snapshots still use the existing native command and `counter-state-changed` event. [add-on state](../addons/state.js) attaches a webview-local `performance.now()` receipt anchor to a running snapshot; [Counter formatting](../addons/builtins/counter.js) uses it for live elapsed display so a later wall-clock correction does not change the displayed duration. The native [Counter database](../../src-tauri/src/addons/counter_db.rs) owns accepted intervals and final balances. No frontend history graph is included yet.
+
 Frontend tests are discovered by `node --test` through [package.json](../../package.json). The [add-on tests](../addons/tests/) are grouped by shared behavior and built-in kind; test-only folders are exempt from their own `doc/` folder under [repository guidance](../../AGENTS.md).
 
 Settings page modules now live in [settings/](../settings/doc/architecture.md), and bundled translations and static markup localization live in [i18n/](../i18n/doc/architecture.md). [settings.js](../settings/settings.js) remains the Alpine page composition root; native event registration, failed-save session readback, and preview rendering have focused helpers. Static markup identifies translations by key, so editing English copy does not change which translation is selected. The clock, Settings, menu, and palette remain separate Vite entries.

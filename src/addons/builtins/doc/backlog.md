@@ -1,5 +1,7 @@
 # Built-in definitions backlog
 
+Check the Counter formatter against a live Windows wall-clock adjustment and sleep/resume. The new unit case covers wall-clock correction while running, but a WebView check must confirm the displayed Stop result and direction glow stay aligned with the native database.
+
 The localization import move is complete. Existing visual and native checks below still cover weekday and Region labels in supported languages.
 
 Confirm Counter's `H:MM:SS` per-second display, `D:HH:MM` transition at 100 hours with minutes retained, and blue/red running versus light blue/red stopped text on both dark and light desktop backgrounds. Verify the direction text glow follows active count direction across sign changes and disappears on Stop, including at zero and in a pair. Exercise 0%, the 50% default, and 100% glow intensity; compare 50% with the Ctrl-held clock and confirm both clock and preview update and retain the setting after restart. Verify zero uses the configured text color and that the text color changes promptly after Stop or restart; see the [frontend Counter checklist](../../../doc/backlog.md#counter-live-windows-acceptance).

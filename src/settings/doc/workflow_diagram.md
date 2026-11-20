@@ -60,3 +60,5 @@ sequenceDiagram
 The save queue and revision check prevent an older failed write from replacing a newer draft. Native settings and sessions are durable; local preview and registration state are not. A Settings close flushes pending writes before hiding the window. See the [parent workflow](../../doc/workflow_diagram.md) for clock and tray interactions.
 
 In the Add-ons card, a member switch saves its own enabled flag through this sequence. The Combined control shows on when either member is enabled; clicking it sets both flags off, and clicking it again sets both on. The preview filters disabled members, then [layout.js](../../addons/layout.js) keeps the pair scale on the lone visible member. The group control has no separate saved field or previous-mix memory.
+
+Counter Reset uses a separate modal: Cancel closes it without a command; Confirm sends `counter_action(reset, confirmedReset)` through the add-on host. Its localized warning describes deletion of all Counter history, and Rust remains authoritative for the transaction. The [native workflow](../../../src-tauri/src/addons/doc/workflow_diagram.md) describes the database deletion.

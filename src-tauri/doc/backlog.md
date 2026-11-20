@@ -1,5 +1,9 @@
 # Tauri package backlog
 
+- [ ] Verify the v1-to-v2 Counter database migration in a disposable packaged profile and confirm Reset leaves both history tables empty after restart. Unit migration tests pass; packaged AppData and downgrade behavior still need live verification.
+
+- [ ] **Check packaged Counter storage:** In a disposable direct build and Store-identity package, locate the app config directory and verify `topclock.db` creation, first-run import, restart recovery, and uninstall behavior. The bundled SQLite build and Rust tests pass locally, but packaged AppData redirection and runtime behavior still need a live check.
+
 Verify a direct and packaged build contains `palette.html`, grants its window capability, and can show the configured nonfocusable overlay without focus or mouse capture. Confirm one key release closes it and runs a selected action, while center release and Alt-Tab cancel. Include second monitors, mixed DPI, and restart with a disposable profile. The [native checklist](../src/doc/backlog.md#mouse-palette-native-input-acceptance) covers physical input and Settings behavior; this package check is high priority before release because Vite and Rust tests alone cannot prove installed WebView behavior.
 
 Check the separate menu window on mixed-DPI displays and after monitor reconnects; the Rust geometry test covers arithmetic but not WebView focus or physical pointer behavior.

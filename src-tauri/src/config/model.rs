@@ -29,7 +29,7 @@ fn default_display_visible() -> bool {
     true
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Clone, Default, Serialize, Deserialize)]
 pub(crate) struct PersistedConfig {
     #[serde(flatten)]
     pub(crate) settings: ClockSettings,
@@ -40,8 +40,8 @@ pub(crate) struct PersistedConfig {
     pub(crate) timer_session: TimerSession,
     #[serde(default)]
     pub(crate) progress_timer_sessions: HashMap<String, TimerSession>,
-    #[serde(default)]
-    pub(crate) counter_session: CounterSession,
+    #[serde(default, rename = "counter_session", skip_serializing)]
+    pub(crate) legacy_counter_session: CounterSession,
 }
 
 fn default_auto_check_updates() -> bool {

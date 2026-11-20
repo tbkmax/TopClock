@@ -2,29 +2,34 @@
 
 ## Counter state and normal quit
 
+A confirmed Reset follows the same command boundary but deletes all `counter_event` and `counter_run` rows in one SQLite transaction. It zeros and stops the singleton `counter_state` row, increments its reset epoch, and stores only the latest Reset action ID for retry protection. A rejected or failed Reset leaves state and history intact. The action emits the existing state event only after commit.
+
 ```mermaid
 sequenceDiagram
     participant UI as Menu or Settings
     participant Rust as counter.rs
-    participant Disk as settings.json
+    participant Disk as topclock.db
     participant Windows as All webviews
     UI->>Rust: counter_action(action, confirmed_reset)
-    Rust->>Rust: Validate enabled Counter and apply signed state
-    Rust->>Disk: Save session
-    alt Save fails
-        Rust->>Rust: Restore old session
+    Rust->>Rust: Validate enabled Counter and capture wall/monotonic time
+    alt Count up/down or Stop
+        Rust->>Disk: Transaction: state, event, close/open run
+    else Confirmed Reset
+        Rust->>Disk: Transaction: delete all events/runs; zero state
+    end
+    alt Commit fails
         Rust-->>UI: Error
-    else Save succeeds
+    else Commit succeeds
         Rust-->>Windows: counter-state-changed
     end
     UI->>Rust: Quit through common helper
-    Rust->>Disk: Save stopped current balance
+    Rust->>Disk: Commit final stopped balance and run
     Rust->>Rust: Exit only after successful Counter save
 ```
 
-[counter.rs](../counter.rs) provides the signed transition and transaction; [window_commands.rs](../../windows/window_commands.rs) supplies the common quit helper for menu, tray, and shortcut entry points. [lib.rs](../../lib.rs) also checkpoints a running Counter on another Tauri exit request. If the process terminates without an exit request, [config store](../../config/store.rs) loads the last saved checkpoint stopped rather than counting closed-app time. The diagram omits separate position persistence, which remains in the quit helper.
+[counter.rs](../counter.rs) adapts the Tauri commands and [counter_db.rs](../counter_db.rs) owns the SQLite transaction. [window_commands.rs](../../windows/window_commands.rs) supplies the common quit helper for menu, tray, and shortcut entry points. [lib.rs](../../lib.rs) also stops a running Counter on another Tauri exit request. If the process terminates without an exit request, database startup closes the abandoned run at its last durable balance with zero additional measured time. The diagram omits separate position persistence, which remains in the quit helper.
 
-Removing Counter through Settings changes only the add-on list. Its separate session keeps its balance and continues running if it was running; adding Counter again exposes that session. An explicit disable stops it while retaining the balance. The quit helper stops a running session even when the Counter add-on is absent.
+Removing Counter through Settings changes only the add-on list. Its database state keeps its balance and continues running if it was running; adding Counter again exposes it. An explicit disable stages a database stop, saves JSON settings, then commits the stop. A failed JSON save rolls back SQLite; a failed SQLite commit attempts to restore JSON. After a crash between files, startup treats a disabled JSON instance as stopped at the durable checkpoint. The quit helper stops a running Counter even when its add-on instance is absent.
 
 The Counter Details slider writes the app-wide `counter_halo_intensity_percent` setting through the ordinary settings update route. [configuration validation](../../config/validation.rs) checks 0–100, while [config model](../../config/model.rs) defaults a missing field to 50; [counter.rs](../counter.rs) continues to require empty instance options. This preference does not change CounterSession or the action event above.
 
@@ -97,12 +102,10 @@ classDiagram
       running: bool
       direction: i8
       started_at_ms: Option~u64~
-      stop()
-      start()
     }
     AddonInstance --> AddonKind : validated by
     ActionTarget --> TimerSession : selects session
-    AddonKind --> CounterSession : Counter has independent session
+    AddonKind --> CounterSession : Counter command snapshot
 ```
 
 These names correspond to [instance.rs](../instance.rs), [registry.rs](../registry.rs), [session.rs](../session.rs), and [actions.rs](../actions.rs). The diagram omits persistence, which remains in the application service.

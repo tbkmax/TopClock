@@ -1,5 +1,7 @@
 # Frontend add-on host backlog
 
+- [ ] Verify a running Counter snapshot stays in sync between clock, Settings preview, and a second display through sleep/resume and an OS clock correction. Check that a confirmed Stop displays the database's frozen result and that repeated action IDs do not create a second run. Automated frontend and Rust tests cover the calculation and deduplication separately; WebView delivery timing remains a live check.
+
 The add-on test-file split is complete. New built-in add-ons can add a matching file in [tests/](../tests/) without updating the npm script. The live WebView checks below remain open.
 
 The 2026-11-17 import move is complete. Existing live WebView checks below remain open for add-on labels and events; there is no new add-on action or state item from the localization refactor.

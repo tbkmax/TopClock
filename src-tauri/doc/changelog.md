@@ -1,5 +1,13 @@
 # Tauri package changelog
 
+### 2026-11-19 - Upgrade Counter schema for history-clearing Reset
+
+- Existing `topclock.db` files migrate from schema v1 to v2 automatically. Reset now deletes all Counter run and event rows while keeping only the zero state and a latest-Reset retry marker.
+
+### 2026-11-19 - Bundle local Counter database support
+
+- The native package now includes bundled SQLite through `rusqlite` and stores Counter balance/history in `topclock.db` next to the settings file. Existing settings import automatically. An older package cannot read the new Counter balance after downgrade.
+
 ### 2026-11-17 - Document grouped Rust backend
 
 - The native source now groups configuration, displays, input, windows, platform services, and add-ons under `src/`. Tauri windows and capabilities, saved settings, and frontend command names are unchanged; no user action is required.

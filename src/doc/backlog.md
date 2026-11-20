@@ -1,5 +1,9 @@
 # Frontend backlog
 
+- [ ] In the live Windows Settings modal, verify Counter Reset's longer warning fits in all four languages and that Cancel preserves history while Confirm clears it and refreshes clock/preview across displays. Native and frontend automated checks pass; visual and cross-window behavior remain unverified.
+
+- [ ] **Check Counter database display live:** In a disposable Windows profile, compare clock and Settings preview during Count up/down, Stop, restart, direction switch, and an OS clock adjustment. Verify every clock webview advances smoothly and the accepted Stop does not jump visibly. Include tray/menu, Ctrl interactions, position restore, and a second display. Automated formatter tests cover the monotonic anchor; real WebView timing and sleep behavior remain to be checked.
+
 The add-on test split and automatic frontend test discovery are complete. Existing live Windows checks remain necessary; the file reorganization adds no new product behavior.
 
 The 2026-11-17 Settings and localization refactor is implemented. Its native Windows and language-switching behavior still needs the live checks below; frontend tests and a Vite build cover module imports, translation key contracts, and save/event helpers.

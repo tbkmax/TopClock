@@ -85,7 +85,7 @@ Direct-download builds store your configuration locally in your Windows user pro
 - **Settings File**: `%APPDATA%\topclock\settings.json`
 - **Auto-Start**: Controlled via the current user's Windows Run registry key (`HKCU\Software\Microsoft\Windows\CurrentVersion\Run\TopClock`).
 
-Settings and desktop positions automatically persist across reboots and app launches.
+Settings and desktop positions automatically persist across reboots and app launches. Counter balance and transition history live in a local `topclock.db` beside `settings.json`. On first launch after upgrading, TopClock imports the saved Counter balance once; prior activity has no invented history. Reset deletes all Counter transition and interval history while leaving a zeroed state ready for new counting. Older builds cannot read the new Counter balance after a downgrade.
 Microsoft Store installations may use Windows' per-package AppData redirection. Use **Open settings folder** in TopClock's Settings window to find the location used by your installation.
 
 ---

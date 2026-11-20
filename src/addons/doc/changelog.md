@@ -1,5 +1,9 @@
 # Frontend add-on host changelog
 
+### 2026-11-19 - Anchor Counter snapshots in each webview
+
+- The shared add-on state now attaches a local monotonic receipt time to running Counter snapshots, and the native adapter sends an action UUID. Existing command/event names and menu roles remain compatible. No user action is required.
+
 ### 2026-11-17 - Treat any visible pair member as Combined on
 
 - The shared pair enabled helper now reports on when either member is enabled. The Settings group control turns both off from that state and turns both on from fully off; member switches remain independent.

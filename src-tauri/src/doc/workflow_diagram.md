@@ -1,5 +1,7 @@
 # Rust workflows
 
+Counter Reset is a destructive database transaction in [counter_db.rs](../addons/counter_db.rs): it deletes all Counter events and runs, zeros the singleton state, and commits before `counter-state-changed`. Confirmation is required by [counter.rs](../addons/counter.rs) and the database action validator; rejection or failed commit leaves the old data intact.
+
 The Rust crate is organized into [configuration](../config/doc/workflow_diagram.md), [displays](../displays/doc/workflow_diagram.md), [input](../input/doc/workflow_diagram.md), [windows](../windows/doc/workflow_diagram.md), [platform services](../platform/doc/workflow_diagram.md), and [add-ons](../addons/doc/workflow_diagram.md). Each folder documents its own state and command flow; [lib.rs](../lib.rs) registers those commands and starts the runtime monitors.
 
 Counter Details' Direction glow slider saves the app-wide `counter_halo_intensity_percent` field through the existing `update_settings` flow. [Settings validation](../config/validation.rs) accepts 0–100; [config model](../config/model.rs) defaults missing older values to 50. Counter instance options remain empty, and the preference does not modify the separate Counter session or its action event. See the [native add-on workflow](../addons/doc/workflow_diagram.md#counter-state-and-normal-quit).
@@ -39,17 +41,22 @@ sequenceDiagram
     participant Command as config/commands.rs
     participant Config as ClockState config
     participant Disk as settings.json
+    participant CounterDB as topclock.db
     Menu->>Command: set_addon_enabled(id, enabled)
     Command->>Config: Lock and change only the requested ID
     alt Unknown ID or invalid settings
         Command-->>Menu: Error without write
     else Valid change
-        Command->>Config: Reconcile Timer, Progress, Counter sessions
-        Command->>Disk: Save settings and sessions
+        Command->>Config: Reconcile Timer and Progress sessions
+        opt Disabling a running Counter
+            Command->>CounterDB: Stage Stop
+        end
+        Command->>Disk: Replace settings.json
         alt Write fails
             Command->>Config: Restore previous settings and sessions
             Command-->>Menu: Error
         else Write succeeds
+            Command->>CounterDB: Commit staged Stop if present
             Command-->>Menu: Saved settings and changed events
         end
     end
@@ -57,7 +64,7 @@ sequenceDiagram
 
 The typed command and the existing whole-settings `update_settings` share [save_settings_change](../config/commands.rs). The targeted command changes one member without submitting a stale copy of the full configuration; Settings saves a Combined switch as one whole-settings update of both flags. This command does not change the separate Settings page's 80 ms draft-save behavior; its pending full snapshot can still race a menu switch.
 
-The Counter command and normal quit path are detailed in the [native add-on workflow](../addons/doc/workflow_diagram.md). Settings removal leaves the Counter session in `PersistedConfig`, even if it is running; re-adding the display exposes it again. Menu, tray, and shortcut Quit use `quit_app`, which checkpoints a running Counter before saving the clock position and exiting. [lib.rs](../lib.rs) also applies the Counter checkpoint on other Tauri exit requests. The separate Timer and Progress sessions keep their existing restart rules.
+The Counter command and normal quit path are detailed in the [native add-on workflow](../addons/doc/workflow_diagram.md). Settings removal leaves the database Counter state intact, even if it is running; re-adding the display exposes it again. An explicit disable stages a SQLite stop before JSON replacement and commits after it. Menu, tray, and shortcut Quit use `quit_app`, which stops a running Counter before saving clock position and exiting. [lib.rs](../lib.rs) also applies this stop on other Tauri exit requests. Timer and Progress keep their existing restart rules.
 
 Counter pair validation follows the existing [native add-on pair workflow](../addons/doc/workflow_diagram.md#pair-validation): `update_settings` accepts an eligible adjacent Counter and another Date, Region clock, or Timer instance, while their sessions remain independent.
 

@@ -1,5 +1,9 @@
 # Frontend workflows
 
+The Settings Counter Reset modal warns that Confirm clears the balance and history. Cancel sends no action. On Confirm, the existing add-on host sends the Reset command; the native database deletes all Counter event and run rows before broadcasting the zeroed state.
+
+The running Counter display uses a local monotonic receipt anchor attached when [state.js](../addons/state.js) receives a native snapshot. [counter.js](../addons/builtins/counter.js) advances that snapshot between native events; the native database remains authoritative for Stop and direction changes. The frontend sends a UUID with each Counter action so a retried action can be deduplicated.
+
 The [add-on test workflow](../addons/doc/workflow_diagram.md#regression-test-workflow) describes Node's discovery of shared and per-add-on regression files. `npm run test:frontend` is still the frontend check; native interactive acceptance remains separate.
 
 The [Settings workflow](../settings/doc/workflow_diagram.md) now shows the native event subscription and failed-save readback helpers. The [localization workflow](../i18n/doc/workflow_diagram.md) shows explicit markup keys for static text and attributes, including Alpine template clones. The four page entry points and native command/event contracts are unchanged.

@@ -6,14 +6,26 @@ use crate::{
         validation::valid_settings,
     },
 };
+use std::io::Write;
 use std::{fs, path::Path};
+use uuid::Uuid;
 
 pub(crate) fn save_config(settings_path: &Path, config: &PersistedConfig) -> Result<(), String> {
     let data = serde_json::to_vec_pretty(config).map_err(|error| error.to_string())?;
     if let Some(parent) = settings_path.parent() {
         fs::create_dir_all(parent).map_err(|error| error.to_string())?;
     }
-    fs::write(settings_path, data).map_err(|error| error.to_string())
+    let temporary = settings_path.with_file_name(format!(".settings-{}.tmp", Uuid::new_v4()));
+    let result = (|| {
+        let mut file = fs::File::create(&temporary).map_err(|error| error.to_string())?;
+        file.write_all(&data).map_err(|error| error.to_string())?;
+        file.sync_all().map_err(|error| error.to_string())?;
+        fs::rename(&temporary, settings_path).map_err(|error| error.to_string())
+    })();
+    if result.is_err() {
+        let _ = fs::remove_file(&temporary);
+    }
+    result
 }
 
 pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
@@ -117,13 +129,13 @@ pub(crate) fn load_config(settings_path: &Path) -> PersistedConfig {
         session.restore_progress_started();
         true
     });
-    if !config.counter_session.valid() {
-        config.counter_session = CounterSession::default();
-    } else if config.counter_session.running {
+    if !config.legacy_counter_session.valid() {
+        config.legacy_counter_session = CounterSession::default();
+    } else if config.legacy_counter_session.running {
         // A previous process did not complete its normal quit path. Keep the
         // saved checkpoint, but never count time while TopClock was closed.
-        config.counter_session.running = false;
-        config.counter_session.started_at_ms = None;
+        config.legacy_counter_session.running = false;
+        config.legacy_counter_session.started_at_ms = None;
     }
     config
 }
@@ -141,17 +153,36 @@ mod tests {
             .as_nanos();
         let path = std::env::temp_dir().join(format!("topclock-counter-{nonce}.json"));
         let mut config = PersistedConfig::default();
-        config.counter_session.value_ms = 60_000;
-        config.counter_session.direction = 1;
-        config.counter_session.running = true;
-        config.counter_session.started_at_ms = Some(1_000);
-        fs::write(&path, serde_json::to_vec(&config).unwrap()).unwrap();
+        config.legacy_counter_session.value_ms = 60_000;
+        config.legacy_counter_session.direction = 1;
+        config.legacy_counter_session.running = true;
+        config.legacy_counter_session.started_at_ms = Some(1_000);
+        let mut legacy = serde_json::to_value(&config).unwrap();
+        legacy["counter_session"] = serde_json::json!({
+            "value_ms": 60_000, "direction": 1, "running": true,
+            "started_at_ms": 1_000
+        });
+        fs::write(&path, serde_json::to_vec(&legacy).unwrap()).unwrap();
 
         let loaded = load_config(&path);
         let _ = fs::remove_file(&path);
         assert!(loaded.settings.addons.is_empty());
-        assert_eq!(loaded.counter_session.value_ms, 60_000);
-        assert!(!loaded.counter_session.running);
-        assert_eq!(loaded.counter_session.started_at_ms, None);
+        assert_eq!(loaded.legacy_counter_session.value_ms, 60_000);
+        assert!(!loaded.legacy_counter_session.running);
+        assert_eq!(loaded.legacy_counter_session.started_at_ms, None);
+    }
+
+    #[test]
+    fn replacing_settings_omits_legacy_counter_and_keeps_valid_json() {
+        let path = std::env::temp_dir().join(format!("topclock-settings-{}.json", Uuid::new_v4()));
+        let mut config = PersistedConfig::default();
+        config.legacy_counter_session.value_ms = 123_000;
+        save_config(&path, &config).unwrap();
+        config.settings.font_size = 70;
+        save_config(&path, &config).unwrap();
+        let saved: serde_json::Value = serde_json::from_slice(&fs::read(&path).unwrap()).unwrap();
+        assert_eq!(saved["font_size"], 70);
+        assert!(saved.get("counter_session").is_none());
+        fs::remove_file(path).unwrap();
     }
 }

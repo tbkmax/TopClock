@@ -42,3 +42,5 @@ sequenceDiagram
 ```
 
 Only the language preference is durable. The DOM observer and original text nodes belong to one webview. Save failure recovery follows the [Settings workflow](../../settings/doc/workflow_diagram.md); native tray localization is outside this folder.
+
+The Settings Counter Reset modal resolves `addons.counterResetWarning` through the same `translate` path before dispatching a confirmed native Reset. The text describes history deletion; translation itself never changes database state.

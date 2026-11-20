@@ -49,7 +49,7 @@ fn settings_and_position_round_trip_together() {
         displays: HashMap::new(),
         timer_session: TimerSession::default(),
         progress_timer_sessions: HashMap::new(),
-        counter_session: CounterSession::default(),
+        legacy_counter_session: CounterSession::default(),
     };
     let loaded: PersistedConfig =
         serde_json::from_str(&serde_json::to_string(&config).unwrap()).unwrap();

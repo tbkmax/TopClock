@@ -2,6 +2,10 @@
 
 ### Changed
 
+#### 2026-11-19 - Warn before destructive Counter Reset
+
+- The existing confirmation modal now states that Reset deletes the saved balance and all Counter history. Cancel and Confirm controls are unchanged; no settings migration is needed.
+
 #### 2026-11-17 - Use two states for the Combined control
 
 - A pair with one enabled member now shows the Combined switch as on. Clicking it turns both off, and clicking it again turns both on. The two member switches remain independent and no saved field changes.

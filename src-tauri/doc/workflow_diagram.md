@@ -1,5 +1,9 @@
 # Tauri package workflow
 
+An existing v1 Counter database is upgraded to v2 before webviews start. Reset then clears Counter history transactionally while retaining the singleton zero state and its latest retry marker.
+
+Startup opens [the Counter database](../src/addons/counter_db.rs) after loading legacy settings and before building webviews. A saved JSON Counter balance is imported only when the database is first created. An abandoned run is closed at its durable checkpoint; no closed-process time is counted.
+
 The package builds the same [native locale command](../src/platform/locale.rs) and bundled frontend translations into direct and MSIX outputs. The `get_system_locale` Tauri command uses the Windows user's UI language; the MSIX manifest does not select or persist the app language. The user's explicit choice remains in `settings.json`. See the [native language workflow](../src/doc/workflow_diagram.md).
 
 The package connects webview configuration to the Rust application. The palette window starts hidden with `focus: false` and `focusable: false`, so showing its topmost overlay should leave keyboard focus with the foreground application. This class diagram describes package relationships rather than Rust inheritance.
@@ -15,6 +19,7 @@ classDiagram
     class ClockState {
       config
       settings_path
+      counter_db
       menu_open
       hotkey_errors
       active_displays
@@ -44,6 +49,7 @@ sequenceDiagram
     Tauri->>Rust: Start application
     Rust->>Rust: Check Evergreen WebView2 availability
     Rust->>Disk: Read or create settings.json
+    Rust->>Disk: Open topclock.db; import legacy Counter balance once
     Rust->>Rust: Manage ClockState
     Rust->>UI: Build main and settings windows
     Rust->>UI: Reconcile enabled display clocks and set click-through

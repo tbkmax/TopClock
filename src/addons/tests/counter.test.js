@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createAddon, displayAddon } from '../model.js';
-import { counterDisplay } from '../builtins/counter.js';
+import { counterDisplay, counterValue } from '../builtins/counter.js';
 import { addonCatalog, addonDefinitions } from '../registry.js';
 import { createAddonController } from '../controller.js';
 
@@ -57,4 +57,13 @@ test('Counter display keeps a signed balance and scales to days', async () => {
     await assert.rejects(controller.dispatch(counter.id, 'reset', 'clock-menu'), /unavailable/);
     await controller.dispatch(counter.id, 'reset', 'counter-reset', { confirmedReset: true });
     assert.deepEqual(calls, [['reset', { confirmedReset: true }]]);
+});
+
+test('Counter live display uses the monotonic receipt anchor after a clock adjustment', () => {
+    const session = {
+        value_ms: 30_000, running: true, direction: -1,
+        started_at_ms: 1_000, received_at_perf_ms: 500,
+    };
+    assert.equal(counterValue(session, 1_000, 2_500), 28_000);
+    assert.equal(counterValue(session, 9_000_000, 2_500), 28_000);
 });

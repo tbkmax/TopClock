@@ -1,5 +1,9 @@
 # Built-in definitions changelog
 
+### 2026-11-19 - Use a monotonic Counter display anchor
+
+- Running Counter text now advances from each webview's receipt-time anchor after native snapshots, avoiding a display drift from later wall-clock changes. Stopped values remain exact native results. The format and signed colors are unchanged.
+
 ### 2026-11-17 - Use relocated localization functions
 
 - Date, Region clock, and Progress now resolve bundled translations from `src/i18n/`. Display text and saved options remain compatible; no user action is required.

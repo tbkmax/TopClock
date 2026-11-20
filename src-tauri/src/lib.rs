@@ -40,6 +40,7 @@ pub fn run() {
             addons::runtime::progress_timer_set_preset,
             addons::counter::counter_action,
             addons::counter::get_counter_state,
+            addons::counter::get_counter_history,
             config::commands::get_hotkey_errors,
             displays::positions::get_displays,
             displays::positions::reset_clock_positions,
@@ -54,7 +55,18 @@ pub fn run() {
         .setup(|app| {
             let settings_path = app.path().app_config_dir()?.join("settings.json");
             let config = config::store::load_config(&settings_path);
-            let state = Arc::new(ClockState::new(config, settings_path));
+            let counter_disabled = config
+                .settings
+                .addons
+                .iter()
+                .any(|addon| addon.kind == "counter" && !addon.enabled);
+            let counter_db = addons::counter_db::CounterDatabase::open(
+                &settings_path.with_file_name("topclock.db"),
+                &config.legacy_counter_session,
+                counter_disabled,
+            )
+            .map_err(std::io::Error::other)?;
+            let state = Arc::new(ClockState::new(config, settings_path, counter_db));
             if let Err(error) =
                 config::store::save_config(&state.settings_path, &state.config.lock().unwrap())
             {

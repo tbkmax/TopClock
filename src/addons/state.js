@@ -12,7 +12,13 @@ export function createAddonState({ adapter = nativeAddonAdapter, onChange = () =
     const notify = () => onChange(snapshot);
     const setTimer = (value) => { snapshot.timerSession = value; timerRevision++; notify(); };
     const setProgress = (value) => { snapshot.progressTimerSessions = value; progressRevision++; notify(); };
-    const setCounter = (value) => { snapshot.counterSession = value; counterRevision++; notify(); };
+    const setCounter = (value) => {
+        snapshot.counterSession = value?.running
+            ? { ...value, received_at_perf_ms: performance.now() }
+            : value;
+        counterRevision++;
+        notify();
+    };
     return {
         get snapshot() { return snapshot; },
         setTimer,

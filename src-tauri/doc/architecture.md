@@ -1,5 +1,9 @@
 # Tauri package architecture
 
+The Counter schema now supports a v1-to-v2 migration for destructive Reset. The database retains its singleton state row and latest Reset ID, while Reset deletes all Counter event and run rows. This schema upgrade is handled locally in [counter_db.rs](../src/addons/counter_db.rs).
+
+The [Cargo manifest](../Cargo.toml) bundles SQLite through `rusqlite` for a local `topclock.db` beside `settings.json`. [counter_db.rs](../src/addons/counter_db.rs) owns its schema and first-run import; [config/store.rs](../src/config/store.rs) still owns JSON settings, Timer/Progress sessions, and display positions. The database has no network or shared-file role. Older binaries cannot read Counter state after it moves into SQLite.
+
 The [Cargo manifest](../Cargo.toml) enables Win32 globalization calls for the app's System default language. [locale.rs](../src/platform/locale.rs) reads the current user's preferred Windows UI language for direct and MSIX processes; no extra webview permission or network service is involved. See the [native language flow](../src/doc/workflow_diagram.md).
 
 The executable checks for the Evergreen WebView2 Runtime with [webview_runtime.rs](../src/platform/webview_runtime.rs) before creating native webviews. A missing runtime produces a native install message. The MSIX payload does not bundle WebView2. [Cargo.toml](../Cargo.toml) enables Windows Store and desktop window-owner APIs for the packaged update commands in [store_updates.rs](../src/platform/store_updates.rs). These commands use the Settings window as the owner of the Store permission dialog; direct builds keep their GitHub browser reminder.

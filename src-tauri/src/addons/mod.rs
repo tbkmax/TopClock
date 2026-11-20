@@ -1,5 +1,6 @@
 mod actions;
 pub(crate) mod counter;
+pub(crate) mod counter_db;
 mod date;
 mod instance;
 mod progress;
@@ -12,7 +13,6 @@ mod timer;
 pub(crate) use actions::{
     apply_action, apply_progress_preset, apply_timer_menu_change, ActionTarget, TimerMenuChange,
 };
-pub(crate) use counter::reconcile_settings as reconcile_counter_settings;
 pub(crate) use counter::{stop_on_quit, CounterSession};
 pub(crate) use instance::{valid_addons, valid_pairs, AddonInstance, AddonPair};
 pub(crate) use progress::progress_countdown_options;
@@ -301,13 +301,12 @@ mod tests {
         for (kind, actions) in entries {
             assert!(registry::AddonKind::from_str(kind).is_some());
             let mut session = TimerSession::default();
-            let mut counter_session = CounterSession::default();
             for action in actions.as_array().unwrap() {
                 let action = action.as_str().unwrap();
                 let result = match kind.as_str() {
                     "timer" => timer::apply_action(&mut session, action, 1_000, "countdown", 5),
                     "progress" => progress::apply_action(&mut session, action, 1_000, 5),
-                    "counter" => counter::apply_action(&mut counter_session, action, 1_000, true),
+                    "counter" => counter_db::validate_action(action, true),
                     _ => panic!("Unexpected actions for {kind}"),
                 };
                 assert!(result.is_ok());

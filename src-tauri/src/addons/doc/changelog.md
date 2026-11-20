@@ -1,5 +1,9 @@
 # Native add-on changelog
 
+### 2026-11-19 - Move Counter balance and history into SQLite
+
+- Counter actions now commit signed state, identified transitions, and measured intervals in `topclock.db`. First launch imports the last JSON balance once without inventing past intervals. Reset deletes all existing Counter runs and events and leaves a zeroed state; the latest Reset ID remains in state for retry protection. Normal Quit stores the final run; an unclean restart keeps the last checkpoint and records recovery. Existing Counter controls and events remain. Downgrading to an older binary does not expose the database balance.
+
 ### 2026-11-17 - Accept mixed pair visibility
 
 - Pair validation now permits one enabled and one disabled member while retaining adjacency, placement, size, and unique membership checks. Older settings files need no migration. A pre-change build may dissolve a mixed pair if it saves the newer file, while retaining both flat instances.

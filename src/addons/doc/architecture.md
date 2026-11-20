@@ -1,5 +1,7 @@
 # Frontend add-on host architecture
 
+The [native adapter](../native-adapter.js) now supplies a UUID on each Counter action while retaining the `counter_action` command and `counter-state-changed` event. [state.js](../state.js) adds a transient `performance.now()` anchor to running snapshots in each webview. That field never enters saved settings; Rust's [Counter database](../../../src-tauri/src/addons/counter_db.rs) remains the accepted balance and history source.
+
 Add-on regression tests live in [tests/](../tests/). Shared files cover the registry, runtime routing, and layout; one file per built-in add-on covers its behavior. The folder contains only tests, so [repository guidance](../../../AGENTS.md) exempts it from its own `doc/` folder. [package.json](../../../package.json) uses Node test discovery to include future `*.test.js` files automatically.
 
 [model.js](../model.js) imports translation functions from the [shared localization folder](../../i18n/doc/architecture.md). Add-on definitions still own their labels and display behavior; this path change does not alter their registry or native action contract.

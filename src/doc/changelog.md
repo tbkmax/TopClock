@@ -1,5 +1,13 @@
 # Frontend changelog
 
+### 2026-11-19 - Explain destructive Counter Reset
+
+- The Settings confirmation now warns in all four supported languages that Reset removes the saved balance and Counter history. The action remains Settings-only and still requires confirmation.
+
+### 2026-11-19 - Keep running Counter display stable across wall-clock changes
+
+- Counter snapshots now get a local monotonic display anchor, and actions carry a unique ID to the native database. The visible format, colors, controls, and click-through behavior remain unchanged. No user action is required.
+
 ### 2026-11-17 - Refine Combined control and palette labels
 
 - The Combined control now stays visually on when either paired member is on; clicking it turns both off, and the next click turns both on. The palette uses a short chain mark for paired sector labels and shows the full selected label in a readout bounded by the window, including long Japanese text. Saved settings and native input behavior are unchanged.

@@ -13,7 +13,9 @@ export const nativeAddonAdapter = {
     action(addon, action, confirmedReset = false) {
         if (addon.kind === 'timer') return invoke('timer_action', { action });
         if (addon.kind === 'progress') return invoke('progress_timer_action', { id: addon.id, action });
-        if (addon.kind === 'counter') return invoke('counter_action', { action, confirmedReset });
+        if (addon.kind === 'counter') return invoke('counter_action', {
+            action, confirmedReset, actionId: globalThis.crypto?.randomUUID?.(),
+        });
         return Promise.reject(new Error('Add-on has no native actions'));
     },
     menuChoice(addon, choice, confirmation) {

@@ -25,6 +25,8 @@ The clock menu's Add-on disclosure uses [controller.js](../controller.js) to lis
 
 ## Counter action and display
 
+The adapter sends a fresh action UUID with each Counter command. The native service deduplicates the ID and broadcasts only after commit; the host stores the returned signed snapshot with a local monotonic receipt anchor. Each webview renders between events without a per-second database write.
+
 ```mermaid
 sequenceDiagram
     participant Menu as Clock menu or Settings
